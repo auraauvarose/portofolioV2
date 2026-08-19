@@ -1,21 +1,12 @@
-import { createSupabaseServer } from "@/lib/supabase/server";
-import { NextResponse } from "next/server";
+import { requireAdmin } from "@/lib/admin-auth";
 
 /**
- * Returns the authenticated user, or a 401 NextResponse if no session.
+ * Admin auth guard for Route Handlers / Server Components.
+ * Returns { user, error } — when authed, user is a lightweight marker and
+ * error is null; otherwise error is a 401 NextResponse the caller returns.
  */
 export async function requireUser() {
-  const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
-  if (!user) {
-    return {
-      user: null,
-      error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-    };
-  }
-
-  return { user, error: null };
+  const { error } = await requireAdmin();
+  if (error) return { user: null, error };
+  return { user: { role: "admin" }, error: null };
 }

@@ -2,14 +2,11 @@
 
 import { useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const supabase = createSupabaseBrowser();
 
-  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -19,13 +16,15 @@ function LoginForm() {
     setLoading(true);
     setError(null);
 
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
+    const res = await fetch("/api/admin/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ password }),
     });
 
-    if (error) {
-      setError(error.message);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setError(data.error ?? "Login gagal. Coba lagi.");
       setLoading(false);
       return;
     }
@@ -49,20 +48,8 @@ function LoginForm() {
           Admin<span className="text-accent">.</span>
         </h1>
         <p className="mb-8 text-sm text-gray-500">
-          Sign in to manage your portfolio content.
+          Masukkan password untuk mengelola konten.
         </p>
-
-        <label className="mb-1 block text-xs uppercase tracking-widest text-gray-400">
-          Email
-        </label>
-        <input
-          type="email"
-          required
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          className="mb-4 w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition-colors focus:border-accent"
-          placeholder="you@example.com"
-        />
 
         <label className="mb-1 block text-xs uppercase tracking-widest text-gray-400">
           Password
@@ -70,6 +57,7 @@ function LoginForm() {
         <input
           type="password"
           required
+          autoFocus
           value={password}
           onChange={(e) => setPassword(e.target.value)}
           className="mb-6 w-full rounded-lg border border-white/10 bg-black/40 px-4 py-3 text-white outline-none transition-colors focus:border-accent"
@@ -87,7 +75,7 @@ function LoginForm() {
           disabled={loading}
           className="w-full rounded-lg bg-accent px-4 py-3 font-semibold uppercase tracking-widest text-black transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {loading ? "Signing in…" : "Sign in"}
+          {loading ? "Masuk…" : "Masuk"}
         </button>
 
         <a

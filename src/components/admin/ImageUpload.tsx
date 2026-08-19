@@ -1,6 +1,9 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { MAX_UPLOAD_BYTES } from "@/lib/config";
+
+const MAX_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
 
 type ImageUploadProps = {
   folder: string;
@@ -20,6 +23,11 @@ export default function ImageUpload({
   const [error, setError] = useState<string | null>(null);
 
   async function handleFile(file: File) {
+    if (file.size > MAX_UPLOAD_BYTES) {
+      setError(`File too large. Maximum allowed is ${MAX_MB} MB.`);
+      return;
+    }
+
     setUploading(true);
     setError(null);
     try {
@@ -31,6 +39,7 @@ export default function ImageUpload({
           filename: file.name,
           contentType: file.type,
           folder,
+          size: file.size,
         }),
       });
       if (!presignRes.ok) {

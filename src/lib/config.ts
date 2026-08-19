@@ -1,5 +1,19 @@
 import type { Localized } from "@/types";
 
+// --- Admin auth -------------------------------------------------------------
+// Password-only admin gate. Prefer setting ADMIN_PASSWORD in .env.local; this
+// value acts as the "stored in code" fallback/seed so /admin works out of the box.
+export const ADMIN_PASSWORD =
+  process.env.ADMIN_PASSWORD ?? "aura2007";
+// Optional extra secret to bind the session cookie value. If unset, derived
+// from ADMIN_PASSWORD.
+export const ADMIN_COOKIE_SECRET =
+  process.env.ADMIN_COOKIE_SECRET ?? "";
+
+// --- Uploads ---------------------------------------------------------------
+// Max allowed file upload size in bytes (50 MB).
+export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
+
 export const profile = {
   name: "Aura Auvarose",
   email: "auraauvaroseendica@gmail.com",

@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
 
-  const supabase = await createSupabaseServer();
+  const supabase = await createSupabaseAdmin();
   const body = await req.json();
 
   const { data, error } = await supabase

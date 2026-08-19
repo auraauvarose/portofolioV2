@@ -77,12 +77,24 @@ export default function GalleryManager() {
       sort_order: Number(form.sort_order) || 0,
     };
 
-    const { error } = editing
-      ? await supabase.from("gallery_photos").update(payload).eq("id", editing.id)
-      : await supabase.from("gallery_photos").insert(payload);
+    let res: Response;
+    if (editing) {
+      res = await fetch(`/api/gallery/${editing.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch("/api/gallery", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setMessage(`Error: ${data.error ?? "Gagal menyimpan"}`);
     } else {
       setMessage(editing ? "Photo updated ✓" : "Photo added ✓");
       setEditing(null);
@@ -94,8 +106,8 @@ export default function GalleryManager() {
 
   async function remove(g: GalleryPhoto) {
     if (!confirm("Delete this photo?")) return;
-    const { error } = await supabase.from("gallery_photos").delete().eq("id", g.id);
-    if (!error) await load();
+    const res = await fetch(`/api/gallery/${g.id}`, { method: "DELETE" });
+    if (res.ok) await load();
   }
 
   return (

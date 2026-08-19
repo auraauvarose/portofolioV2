@@ -92,12 +92,24 @@ export default function ProjectsManager() {
       featured: form.featured,
     };
 
-    const { error } = editing
-      ? await supabase.from("projects").update(payload).eq("id", editing.id)
-      : await supabase.from("projects").insert(payload);
+    let res: Response;
+    if (editing) {
+      res = await fetch(`/api/projects/${editing.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch("/api/projects", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setMessage(`Error: ${data.error ?? "Gagal menyimpan"}`);
     } else {
       setMessage(editing ? "Project updated ✓" : "Project created ✓");
       setEditing(null);
@@ -109,8 +121,8 @@ export default function ProjectsManager() {
 
   async function remove(p: Project) {
     if (!confirm(`Delete "${p.title_en}"?`)) return;
-    const { error } = await supabase.from("projects").delete().eq("id", p.id);
-    if (!error) await load();
+    const res = await fetch(`/api/projects/${p.id}`, { method: "DELETE" });
+    if (res.ok) await load();
   }
 
   return (

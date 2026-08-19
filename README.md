@@ -6,7 +6,7 @@ built as a full-stack app with an **admin panel** for managing
 
 - **Frontend:** Next.js 15 (App Router) + React 19 + Tailwind CSS v4
 - **Hosting:** Vercel
-- **Database + Auth:** Supabase (PostgreSQL + email/password admin login)
+- **Database + Auth:** Supabase (PostgreSQL) + password-only admin panel
 - **File storage:** Cloudflare R2 (presigned direct-to-browser uploads)
 
 Bilingual **EN / ID** with a language toggle.
@@ -19,13 +19,14 @@ Bilingual **EN / ID** with a language toggle.
   How I Work, Projects (Selected Works), **Photo Gallery**, Contact, Footer
 - Letter-by-letter text reveal, marquee strips, scroll-reveal animations,
   gallery lightbox with keyboard navigation
-- Admin panel at `/admin`:
+- Admin panel at `/admin` (accessed directly by URL — no button on the public site;
+  login is password-only, default password `aura2007`):
   - Create / edit / delete **projects** (title EN+ID, description, tech stack,
     category, year, link, image, featured)
   - Create / edit / delete **certifications** (title EN+ID, issuer, category,
     date, description, certificate image)
   - Upload **gallery photos** (title EN+ID, category)
-  - Images upload straight to Cloudflare R2
+  - Images upload straight to Cloudflare R2; **max file size 50 MB**
 
 ---
 
@@ -55,16 +56,17 @@ portofolioV2/
    [`supabase/schema.sql`](supabase/schema.sql), and **Run**. This creates the
    `projects`, `certifications`, and `gallery_photos` tables, row-level
    security, and seed data.
-3. Create your admin login:
-   - **Authentication → Users → Add user** → enter your email + password.
-   - (Recommended) **Authentication → Sign In / Providers → Email** → disable
-     "Allow new users to sign up" so only your admin account can log in.
-4. Copy your credentials from **Project Settings → API**:
+3. Copy your credentials from **Project Settings → API**:
    - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+   - `service_role` key → `SUPABASE_SERVICE_ROLE_KEY`
+     (server-side only — used for writes via the admin API routes. Never expose
+     it to the browser or commit it.)
 
-> Security: row-level security allows anyone to **read**, but only signed-in
-> users (your admin account) to **write**.
+> Security: row-level security allows anyone to **read**, but **writes are only
+> performed through the server-side admin API routes**, which are protected by
+> the admin password cookie (`/admin/login`). The default admin password is
+> `aura2007` — override it with `ADMIN_PASSWORD` in `.env.local`.
 
 ---
 
@@ -99,6 +101,9 @@ cp .env.example .env.local
 | --- | --- |
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon key |
+| `SUPABASE_SERVICE_ROLE_KEY` | Supabase service_role key (server-side writes) |
+| `ADMIN_PASSWORD` | Admin panel password (default `aura2007`) |
+| `ADMIN_COOKIE_SECRET` | Optional extra secret for the admin session cookie |
 | `R2_ACCOUNT_ID` | Cloudflare account ID |
 | `R2_ACCESS_KEY_ID` | R2 API token access key |
 | `R2_SECRET_ACCESS_KEY` | R2 API token secret |

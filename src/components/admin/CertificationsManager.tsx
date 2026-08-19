@@ -85,12 +85,24 @@ export default function CertificationsManager() {
       sort_order: Number(form.sort_order) || 0,
     };
 
-    const { error } = editing
-      ? await supabase.from("certifications").update(payload).eq("id", editing.id)
-      : await supabase.from("certifications").insert(payload);
+    let res: Response;
+    if (editing) {
+      res = await fetch(`/api/certifications/${editing.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    } else {
+      res = await fetch("/api/certifications", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+    }
 
-    if (error) {
-      setMessage(`Error: ${error.message}`);
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      setMessage(`Error: ${data.error ?? "Gagal menyimpan"}`);
     } else {
       setMessage(editing ? "Certification updated ✓" : "Certification created ✓");
       setEditing(null);
@@ -102,8 +114,8 @@ export default function CertificationsManager() {
 
   async function remove(c: Certification) {
     if (!confirm(`Delete "${c.title_en}"?`)) return;
-    const { error } = await supabase.from("certifications").delete().eq("id", c.id);
-    if (!error) await load();
+    const res = await fetch(`/api/certifications/${c.id}`, { method: "DELETE" });
+    if (res.ok) await load();
   }
 
   return (

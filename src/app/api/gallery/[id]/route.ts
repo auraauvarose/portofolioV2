@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseServer } from "@/lib/supabase/server";
+import { createSupabaseAdmin } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 
 export async function PUT(
@@ -10,7 +10,7 @@ export async function PUT(
   if (authError) return authError;
 
   const { id } = await params;
-  const supabase = await createSupabaseServer();
+  const supabase = await createSupabaseAdmin();
   const body = await req.json();
 
   const { data, error } = await supabase
@@ -38,7 +38,7 @@ export async function DELETE(
   if (authError) return authError;
 
   const { id } = await params;
-  const supabase = await createSupabaseServer();
+  const supabase = await createSupabaseAdmin();
 
   const { error } = await supabase.from("gallery_photos").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });

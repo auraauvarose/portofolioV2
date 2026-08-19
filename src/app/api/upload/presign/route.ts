@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createPresignedUpload } from "@/lib/r2";
 import { requireUser } from "@/lib/auth";
+import { MAX_UPLOAD_BYTES } from "@/lib/config";
 
 export async function POST(req: NextRequest) {
   const { error: authError } = await requireUser();
@@ -8,12 +9,23 @@ export async function POST(req: NextRequest) {
 
   try {
     const body = await req.json();
-    const { filename, contentType, folder } = body ?? {};
+    const { filename, contentType, folder, size } = body ?? {};
 
     if (!filename || !contentType) {
       return NextResponse.json(
         { error: "filename and contentType are required" },
         { status: 400 },
+      );
+    }
+
+    // Enforce the max upload size (50 MB) server-side before handing out a
+    // presigned URL.
+    if (typeof size === "number" && size > MAX_UPLOAD_BYTES) {
+      return NextResponse.json(
+        {
+          error: `File too large. Maximum allowed is 50 MB (${MAX_UPLOAD_BYTES} bytes).`,
+        },
+        { status: 413 },
       );
     }
 

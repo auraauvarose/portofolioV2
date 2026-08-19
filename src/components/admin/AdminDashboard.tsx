@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ProjectsManager from "@/components/admin/ProjectsManager";
 import CertificationsManager from "@/components/admin/CertificationsManager";
 import GalleryManager from "@/components/admin/GalleryManager";
@@ -17,29 +16,15 @@ type TabKey = (typeof TABS)[number]["key"];
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [email, setEmail] = useState<string | null>(null);
   const [tab, setTab] = useState<TabKey>("projects");
-  const [checking, setChecking] = useState(true);
-  const [configured, setConfigured] = useState(true);
 
-  useEffect(() => {
-    if (!process.env.NEXT_PUBLIC_SUPABASE_URL) {
-      setConfigured(false);
-      setChecking(false);
-      return;
-    }
-    const supabase = createSupabaseBrowser();
-    supabase.auth.getUser().then(({ data }) => {
-      setEmail(data.user?.email ?? null);
-      setChecking(false);
-      if (!data.user) router.replace("/admin/login");
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  const configured = Boolean(
+    process.env.NEXT_PUBLIC_SUPABASE_URL &&
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+  );
 
   async function signOut() {
-    const supabase = createSupabaseBrowser();
-    await supabase.auth.signOut();
+    await fetch("/api/admin/logout", { method: "POST" });
     router.replace("/admin/login");
     router.refresh();
   }
@@ -67,14 +52,6 @@ export default function AdminDashboard() {
     );
   }
 
-  if (checking) {
-    return (
-      <div className="flex min-h-screen items-center justify-center text-gray-500">
-        Loading…
-      </div>
-    );
-  }
-
   return (
     <div className="tv-static relative min-h-screen overflow-x-hidden bg-ink px-6 py-8 md:px-10">
       <div className="relative mx-auto max-w-5xl">
@@ -84,7 +61,7 @@ export default function AdminDashboard() {
             Admin<span className="text-accent">.</span>
           </h1>
           <p className="mt-1 text-sm text-gray-500">
-            Signed in as <span className="text-gray-300">{email}</span>
+            Manage your portfolio content.
           </p>
         </div>
         <div className="flex items-center gap-3">
