@@ -1,0 +1,466 @@
+@import "tailwindcss";
+
+/* Class-based dark mode (matches the reference site's next-themes approach) */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-anton), "Arial Narrow", Impact, sans-serif;
+
+  /* Warm-neutral palette matching the reference site (Apriyanto Dwi Herlambang) */
+  --color-accent: #eb5939; /* terracotta / warm orange accent */
+  --color-accent-soft: #d5542f;
+  --color-ink: #0d0e13; /* near-black, slightly blue like the original */
+  --color-panel: #13151c;
+  --color-ecru: #d6d0c4; /* warm off-white body text */
+  --color-khaki: #b7ab98; /* muted warm secondary text */
+  --color-fg: #ffffff; /* primary foreground (light override below) */
+  --color-muted: #9ca3af; /* secondary foreground (light override below) */
+
+  --animate-marquee: marquee 30s linear infinite;
+  --animate-marquee-reverse: marquee-reverse 30s linear infinite;
+  --animate-spin-slow: spin 6s linear infinite;
+  --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-preloader-word: preloader-word 0.42s cubic-bezier(0.16, 1, 0.3, 1)
+    forwards;
+
+  @keyframes preloader-word {
+    0% {
+      opacity: 0;
+      transform: translateY(1.2em) rotate(4deg);
+      filter: blur(6px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0) rotate(0);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes marquee {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-50%);
+    }
+  }
+  @keyframes marquee-reverse {
+    from {
+      transform: translateX(-50%);
+    }
+    to {
+      transform: translateX(0);
+    }
+  }
+  @keyframes pulse-dot {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(0.8);
+    }
+  }
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* Brief global color-transition window toggled during a theme switch, so the
+   whole site crossfades smoothly between dark and light. */
+.theme-anim,
+.theme-anim *,
+.theme-anim *::before,
+.theme-anim *::after {
+  transition:
+    background-color 0.4s ease,
+    border-color 0.4s ease,
+    color 0.4s ease,
+    fill 0.4s ease,
+    stroke 0.4s ease,
+    box-shadow 0.4s ease !important;
+}
+
+/* Custom cursor: hide the native pointer only where the cursor is mounted
+   (main site), and grow the ring over interactive elements. */
+.no-native-cursor,
+.no-native-cursor * {
+  cursor: none !important;
+}
+.cursor-ring-grow {
+  width: 3.5rem;
+  height: 3.5rem;
+  border-color: var(--color-accent);
+}
+
+/* ---------------------------------------------------------------------------
+ * Light-mode adjustments (enabled via the theme toggle in the right rail).
+ * The site is dark-first; these overrides keep it readable in `light`.
+ * ------------------------------------------------------------------------- */
+:root:not(.dark) {
+  --color-ink: #f4f4f5;
+  --color-panel: #ffffff;
+  --color-ecru: #2f2f2f;
+  --color-khaki: #6b6b6b;
+  --color-fg: #0d0e13;
+  --color-muted: #6b6b6b;
+}
+/* ===========================================================================
+   LIGHT MODE — comprehensive overrides so the whole site stays readable when
+   the theme toggle is switched to light (`.dark` class removed).
+   Strategy: flip the hardcoded dark-mode utility colors that components use.
+   ========================================================================= */
+:root:not(.dark) body {
+  color: #1c1c1e;
+}
+/* Foreground text */
+:root:not(.dark) .text-white,
+:root:not(.dark) .text-gray-100 {
+  color: #1c1c1e;
+}
+:root:not(.dark) .text-gray-200 {
+  color: #333333;
+}
+:root:not(.dark) .text-gray-300 {
+  color: #3d3d3d;
+}
+:root:not(.dark) .text-gray-400 {
+  color: #5b5b5b;
+}
+:root:not(.dark) .text-gray-500 {
+  color: #6e6e6e;
+}
+:root:not(.dark) .text-gray-600,
+:root:not(.dark) .text-zinc-500 {
+  color: #787878;
+}
+:root:not(.dark) .text-gray-700,
+:root:not(.dark) .text-zinc-700 {
+  color: #555555;
+}
+:root:not(.dark) .text-zinc-800 {
+  color: #444444;
+}
+/* text-black: keep dark in light mode (it is already dark) */
+
+/* Subtle dark surfaces (bg-black/xx) used as light hovers / hairline fills */
+:root:not(.dark) .bg-black\/5 {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+:root:not(.dark) .bg-black\/10 {
+  background-color: rgba(0, 0, 0, 0.08);
+}
+:root:not(.dark) .bg-black\/20 {
+  background-color: rgba(0, 0, 0, 0.12);
+}
+/* Keep the strong overlays dark for photo/input contrast */
+/* (bg-black/40, /50, /60, /90 intentionally unchanged) */
+
+/* White-tinted surfaces become dark-tinted in light mode */
+:root:not(.dark) [class*="bg-white/"] {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+:root:not(.dark) .bg-white\/50 {
+  background-color: rgba(255, 255, 255, 0.6);
+}
+:root:not(.dark) .bg-white\/80 {
+  background-color: rgba(255, 255, 255, 0.85);
+}
+
+/* Opacity-tinted white text → dark in light mode (latent footgun safety) */
+:root:not(.dark) [class*="text-white/"] {
+  color: #1c1c1e;
+}
+
+/* Light-mode surfaces that must stand out from the near-white page bg. */
+:root:not(.dark) .how-card {
+  background-color: #ffffff;
+  box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.14);
+}
+:root:not(.dark) .footer-mark {
+  color: rgba(0, 0, 0, 0.08);
+}
+
+/* Borders: white-tinted → dark-tinted */
+:root:not(.dark) [class*="border-white/"] {
+  border-color: rgba(0, 0, 0, 0.1);
+}
+
+/* Outlined/glass styles */
+:root:not(.dark) .text-outline {
+  -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
+}
+:root:not(.dark) .glass {
+  background: rgba(255, 255, 255, 0.7);
+  border-color: rgba(0, 0, 0, 0.08);
+}
+:root:not(.dark) .grain::before,
+:root:not(.dark) .tv-static::before {
+  opacity: 0.04;
+}
+:root:not(.dark) .reveal,
+:root:not(.dark) .letter {
+  color: inherit;
+}
+
+/* Scrollbar for light mode — the WebKit track above is already transparent in
+   every theme, so no extra light-mode override is needed for Chromium/WebKit
+   (setting `scrollbar-color` here would disable the WebKit transparent track,
+   exactly the white-rail bug we're fixing). Firefox is handled by the global
+   `@supports (-moz-appearance:none)` rule, which applies to all themes. */
+
+body {
+  background-color: var(--color-ink);
+  color: var(--color-ecru);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #000;
+}
+
+/* Custom scrollbar — transparent track (rail hidden), only the accent thumb
+   shows, over both dark and light sections.
+
+   Browser behavior that drives this (Chrome 121+ / Brave / Edge / Safari 18.2+):
+   setting the standard `scrollbar-color` OR `scrollbar-width` properties makes
+   the browser switch to the compositor-drawn native scrollbar and IGNORE the
+   legacy `::-webkit-scrollbar-*` pseudo-elements. So to keep our transparent
+   WebKit track we must NOT set either standard property on the root for
+   Chromium/WebKit — we control width via `::-webkit-scrollbar { width: 8px }`.
+
+   Firefox does NOT support `-webkit-scrollbar`, only the standard properties,
+   so it gets `scrollbar-color` + `scrollbar-width: thin` scoped to Firefox via
+   `@supports (-moz-appearance:none)`. Firefox honors a transparent track color,
+   so the rail stays hidden there too. */
+::-webkit-scrollbar {
+  width: 8px;
+  background: transparent;
+  background-color: transparent;
+}
+::-webkit-scrollbar-track,
+::-webkit-scrollbar-track-piece {
+  background: transparent;
+  background-color: transparent;
+}
+/* Bottom-right corner where two scrollbars meet — always transparent so no
+   light/white square can appear in light mode. */
+::-webkit-scrollbar-corner {
+  background: transparent;
+  background-color: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #eb5939;
+  border-radius: 999px;
+  border: 2px solid rgba(0, 0, 0, 0.4);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #d5542f;
+}
+/* Firefox only — standard scrollbar props; these would disable the WebKit
+   pseudo-elements above, but Firefox lacks WebKit scrollbars so it's safe and
+   required here. */
+@supports (-moz-appearance: none) {
+  :root {
+    scrollbar-color: #eb5939 rgba(0, 0, 0, 0) !important;
+    scrollbar-width: thin !important;
+  }
+}
+
+@layer utilities {
+  .text-display {
+    font-family: var(--font-display);
+    font-weight: 400;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  .text-outline {
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.25);
+    color: transparent;
+  }
+  .text-outline-accent {
+    -webkit-text-stroke: 1px var(--color-accent);
+    color: transparent;
+  }
+  .glass {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    backdrop-filter: blur(12px);
+  }
+  .marquee-mask {
+    -webkit-mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+    mask-image: linear-gradient(
+      to right,
+      transparent,
+      #000 8%,
+      #000 92%,
+      transparent
+    );
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  /* Film-grain / "TV static" overlay — fine black+white noise that shimmers,
+     giving the raw "ants / broken TV" texture. */
+  .grain::before,
+  .tv-static::before {
+    content: "";
+    position: fixed;
+    inset: -200%;
+    width: 400%;
+    height: 400%;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+    opacity: 0.09;
+    pointer-events: none;
+    animation: grain 0.5s steps(8) infinite;
+    transform: translateZ(0);
+    z-index: 90;
+    mix-blend-mode: overlay;
+  }
+  /* a second, faster vertical jitter layer for the "ants" feel */
+  .tv-static::after {
+    content: "";
+    position: fixed;
+    inset: 0;
+    z-index: 89;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+      to bottom,
+      rgba(255, 255, 255, 0.015),
+      rgba(255, 255, 255, 0.015) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+    animation: scan-jump 0.09s steps(2) infinite;
+  }
+
+  @keyframes grain {
+    0%,
+    100% {
+      transform: translate(0, 0);
+    }
+    10% {
+      transform: translate(-2%, -3%);
+    }
+    20% {
+      transform: translate(3%, 2%);
+    }
+    30% {
+      transform: translate(-1%, 4%);
+    }
+    40% {
+      transform: translate(4%, -1%);
+    }
+    50% {
+      transform: translate(-3%, 3%);
+    }
+    60% {
+      transform: translate(2%, -4%);
+    }
+    70% {
+      transform: translate(-4%, 1%);
+    }
+    80% {
+      transform: translate(1%, -2%);
+    }
+    90% {
+      transform: translate(3%, 4%);
+    }
+  }
+  @keyframes scan-jump {
+    0% {
+      transform: translateY(0);
+    }
+    100% {
+      transform: translateY(8px);
+    }
+  }
+}
+
+/* Reveal-on-scroll base state (activated by IntersectionObserver) */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition:
+    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform;
+}
+.reveal.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Letter-by-letter reveal for the About headline */
+.letter {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(0.6em) rotate(4deg);
+  transition:
+    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.letter.is-in {
+  opacity: 1;
+  transform: translateY(0) rotate(0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal,
+  .letter {
+    opacity: 1 !important;
+    transform: none !important;
+    transition: none !important;
+  }
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Mobile / touch improvements
+ * ------------------------------------------------------------------------- */
+
+/* Hard-stop any horizontal overflow at the root (complements body/main rules). */
+html {
+  overflow-x: hidden;
+}
+
+/* Tap targets: avoid the 300ms double-tap zoom delay and remove the flash. */
+button,
+a,
+[role="button"],
+[role="link"],
+input,
+textarea,
+select,
+summary {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Tailwind v4 preflight leaves buttons at `cursor: default`; restore pointer
+   affordance for anything clickable. */
+button:not(:disabled),
+[role="button"]:not(:disabled),
+summary {
+  cursor: pointer;
+}
