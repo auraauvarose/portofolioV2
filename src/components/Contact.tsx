@@ -31,8 +31,6 @@ export default function Contact() {
 
   return (
     <section id="contact" className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
-      <div className="pointer-events-none absolute -bottom-40 left-1/2 h-[40rem] w-[40rem] -translate-x-1/2 rounded-full bg-accent/10 blur-[140px]" />
-
       <div className="relative mx-auto max-w-7xl">
         <Reveal className="mb-10 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
           <span className="font-display text-accent">10</span>

@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 
-export async function POST(req: NextRequest) {
+export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
 
@@ -31,4 +31,4 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
   return NextResponse.json(data, { status: 201 });
-}
+});

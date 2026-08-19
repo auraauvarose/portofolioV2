@@ -1,8 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createSupabaseAdmin } from "@/lib/supabase/admin";
+import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 
-export async function PUT(
+export const PUT = withJsonErrors(async function PUT(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -28,9 +28,9 @@ export async function PUT(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json(data);
-}
+});
 
-export async function DELETE(
+export const DELETE = withJsonErrors(async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> },
 ) {
@@ -43,4 +43,4 @@ export async function DELETE(
   const { error } = await supabase.from("gallery_photos").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
   return NextResponse.json({ ok: true });
-}
+});

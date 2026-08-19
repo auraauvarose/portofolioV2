@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -15,8 +17,8 @@ import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import Marquee from "@/components/Marquee";
 import Sidebars from "@/components/Sidebars";
-import Preloader from "@/components/Preloader";
 import CustomCursor from "@/components/CustomCursor";
+import { isLoaded } from "@/lib/loading";
 import type { Project, Certification, GalleryPhoto } from "@/types";
 
 export default function HomeClient({
@@ -28,12 +30,29 @@ export default function HomeClient({
   certifications: Certification[];
   gallery: GalleryPhoto[];
 }) {
+  const router = useRouter();
+  const [booting, setBooting] = useState(true);
+
+  useEffect(() => {
+    // Route through the separate /loading page only on the very first visit
+    // (persisted in localStorage); afterwards home renders directly.
+    if (isLoaded()) {
+      setBooting(false);
+      return;
+    }
+    router.replace("/loading");
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // While deciding / being routed to /loading, keep a plain ink screen so we
+  // don't flash the content behind the loading page.
+  if (booting) {
+    return <div className="fixed inset-0 bg-ink" aria-hidden="true" />;
+  }
+
   // ponytail: overflow-x-clip, not -hidden. -hidden forces overflow-y auto and breaks sticky below.
   return (
     <main className="relative min-h-screen overflow-x-clip bg-ink">
-      {/* Intro / loading overlay ("Hallo" in many languages) */}
-      <Preloader />
-
       {/* Fixed overlays */}
       <Sidebars />
       {/* Custom cursor (dot + ring) */}

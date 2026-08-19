@@ -24,9 +24,14 @@ Bilingual **EN / ID** with a language toggle.
   - Create / edit / delete **projects** (title EN+ID, description, tech stack,
     category, year, link, image, featured)
   - Create / edit / delete **certifications** (title EN+ID, issuer, category,
-    date, description, certificate image)
+    date, description, certificate file)
   - Upload **gallery photos** (title EN+ID, category)
-  - Images upload straight to Cloudflare R2; **max file size 50 MB**
+  - Uploads accept **images and PDFs**; files go straight to Cloudflare R2;
+    **max file size 50 MB**
+- On a visitor's **first visit**, a dedicated `/loading` page shows a curtain
+  that slides up (open), plays a short greeting animation, then slides down
+  (close) to reveal the home page. Recorded in `localStorage`, so it only plays
+  once — later visits load the home page directly (no blocking overlay)
 
 ---
 
@@ -86,6 +91,25 @@ portofolioV2/
 5. Set `R2_BUCKET_NAME` to your bucket name.
 6. Set `NEXT_PUBLIC_R2_PUBLIC_URL` to the public base URL (e.g.
    `https://cdn.yourdomain.com` or `https://pub-xxxx.r2.dev`).
+7. **Add a CORS policy on the bucket** (required for browser uploads). In
+   **R2 → your bucket → Settings → CORS Policy**, set a policy (this is what
+   makes the admin "Upload" work — without it you get `Failed to fetch`):
+
+   ```json
+   [
+     {
+       "AllowedOrigins": ["*"],
+       "AllowedMethods": ["GET", "PUT", "HEAD"],
+       "AllowedHeaders": ["Content-Type", "*"],
+       "ExposeHeaders": ["ETag"],
+       "MaxAgeSeconds": 3600
+     }
+   ]
+   ```
+
+   > For production you can replace `"*"` with your exact domain
+   > (e.g. `https://auraauvarosee.vercel.app`). TypeScript code will also
+   > surface a clear CORS hint in the admin UI if this is missing.
 
 ---
 

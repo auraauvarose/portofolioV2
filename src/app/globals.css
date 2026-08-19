@@ -464,3 +464,47 @@ button:not(:disabled),
 summary {
   cursor: pointer;
 }
+
+/* ---------------------------------------------------------------------------
+ * Mobile menu + touch interactivity
+ * ------------------------------------------------------------------------- */
+
+/* Staggered entrance for mobile menu items */
+@keyframes menu-item-in {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.menu-item-in {
+  opacity: 0;
+  animation: menu-item-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Fade-in for the mobile menu footer controls */
+@keyframes menu-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+.menu-fade-in {
+  animation: menu-fade-in 0.6s ease-out forwards;
+}
+
+/* Tap feedback so hover-only effects still respond on touch screens */
+@media (hover: none) {
+  .touch-active:active {
+    transform: scale(0.94);
+  }
+  a.menu-link:active,
+  button.menu-link:active {
+    color: #eb5939;
+  }
+}

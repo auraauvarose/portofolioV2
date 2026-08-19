@@ -4,13 +4,16 @@ import { useRef } from "react";
 import type { ReactNode, PointerEvent } from "react";
 
 /**
- * Tilt3D — wraps a card and tilts it in 3D toward the cursor.
+ * Tilt3D — wraps a card and tilts it in 3D toward the cursor (or the tap
+ * point on touch screens).
  *
  * The outer wrapper carries the `perspective`; the inner layer rotates around
  * X/Y based on the pointer position (driven by CSS vars, no re-render on
  * move) and scales up slightly, giving the card a tactile "lift toward you"
- * effect. Pointer events pass straight through so any onClick on the children
- * (e.g. a project's expand toggle) still works normally.
+ * effect. On touch devices there is no hover, so a quick tilt is applied on
+ * tap (pointerdown) and animates back on release — this makes the cards feel
+ * interactive when scrolling / tapping on mobile. Pointer events pass straight
+ * through so any onClick on the children still works normally.
  */
 export default function Tilt3D({
   children,
@@ -25,19 +28,7 @@ export default function Tilt3D({
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
 
-  const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    const el = ref.current;
-    if (!el) return;
-    const r = el.getBoundingClientRect();
-    if (!r.width || !r.height) return;
-    const px = (e.clientX - r.left) / r.width - 0.5; // -0.5 .. 0.5
-    const py = (e.clientY - r.top) / r.height - 0.5;
-    el.style.setProperty("--rx", `${(-py * max).toFixed(2)}deg`);
-    el.style.setProperty("--ry", `${(px * max).toFixed(2)}deg`);
-    el.style.setProperty("--s", `${scale}`);
-  };
-
-  const onLeave = () => {
+  const reset = () => {
     const el = ref.current;
     if (!el) return;
     el.style.setProperty("--rx", "0deg");
@@ -45,12 +36,32 @@ export default function Tilt3D({
     el.style.setProperty("--s", "1");
   };
 
+  const tiltAt = (clientX: number, clientY: number, tiltScale: number) => {
+    const el = ref.current;
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    if (!r.width || !r.height) return;
+    const px = (clientX - r.left) / r.width - 0.5; // -0.5 .. 0.5
+    const py = (clientY - r.top) / r.height - 0.5;
+    el.style.setProperty("--rx", `${(-py * max).toFixed(2)}deg`);
+    el.style.setProperty("--ry", `${(px * max).toFixed(2)}deg`);
+    el.style.setProperty("--s", `${tiltScale}`);
+  };
+
+  const onMove = (e: PointerEvent<HTMLDivElement>) => tiltAt(e.clientX, e.clientY, scale);
+  const onDown = (e: PointerEvent<HTMLDivElement>) => tiltAt(e.clientX, e.clientY, scale * 0.96);
+  const onLeave = () => reset();
+  const onUp = () => reset();
+
   return (
     <div
       ref={ref}
       className={className}
       style={{ perspective: "1000px" }}
       onPointerMove={onMove}
+      onPointerDown={onDown}
+      onPointerUp={onUp}
+      onPointerCancel={onUp}
       onPointerLeave={onLeave}
     >
       <div

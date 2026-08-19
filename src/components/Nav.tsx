@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/providers";
 import { nav, profile } from "@/lib/config";
+import { socialIcon } from "@/components/social-icons";
 
 // Ordered menu → anchor mapping (matches reference header).
 const ANCHORS = ["#about", "#work", "#contact"];
@@ -103,7 +104,10 @@ export default function Nav() {
             key={i}
             href={ANCHORS[i] ?? "#"}
             onClick={() => setOpen(false)}
-            className="group flex items-baseline gap-4 rounded-lg px-4 py-4 text-display text-4xl uppercase text-white transition-colors hover:text-accent"
+            className={`menu-link group flex items-baseline gap-4 rounded-lg px-4 py-4 text-display text-4xl uppercase text-white transition-colors hover:text-accent active:text-accent ${
+              open ? "menu-item-in touch-active" : ""
+            }`}
+            style={open ? { animationDelay: `${i * 70 + 80}ms` } : undefined}
           >
             <span className="text-xs font-bold tracking-[0.3em] text-accent">
               0{i + 1}
@@ -113,7 +117,7 @@ export default function Nav() {
         ))}
 
         {/* Controls: language + theme toggle */}
-        <div className="mt-10 flex items-center gap-4">
+        <div className="menu-fade-in mt-10 flex items-center gap-4" style={open ? { animationDelay: `${nav.length * 70 + 160}ms` } : undefined}>
           <button
             onClick={() => setLang("en")}
             className={`text-sm font-bold uppercase tracking-widest transition-colors ${
@@ -149,17 +153,19 @@ export default function Nav() {
           </button>
         </div>
 
-        {/* Socials */}
-        <div className="mt-8 flex items-center gap-5">
+        {/* Socials — icon-only logos */}
+        <div className="menu-fade-in mt-8 flex items-center gap-5" style={open ? { animationDelay: `${nav.length * 70 + 240}ms` } : undefined}>
           {profile.socials.map((s) => (
             <a
               key={s.label}
               href={s.href}
               target="_blank"
               rel="noreferrer"
-              className="text-sm uppercase tracking-widest text-gray-400 transition-colors hover:text-accent"
+              aria-label={s.label}
+              title={s.label}
+              className="flex h-11 w-11 touch-active items-center justify-center rounded-full border border-white/10 bg-white/5 text-gray-300 transition-all duration-200 hover:scale-110 hover:border-accent hover:text-accent active:scale-95 dark:text-gray-200"
             >
-              {s.label}
+              {socialIcon(s.label)}
             </a>
           ))}
         </div>

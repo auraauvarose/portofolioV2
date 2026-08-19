@@ -1,4 +1,28 @@
 import { createClient } from "@supabase/supabase-js";
+import type { NextRequest } from "next/server";
+import { NextResponse } from "next/server";
+
+/**
+ * Wrap an API route handler so unexpected throws (e.g. missing env config)
+ * return a readable JSON `{ error }` instead of an HTML 500 that the admin UI
+ * silently reduces to a generic "Gagal menyimpan".
+ *
+ * Also pass through the route context (e.g. `{ params }`) for `[id]` routes.
+ */
+export function withJsonErrors<C = unknown>(
+  handler: (req: NextRequest, context: C) => Promise<NextResponse>,
+) {
+  return async (req: NextRequest, context: C) => {
+    try {
+      return await handler(req, context);
+    } catch (err) {
+      console.error("api error:", err);
+      const msg =
+        err instanceof Error ? err.message : "Internal server error";
+      return NextResponse.json({ error: msg }, { status: 500 });
+    }
+  };
+}
 
 /**
  * Server-only Supabase client using the service-role key.
@@ -12,7 +36,7 @@ export async function createSupabaseAdmin() {
 
   if (!url || !serviceKey) {
     throw new Error(
-      "NEXT_PUBLIC_SUPABASE_URL / SUPABASE_SERVICE_ROLE_KEY are not configured.",
+      "SUPABASE_SERVICE_ROLE_KEY belum diisi di .env.local — isi dengan service_role key dari Supabase Dashboard > Project Settings > API.",
     );
   }
 

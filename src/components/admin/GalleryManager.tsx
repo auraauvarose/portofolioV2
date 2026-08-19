@@ -6,6 +6,11 @@ import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
 import type { GalleryPhoto } from "@/types";
 
+const isPdf = (url: string) => {
+  const q = url.split("?")[0].toLowerCase();
+  return q.endsWith(".pdf") || url.toLowerCase().startsWith("data:application/pdf");
+};
+
 const EMPTY = {
   title_en: "",
   title_id: "",
@@ -142,8 +147,36 @@ export default function GalleryManager() {
               className="overflow-hidden rounded-xl border border-white/10 bg-black/20"
             >
               <div className="aspect-[4/3] w-full overflow-hidden bg-black/40">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+                {isPdf(g.image_url) ? (
+                  <a
+                    href={g.image_url}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="flex h-full w-full flex-col items-center justify-center gap-1 text-accent hover:bg-white/5"
+                  >
+                    <svg
+                      width="28"
+                      height="28"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="1.6"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
+                      <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
+                      <path d="M14 2v6h6" />
+                      <path d="M12 18v-6" />
+                      <path d="M9 15h6" />
+                    </svg>
+                    <span className="text-[10px] uppercase tracking-widest text-gray-300">
+                      PDF
+                    </span>
+                  </a>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={g.image_url} alt="" className="h-full w-full object-cover" />
+                )}
               </div>
               <div className="flex items-center justify-between gap-2 p-3">
                 <div className="min-w-0">

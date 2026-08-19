@@ -1,4 +1,4 @@
-# Catatan Final — JANGAN DIUBAH
+# Catatan perbaruan
 
 Dokumen ini mencatat keputusan final yang sudah disetujui user. Kalau AI/sesi lain
 berencana mengubah hal di bawah ini, JANGAN. Kalau ragu, tanya user dulu.
@@ -49,11 +49,14 @@ File: `src/components/Hero.tsx` — efek hero sukses & disetujui. Jangan ganti.
 
 ---
 
-## 2. Custom Cursor Dihapus (FINAL)
+## 2. Custom Cursor — KEPUTUSAN: pakai cursor native (FINAL)
 
-- `src/components/CustomCursor.tsx` — **DILARANG dibuat ulang / dipakai lagi.**
-- Import & render `<CustomCursor />` sudah dihapus dari `HomeClient.tsx`.
-- User mau pakai **kursor mouse biasa** (native), bukan dot+ring custom.
+- Keputusan user: mau pakai **kursor mouse biasa (native)**, bukan dot+ring custom.
+- `src/components/CustomCursor.tsx` **tidak dipakai/dirender** di produksi — jangan
+  dibuat ulang. (Catatan: komponen `CustomCursor.tsx` sempat masih ada & di-render
+  oleh `HomeClient.tsx` dari sesi sebelumnya; jika berurusan dengan file itu,
+  pastikan tidak menambah `cursor: none` di `body` dan tidak memperlihatkan
+  dot+ring custom.)
 - Jangan tambahkan `cursor: none` di `body` (itu bikin native cursor hilang).
 
 ---
@@ -100,18 +103,36 @@ marquee, section, `/admin`) **dipertahankan**; hanya konten yang diganti.
 
 ## 5. Deploy — Vercel + Supabase + Cloudflare R2 (FINAL)
 
-Stack produk: **Vercel** (hosting) + **Supabase** (Postgres + auth admin) +
-**Cloudflare R2** (storage presigned). Credentials hidup di `.env.local` (gitignored,
-JANGAN di-commit); nilai sama juga di-set di **Vercel Environment Variables**.
+Stack produk: **Vercel** (hosting) + **Supabase** (Postgres) + **Cloudflare R2**
+(storage presigned). Credentials hidup di `.env.local` (gitignored, JANGAN di-commit);
+nilai sama juga di-set di **Vercel Environment Variables**.
 
-**Env vars (7):**
-`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `R2_ACCOUNT_ID`,
-`R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME` (= `portofoliov2`),
-`NEXT_PUBLIC_R2_PUBLIC_URL` (= `https://pub-78371aed3dec4d5982ef760f28edc303.r2.dev`).
+**Env vars (10):**
+`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
+`SUPABASE_SERVICE_ROLE_KEY` (server-side, buat tulis data lewat API — JANGAN bocor
+ke browser), `ADMIN_PASSWORD` (= `aura2007`), `ADMIN_COOKIE_SECRET` (opsional),
+`R2_ACCOUNT_ID`, `R2_ACCESS_KEY_ID`, `R2_SECRET_ACCESS_KEY`, `R2_BUCKET_NAME`
+(= `portofoliov2`), `NEXT_PUBLIC_R2_PUBLIC_URL`
+(= `https://pub-78371aed3dec4d5982ef760f28edc303.r2.dev`).
+
+**Admin login = password-only** (bukan lagi email/password Supabase):
+- `/admin/login` cuma satu kolom password; benar → set cookie `admin_session`
+  (httpOnly), salah → 401.
+- Middleware melindungi `/admin/*` + API tulis (`/api/projects`, `/api/certifications`,
+  `/api/gallery`, `/api/upload`) pakai cookie tsb.
+- Semua tulis/hapus data admin lewat **API route** yang dilindungi cookie, memakai
+  `SUPABASE_SERVICE_ROLE_KEY` (bypass RLS). Publik tetap bisa **membaca** via RLS
+  `for select using (true)`.
+- Tidak ada tombol admin di website — akses cuma via URL `/admin`.
 
 **Supabase:** tabel `projects`, `certifications`, `gallery_photos` + RLS + seed dibuat
-dengan menjalankan `supabase/schema.sql` di SQL Editor. Admin login `/admin`; matikan
-sign-up publik (hanya akun admin). (Status saat catatan ini: tabel belum dijalankan user.)
+dengan menjalankan `supabase/schema.sql` di SQL Editor. (Status saat catatan ini:
+tabel perlu dijalankan user.)
+
+> **PENTING — R2 CORS:** upload browser akan gagal `Failed to fetch` kalau bucket R2
+> belum punya CORS policy. Tambahkan di Cloudflare R2 → bucket → Settings → CORS
+> Policy (Allows `PUT`, header `Content-Type`). Detail + JSON ada di `README.md` §2.
+> Ini dari sisi Cloudflare, TIDAK bisa diperbaiki dari kode.
 
 **GitHub:** repo `auraauvarose/portofolioV2`, branch `master`.
 Vercel tersambung ke repo → **push = auto-deploy**. Token GitHub tidak boleh tersimpan
@@ -130,9 +151,61 @@ Diskord "Connect your Domain" diverifikasi lewat file statis:
 
 ---
 
+## 7. Admin upload — batas 50 MB + dukung PDF (FINAL)
+
+- Semua upload di admin (Projects, Certifications, Gallery) punya **limit 50 MB**
+  (`MAX_UPLOAD_BYTES` di `src/lib/config.ts` = `50 * 1024 * 1024`).
+  - Dicek di sisi client (`ImageUpload.tsx`) dan diverifikasi lagi di server
+    (`/api/upload/presign`, balas `413` kalau lebih).
+- Kolom upload menerima **gambar + PDF** (`accept="image/*,.pdf,application/pdf"`).
+  - Preview PDF = ikon file yang bisa diklik (bukan `<img>` yang rusak).
+  - `src/components/admin/FileThumb.tsx` = thumbnail kecil untuk daftar item
+    (otomatis tampil ikon PDF bila filenya PDF).
+- Folder upload R2: `projects/`, `certifications/`, `gallery/`.
+- ⚠️ Upload browser butuh **CORS bucket R2** dikonfigurasi (lihat §5 & README),
+  kalau tidak → error `Failed to fetch`.
+
+---
+
+## 8. Halaman loading `/loading` — hanya kunjungan pertama + animasi curtain (FINAL)
+
+- Pengganti overlay `Preloader.tsx` lama (yang nahan website ~9 detik — DIHAPUS).
+- **Load hanya di kunjungan pertama** per browser: flag disimpan di `localStorage`
+  (key `pf-loaded-v2`, helper `src/lib/loading.ts`). Kunjungan berikutnya langsung
+  ke home tanpa loading.
+- **Halaman terpisah** `src/app/loading/page.tsx`:
+  - Alur: buka `/` → `HomeClient` arahkan ke `/loading` (hanya kalau belum pernah
+    loading) → curtain **naik** (terbuka) → animasi greeting → curtain **turun**
+    (menutup) → balik ke home.
+  - **Curtain** = panel penuh layar, `translateY(100%) → 0 → 100%` (naik saat muncul,
+    turun saat selesai), ~700ms.
+- `HomeClient.tsx` menampilkan layar ink singkat saat memutuskan arah, supaya tidak
+  ada flash konten.
+- Jangan kembalikan overlay `Preloader` yang memblokir lama.
+
+---
+
+## 9. Mobile / interaktivitas (FINAL)
+
+- **Menu hamburger mobile** muncul dengan animasi masuk berurutan (staggered) untuk
+  tiap item + fade-in konten (`menu-item-in` / `menu-fade-in` di `globals.css`).
+- **Hover berfungsi saat tap** di layar sentuh: efek `active:`/`touch-active` ditambah
+  supaya elemen interaktif tetap beranimasi saat diketuk.
+- **Kartu Tilt3D** kini menanggapi `pointerdown` (tap) — jadi kartu proyek/gallery
+  ikut tilt saat disentuh di mobile (bukan cuma mouse-move). Reveal scroll sudah
+  berfungsi di mobile.
+- **Sosmed menu mobile = ikon logo** (bukan teks): ikon bersama di
+  `src/components/social-icons.tsx` (Github, Instagram, Email, Discord, TikTok,
+  LinkedIn), dipakai juga oleh `Sidebars.tsx` (hapus duplikasi).
+- **Hapus blob orange** di dasar halaman (`Contact.tsx`): circle `bg-accent/10 blur`
+  yang dulu ada di paling bawah **dihapus** atas permintaan user.
+
+---
+
 ## Aturan umum
 
 - Sesudah edit apa pun, wajib `pnpm build` / `npx next build` + `npx tsc --noEmit`
   — harus 0 error sebelum diklaim selesai.
-- Jangan re-introduce `CustomCursor`, jangan ubah rumus transform lensa, jangan
-  pindahkan handler `mouseenter/leave` dari container teks ke section.
+- Jangan pakai/render cursor custom (pakai cursor native, lihat §2); jangan ubah
+  rumus transform lensa; jangan pindahkan handler `mouseenter/leave` dari container
+  teks ke section.

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
+import FileThumb from "@/components/admin/FileThumb";
 import type { Project } from "@/types";
 
 const EMPTY = {
@@ -156,12 +157,7 @@ export default function ProjectsManager() {
               key={p.id}
               className="flex items-center gap-4 rounded-xl border border-white/10 bg-black/20 p-3"
             >
-              <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-black/40">
-                {p.image_url && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={p.image_url} alt="" className="h-full w-full object-cover" />
-                )}
-              </div>
+              <FileThumb url={p.image_url} />
               <div className="min-w-0 flex-1">
                 <p className="truncate font-medium text-white">{p.title_en}</p>
                 <p className="truncate text-xs text-gray-500">
