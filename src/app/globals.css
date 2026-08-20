@@ -207,11 +207,8 @@ html {
   color: inherit;
 }
 
-/* Scrollbar for light mode — the WebKit track above is already transparent in
-   every theme, so no extra light-mode override is needed for Chromium/WebKit
-   (setting `scrollbar-color` here would disable the WebKit transparent track,
-   exactly the white-rail bug we're fixing). Firefox is handled by the global
-   `@supports (-moz-appearance:none)` rule, which applies to all themes. */
+/* Scrollbar is fully hidden in every theme (see "Hide the scrollbar entirely"
+   below), so no light-mode scrollbar override is needed here. */
 
 body {
   background-color: var(--color-ink);
