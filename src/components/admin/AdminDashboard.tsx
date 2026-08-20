@@ -70,7 +70,7 @@ export default function AdminDashboard() {
             target="_blank"
             className="rounded-lg border border-white/15 px-4 py-2 text-sm text-gray-300 hover:border-accent hover:text-accent"
           >
-            View site ↗
+            View site
           </a>
           <button
             onClick={signOut}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import { useLanguage } from "@/components/providers";
@@ -20,7 +21,12 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         setLightbox((lightbox - 1 + items.length) % items.length);
     };
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    // Lock body scroll while the lightbox is open.
+    document.body.style.overflow = lightbox !== null ? "hidden" : "";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
   }, [lightbox, items.length]);
 
   return (
@@ -76,12 +82,16 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         )}
       </div>
 
-      {/* Lightbox */}
-      {lightbox !== null && items[lightbox] && (
-        <div
-          className="fixed inset-0 z-[100] flex items-center justify-center bg-black/90 p-6 backdrop-blur-sm"
-          onClick={() => setLightbox(null)}
-        >
+      {/* Lightbox — portaled to <body> so it escapes the ancestor `relative
+          z-[1]` stacking context and truly paints ABOVE the nav (z-100),
+          social rail (z-40) and tv-static (z-90). */}
+      {lightbox !== null &&
+        items[lightbox] &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
+            onClick={() => setLightbox(null)}
+          >
           <button
             className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
             onClick={() => setLightbox(null)}
@@ -116,8 +126,10 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
           >
             →
           </button>
-        </div>
-      )}
+          </div>
+          ,
+          document.body
+        )}
     </section>
   );
 }

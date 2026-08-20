@@ -4,41 +4,56 @@ import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/providers";
 import { nav, profile } from "@/lib/config";
 import { socialIcon } from "@/components/social-icons";
+import MusicPlayer from "@/components/MusicPlayer";
 
 // Ordered menu → anchor mapping (matches reference header).
 const ANCHORS = ["#about", "#work", "#contact"];
 
+const PROFILE_IMG = "/profile.png";
+
 export default function Nav() {
   const { t, lang, setLang, theme, toggleTheme } = useLanguage();
   const [open, setOpen] = useState(false);
+  const [profileOpen, setProfileOpen] = useState(false);
 
-  // Close the mobile menu on Escape.
+  // Close the mobile menu / profile popup on Escape.
   useEffect(() => {
-    if (!open) return;
+    if (!open && !profileOpen) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        setProfileOpen(false);
+      }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [open]);
+  }, [open, profileOpen]);
 
-  // Lock body scroll while the mobile menu is open.
+  // Lock body scroll while the mobile menu or profile popup is open.
   useEffect(() => {
-    document.body.style.overflow = open ? "hidden" : "";
+    document.body.style.overflow = open || profileOpen ? "hidden" : "";
     return () => {
       document.body.style.overflow = "";
     };
-  }, [open]);
+  }, [open, profileOpen]);
 
   return (
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-6 py-6 md:px-12 md:py-8">
-        {/* Logo — circular avatar (initials fallback) */}
-        <a href="#top" className="pointer-events-auto" aria-label="Back to top">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-accent to-accent-soft font-display text-lg text-black shadow-lg transition-transform hover:scale-105 md:h-14 md:w-14 md:text-2xl">
-            A
-          </span>
-        </a>
+        {/* Logo — round profile photo, clickable to view a larger popup */}
+        <button
+          type="button"
+          onClick={() => setProfileOpen(true)}
+          aria-label="View profile photo"
+          className="pointer-events-auto group relative h-10 w-10 overflow-hidden rounded-full border border-white/15 bg-ink shadow-lg transition-transform hover:scale-105 md:h-14 md:w-14"
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={PROFILE_IMG}
+            alt={profile.name}
+            className="h-full w-full object-cover object-center"
+          />
+        </button>
 
         {/* Menu — vertical, right-aligned, dual-layer rollover animation (desktop) */}
         <nav className="pointer-events-auto hidden flex-col items-end gap-1 md:flex">
@@ -169,7 +184,53 @@ export default function Nav() {
             </a>
           ))}
         </div>
+
+        {/* Music player — pinned at the very bottom of the mobile menu */}
+        <div className="mt-10 mb-2">
+          <MusicPlayer variant="menu" />
+        </div>
       </div>
+
+      {/* Profile photo popup */}
+      {profileOpen && (
+        <div
+          className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
+          onClick={() => setProfileOpen(false)}
+          role="dialog"
+          aria-modal="true"
+          aria-label="Profile photo"
+        >
+          <button
+            type="button"
+            onClick={() => setProfileOpen(false)}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+          >
+            ✕
+          </button>
+          {/* Square frame — image cropped to a neat square (matching the round
+              avatar crop) and enlarged so it reads as a big framed picture. */}
+          <div
+            className="max-h-[85vh] w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="grid aspect-square w-full place-items-center overflow-hidden bg-black/30">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={PROFILE_IMG}
+                alt={profile.name}
+                className="h-full w-full object-cover object-center"
+              />
+            </div>
+            <div className="border-t border-white/10 px-5 py-3 text-center">
+              <p className="text-sm font-semibold text-white">{profile.name}</p>
+              <p className="text-xs uppercase tracking-widest text-gray-500">
+                {profile.name.split(" ")[1] ?? "Developer"}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

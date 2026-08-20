@@ -3,6 +3,7 @@
 import { useLanguage } from "@/components/providers";
 import { profile } from "@/lib/config";
 import { socialIcon } from "@/components/social-icons";
+import MusicPlayer from "@/components/MusicPlayer";
 
 type Social = { label: string; href: string };
 
@@ -79,7 +80,7 @@ export default function Sidebars() {
               target="_blank"
               rel="noreferrer"
               aria-label={s.label}
-              className="flex h-10 w-10 items-center justify-center text-gray-500 transition-colors hover:text-accent dark:text-gray-300 dark:hover:text-accent"
+              className="flex h-10 w-10 items-center justify-center text-black/70 transition-colors hover:text-accent dark:text-gray-300 dark:hover:text-accent"
             >
               {leftIcon(s.label)}
             </a>
@@ -92,11 +93,13 @@ export default function Sidebars() {
       <div className="fixed right-0 top-1/2 z-40 mr-6 hidden -translate-y-1/2 md:flex lg:mr-12">
         <div className="glass flex flex-col items-center gap-8 rounded-2xl py-4 shadow-xl">
           <div className="h-12 w-[0.2px] bg-gray-400/50 dark:bg-gray-500/60" />
+          {/* Music player — sits above the EN/ID toggle */}
+          <MusicPlayer variant="rail" />
           <div className="flex flex-col items-center gap-3 text-[12px] font-bold tracking-widest dark:text-white">
             <button
               onClick={() => setLang("en")}
               className={`transition-colors ${
-                lang === "en" ? "text-accent dark:text-accent" : "text-gray-500 hover:text-accent dark:text-gray-300 dark:hover:text-accent"
+                lang === "en" ? "text-accent dark:text-accent" : "text-black/70 hover:text-accent dark:text-gray-300 dark:hover:text-accent"
               }`}
             >
               EN
@@ -105,7 +108,7 @@ export default function Sidebars() {
             <button
               onClick={() => setLang("id")}
               className={`transition-colors ${
-                lang === "id" ? "text-accent dark:text-accent" : "text-gray-500 hover:text-accent dark:text-gray-300 dark:hover:text-accent"
+                lang === "id" ? "text-accent dark:text-accent" : "text-black/70 hover:text-accent dark:text-gray-300 dark:hover:text-accent"
               }`}
             >
               ID

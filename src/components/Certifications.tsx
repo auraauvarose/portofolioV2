@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import Tilt3D from "@/components/Tilt3D";
@@ -17,6 +18,21 @@ export default function Certifications({
 }) {
   const { t } = useLanguage();
   const [active, setActive] = useState<string>("all");
+  const [selected, setSelected] = useState<Certification | null>(null);
+
+  // Close the popup on Escape / lock body scroll while open.
+  useEffect(() => {
+    if (!selected) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setSelected(null);
+    };
+    window.addEventListener("keydown", onKey);
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = "";
+    };
+  }, [selected]);
 
   const filtered =
     active === "all" ? items : items.filter((c) => c.category === active);
@@ -75,7 +91,10 @@ export default function Certifications({
             {filtered.map((cert, i) => (
               <Reveal key={cert.id} delay={i * 80} className="h-full">
                 <Tilt3D className="h-full">
-                  <article className="group flex h-full flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-all duration-500 hover:border-accent/50">
+                  <article
+                    onClick={() => setSelected(cert)}
+                    className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-all duration-500 hover:border-accent/50"
+                  >
                     {cert.image_url ? (
                       <div className="relative aspect-[4/3] overflow-hidden bg-black/40">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -129,6 +148,83 @@ export default function Certifications({
           </div>
         )}
       </div>
+
+      {/* Certification popup — portaled to <body> so it escapes the ancestor
+          `relative z-[1]` stacking context and can truly paint ABOVE the nav
+          (z-100), social rail (z-40) and tv-static (z-90). */}
+      {selected &&
+        createPortal(
+          <div
+            className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
+            onClick={() => setSelected(null)}
+            role="dialog"
+            aria-modal="true"
+            aria-label="Certification"
+          >
+          <button
+            type="button"
+            onClick={() => setSelected(null)}
+            aria-label="Close"
+            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+          >
+            ✕
+          </button>
+          <div
+            className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {selected.image_url ? (
+              // Full-bleed image: natural aspect so there are no leftover
+              // left/right bars — the popup focuses purely on the document.
+              <div className="flex w-full items-center justify-center bg-black/40">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={selected.image_url}
+                  alt={selected.title_en ?? "Certification"}
+                  className="max-h-[58vh] w-auto max-w-full object-contain"
+                />
+              </div>
+            ) : (
+              <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-20 w-20 text-accent/50">
+                  <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+                </svg>
+              </div>
+            )}
+            <div className="px-5 py-5 md:px-6 md:py-6">
+              <div className="mb-3 flex items-center justify-between">
+                <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
+                  {t(certifications.categories[selected.category] ?? {
+                    en: selected.category,
+                    id: selected.category,
+                  })}
+                </span>
+                {selected.date && (
+                  <span className="text-xs text-gray-500">{selected.date}</span>
+                )}
+              </div>
+              <h3 className="text-xl font-semibold leading-snug text-white md:text-2xl">
+                {lang_title(selected, t)}
+              </h3>
+              {selected.issuer && (
+                <p className="mt-2 text-sm text-gray-400">
+                  {t({ en: "By:", id: "Oleh:" })} {selected.issuer}
+                </p>
+              )}
+              {selected.description_en && (
+                <p className="mt-4 text-sm leading-relaxed text-gray-400 md:text-base">
+                  {t({
+                    en: selected.description_en,
+                    id: selected.description_id ?? selected.description_en,
+                  })}
+                </p>
+              )}
+            </div>
+          </div>
+          </div>
+          ,
+          document.body
+        )}
     </section>
   );
 }
