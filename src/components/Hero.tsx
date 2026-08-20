@@ -77,11 +77,11 @@ export default function Hero() {
           onMouseEnter={() => setActive(true)}
           onMouseLeave={() => setActive(false)}
         >
-          <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-[#EB5939] md:mb-8 md:text-xl">
+          <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-[#EB5939] sm:text-base md:mb-8 md:text-xl">
             {eyebrow}
           </p>
 
-          <h1 className="text-center text-5xl font-black uppercase leading-[1] text-[#f4f4f5]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+          <h1 className="text-center text-[clamp(3rem,15vw,4rem)] font-black uppercase leading-[1] text-[#f4f4f5]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
             FULLSTACK
             <br />
             DEVELOPER
@@ -94,7 +94,7 @@ export default function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e]" />
             </span>
-            <span className="text-[9px] uppercase tracking-widest text-[#c7c7cc] transition-colors group-hover:text-[#ffffff] md:text-[14px] dark:text-[#c7c7cc] dark:group-hover:text-[#ffffff]">
+            <span className="text-xs uppercase tracking-widest text-[#c7c7cc] transition-colors group-hover:text-[#ffffff] md:text-[14px] dark:text-[#c7c7cc] dark:group-hover:text-[#ffffff]">
               {t(hero.tagline)}
             </span>
           </div>
@@ -134,10 +134,10 @@ export default function Hero() {
               transform: `translate(calc(-1 * var(--mx) + ${DISC / 2}px), calc(-1 * var(--my) + ${DISC / 2}px))`,
             }}
           >
-            <p className="mb-2 text-[10px] font-bold uppercase tracking-[0.3em] text-black md:mb-8 md:text-xl">
+            <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-black sm:text-base md:mb-8 md:text-xl">
               {eyebrow}
             </p>
-            <h1 className="text-center text-5xl font-black uppercase leading-[1] text-black sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+            <h1 className="text-center text-[clamp(3rem,15vw,4rem)] font-black uppercase leading-[1] text-black sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
               SOFTWARE
               <br />
               ENGINEER

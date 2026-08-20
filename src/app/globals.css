@@ -218,7 +218,11 @@ body {
   color: var(--color-ecru);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  overflow-x: hidden;
+  /* overflow-x: clip (NOT hidden): `hidden` turns body into a scroll container,
+     which breaks `position: sticky` on descendants (the hero reveal). `clip`
+     clips overflow identically but does NOT create a scroll container, so
+     sticky keeps working. */
+  overflow-x: clip;
 }
 
 ::selection {
@@ -439,9 +443,11 @@ body {
  * Mobile / touch improvements
  * ------------------------------------------------------------------------- */
 
-/* Hard-stop any horizontal overflow at the root (complements body/main rules). */
+/* Hard-stop any horizontal overflow at the root (complements body/main rules).
+   overflow-x: clip (NOT hidden) so the root does NOT become a scroll container,
+   which would break `position: sticky` (hero reveal) on descendants. */
 html {
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* Tap targets: avoid the 300ms double-tap zoom delay and remove the flash. */
