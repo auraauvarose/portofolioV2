@@ -230,51 +230,18 @@ body {
   color: #000;
 }
 
-/* Custom scrollbar — transparent track (rail hidden), only the accent thumb
-   shows, over both dark and light sections.
-
-   Browser behavior that drives this (Chrome 121+ / Brave / Edge / Safari 18.2+):
-   setting the standard `scrollbar-color` OR `scrollbar-width` properties makes
-   the browser switch to the compositor-drawn native scrollbar and IGNORE the
-   legacy `::-webkit-scrollbar-*` pseudo-elements. So to keep our transparent
-   WebKit track we must NOT set either standard property on the root for
-   Chromium/WebKit — we control width via `::-webkit-scrollbar { width: 8px }`.
-
-   Firefox does NOT support `-webkit-scrollbar`, only the standard properties,
-   so it gets `scrollbar-color` + `scrollbar-width: thin` scoped to Firefox via
-   `@supports (-moz-appearance:none)`. Firefox honors a transparent track color,
-   so the rail stays hidden there too. */
+/* Hide the scrollbar entirely across all browsers (Chrome / Brave / Edge /
+   Safari via WebKit pseudo-elements, Firefox via the standard property). We
+   still `overflow` so the page remains scrollable — only the visual bar is
+   gone. */
 ::-webkit-scrollbar {
-  width: 8px;
-  background: transparent;
-  background-color: transparent;
+  display: none;
+  width: 0;
+  height: 0;
 }
-::-webkit-scrollbar-track,
-::-webkit-scrollbar-track-piece {
-  background: transparent;
-  background-color: transparent;
-}
-/* Bottom-right corner where two scrollbars meet — always transparent so no
-   light/white square can appear in light mode. */
-::-webkit-scrollbar-corner {
-  background: transparent;
-  background-color: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #eb5939;
-  border-radius: 999px;
-  border: 2px solid rgba(0, 0, 0, 0.4);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #d5542f;
-}
-/* Firefox only — standard scrollbar props; these would disable the WebKit
-   pseudo-elements above, but Firefox lacks WebKit scrollbars so it's safe and
-   required here. */
 @supports (-moz-appearance: none) {
   :root {
-    scrollbar-color: #eb5939 rgba(0, 0, 0, 0) !important;
-    scrollbar-width: thin !important;
+    scrollbar-width: none !important;
   }
 }
 

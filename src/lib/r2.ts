@@ -18,6 +18,14 @@ function getR2Client(): S3Client {
     region: "auto",
     endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
     credentials: { accessKeyId, secretAccessKey },
+    // The presigned PUT is later replayed by a plain browser `fetch()`, which
+    // cannot recompute the CRC32 checksum that the SDK otherwise injects into
+    // the presigned URL by default (`WHEN_SUPPORTED`). That baked-in placeholder
+    // checksum (`x-amz-checksum-crc32=AAAAAA==`) makes R2 reject the real file
+    // body with a 400 Bad Request. Only calculate checksums when the model
+    // requires them, so the presigned URL carries no checksum at all and the
+    // direct browser upload succeeds.
+    requestChecksumCalculation: "WHEN_REQUIRED",
   });
 }
 
