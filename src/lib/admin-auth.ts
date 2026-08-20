@@ -16,8 +16,9 @@ function expectedSessionValue(): string {
 
 export function verifyAdminPassword(password: string): boolean {
   if (!ADMIN_PASSWORD) return false;
-  // Constant-ish time compare to avoid trivial timing leaks.
-  const a = String(password);
+  // Ignore accidental surrounding whitespace on the typed input too, matching
+  // the normalization applied to the stored password in config.ts.
+  const a = String(password).trim();
   const b = String(ADMIN_PASSWORD);
   if (a.length !== b.length) return false;
   let diff = 0;

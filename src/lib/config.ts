@@ -3,8 +3,10 @@ import type { Localized } from "@/types";
 // --- Admin auth -------------------------------------------------------------
 // Password-only admin gate. Prefer setting ADMIN_PASSWORD in .env.local; this
 // value acts as the "stored in code" fallback/seed so /admin works out of the box.
-export const ADMIN_PASSWORD =
-  process.env.ADMIN_PASSWORD ?? "aura2007";
+// Trim surrounding whitespace: env vars pasted into dashboards (e.g. Vercel)
+// often pick up a stray trailing/leading space, which silently changes the
+// effective password and makes the real one get rejected.
+export const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD ?? "aura2007").trim();
 // Optional extra secret to bind the session cookie value. If unset, derived
 // from ADMIN_PASSWORD.
 export const ADMIN_COOKIE_SECRET =
