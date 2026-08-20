@@ -141,6 +141,7 @@ cp .env.example .env.local
 ```bash
 pnpm install
 pnpm dev
+or npm run dev
 ```
 
 Open <http://localhost:3000>. The admin panel is at <http://localhost:3000/admin>.
@@ -168,3 +169,4 @@ The admin login is at `https://your-domain.vercel.app/admin`.
 - **Fonts & colors:** the accent (terracotta orange `#eb5939`), fonts, and
   animations live in
   [`src/app/globals.css`](src/app/globals.css).
+
