@@ -19,7 +19,7 @@ import Sidebars from "@/components/Sidebars";
 import CustomCursor from "@/components/CustomCursor";
 import type { Project, Certification, GalleryPhoto } from "@/types";
 
-// Loading curtain timing (mirrors the former /loading page).
+// Loading curtain inline timing (replaced the old dedicated /loading page).
 const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
 const GREET_MS = 320;
 const HOLD_MS = 500;
@@ -99,7 +99,7 @@ export default function HomeClient({
           and is removed from the DOM once revealed. */}
       {curtainVisible && !revealed && (
         <div
-          className="fixed inset-0 z-[99999] overflow-hidden bg-ink"
+          className="loading-curtain fixed inset-0 z-[99999] overflow-hidden bg-ink"
           aria-hidden="true"
         >
           <div
@@ -129,7 +129,7 @@ export default function HomeClient({
                 />
               </div>
 
-              <span className="mt-6 text-[10px] uppercase tracking-[0.4em] text-[#9ca3af]">
+              <span className="mt-6 text-[10px] uppercase tracking-[0.4em] text-white">
                 Loading
               </span>
             </div>

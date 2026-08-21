@@ -35,3 +35,7 @@ next-env.d.ts
 .mimosa/
 .zcode/
 .playwright-mcp/
+
+# local npm cache (used because the sandboxed home ~/.npm is read-only)
+.npm-cache/
+.pnpm-store/

@@ -4,8 +4,8 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-display: var(--font-anton), "Arial Narrow", Impact, sans-serif;
+  --font-sans: var(--font-general), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-cabinet), "Arial Narrow", Impact, sans-serif;
 
   /* Warm-neutral palette matching the reference site (Apriyanto Dwi Herlambang) */
   --color-accent: #eb5939; /* terracotta / warm orange accent */
@@ -147,6 +147,14 @@ html {
 }
 /* text-black: keep dark in light mode (it is already dark) */
 
+/* Loading curtain always sits on a dark backdrop (#0D0E13), so keep its text
+   white (not flipped to dark) even when the theme toggle is set to light. */
+:root:not(.dark) .loading-curtain,
+:root:not(.dark) .loading-curtain .text-white,
+:root:not(.dark) .loading-curtain .text-display {
+  color: #ffffff;
+}
+
 /* Subtle dark surfaces (bg-black/xx) used as light hovers / hairline fills */
 :root:not(.dark) .bg-black\/5 {
   background-color: rgba(0, 0, 0, 0.05);
@@ -252,7 +260,7 @@ body {
 @layer utilities {
   .text-display {
     font-family: var(--font-display);
-    font-weight: 400;
+    font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 0.92;
   }
@@ -384,6 +392,32 @@ body {
   transform: translateY(0);
 }
 
+/* Scroll-linked word reveal (About bio + What I Do rows) */
+.scroll-word {
+  display: inline;
+}
+.scroll-word-inner {
+  display: inline-block;
+  will-change: opacity;
+  white-space: pre-wrap;
+}
+
+/* Orange brand highlight for scroll-reveal words — theme-aware so it clears
+   WCAG contrast in BOTH themes (and at 20px body size on mobile). */
+.text-highlight {
+  color: #ff7a50; /* lighter warm orange — ~7:1 on dark ink */
+}
+:root:not(.dark) .text-highlight {
+  color: #b3391f; /* darker terracotta — ~5.5:1 on light backgrounds */
+}
+
+/* On a WhatIDo row hover, force the words fully opaque so the flipped title
+   color (ink/near-black on the orange overlay) stays legible regardless of the
+   scroll-linked dim state. Only applies inside a `group` row (not the bio). */
+.group:hover .scroll-word-inner {
+  opacity: 1 !important;
+}
+
 /* Letter-by-letter reveal for the About headline */
 .letter {
   display: inline-block;
@@ -400,7 +434,8 @@ body {
 
 @media (prefers-reduced-motion: reduce) {
   .reveal,
-  .letter {
+  .letter,
+  .scroll-word-inner {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;

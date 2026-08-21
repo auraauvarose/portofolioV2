@@ -19,6 +19,11 @@ export default function Certifications({
   const { t } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Certification | null>(null);
+  // Mobile carousel: which filtered item is shown as the big card.
+  const [slide, setSlide] = useState(0);
+
+  // Reset the mobile carousel to the first card whenever the filter changes.
+  useEffect(() => setSlide(0), [active]);
 
   // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
@@ -36,6 +41,64 @@ export default function Certifications({
 
   const filtered =
     active === "all" ? items : items.filter((c) => c.category === active);
+
+  // Single card renderer shared by the mobile slide scroller and the
+  // desktop grid so both stay in sync.
+  const certCard = (cert: Certification) => (
+    <Tilt3D className="h-full">
+      <article
+        onClick={() => setSelected(cert)}
+        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-all duration-500 hover:border-accent/50"
+      >
+        {cert.image_url ? (
+          <div className="relative aspect-[4/3] overflow-hidden bg-black/40">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={cert.image_url}
+              alt={cert.title_en}
+              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              loading="lazy"
+            />
+          </div>
+        ) : (
+          <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/5 to-transparent">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-14 w-14 text-accent/50">
+              <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+            </svg>
+          </div>
+        )}
+        <div className="flex flex-1 flex-col p-5 md:p-6">
+          <div className="mb-3 flex flex-col items-start gap-1 md:flex-row md:items-center md:justify-between">
+            <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
+              {t(certifications.categories[cert.category] ?? {
+                en: cert.category,
+                id: cert.category,
+              })}
+            </span>
+            {cert.date && (
+              <span className="text-xs text-gray-500">{cert.date}</span>
+            )}
+          </div>
+          <h3 className="text-lg font-semibold leading-snug text-white">
+            {lang_title(cert, t)}
+          </h3>
+          {cert.issuer && (
+            <p className="mt-2 text-sm text-gray-400">
+              {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
+            </p>
+          )}
+          {cert.description_en && (
+            <p className="mt-3 text-sm leading-relaxed text-gray-400">
+              {t({
+                en: cert.description_en,
+                id: cert.description_id ?? cert.description_en,
+              })}
+            </p>
+          )}
+        </div>
+      </article>
+    </Tilt3D>
+  );
 
   return (
     <section className="px-6 py-16 md:px-10 md:py-32">
@@ -87,65 +150,78 @@ export default function Certifications({
             </p>
           </Reveal>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {filtered.map((cert, i) => (
-              <Reveal key={cert.id} delay={i * 80} className="h-full">
-                <Tilt3D className="h-full">
-                  <article
-                    onClick={() => setSelected(cert)}
-                    className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-all duration-500 hover:border-accent/50"
-                  >
-                    {cert.image_url ? (
-                      <div className="relative aspect-[4/3] overflow-hidden bg-black/40">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={cert.image_url}
-                          alt={cert.title_en}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      </div>
-                    ) : (
-                      <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/5 to-transparent">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-14 w-14 text-accent/50">
-                          <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                        </svg>
-                      </div>
-                    )}
-                    <div className="flex flex-1 flex-col p-6">
-                      <div className="mb-3 flex items-center justify-between">
-                        <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
-                          {t(certifications.categories[cert.category] ?? {
-                            en: cert.category,
-                            id: cert.category,
-                          })}
-                        </span>
-                        {cert.date && (
-                          <span className="text-xs text-gray-500">{cert.date}</span>
-                        )}
-                      </div>
-                      <h3 className="text-lg font-semibold leading-snug text-white">
-                        {lang_title(cert, t)}
-                      </h3>
-                      {cert.issuer && (
-                        <p className="mt-2 text-sm text-gray-400">
-                          {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
-                        </p>
-                      )}
-                      {cert.description_en && (
-                        <p className="mt-3 text-sm leading-relaxed text-gray-400">
-                          {t({
-                            en: cert.description_en,
-                            id: cert.description_id ?? cert.description_en,
-                          })}
-                        </p>
+          <>
+            {/* Mobile: one big card at a time, with a dot slider below and a
+                "n / total" counter on the left. */}
+            <div className="md:hidden">
+              {(() => {
+                const idx = Math.min(slide, filtered.length - 1);
+                const current = filtered[idx];
+                const total = filtered.length;
+                const go = (next: number) =>
+                  setSlide((next + total) % total);
+                return (
+                  <div>
+                    <div className="relative">
+                      <Reveal className="h-full">{certCard(current)}</Reveal>
+                      {total > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            aria-label="Sebelumnya"
+                            onClick={() => go(idx - 1)}
+                            className="absolute -left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+                          >
+                            ‹
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Berikutnya"
+                            onClick={() => go(idx + 1)}
+                            className="absolute -right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+                          >
+                            ›
+                          </button>
+                        </>
                       )}
                     </div>
-                  </article>
-                </Tilt3D>
-              </Reveal>
-            ))}
-          </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-widest text-gray-500">
+                        {String(idx + 1).padStart(2, "0")} /{" "}
+                        {String(total).padStart(2, "0")}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {total > 1 &&
+                          filtered.map((_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-label={`Slide ${i + 1}`}
+                              onClick={() => setSlide(i)}
+                              className={`h-2 w-2 rounded-full transition-all ${
+                                i === idx
+                                  ? "w-6 bg-accent"
+                                  : "bg-white/25 hover:bg-white/50"
+                              }`}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Desktop: normal grid */}
+            <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
+              {filtered.map((cert, i) => (
+                <Reveal key={cert.id} delay={i * 80} className="h-full">
+                  {certCard(cert)}
+                </Reveal>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

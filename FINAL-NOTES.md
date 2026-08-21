@@ -167,20 +167,16 @@ Diskord "Connect your Domain" diverifikasi lewat file statis:
 
 ---
 
-## 8. Halaman loading `/loading` — hanya kunjungan pertama + animasi curtain (FINAL)
+## 8. Loading curtain (bukan halaman `/loading` terpisah) (FINAL)
 
 - Pengganti overlay `Preloader.tsx` lama (yang nahan website ~9 detik — DIHAPUS).
-- **Load hanya di kunjungan pertama** per browser: flag disimpan di `localStorage`
-  (key `pf-loaded-v2`, helper `src/lib/loading.ts`). Kunjungan berikutnya langsung
-  ke home tanpa loading.
-- **Halaman terpisah** `src/app/loading/page.tsx`:
-  - Alur: buka `/` → `HomeClient` arahkan ke `/loading` (hanya kalau belum pernah
-    loading) → curtain **naik** (terbuka) → animasi greeting → curtain **turun**
-    (menutup) → balik ke home.
-  - **Curtain** = panel penuh layar, `translateY(100%) → 0 → 100%` (naik saat muncul,
-    turun saat selesai), ~700ms.
-- `HomeClient.tsx` menampilkan layar ink singkat saat memutuskan arah, supaya tidak
-  ada flash konten.
+- **Curtain berjalan di setiap kunjungan/reload** langsung di `HomeClient.tsx`
+  (tanpa rute `/loading` terpisah, tanpa hop, tanpa localStorage).
+  - **Halaman rute `/loading` lama** (`src/app/loading/page.tsx`) dan helper
+    `src/lib/loading.ts` **DIHAPUS** — sudah tidak dipakai.
+  - Curtain = panel penuh layar `bg-[#0D0E13]` (selalu gelap di theme apapun),
+    `translateY(100%) → 0 → 100%` (naik saat muncul, turun saat selesai), ~700ms.
+  - Teks loading (greeting + label "Loading") **putih** di light & dark mode.
 - Jangan kembalikan overlay `Preloader` yang memblokir lama.
 
 ---

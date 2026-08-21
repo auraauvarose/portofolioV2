@@ -1,18 +1,31 @@
 import type { Metadata } from "next";
-import { Inter, Anton } from "next/font/google";
+import localFont from "next/font/local";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers";
 
-const inter = Inter({
-  subsets: ["latin"],
-  variable: "--font-inter",
+/* Self-hosted Fontshare fonts (see scripts/download-fonts.sh to refresh).
+   - General Sans: warm premium neo-grotesque body/UI font (replaces Inter)
+   - Cabinet Grotesk: heavy bold/black display font (replaces Anton) */
+const generalSans = localFont({
+  src: [
+    { path: "../../public/fonts/GeneralSans-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/GeneralSans-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/GeneralSans-600.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/GeneralSans-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-general",
   display: "swap",
 });
 
-const anton = Anton({
-  weight: "400",
-  subsets: ["latin"],
-  variable: "--font-anton",
+const cabinetGrotesk = localFont({
+  src: [
+    { path: "../../public/fonts/CabinetGrotesk-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/CabinetGrotesk-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/CabinetGrotesk-700.woff2", weight: "700", style: "normal" },
+    { path: "../../public/fonts/CabinetGrotesk-800.woff2", weight: "800", style: "normal" },
+    { path: "../../public/fonts/CabinetGrotesk-900.woff2", weight: "900", style: "normal" },
+  ],
+  variable: "--font-cabinet",
   display: "swap",
 });
 
@@ -29,7 +42,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
-      <body className={`${inter.variable} ${anton.variable} antialiased`}>
+      <body
+        className={`${generalSans.variable} ${cabinetGrotesk.variable} antialiased`}
+      >
         {/* Theme boot — apply persisted theme before hydration to avoid FOUC */}
         <script
           dangerouslySetInnerHTML={{

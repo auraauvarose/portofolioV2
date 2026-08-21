@@ -13,6 +13,11 @@ export default function Projects({ items }: { items: Project[] }) {
   const { t, lang } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Project | null>(null);
+  // Mobile carousel: which filtered item is shown as the big card.
+  const [slide, setSlide] = useState(0);
+
+  // Reset the mobile carousel to the first card whenever the filter changes.
+  useEffect(() => setSlide(0), [active]);
 
   // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
@@ -35,6 +40,102 @@ export default function Projects({ items }: { items: Project[] }) {
 
   const filtered =
     active === "all" ? items : items.filter((p) => p.category === active);
+
+  // Single card renderer shared by the mobile slide scroller and the
+  // desktop grid so both stay in sync.
+  const projectCard = (project: Project, i: number) => {
+    const title = lang === "en" ? project.title_en : project.title_id;
+    const description =
+      lang === "en"
+        ? project.description_en ?? ""
+        : project.description_id ?? project.description_en ?? "";
+
+    return (
+      <Tilt3D className="h-full">
+        <article
+          onClick={() => setSelected(project)}
+          className="group h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-all duration-500 hover:border-accent/50"
+        >
+          <div className="relative aspect-[16/10] overflow-hidden bg-black/40">
+            {project.image_url ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={project.image_url}
+                alt={title}
+                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                loading="lazy"
+              />
+            ) : (
+              <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
+                <span className="text-display text-4xl uppercase text-outline md:text-5xl">
+                  {title}
+                </span>
+              </div>
+            )}
+            <div className="absolute left-3 top-3 flex items-center gap-2 md:left-4 md:top-4">
+              <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] uppercase tracking-widest text-[#ffffff] backdrop-blur md:px-3 md:text-xs">
+                {project.year ?? project.category}
+              </span>
+            </div>
+            {project.featured && (
+              <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-black md:right-4 md:top-4 md:text-[11px]">
+                {t(work.professionalLabel)}
+              </span>
+            )}
+          </div>
+
+          <div className="p-5 md:p-6">
+            <div className="mb-3 flex items-start justify-between">
+              <h3 className="text-display text-3xl uppercase text-white">
+                {title}
+              </h3>
+              <span className="mt-1 text-xs uppercase tracking-widest text-gray-500">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+            </div>
+            <p className="text-sm leading-relaxed text-gray-400">
+              {description}
+            </p>
+
+            {project.tech_stack.length > 0 && (
+              <div className="mt-3 flex flex-wrap gap-2 md:mt-4">
+                {project.tech_stack.map((tech) => (
+                  <span
+                    key={tech}
+                    className="rounded-md border border-white/10 px-2 py-0.5 text-[10px] text-gray-300 md:px-2.5 md:py-1 md:text-xs"
+                  >
+                    {tech}
+                  </span>
+                ))}
+              </div>
+            )}
+
+            <div className="mt-4 flex items-center justify-between md:mt-5">
+              {project.link ? (
+                <a
+                  href={project.link}
+                  target="_blank"
+                  rel="noreferrer"
+                  onClick={(e) => e.stopPropagation()}
+                  className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent hover:underline md:text-sm"
+                >
+                  {t(work.viewCaseStudy)}
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                    <path d="M7 17L17 7M9 7h8v8" />
+                  </svg>
+                </a>
+              ) : (
+                <span />
+              )}
+              <span className="hidden text-xs text-gray-500 sm:block">
+                {t(work.clickToExpand)}
+              </span>
+            </div>
+          </div>
+        </article>
+      </Tilt3D>
+    );
+  };
 
   return (
     <section id="work" className="px-6 py-16 md:px-10 md:py-32">
@@ -78,103 +179,77 @@ export default function Projects({ items }: { items: Project[] }) {
             </p>
           </Reveal>
         ) : (
-          <div className="grid gap-6 md:grid-cols-2">
-            {filtered.map((project, i) => {
-              const title = lang === "en" ? project.title_en : project.title_id;
-              const description =
-                lang === "en"
-                  ? project.description_en ?? ""
-                  : project.description_id ?? project.description_en ?? "";
-
-              return (
-                <Reveal key={project.id} delay={(i % 2) * 80} className="h-full">
-                  <Tilt3D className="h-full">
-                    <article
-                      onClick={() => setSelected(project)}
-                      className="group h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-all duration-500 hover:border-accent/50"
-                    >
-                    <div className="relative aspect-[16/10] overflow-hidden bg-black/40">
-                      {project.image_url ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={project.image_url}
-                          alt={title}
-                          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                          loading="lazy"
-                        />
-                      ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                          <span className="text-display text-5xl uppercase text-outline">
-                            {title}
-                          </span>
-                        </div>
-                      )}
-                      <div className="absolute left-4 top-4 flex items-center gap-2">
-                        <span className="rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-widest text-[#ffffff] backdrop-blur">
-                          {project.year ?? project.category}
-                        </span>
-                      </div>
-                      {project.featured && (
-                        <span className="absolute right-4 top-4 rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-black">
-                          {t(work.professionalLabel)}
-                        </span>
-                      )}
-                    </div>
-
-                    <div className="p-6">
-                      <div className="mb-3 flex items-start justify-between">
-                        <h3 className="text-display text-3xl uppercase text-white">
-                          {title}
-                        </h3>
-                        <span className="mt-1 text-xs uppercase tracking-widest text-gray-500">
-                          {String(i + 1).padStart(2, "0")}
-                        </span>
-                      </div>
-                      <p className="text-sm leading-relaxed text-gray-400">
-                        {description}
-                      </p>
-
-                      {project.tech_stack.length > 0 && (
-                        <div className="mt-4 flex flex-wrap gap-2">
-                          {project.tech_stack.map((tech) => (
-                            <span
-                              key={tech}
-                              className="rounded-md border border-white/10 px-2.5 py-1 text-xs text-gray-300"
-                            >
-                              {tech}
-                            </span>
-                          ))}
-                        </div>
-                      )}
-
-                      <div className="mt-5 flex items-center justify-between">
-                        {project.link ? (
-                          <a
-                            href={project.link}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-accent hover:underline"
+          <>
+            {/* Mobile: one big card at a time, with a dot slider below and a
+                "n / total" counter on the left. */}
+            <div className="md:hidden">
+              {(() => {
+                const idx = Math.min(slide, filtered.length - 1);
+                const current = filtered[idx];
+                const total = filtered.length;
+                const go = (next: number) => setSlide((next + total) % total);
+                return (
+                  <div>
+                    <div className="relative">
+                      <Reveal className="h-full">{projectCard(current, idx)}</Reveal>
+                      {total > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            aria-label="Sebelumnya"
+                            onClick={() => go(idx - 1)}
+                            className="absolute -left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
                           >
-                            {t(work.viewCaseStudy)}
-                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                              <path d="M7 17L17 7M9 7h8v8" />
-                            </svg>
-                          </a>
-                        ) : (
-                          <span />
-                        )}
-                        <span className="text-xs text-gray-500">
-                          {t(work.clickToExpand)}
-                        </span>
+                            ‹
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Berikutnya"
+                            onClick={() => go(idx + 1)}
+                            className="absolute -right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+                          >
+                            ›
+                          </button>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-widest text-gray-500">
+                        {String(idx + 1).padStart(2, "0")} /{" "}
+                        {String(total).padStart(2, "0")}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {total > 1 &&
+                          filtered.map((_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-label={`Slide ${i + 1}`}
+                              onClick={() => setSlide(i)}
+                              className={`h-2 w-2 rounded-full transition-all ${
+                                i === idx
+                                  ? "w-6 bg-accent"
+                                  : "bg-white/25 hover:bg-white/50"
+                              }`}
+                            />
+                          ))}
                       </div>
                     </div>
-                  </article>
-                  </Tilt3D>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Desktop: normal grid */}
+            <div className="hidden gap-6 md:grid md:grid-cols-2">
+              {filtered.map((project, i) => (
+                <Reveal key={project.id} delay={(i % 2) * 80} className="h-full">
+                  {projectCard(project, i)}
                 </Reveal>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

@@ -11,6 +11,8 @@ import type { GalleryPhoto } from "@/types";
 export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   const { t, lang } = useLanguage();
   const [lightbox, setLightbox] = useState<number | null>(null);
+  // Mobile carousel: which photo is shown as the big card.
+  const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -28,6 +30,37 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
       document.body.style.overflow = "";
     };
   }, [lightbox, items.length]);
+
+  // Single photo renderer shared by the mobile slide scroller and the
+  // desktop masonry so both stay in sync.
+  const photoCard = (photo: GalleryPhoto, i: number) => {
+    const title =
+      lang === "en"
+        ? photo.title_en ?? ""
+        : photo.title_id ?? photo.title_en ?? "";
+    return (
+      <button
+        onClick={() => setLightbox(i)}
+        className="group relative block w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
+        aria-label={title || `Photo ${i + 1}`}
+      >
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img
+          src={photo.image_url}
+          alt={title || `Photo ${i + 1}`}
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+          loading="lazy"
+        />
+        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          {title && (
+            <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
+              {title}
+            </p>
+          )}
+        </div>
+      </button>
+    );
+  };
 
   return (
     <section className="px-6 py-16 md:px-10 md:py-32">
@@ -48,37 +81,78 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
             </p>
           </Reveal>
         ) : (
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {items.map((photo, i) => {
-              const title =
-                lang === "en"
-                  ? photo.title_en ?? ""
-                  : photo.title_id ?? photo.title_en ?? "";
-              return (
-                <Reveal key={photo.id} delay={(i % 3) * 60} className="mb-4 break-inside-avoid">
-                  <button
-                    onClick={() => setLightbox(i)}
-                    className="group relative block w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
-                  >
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img
-                      src={photo.image_url}
-                      alt={title || `Photo ${i + 1}`}
-                      className="w-full object-cover transition-transform duration-700 group-hover:scale-105"
-                      loading="lazy"
-                    />
-                    <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-                      {title && (
-                        <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
-                          {title}
-                        </p>
+          <>
+            {/* Mobile: one big photo at a time, with a dot slider below and a
+                "n / total" counter on the left. */}
+            <div className="md:hidden">
+              {(() => {
+                const idx = Math.min(slide, items.length - 1);
+                const total = items.length;
+                const go = (next: number) => setSlide((next + total) % total);
+                return (
+                  <div>
+                    <div className="relative">
+                      <Reveal className="aspect-[4/3] w-full">
+                        {photoCard(items[idx], idx)}
+                      </Reveal>
+                      {total > 1 && (
+                        <>
+                          <button
+                            type="button"
+                            aria-label="Sebelumnya"
+                            onClick={() => go(idx - 1)}
+                            className="absolute -left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+                          >
+                            ‹
+                          </button>
+                          <button
+                            type="button"
+                            aria-label="Berikutnya"
+                            onClick={() => go(idx + 1)}
+                            className="absolute -right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+                          >
+                            ›
+                          </button>
+                        </>
                       )}
                     </div>
-                  </button>
+
+                    <div className="mt-4 flex items-center justify-between">
+                      <span className="text-xs uppercase tracking-widest text-gray-500">
+                        {String(idx + 1).padStart(2, "0")} /{" "}
+                        {String(total).padStart(2, "0")}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        {total > 1 &&
+                          items.map((_, i) => (
+                            <button
+                              key={i}
+                              type="button"
+                              aria-label={`Slide ${i + 1}`}
+                              onClick={() => setSlide(i)}
+                              className={`h-2 w-2 rounded-full transition-all ${
+                                i === idx
+                                  ? "w-6 bg-accent"
+                                  : "bg-white/25 hover:bg-white/50"
+                              }`}
+                            />
+                          ))}
+                      </div>
+                    </div>
+                  </div>
+                );
+              })()}
+            </div>
+
+            {/* Desktop: masonry columns */}
+            <div className="hidden columns-1 gap-4 md:block sm:columns-2 lg:columns-3">
+              {items.map((photo, i) => (
+                <Reveal key={photo.id} delay={(i % 3) * 60} className="mb-4 break-inside-avoid">
+                  {photoCard(photo, i)}
                 </Reveal>
-              );
-            })}
-          </div>
+              ))}
+            </div>
+          </>
         )}
       </div>
 

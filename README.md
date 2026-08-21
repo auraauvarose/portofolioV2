@@ -28,10 +28,10 @@ Bilingual **EN / ID** with a language toggle.
   - Upload **gallery photos** (title EN+ID, category)
   - Uploads accept **images and PDFs**; files go straight to Cloudflare R2;
     **max file size 50 MB**
-- On a visitor's **first visit**, a dedicated `/loading` page shows a curtain
-  that slides up (open), plays a short greeting animation, then slides down
-  (close) to reveal the home page. Recorded in `localStorage`, so it only plays
-  once — later visits load the home page directly (no blocking overlay)
+- On **every visit/reload**, a loading curtain covers the page, plays a short
+  greeting animation, then slides away to reveal the home content. It runs inline
+  in `HomeClient.tsx` on a dark backdrop (white loading text in both themes); there
+  is no separate `/loading` route.
 
 ---
 

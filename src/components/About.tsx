@@ -2,11 +2,12 @@
 
 import Reveal from "@/components/Reveal";
 import LetterReveal from "@/components/LetterReveal";
+import ScrollWordReveal from "@/components/ScrollWordReveal";
 import { useLanguage } from "@/components/providers";
 import { about, profile } from "@/lib/config";
 
 export default function About() {
-  const { t } = useLanguage();
+  const { t, lang } = useLanguage();
 
   return (
     <section id="about" className="px-6 py-16 md:px-10 md:py-32">
@@ -21,12 +22,18 @@ export default function About() {
             <LetterReveal text={t(about.heading)} />
           </h2>
 
-          <div className="grid gap-10 lg:grid-cols-[1.2fr_1fr]">
-            <div className="space-y-6 text-lg leading-relaxed text-gray-300 md:text-xl">
+          <div className="max-w-4xl">
+            <div className="space-y-7 text-xl leading-relaxed text-ecru md:text-2xl">
               {about.paragraphs.map((p, i) => (
-                <Reveal key={i} delay={i * 120}>
-                  <p>{t(p)}</p>
-                </Reveal>
+                <ScrollWordReveal
+                  key={i}
+                  text={t(p)}
+                  className="text-ecru"
+                  baseOpacity={0.5}
+                  scanRange={0.5}
+                  highlight={p.highlight?.[lang] ?? []}
+                  highlightClassName="text-highlight"
+                />
               ))}
               <Reveal delay={240}>
                 <a
@@ -50,28 +57,6 @@ export default function About() {
                 </a>
               </Reveal>
             </div>
-
-            <Reveal delay={150}>
-              <div className="glass rounded-2xl p-8">
-                <p className="mb-6 text-xs uppercase tracking-widest text-gray-500">
-                  {t(profile.location)}
-                </p>
-                <div className="space-y-4">
-                  {["Fullstack", "Frontend", "Mobile", "Backend"].map(
-                    (skill) => (
-                      <div key={skill}>
-                        <div className="mb-2 flex justify-between text-sm">
-                          <span className="text-gray-200">{skill}</span>
-                        </div>
-                        <div className="h-1.5 overflow-hidden rounded-full bg-white/10">
-                          <div className="h-full w-[85%] rounded-full bg-accent" />
-                        </div>
-                      </div>
-                    ),
-                  )}
-                </div>
-              </div>
-            </Reveal>
           </div>
         </div>
     </section>

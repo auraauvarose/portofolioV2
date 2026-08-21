@@ -1,8 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useLanguage } from "@/components/providers";
-import { hero, profile } from "@/lib/config";
+import { profile } from "@/lib/config";
 
 /**
  * Hero — orange lens disc cursor reveal:
@@ -19,7 +18,6 @@ import { hero, profile } from "@/lib/config";
 const DISC = 280; // disc diameter; half used to center it on the cursor
 
 export default function Hero() {
-  const { t } = useLanguage();
   const eyebrow = `${profile.name}`.toUpperCase();
   const [scrolled, setScrolled] = useState(false);
   const [dim, setDim] = useState(0); // 0..1 how far the reveal has covered the hero
@@ -81,23 +79,11 @@ export default function Hero() {
             {eyebrow}
           </p>
 
-          <h1 className="text-center text-[clamp(3rem,15vw,4rem)] font-black uppercase leading-[1] text-[#f4f4f5]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+          <h1 className="text-display text-center text-[clamp(3rem,15vw,4rem)] uppercase leading-[1] text-[#f4f4f5]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
             FULLSTACK
             <br />
             DEVELOPER
           </h1>
-        </div>
-
-        <div className="relative z-[60] mt-4 md:mt-8">
-          <div className="group flex cursor-default items-center gap-5 rounded-full border border-[#ffffff]/20 bg-black/30 px-6 py-2 shadow-xl backdrop-blur-md transition-all hover:border-[#22c55e]/40 dark:border-[#ffffff]/20 dark:bg-black/30 dark:hover:border-[#22c55e]/40">
-            <span className="relative flex h-2 w-2">
-              <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-75" />
-              <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e]" />
-            </span>
-            <span className="text-xs uppercase tracking-widest text-[#c7c7cc] transition-colors group-hover:text-[#ffffff] md:text-[14px] dark:text-[#c7c7cc] dark:group-hover:text-[#ffffff]">
-              {t(hero.tagline)}
-            </span>
-          </div>
         </div>
       </div>
 
@@ -137,13 +123,11 @@ export default function Hero() {
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-black sm:text-base md:mb-8 md:text-xl">
               {eyebrow}
             </p>
-            <h1 className="text-center text-[clamp(3rem,15vw,4rem)] font-black uppercase leading-[1] text-black sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+            <h1 className="text-display text-center text-[clamp(3rem,15vw,4rem)] uppercase leading-[1] text-black sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
               SOFTWARE
               <br />
               ENGINEER
             </h1>
-            {/* Invisible spacer — mirrors the base pill so the title aligns */}
-            <div className="pointer-events-none relative mt-4 opacity-0 md:mt-8" />
           </div>
         </div>
       </div>
