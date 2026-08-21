@@ -18,7 +18,7 @@ export default function About() {
             <span className="h-px flex-1 bg-white/10" />
           </Reveal>
 
-          <h2 className="text-display mb-12 max-w-4xl text-3xl uppercase leading-tight text-white sm:text-4xl md:text-6xl">
+          <h2 className="text-bevellier mb-12 max-w-4xl text-3xl uppercase leading-tight text-white sm:text-4xl md:text-6xl">
             <LetterReveal text={t(about.heading)} />
           </h2>
 

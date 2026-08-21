@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { profile } from "@/lib/config";
+import { useLanguage } from "@/components/providers";
 
 /**
  * Hero — orange lens disc cursor reveal:
@@ -19,6 +20,7 @@ const DISC = 280; // disc diameter; half used to center it on the cursor
 
 export default function Hero() {
   const eyebrow = `${profile.name}`.toUpperCase();
+  const { theme } = useLanguage();
   const [scrolled, setScrolled] = useState(false);
   const [dim, setDim] = useState(0); // 0..1 how far the reveal has covered the hero
   const [active, setActive] = useState(false);
@@ -49,19 +51,29 @@ export default function Hero() {
       className="relative flex h-screen w-full items-center justify-center overflow-hidden px-4 text-ecru"
       style={{ "--mx": "-200px", "--my": "-200px" } as React.CSSProperties}
     >
-      {/* Background image — full-bleed cover layer, under the text */}
+      {/* Background image — full-bleed cover layer, under the text. Two layers
+          crossfade on theme switch: the dark artwork in dark mode, the light
+          artwork in light mode. */}
       <div
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 bg-cover bg-center"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700 ease-in-out dark:opacity-100"
         style={{ backgroundImage: "url(/background_heding.png)" }}
       />
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-100 transition-opacity duration-700 ease-in-out dark:opacity-0"
+        style={{ backgroundImage: "url(/background-light-mode.jpg)" }}
+      />
       {/* Dark overlay to keep the headline readable; dims further as the
-          sticky reveal page scrolls up over the hero. Fixed black so it
-          dims correctly in both light and dark themes. */}
+          sticky reveal page scrolls up over the hero. Dark mode: fixed black
+          so it dims correctly. Light mode: none (the light artwork is already
+          light, and the headline flips to dark ink). */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-300"
-        style={{ opacity: 0.35 + dim * 0.6 }}
+        style={{
+          opacity: theme === "dark" ? 0.35 + dim * 0.6 : 0,
+        }}
       />
 
       {/* Ambient glow */}
@@ -79,7 +91,7 @@ export default function Hero() {
             {eyebrow}
           </p>
 
-          <h1 className="text-display text-center text-[clamp(3rem,15vw,4rem)] uppercase leading-[1] text-[#f4f4f5]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+          <h1 className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
             FULLSTACK
             <br />
             DEVELOPER
@@ -123,7 +135,7 @@ export default function Hero() {
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-black sm:text-base md:mb-8 md:text-xl">
               {eyebrow}
             </p>
-            <h1 className="text-display text-center text-[clamp(3rem,15vw,4rem)] uppercase leading-[1] text-black sm:text-7xl md:text-[8rem] md:leading-[0.9] lg:text-[10rem]">
+            <h1 className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-black sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
               SOFTWARE
               <br />
               ENGINEER
@@ -139,7 +151,7 @@ export default function Hero() {
         }`}
       >
         <span className="h-10 w-px origin-bottom scale-y-100 bg-accent/60" />
-        <span className="text-[10px] uppercase tracking-[0.4em] text-[#b7ab98] [writing-mode:vertical-rl]">
+        <span className="text-[10px] uppercase tracking-[0.4em] text-[#6b6b6b] [writing-mode:vertical-rl] dark:text-[#b7ab98]">
           SCROLL
         </span>
         <svg

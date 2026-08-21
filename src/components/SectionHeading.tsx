@@ -21,7 +21,7 @@ export default function SectionHeading({
         <span>{t(kicker)}</span>
         <span className="h-px flex-1 bg-white/10" />
       </div>
-      <h2 className="text-display mt-4 bg-ink text-4xl uppercase text-white sm:text-5xl md:text-7xl">
+      <h2 className="text-bevellier mt-4 bg-ink text-4xl uppercase text-white sm:text-5xl md:text-7xl">
         {t(heading)}
       </h2>
     </Reveal>

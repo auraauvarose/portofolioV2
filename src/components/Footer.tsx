@@ -11,7 +11,7 @@ export default function Footer() {
     <footer className="relative overflow-hidden">
       {/* Giant watermark name (matches reference footer) */}
       <div className="pointer-events-none select-none overflow-hidden -mt-8 md:-mt-16 lg:-mt-20">
-        <h1 className="footer-mark translate-y-[25%] whitespace-nowrap text-[30vw] font-black uppercase leading-[0.75] tracking-[0.02em] text-black/[0.03] transition-colors duration-500 md:text-[17vw] lg:text-[19vw] dark:text-white/[0.02]">
+    <h1 className="footer-mark translate-y-[25%] whitespace-nowrap text-[30vw] font-black uppercase leading-[0.75] tracking-[0.02em] text-black/[0.03] transition-colors duration-500 md:text-[17vw] lg:text-[19vw] dark:text-white/[0.02]" style={{ fontFamily: "var(--font-display)" }}>
           {profile.name.split(" ")[0]}
         </h1>
       </div>

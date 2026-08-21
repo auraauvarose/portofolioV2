@@ -14,7 +14,7 @@ export default function Marquee({
         className="flex items-center gap-8 whitespace-nowrap"
       >
         <span
-          className="text-display text-5xl uppercase text-outline md:text-8xl"
+          className="text-comico text-5xl uppercase text-outline md:text-8xl"
           style={{ lineHeight: 1 }}
         >
           {label}

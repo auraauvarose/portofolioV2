@@ -96,7 +96,7 @@ export default function Contact() {
                   <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-[110%]">
                     {s.label}
                   </span>
-                  <span className="absolute left-0 top-0 inline-block translate-y-[110%] font-serif italic text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0">
+                  <span className="absolute left-0 top-0 inline-block translate-y-[110%] text-serif-accent text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0">
                     {s.label}
                   </span>
                 </a>

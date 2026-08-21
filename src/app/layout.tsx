@@ -4,16 +4,29 @@ import "./globals.css";
 import { LanguageProvider } from "@/components/providers";
 
 /* Self-hosted Fontshare fonts (see scripts/download-fonts.sh to refresh).
-   - General Sans: warm premium neo-grotesque body/UI font (replaces Inter)
-   - Cabinet Grotesk: heavy bold/black display font (replaces Anton) */
-const generalSans = localFont({
+   Modern-minimalist type system — each role has its own voice so the page
+   feels designed, not templated:
+
+   - Switzer       → body / UI  (warm humanist grotesque; replaces General Sans)
+   - Tanker        → HERO      (single-weight wide geometric signature)
+   - Cabinet Grotesk → display  (workhorse for marquees, card titles, nav)
+   - Comico        → marquee   (playful handwriting/comic display strip)
+   - Bevellier     → section H2s + WhatIDo mega rows (display signature)
+   - Zodiak Italic → editoral serif accent for hover-reveal labels */
+const switzer = localFont({
   src: [
-    { path: "../../public/fonts/GeneralSans-400.woff2", weight: "400", style: "normal" },
-    { path: "../../public/fonts/GeneralSans-500.woff2", weight: "500", style: "normal" },
-    { path: "../../public/fonts/GeneralSans-600.woff2", weight: "600", style: "normal" },
-    { path: "../../public/fonts/GeneralSans-700.woff2", weight: "700", style: "normal" },
+    { path: "../../public/fonts/Switzer-400.woff2", weight: "400", style: "normal" },
+    { path: "../../public/fonts/Switzer-500.woff2", weight: "500", style: "normal" },
+    { path: "../../public/fonts/Switzer-600.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/Switzer-700.woff2", weight: "700", style: "normal" },
   ],
-  variable: "--font-general",
+  variable: "--font-switzer",
+  display: "swap",
+});
+
+const tanker = localFont({
+  src: [{ path: "../../public/fonts/Tanker-Regular.woff2", weight: "400", style: "normal" }],
+  variable: "--font-tanker",
   display: "swap",
 });
 
@@ -29,6 +42,31 @@ const cabinetGrotesk = localFont({
   display: "swap",
 });
 
+const comico = localFont({
+  src: [
+    { path: "../../public/fonts/Comico-Regular.woff2", weight: "400", style: "normal" },
+  ],
+  variable: "--font-comico",
+  display: "swap",
+});
+
+const bevellier = localFont({
+  src: [
+    { path: "../../public/fonts/Bevellier-600.woff2", weight: "600", style: "normal" },
+    { path: "../../public/fonts/Bevellier-700.woff2", weight: "700", style: "normal" },
+  ],
+  variable: "--font-bevellier",
+  display: "swap",
+});
+
+const zodiak = localFont({
+  src: [
+    { path: "../../public/fonts/Zodiak-700i.woff2", weight: "700", style: "italic" },
+  ],
+  variable: "--font-zodiak",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Aura Auvarose — Full Stack Developer",
   description:
@@ -41,10 +79,12 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark" style={{ colorScheme: "dark" }}>
-      <body
-        className={`${generalSans.variable} ${cabinetGrotesk.variable} antialiased`}
-      >
+    <html
+      lang="en"
+      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${zodiak.variable} dark`}
+      style={{ colorScheme: "dark" }}
+    >
+      <body className="antialiased">
         {/* Theme boot — apply persisted theme before hydration to avoid FOUC */}
         <script
           dangerouslySetInnerHTML={{

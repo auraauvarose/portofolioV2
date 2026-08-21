@@ -4,8 +4,10 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
-  --font-sans: var(--font-general), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cabinet), "Arial Narrow", Impact, sans-serif;
+  --font-hero: var(--font-tanker), var(--font-cabinet), sans-serif;
+  --font-serif: var(--font-zodiak), Georgia, serif;
 
   /* Warm-neutral palette matching the reference site (Apriyanto Dwi Herlambang) */
   --color-accent: #eb5939; /* terracotta / warm orange accent */
@@ -71,7 +73,8 @@ html {
 }
 
 /* Brief global color-transition window toggled during a theme switch, so the
-   whole site crossfades smoothly between dark and light. */
+   whole site crossfades smoothly between dark and light. `opacity` is included
+   so the hero's background artwork crossfades during the switch too. */
 .theme-anim,
 .theme-anim *,
 .theme-anim *::before,
@@ -82,7 +85,8 @@ html {
     color 0.4s ease,
     fill 0.4s ease,
     stroke 0.4s ease,
-    box-shadow 0.4s ease !important;
+    box-shadow 0.4s ease,
+    opacity 0.5s ease !important;
 }
 
 /* Custom cursor: hide the native pointer only where the cursor is mounted
@@ -263,6 +267,35 @@ body {
     font-weight: 700;
     letter-spacing: -0.02em;
     line-height: 0.92;
+  }
+  /* Hero signature — Tanker, wide confident geometric (single weight 400).
+     Slight positive letter-spacing so the big all-caps lines breathe. */
+  .text-hero {
+    font-family: var(--font-hero);
+    font-weight: 400;
+    letter-spacing: 0.03em;
+    line-height: 0.9;
+  }
+  /* Comico — playful handwriting/comic display for the moving marquees. */
+  .text-comico {
+    font-family: var(--font-comico), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 400;
+    letter-spacing: 0.01em;
+    line-height: 1;
+  }
+  /* Bevellier — display signature for section H2s + WhatIDo mega rows
+     (Fontshare "SemiBold" = weight 600). */
+  .text-bevellier {
+    font-family: var(--font-bevellier);
+    font-weight: 600;
+    letter-spacing: -0.02em;
+    line-height: 0.92;
+  }
+  /* Zodiak italic — editorial serif accent for hover-reveal labels. */
+  .text-serif-accent {
+    font-family: var(--font-serif);
+    font-style: italic;
+    font-weight: 700;
   }
   .text-outline {
     -webkit-text-stroke: 1px rgba(255, 255, 255, 0.25);
