@@ -11,7 +11,7 @@ export default function HowIWork() {
   return (
     <section className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={howIWork.kicker} heading={{ en: "Process", id: "Proses" }} index="07" />
+        <SectionHeading kicker={howIWork.kicker} heading={{ en: "Process", id: "Proses" }} index="06" />
 
         <div className="grid gap-px overflow-hidden rounded-2xl border border-white/10 bg-white/10 md:grid-cols-3">
           {howIWork.steps.map((step, i) => (

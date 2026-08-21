@@ -571,6 +571,40 @@ summary {
   animation: menu-fade-in 0.6s ease-out forwards;
 }
 
+/* Mobile carousel slide-in: content enters from the travel direction */
+@keyframes slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.slide-in-right {
+  animation: slide-in-right 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.slide-in-left {
+  animation: slide-in-left 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@media (prefers-reduced-motion: reduce) {
+  .slide-in-right,
+  .slide-in-left {
+    animation: none;
+  }
+}
+
 /* Tap feedback so hover-only effects still respond on touch screens */
 @media (hover: none) {
   .touch-active:active {
@@ -579,5 +613,78 @@ summary {
   a.menu-link:active,
   button.menu-link:active {
     color: #eb5939;
+  }
+}
+
+/* Spider Walker — laba-laba yang patroli mengelilingi perimeter viewport.
+   Posisi digerakkan dari JS (rAF); animasi kaki di sini, terpisah, dan
+   hanya berjalan saat container punya class `spider-walking`. */
+.spider-walker {
+  /* Warna silhouette monokrom — mengikuti tema: putih di dark, hitam di light */
+  color: var(--color-fg);
+}
+.spider-leg {
+  animation: spider-leg-swing 0.4s ease-in-out infinite alternate;
+  animation-play-state: paused;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+.spider-walking .spider-leg {
+  animation-play-state: running;
+}
+.spider-thread {
+  position: absolute;
+  left: 50%;
+  top: 0;
+  width: 1px;
+  height: 0;
+  opacity: 0;
+  transform: translateX(-50%);
+  background: linear-gradient(
+    to bottom,
+    rgba(255, 255, 255, 0.55),
+    rgba(255, 255, 255, 0.12)
+  );
+  will-change: height, opacity;
+}
+/* Benang ikut tema: gelap di light mode biar tetap kelihatan */
+:root:not(.dark) .spider-thread {
+  background: linear-gradient(
+    to bottom,
+    rgba(10, 10, 14, 0.5),
+    rgba(10, 10, 14, 0.12)
+  );
+}
+.spider-walker svg {
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+/* Goyangan pendulum saat bergelantungan di benang — rotate CSS terpisah
+   dari transform JS (translate3d), pivot di jangkar langit-langit yang
+   di-set via transform-origin dari JS. Amplitude/durasi acak per kejadian. */
+.spider-swaying {
+  animation: spider-sway var(--sway-dur, 1.6s) ease-in-out infinite alternate;
+}
+@keyframes spider-sway {
+  from {
+    rotate: var(--sway-from, -6deg);
+  }
+  to {
+    rotate: var(--sway-to, 6deg);
+  }
+}
+@keyframes spider-leg-swing {
+  from {
+    transform: rotate(-14deg);
+  }
+  to {
+    transform: rotate(14deg);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spider-walker .spider-leg {
+    animation: none !important;
+  }
+  .spider-swaying {
+    animation: none !important;
   }
 }

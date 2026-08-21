@@ -5,7 +5,6 @@ import Nav from "@/components/Nav";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import WhatIDo from "@/components/WhatIDo";
-import Experience from "@/components/Experience";
 import Education from "@/components/Education";
 import Certifications from "@/components/Certifications";
 import TechStack from "@/components/TechStack";
@@ -17,6 +16,7 @@ import Footer from "@/components/Footer";
 import Marquee from "@/components/Marquee";
 import Sidebars from "@/components/Sidebars";
 import CustomCursor from "@/components/CustomCursor";
+import SpiderWalker from "@/components/SpiderWalker";
 import type { Project, Certification, GalleryPhoto } from "@/types";
 
 // Loading curtain inline timing (replaced the old dedicated /loading page).
@@ -141,6 +141,8 @@ export default function HomeClient({
       <Sidebars />
       {/* Custom cursor (dot + ring) */}
       <CustomCursor />
+      {/* Spider laba-laba yang patroli di tepi viewport */}
+      <SpiderWalker />
       {/* Film-grain / TV-static overlay ("ants") */}
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
 
@@ -162,7 +164,6 @@ export default function HomeClient({
         <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)]">
           <About />
           <WhatIDo />
-          <Experience />
           <Education />
         </div>
 

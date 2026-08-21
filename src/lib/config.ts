@@ -135,14 +135,24 @@ export const whatIDo = {
   ],
 } as const;
 
-export const experience = {
-  kicker: { en: "Experience", id: "Pengalaman" },
+export const education = {
+  kicker: { en: "Education", id: "Pendidikan" },
   items: [
     {
       period: "2021 - 2025",
-      location: { en: "Indonesia", id: "Indonesia" },
-      role: { en: "Visual Communication Design", id: "Desain Komunikasi Visual" },
-      company: "Learning Experience",
+      school: "Learning Experience",
+      degree: {
+        en: "Visual Communication Design",
+        id: "Desain Komunikasi Visual",
+      },
+      detail: {
+        en: "Design Fundamentals",
+        id: "Dasar Desain",
+      },
+      location: {
+        en: "Indonesia",
+        id: "Indonesia",
+      },
       description: {
         en: "Built a strong foundation in design fundamentals, then moved into web development. Started learning programming with JavaScript and Python in 2022.",
         id: "Membangun dasar yang kuat di bidang desain, lalu beralih ke pengembangan web. Mulai belajar pemrograman menggunakan JavaScript dan Python pada 2022.",
@@ -150,38 +160,22 @@ export const experience = {
     },
     {
       period: "2025 - Present",
-      location: { en: "Indonesia", id: "Indonesia" },
-      role: { en: "S1 Informatics Student", id: "Mahasiswa S1 Informatika" },
-      company: "Informatics Degree",
-      description: {
-        en: "Enrolled in a Bachelor of Informatics degree. Actively exploring Arch Linux, mastering strong programming logic, and building real projects to reach a professional level.",
-        id: "Menempuh pendidikan S1 Informatika. Aktif mendalami Arch Linux, menguasai logika pemrograman yang kuat, dan membangun proyek nyata untuk mencapai level profesional.",
-      },
-    },
-  ],
-} as const;
-
-export const education = {
-  kicker: { en: "Education", id: "Pendidikan" },
-  items: [
-    {
-      period: "2023 - Present",
-      school: "IT Academy",
+      school: "Informatics Degree",
       degree: {
-        en: "Software Engineering Student",
-        id: "Siswa Rekayasa Perangkat Lunak",
+        en: "S1 Informatics Student",
+        id: "Mahasiswa S1 Informatika",
       },
       detail: {
-        en: "Informatics & Software Engineering",
-        id: "Informatika & Rekayasa Perangkat Lunak",
+        en: "Informatics",
+        id: "Informatika",
       },
       location: {
         en: "Indonesia",
         id: "Indonesia",
       },
       description: {
-        en: "Deeply focusing on core programming concepts, data structures, full-stack web development, database management systems, and Linux systems administration.",
-        id: "Berfokus mendalam pada konsep pemrograman inti, struktur data, pengembangan web full-stack, manajemen basis data, dan administrasi sistem Linux.",
+        en: "Enrolled in a Bachelor of Informatics degree. Actively exploring Arch Linux, mastering strong programming logic, and building real projects to reach a professional level.",
+        id: "Menempuh pendidikan S1 Informatika. Aktif mendalami Arch Linux, menguasai logika pemrograman yang kuat, dan membangun proyek nyata untuk mencapai level profesional.",
       },
     },
   ],

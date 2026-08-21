@@ -417,7 +417,7 @@ export default function TechStack() {
     <section className="px-6 py-24 md:px-10 md:py-32">
       <style>{`@keyframes mm-rotate { to { transform: rotate(360deg); } }`}</style>
       <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={techStack.kicker} heading={techStack.heading} index="06" />
+        <SectionHeading kicker={techStack.kicker} heading={techStack.heading} index="05" />
 
         <div
           ref={containerRef}

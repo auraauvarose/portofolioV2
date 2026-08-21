@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
+import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
@@ -65,7 +66,7 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   return (
     <section className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} index="09" />
+        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} index="08" />
 
         <Reveal className="mb-10 max-w-2xl text-gray-400">
           {t(gallery.description)}
@@ -82,64 +83,21 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
           </Reveal>
         ) : (
           <>
-            {/* Mobile: one big photo at a time, with a dot slider below and a
-                "n / total" counter on the left. */}
+            {/* Mobile: one big photo at a time. Controls (counter + arrows)
+                sit ABOVE the photo; photo slides in from the travel direction. */}
             <div className="md:hidden">
               {(() => {
                 const idx = Math.min(slide, items.length - 1);
                 const total = items.length;
-                const go = (next: number) => setSlide((next + total) % total);
                 return (
-                  <div>
-                    <div className="relative">
-                      <Reveal className="aspect-[4/3] w-full">
-                        {photoCard(items[idx], idx)}
-                      </Reveal>
-                      {total > 1 && (
-                        <>
-                          <button
-                            type="button"
-                            aria-label="Sebelumnya"
-                            onClick={() => go(idx - 1)}
-                            className="absolute -left-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
-                          >
-                            ‹
-                          </button>
-                          <button
-                            type="button"
-                            aria-label="Berikutnya"
-                            onClick={() => go(idx + 1)}
-                            className="absolute -right-3 top-1/2 flex h-10 w-10 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
-                          >
-                            ›
-                          </button>
-                        </>
-                      )}
-                    </div>
-
-                    <div className="mt-4 flex items-center justify-between">
-                      <span className="text-xs uppercase tracking-widest text-gray-500">
-                        {String(idx + 1).padStart(2, "0")} /{" "}
-                        {String(total).padStart(2, "0")}
-                      </span>
-                      <div className="flex items-center gap-2">
-                        {total > 1 &&
-                          items.map((_, i) => (
-                            <button
-                              key={i}
-                              type="button"
-                              aria-label={`Slide ${i + 1}`}
-                              onClick={() => setSlide(i)}
-                              className={`h-2 w-2 rounded-full transition-all ${
-                                i === idx
-                                  ? "w-6 bg-accent"
-                                  : "bg-white/25 hover:bg-white/50"
-                              }`}
-                            />
-                          ))}
-                      </div>
-                    </div>
-                  </div>
+                  <MobileCarousel
+                    total={total}
+                    idx={idx}
+                    onSlide={setSlide}
+                    revealClassName="aspect-[4/3] w-full"
+                  >
+                    {photoCard(items[idx], idx)}
+                  </MobileCarousel>
                 );
               })()}
             </div>
