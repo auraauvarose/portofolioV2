@@ -14,6 +14,8 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   const [lightbox, setLightbox] = useState<number | null>(null);
   // Mobile carousel: which photo is shown as the big card.
   const [slide, setSlide] = useState(0);
+  // Desktop paged carousel: which page of 3 photos is shown.
+  const [deskPage, setDeskPage] = useState(0);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -42,7 +44,7 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
     return (
       <button
         onClick={() => setLightbox(i)}
-        className="group relative block w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
+        className="group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
         aria-label={title || `Photo ${i + 1}`}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -102,13 +104,29 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
               })()}
             </div>
 
-            {/* Desktop: masonry columns */}
-            <div className="hidden columns-1 gap-4 md:block sm:columns-2 lg:columns-3">
-              {items.map((photo, i) => (
-                <Reveal key={photo.id} delay={(i % 3) * 60} className="mb-4 break-inside-avoid">
-                  {photoCard(photo, i)}
-                </Reveal>
-              ))}
+            {/* Desktop: paged carousel — 3 photos per page, rest slides */}
+            <div className="hidden md:block">
+              {(() => {
+                const pages = chunk(items, 3);
+                const idx = Math.min(deskPage, pages.length - 1);
+                const start = idx * 3;
+                return (
+                  <MobileCarousel
+                    total={pages.length}
+                    idx={idx}
+                    onSlide={setDeskPage}
+                    revealClassName="h-auto"
+                  >
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                      {pages[idx].map((photo, i) => (
+                        <Reveal key={photo.id} delay={i * 60} className="break-inside-avoid">
+                          {photoCard(photo, start + i)}
+                        </Reveal>
+                      ))}
+                    </div>
+                  </MobileCarousel>
+                );
+              })()}
             </div>
           </>
         )}
@@ -164,4 +182,11 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         )}
     </section>
   );
+}
+
+// Split a list into fixed-size pages (desktop carousel shows 3 per page).
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
 }

@@ -658,20 +658,6 @@ summary {
 .spider-walker svg {
   filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
-/* Goyangan pendulum saat bergelantungan di benang — rotate CSS terpisah
-   dari transform JS (translate3d), pivot di jangkar langit-langit yang
-   di-set via transform-origin dari JS. Amplitude/durasi acak per kejadian. */
-.spider-swaying {
-  animation: spider-sway var(--sway-dur, 1.6s) ease-in-out infinite alternate;
-}
-@keyframes spider-sway {
-  from {
-    rotate: var(--sway-from, -6deg);
-  }
-  to {
-    rotate: var(--sway-to, 6deg);
-  }
-}
 @keyframes spider-leg-swing {
   from {
     transform: rotate(-14deg);
@@ -680,11 +666,17 @@ summary {
     transform: rotate(14deg);
   }
 }
+/* Scroll hint arrow — gentle bob down while at the top of the page. */
+@keyframes scroll-hint-bob {
+  from {
+    transform: translateY(-3px);
+  }
+  to {
+    transform: translateY(3px);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .spider-walker .spider-leg {
-    animation: none !important;
-  }
-  .spider-swaying {
     animation: none !important;
   }
 }

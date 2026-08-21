@@ -22,9 +22,14 @@ export default function Certifications({
   const [selected, setSelected] = useState<Certification | null>(null);
   // Mobile carousel: which filtered item is shown as the big card.
   const [slide, setSlide] = useState(0);
+  // Desktop paged carousel: which page of 3 cards is shown.
+  const [deskPage, setDeskPage] = useState(0);
 
-  // Reset the mobile carousel to the first card whenever the filter changes.
-  useEffect(() => setSlide(0), [active]);
+  // Reset both carousels to the first card whenever the filter changes.
+  useEffect(() => {
+    setSlide(0);
+    setDeskPage(0);
+  }, [active]);
 
   // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
@@ -171,13 +176,28 @@ export default function Certifications({
               })()}
             </div>
 
-            {/* Desktop: normal grid */}
-            <div className="hidden gap-6 md:grid md:grid-cols-2 lg:grid-cols-3">
-              {filtered.map((cert, i) => (
-                <Reveal key={cert.id} delay={i * 80} className="h-full">
-                  {certCard(cert)}
-                </Reveal>
-              ))}
+            {/* Desktop: paged carousel — 3 cards per page, rest slides */}
+            <div className="hidden md:block">
+              {(() => {
+                const pages = chunk(filtered, 3);
+                const idx = Math.min(deskPage, pages.length - 1);
+                return (
+                  <MobileCarousel
+                    total={pages.length}
+                    idx={idx}
+                    onSlide={setDeskPage}
+                    revealClassName="h-auto"
+                  >
+                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                      {pages[idx].map((cert, i) => (
+                        <Reveal key={cert.id} delay={i * 80} className="h-full">
+                          {certCard(cert)}
+                        </Reveal>
+                      ))}
+                    </div>
+                  </MobileCarousel>
+                );
+              })()}
             </div>
           </>
         )}
@@ -269,4 +289,11 @@ function lang_title(
   t: (v: { en: string; id: string }) => string,
 ) {
   return t({ en: cert.title_en, id: cert.title_id });
+}
+
+// Split a list into fixed-size pages (desktop carousel shows 3 per page).
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
 }

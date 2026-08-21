@@ -16,9 +16,14 @@ export default function Projects({ items }: { items: Project[] }) {
   const [selected, setSelected] = useState<Project | null>(null);
   // Mobile carousel: which filtered item is shown as the big card.
   const [slide, setSlide] = useState(0);
+  // Desktop paged carousel: which page of 2 cards is shown.
+  const [deskPage, setDeskPage] = useState(0);
 
-  // Reset the mobile carousel to the first card whenever the filter changes.
-  useEffect(() => setSlide(0), [active]);
+  // Reset both carousels to the first card whenever the filter changes.
+  useEffect(() => {
+    setSlide(0);
+    setDeskPage(0);
+  }, [active]);
 
   // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
@@ -200,13 +205,28 @@ export default function Projects({ items }: { items: Project[] }) {
               })()}
             </div>
 
-            {/* Desktop: normal grid */}
-            <div className="hidden gap-6 md:grid md:grid-cols-2">
-              {filtered.map((project, i) => (
-                <Reveal key={project.id} delay={(i % 2) * 80} className="h-full">
-                  {projectCard(project, i)}
-                </Reveal>
-              ))}
+            {/* Desktop: paged carousel — 2 cards per page, rest slides */}
+            <div className="hidden md:block">
+              {(() => {
+                const pages = chunk(filtered, 2);
+                const idx = Math.min(deskPage, pages.length - 1);
+                return (
+                  <MobileCarousel
+                    total={pages.length}
+                    idx={idx}
+                    onSlide={setDeskPage}
+                    revealClassName="h-auto"
+                  >
+                    <div className="grid gap-6 md:grid-cols-2">
+                      {pages[idx].map((project, i) => (
+                        <Reveal key={project.id} delay={i * 80} className="h-full">
+                          {projectCard(project, i)}
+                        </Reveal>
+                      ))}
+                    </div>
+                  </MobileCarousel>
+                );
+              })()}
             </div>
           </>
         )}
@@ -307,4 +327,11 @@ export default function Projects({ items }: { items: Project[] }) {
         )}
     </section>
   );
+}
+
+// Split a list into fixed-size pages (desktop carousel shows 2 per page).
+function chunk<T>(arr: T[], size: number): T[][] {
+  const out: T[][] = [];
+  for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+  return out;
 }

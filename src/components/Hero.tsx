@@ -21,7 +21,6 @@ const DISC = 280; // disc diameter; half used to center it on the cursor
 export default function Hero() {
   const eyebrow = `${profile.name}`.toUpperCase();
   const { theme } = useLanguage();
-  const [scrolled, setScrolled] = useState(false);
   const [dim, setDim] = useState(0); // 0..1 how far the reveal has covered the hero
   const [active, setActive] = useState(false);
 
@@ -31,11 +30,9 @@ export default function Hero() {
     e.currentTarget.style.setProperty("--my", `${e.clientY}px`);
   };
 
-  // Hide the scroll hint once the user scrolls past the hero, and dim the
-  // background image as the reveal page scrolls up over the hero.
+  // Dim the background image as the reveal page scrolls up over the hero.
   useEffect(() => {
     const onScroll = () => {
-      setScrolled(window.scrollY > 40);
       // Dim runs over ~1 viewport of scroll (matches the pin height).
       setDim(Math.min(1, window.scrollY / window.innerHeight));
     };
@@ -144,28 +141,8 @@ export default function Hero() {
         </div>
       </div>
 
-      {/* Vertical SCROLL hint — centered at the right-far edge, fades out on scroll */}
-      <div
-        className={`pointer-events-none absolute right-8 bottom-8 hidden items-center gap-4 transition-all duration-500 ease-out lg:flex ${
-          scrolled ? "translate-x-6 opacity-0" : "translate-x-0 opacity-100"
-        }`}
-      >
-        <span className="h-10 w-px origin-bottom scale-y-100 bg-accent/60" />
-        <span className="text-[10px] uppercase tracking-[0.4em] text-[#6b6b6b] [writing-mode:vertical-rl] dark:text-[#b7ab98]">
-          SCROLL
-        </span>
-        <svg
-          width="12"
-          height="12"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          strokeWidth="2"
-          className="text-accent"
-        >
-          <path d="M12 5v14M5 12l7 7 7-7" />
-        </svg>
-      </div>
+      {/* Scroll hint moved to HomeClient — fixed bottom-right, so it can
+          rotate to point up when the user reaches the bottom. */}
     </section>
   );
 }

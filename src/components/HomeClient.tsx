@@ -43,6 +43,33 @@ export default function HomeClient({
   const [revealed, setRevealed] = useState(false);
   const exitedRef = useRef(false);
 
+  // Scroll hint state: visible at the very top (arrow down) and at the very
+  // bottom (arrow rotated up); hidden while scrolling through the middle.
+  const [atTop, setAtTop] = useState(true);
+  const [atBottom, setAtBottom] = useState(false);
+
+  useEffect(() => {
+    const onScroll = () => {
+      setAtTop(window.scrollY <= 40);
+      // "At bottom" only counts once the user has actually scrolled down.
+      // At first paint the document is still short (loading curtain, images
+      // not loaded) — without the scrollY guard it would report bottom at
+      // scrollY=0 and flip the arrow up on load.
+      const doc = document.documentElement;
+      setAtBottom(
+        window.scrollY > 40 &&
+          window.innerHeight + window.scrollY >= doc.scrollHeight - 120,
+      );
+    };
+    onScroll();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+    };
+  }, []);
+
   // Curtain "open": slide up from below the screen to cover it right after mount.
   useEffect(() => {
     const raf = requestAnimationFrame(() => setPhase("show"));
@@ -145,6 +172,39 @@ export default function HomeClient({
       <SpiderWalker />
       {/* Film-grain / TV-static overlay ("ants") */}
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
+
+      {/* Scroll hint — fixed bottom-right. Bobs down at the top; when the user
+          reaches the bottom of the page the arrow rotates 180° to point up. */}
+      <div
+        className={`pointer-events-none fixed right-6 bottom-8 z-[95] flex flex-col items-center gap-3 transition-all duration-500 ease-out lg:right-12 ${
+          atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
+        }`}
+      >
+          <span className="text-[13px] uppercase tracking-[0.4em] text-[#6b6b6b] [writing-mode:vertical-rl] dark:text-[#b7ab98]">
+            SCROLL
+          </span>
+          <span
+            className={`block ${
+              atTop && !atBottom
+                ? "animate-[scroll-hint-bob_1.4s_ease-in-out_infinite_alternate] motion-reduce:animate-none"
+                : ""
+            }`}
+          >
+            <svg
+              width="18"
+              height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`text-accent transition-transform duration-500 ease-out ${
+              atBottom ? "rotate-180" : ""
+            }`}
+          >
+            <path d="M12 5v14M5 12l7 7 7-7" />
+          </svg>
+        </span>
+      </div>
 
       <Nav />
       {/* Hero pins at top; the solid page below scrolls up and covers it */}

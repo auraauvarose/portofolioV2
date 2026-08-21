@@ -13,7 +13,7 @@ import { useEffect, useRef } from "react";
  * - Animasi kaki terpisah dari posisi: CSS @keyframes pendek (0.4s) yang
  *   berjalan hanya saat spider bergerak (`spider-walking` class).
  * - Setiap 20–40 detik berhenti: idle 2–3 detik, atau (jika sedang di sisi
- *   atas) turun memakai benang jaring ke tengah layar, menggantung, lalu naik.
+ *   atas) turun memakai benang jaring ke tengah layar, lalu naik lagi.
  * - prefers-reduced-motion: reduce → spider parkir statis, tidak bergerak.
  * - Perimeter di-re-measure ulang saat window di-resize.
  */
@@ -65,9 +65,6 @@ export default function SpiderWalker() {
       webX: 0,
       webY: 0,
       webTarget: 0,
-      swayFrom: -6,
-      swayTo: 6,
-      swayDur: 1.6,
       last: 0,
     };
 
@@ -101,24 +98,6 @@ export default function SpiderWalker() {
       thread.style.opacity = h > 0 ? "1" : "0";
     };
 
-    // Goyangan pendulum saat bergelantungan: pivot di titik jangkar
-    // langit-langit (container top-left + (15, 15 - webY)) supaya thread
-    // ikut miring — animasi `rotate` CSS terpisah dari transform JS.
-    const startSway = () => {
-      st.swayFrom = -rand(4, 8);
-      st.swayTo = rand(4, 8);
-      st.swayDur = rand(1.2, 2);
-      el.style.transformOrigin = `15px ${15 - st.webY}px`;
-      el.style.setProperty("--sway-from", `${st.swayFrom}deg`);
-      el.style.setProperty("--sway-to", `${st.swayTo}deg`);
-      el.style.setProperty("--sway-dur", `${st.swayDur}s`);
-      el.classList.add("spider-swaying");
-    };
-    const stopSway = () => {
-      el.classList.remove("spider-swaying");
-      el.style.transformOrigin = "";
-    };
-
     let walking = false;
     const setWalking = (on: boolean) => {
       if (on !== walking) {
@@ -135,7 +114,6 @@ export default function SpiderWalker() {
 
     const park = () => {
       // Mode reduce-motion: spider statis di pojok kanan atas.
-      stopSway();
       applyPose(Math.max(SIZE + 12, st.w - 80), 0, 0);
       setThread(0);
       setWalking(false);
@@ -182,7 +160,6 @@ export default function SpiderWalker() {
           if (st.webY >= st.webTarget) {
             st.mode = "webHang";
             st.idleUntil = now + rand(IDLE_MIN, IDLE_MAX);
-            startSway();
           }
           break;
         }
@@ -191,7 +168,6 @@ export default function SpiderWalker() {
           setThread(st.webY);
           setWalking(false);
           if (now >= st.idleUntil) {
-            stopSway();
             st.mode = "webUp";
           }
           break;
