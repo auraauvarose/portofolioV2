@@ -202,6 +202,19 @@ html {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
+/* Carousel slide arrows (Certifications / Projects / Gallery): in light mode
+   keep them SOLID dark with WHITE arrows — the generic `.text-white` flip
+   above would turn the arrows dark gray on the translucent black button. */
+:root:not(.dark) button.carousel-arrow {
+  background-color: #0d0e13;
+  border-color: rgba(255, 255, 255, 0.2);
+  color: #ffffff;
+}
+:root:not(.dark) button.carousel-arrow:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
+
 /* Outlined/glass styles */
 :root:not(.dark) .text-outline {
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
@@ -444,11 +457,26 @@ body {
   color: #b3391f; /* darker terracotta — ~5.5:1 on light backgrounds */
 }
 
-/* On a WhatIDo row hover, force the words fully opaque so the flipped title
-   color (ink/near-black on the orange overlay) stays legible regardless of the
-   scroll-linked dim state. Only applies inside a `group` row (not the bio). */
-.group:hover .scroll-word-inner {
+/* On a WhatIDo row hover (or tap — `.is-active` on touch), force the words
+   fully opaque so the flipped title color (ink/near-black on the orange
+   overlay) stays legible regardless of the scroll-linked dim state. Only
+   applies inside a `group` row (not the bio). */
+.group:hover .scroll-word-inner,
+.group.is-active .scroll-word-inner {
   opacity: 1 !important;
+}
+
+/* WhatIDo hover/tap: the scroll-reveal color animation sets inline `color` on
+   each word, which would otherwise beat the inherited group-hover text color —
+   force ink/black (theme-aware via --color-ink) so the title stays legible on
+   the orange overlay. */
+#whatido .group:hover .scroll-word-inner,
+#whatido .group.is-active .scroll-word-inner {
+  color: black !important;
+}
+:root.dark #whatido .group:hover .scroll-word-inner,
+:root.dark #whatido .group.is-active .scroll-word-inner {
+  color: var(--color-ink) !important;
 }
 
 /* Letter-by-letter reveal for the About headline */

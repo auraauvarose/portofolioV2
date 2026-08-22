@@ -22,6 +22,13 @@ type ScrollWordRevealProps = {
       completes. Lower = words finish lighting sooner (more readable while
       centered). 0.5–0.6 => the last word is full once the block is centered. */
   scanRange?: number;
+  /** Color of words before they enter their scroll range (inherited from the
+      parent's `color` when omitted — no per-word color animation). */
+  baseColor?: string;
+  /** Color once a word is fully lit. When both baseColor and fullColor are
+      given, each word's color interpolates base→full in lockstep with its
+      opacity reveal. */
+  fullColor?: string;
   /** Words (case-insensitive, trailing-punctuation-insensitive) to render with
       `highlightClassName` (e.g. brand orange) instead of the default color —
       while still animating opacity through the scroll reveal. */
@@ -43,10 +50,10 @@ type ScrollWordRevealProps = {
  * time).
  *
  * HOOKS RULES: every per-word `useTransform` lives inside the small
- * `<RevealWord>` child, so each instance calls exactly ONE hook no matter what
- * the word is. The parent only ever calls a fixed set of hooks (useRef,
- * useReducedMotion, useScroll) — so switching language (which changes the word
- * count) is safe and never trips "rendered fewer/more hooks".
+ * `<RevealWord>` child, so each instance calls a fixed number of hooks no
+ * matter what the word is. The parent only ever calls a fixed set of hooks
+ * (useRef, useReducedMotion, useScroll) — so switching language (which changes
+ * the word count) is safe and never trips "rendered fewer/more hooks".
  */
 export default function ScrollWordReveal({
   text,
@@ -54,6 +61,8 @@ export default function ScrollWordReveal({
   baseOpacity = 0.4,
   fullOpacity = 1,
   scanRange = 0.6,
+  baseColor,
+  fullColor,
   highlight = [],
   highlightClassName = "",
   as: Tag = "p",
@@ -97,6 +106,8 @@ export default function ScrollWordReveal({
             baseOpacity={baseOpacity}
             fullOpacity={fullOpacity}
             scanRange={scanRange}
+            baseColor={baseColor}
+            fullColor={fullColor}
             reduceMotion={reduceMotion}
             className={wordClass}
             isLast={i === words.length - 1}
@@ -116,6 +127,8 @@ type RevealWordProps = {
   baseOpacity: number;
   fullOpacity: number;
   scanRange: number;
+  baseColor?: string;
+  fullColor?: string;
   reduceMotion: boolean | null;
   className: string;
   isLast: boolean;
@@ -123,9 +136,9 @@ type RevealWordProps = {
 };
 
 /**
- * One word. Calls exactly ONE hook (`useTransform`), so the child's hook count
- * is constant regardless of word text / language — the Rules of Hooks stay
- * satisfied even though the number of rendered words varies.
+ * One word. Calls exactly TWO hooks (both `useTransform`), so the child's hook
+ * count is constant regardless of word text / language — the Rules of Hooks
+ * stay satisfied even though the number of rendered words varies.
  */
 function RevealWord({
   progress,
@@ -134,22 +147,38 @@ function RevealWord({
   baseOpacity,
   fullOpacity,
   scanRange,
+  baseColor,
+  fullColor,
   reduceMotion,
   className,
   isLast,
   children,
 }: RevealWordProps) {
-  const opacity = useTransform(
-    progress,
-    [(index / count) * scanRange, ((index + 1) / count) * scanRange],
-    [baseOpacity, fullOpacity],
-  );
+  const input: [number, number] = [
+    (index / count) * scanRange,
+    ((index + 1) / count) * scanRange,
+  ];
+  const opacity = useTransform(progress, input, [baseOpacity, fullOpacity]);
+  // Color interpolates in lockstep with opacity. Always called (fixed hook
+  // count), but only APPLIED when baseColor/fullColor are provided — otherwise
+  // the word keeps its inherited/class color (e.g. About's text-highlight).
+  const color = useTransform(progress, input, [
+    baseColor ?? "currentColor",
+    fullColor ?? "currentColor",
+  ]);
+  const colorStyle: { color: string | MotionValue<string> } | null =
+    baseColor && fullColor
+      ? { color: reduceMotion ? fullColor : color }
+      : null;
 
   return (
     <span aria-hidden="true" className="scroll-word">
       <motion.span
         className={className}
-        style={{ opacity: reduceMotion ? 1 : opacity }}
+        style={{
+          opacity: reduceMotion ? 1 : opacity,
+          ...colorStyle,
+        }}
       >
         {children}
         {/* Non-breaking space kept INSIDE the inline-block so a visible gap

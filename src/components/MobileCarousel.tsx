@@ -45,7 +45,7 @@ export default function MobileCarousel({
               type="button"
               aria-label="Sebelumnya"
               onClick={() => go(idx - 1)}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
             >
               ‹
             </button>
@@ -53,7 +53,7 @@ export default function MobileCarousel({
               type="button"
               aria-label="Berikutnya"
               onClick={() => go(idx + 1)}
-              className="flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
             >
               ›
             </button>

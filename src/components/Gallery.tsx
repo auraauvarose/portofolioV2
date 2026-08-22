@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import MobileCarousel from "@/components/MobileCarousel";
+import Tilt3D from "@/components/Tilt3D";
 import { useLanguage } from "@/components/providers";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
@@ -16,14 +17,11 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   const [slide, setSlide] = useState(0);
   // Desktop paged carousel: which page of 3 photos is shown.
   const [deskPage, setDeskPage] = useState(0);
+  const [isLandscape, setIsLandscape] = useState(false);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (e.key === "Escape") setLightbox(null);
-      if (lightbox === null) return;
-      if (e.key === "ArrowRight") setLightbox((lightbox + 1) % items.length);
-      if (e.key === "ArrowLeft")
-        setLightbox((lightbox - 1 + items.length) % items.length);
     };
     window.addEventListener("keydown", onKey);
     // Lock body scroll while the lightbox is open.
@@ -32,7 +30,42 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = "";
     };
-  }, [lightbox, items.length]);
+  }, [lightbox]);
+
+  // Track screen orientation (mobile only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mql = window.matchMedia("(orientation: landscape)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsLandscape(e.matches);
+    handler(mql);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
+  async function rotateToLandscape() {
+    try {
+      const orientation = screen.orientation as ScreenOrientation & {
+        lock?: (o: "landscape") => Promise<void>;
+      };
+      if (orientation?.lock) {
+        await orientation.lock("landscape");
+      } else {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch {
+      // orientation lock may fail on some devices
+    }
+  }
+
+  async function rotateToPortrait() {
+    try {
+      if (screen.orientation?.unlock) screen.orientation.unlock();
+      if (document.fullscreenElement) await document.exitFullscreen();
+    } catch {
+      // ignore
+    }
+  }
 
   // Single photo renderer shared by the mobile slide scroller and the
   // desktop masonry so both stay in sync.
@@ -42,26 +75,28 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         ? photo.title_en ?? ""
         : photo.title_id ?? photo.title_en ?? "";
     return (
-      <button
-        onClick={() => setLightbox(i)}
-        className="group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
-        aria-label={title || `Photo ${i + 1}`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={photo.image_url}
-          alt={title || `Photo ${i + 1}`}
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
-          loading="lazy"
-        />
-        <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
-          {title && (
-            <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
-              {title}
-            </p>
-          )}
-        </div>
-      </button>
+      <Tilt3D className="h-full">
+        <button
+          onClick={() => setLightbox(i)}
+          className="group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
+          aria-label={title || `Photo ${i + 1}`}
+        >
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={photo.image_url}
+            alt={title || `Photo ${i + 1}`}
+            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            loading="lazy"
+          />
+          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+            {title && (
+              <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
+                {title}
+              </p>
+            )}
+          </div>
+        </button>
+      </Tilt3D>
     );
   };
 
@@ -142,42 +177,76 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
             onClick={() => setLightbox(null)}
           >
-          <button
-            className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
-            onClick={() => setLightbox(null)}
-            aria-label="Close"
-          >
-            ✕
-          </button>
-          <button
-            className="absolute left-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-xl text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:left-4"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox((lightbox - 1 + items.length) % items.length);
-            }}
-            aria-label="Previous image"
-          >
-            ←
-          </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={items[lightbox].image_url}
-            alt={items[lightbox].title_en ?? "Photo"}
-            className="max-h-[85vh] max-w-full rounded-xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
-          <button
-            className="absolute right-2 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-xl text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-4"
-            onClick={(e) => {
-              e.stopPropagation();
-              setLightbox((lightbox + 1) % items.length);
-            }}
-            aria-label="Next image"
-          >
-            →
-          </button>
-          </div>
-          ,
+            <button
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+              onClick={() => setLightbox(null)}
+              aria-label="Close"
+            >
+              ✕
+            </button>
+
+            {/* Portrait icon — top-right when landscape (mobile only) */}
+            {isLandscape && (
+              <button
+                className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/50 text-white backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rotateToPortrait();
+                }}
+                aria-label="Portrait mode"
+              >
+                <svg
+                  width="20"
+                  height="20"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <rect x="5" y="2" width="14" height="20" rx="2" />
+                  <line x1="12" y1="18" x2="12" y2="18" />
+                </svg>
+              </button>
+            )}
+
+            {/* Image + rotate button grouped together */}
+            <div className="flex flex-col items-center gap-4">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={items[lightbox].image_url}
+                alt={items[lightbox].title_en ?? "Photo"}
+                className="max-h-[85vh] max-w-full rounded-xl object-contain"
+                onClick={(e) => e.stopPropagation()}
+              />
+
+              {/* Rotate to landscape — below image (mobile only) */}
+              <button
+                className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  rotateToLandscape();
+                }}
+                aria-label="Rotate to landscape"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56" />
+                  <path d="M21 3v5h-5" />
+                </svg>
+                Landscape
+              </button>
+            </div>
+          </div>,
           document.body
         )}
     </section>
