@@ -21,7 +21,7 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setLightbox(null);
+      if (e.key === "Escape") closeLightbox();
     };
     window.addEventListener("keydown", onKey);
     // Lock body scroll while the lightbox is open.
@@ -48,23 +48,33 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
       const orientation = screen.orientation as ScreenOrientation & {
         lock?: (o: "landscape") => Promise<void>;
       };
-      if (orientation?.lock) {
-        await orientation.lock("landscape");
-      } else {
+      // Chrome/Android: orientation lock only works while fullscreen.
+      if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
       }
+      if (orientation?.lock) {
+        await orientation.lock("landscape");
+      }
     } catch {
-      // orientation lock may fail on some devices
+      // iOS Safari blocks programmatic rotation — device auto-rotate only.
     }
   }
 
   async function rotateToPortrait() {
     try {
-      if (screen.orientation?.unlock) screen.orientation.unlock();
       if (document.fullscreenElement) await document.exitFullscreen();
+      screen.orientation?.unlock?.();
     } catch {
       // ignore
     }
+  }
+
+  function closeLightbox() {
+    setLightbox(null);
+    if (document.fullscreenElement) {
+      document.exitFullscreen().catch(() => {});
+    }
+    screen.orientation?.unlock?.();
   }
 
   // Single photo renderer shared by the mobile slide scroller and the
@@ -175,11 +185,11 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         createPortal(
           <div
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
-            onClick={() => setLightbox(null)}
+            onClick={closeLightbox}
           >
             <button
               className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
-              onClick={() => setLightbox(null)}
+              onClick={closeLightbox}
               aria-label="Close"
             >
               ✕
