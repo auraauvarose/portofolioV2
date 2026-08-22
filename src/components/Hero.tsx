@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { profile } from "@/lib/config";
 import { useLanguage } from "@/components/providers";
+import Tilt3D from "@/components/Tilt3D";
 
 /**
  * Hero — orange lens disc cursor reveal:
@@ -50,16 +51,17 @@ export default function Hero() {
     >
       {/* Background image — full-bleed cover layer, under the text. Two layers
           crossfade on theme switch: the dark artwork in dark mode, the light
-          artwork in light mode. */}
+          artwork in light mode. The character has been inpainted OUT of these
+          so the floating 3D cutout below is the only character. */}
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700 ease-in-out dark:opacity-100"
-        style={{ backgroundImage: "url(/background_heding.png)" }}
+        style={{ backgroundImage: "url(/photo/dakmode-bg.png)" }}
       />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-100 transition-opacity duration-700 ease-in-out dark:opacity-0"
-        style={{ backgroundImage: "url(/background-light-mode.jpg)" }}
+        style={{ backgroundImage: "url(/photo/lightmode-bg.png)" }}
       />
       {/* Dark overlay to keep the headline readable; dims further as the
           sticky reveal page scrolls up over the hero. Dark mode: fixed black
@@ -72,6 +74,24 @@ export default function Hero() {
           opacity: theme === "dark" ? 0.35 + dim * 0.6 : 0,
         }}
       />
+
+      {/* Character cutout — transparent PNG floating over the artwork (which has
+          the character inpainted out). 3D tilt toward the cursor + gentle float
+          + soft drop shadow make the character pop out of the background. */}
+      <Tilt3D max={10} scale={1.05} className="absolute inset-0">
+        <img
+          aria-hidden="true"
+          alt=""
+          src="/photo/character-dark.png"
+          className="pointer-events-none absolute inset-0 h-full w-full animate-hero-float object-cover opacity-0 transition-opacity duration-700 ease-in-out motion-reduce:animate-none dark:opacity-100"
+        />
+        <img
+          aria-hidden="true"
+          alt=""
+          src="/photo/character-light.png"
+          className="pointer-events-none absolute inset-0 h-full w-full animate-hero-float object-cover opacity-100 shadow-2xl transition-opacity duration-700 ease-in-out drop-shadow-[0_24px_38px_rgba(0,0,0,0.38)] motion-reduce:animate-none dark:opacity-0 dark:drop-shadow-[0_24px_38px_rgba(0,0,0,0.60)]"
+        />
+      </Tilt3D>
 
       {/* Ambient glow */}
       <div className="pointer-events-none absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 blur-[120px]" />
