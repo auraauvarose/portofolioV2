@@ -74,19 +74,25 @@ html {
 
 /* Brief global color-transition window toggled during a theme switch, so the
    whole site crossfades smoothly between dark and light. `opacity` is included
-   so the hero's background artwork crossfades during the switch too. */
-.theme-anim,
-.theme-anim *,
-.theme-anim *::before,
-.theme-anim *::after {
-  transition:
-    background-color 0.4s ease,
-    border-color 0.4s ease,
-    color 0.4s ease,
-    fill 0.4s ease,
-    stroke 0.4s ease,
-    box-shadow 0.4s ease,
-    opacity 0.5s ease !important;
+   so the hero's background artwork crossfades during the switch too.
+   Desktop only: transitioning EVERY element (incl. ::before/::after) for
+   400-500ms forces a full-page repaint that hangs on mobile GPUs (tap lag on
+   theme toggle). Coarse-pointer devices flip instantly instead; the hero
+   artwork still crossfades via its own component transitions. */
+@media (hover: hover) and (pointer: fine) {
+  .theme-anim,
+  .theme-anim *,
+  .theme-anim *::before,
+  .theme-anim *::after {
+    transition:
+      background-color 0.4s ease,
+      border-color 0.4s ease,
+      color 0.4s ease,
+      fill 0.4s ease,
+      stroke 0.4s ease,
+      box-shadow 0.4s ease,
+      opacity 0.5s ease !important;
+  }
 }
 
 /* Custom cursor: hide the native pointer only where the cursor is mounted

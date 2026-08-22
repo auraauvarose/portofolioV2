@@ -198,7 +198,7 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
             {/* Portrait icon — top-right when landscape (mobile only) */}
             {isLandscape && (
               <button
-                className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-white/20 bg-black/50 text-white backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
                 onClick={(e) => {
                   e.stopPropagation();
                   rotateToPortrait();
@@ -233,7 +233,7 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
 
               {/* Rotate to landscape — below image (mobile only) */}
               <button
-                className="flex items-center gap-2 rounded-full border border-white/20 bg-black/50 px-5 py-2 text-sm text-white backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
                 onClick={(e) => {
                   e.stopPropagation();
                   rotateToLandscape();
