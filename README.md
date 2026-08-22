@@ -5,7 +5,7 @@ built as a full-stack app with an **admin panel** for managing
 **projects, certifications, and a photo gallery**.
 
 - **Frontend:** Next.js 15 (App Router) + React 19 + Tailwind CSS v4
-- **Hosting:** Vercel
+- **Hosting:** Cloudflare Workers (via `@opennextjs/cloudflare`)
 - **Database + Auth:** Supabase (PostgreSQL) + password-only admin panel
 - **File storage:** Cloudflare R2 (presigned direct-to-browser uploads)
 
@@ -148,15 +148,87 @@ Open <http://localhost:3000>. The admin panel is at <http://localhost:3000/admin
 
 ---
 
-## 5. Deploy to Vercel
+## 5. Deploy to Cloudflare Workers
 
-1. Push this folder to a Git repository (GitHub/GitLab).
-2. In Vercel, **Add New → Project**, import the repo.
-3. Vercel auto-detects Next.js. In **Environment Variables**, add all variables
-   from the table above (the same values, `Production` + `Preview`).
-4. Deploy.
+The app is a full-stack Next.js app (API routes, middleware, Supabase SSR), so it
+runs on **Cloudflare Workers** via the official
+[`@opennextjs/cloudflare`](https://opennext.js.org/cloudflare) adapter — not on
+Cloudflare Pages static hosting.
 
-The admin login is at `https://your-domain.vercel.app/admin`.
+### 5.1 One-time setup
+
+```bash
+pnpm install
+pnpm wrangler login      # opens the browser, authenticates your Cloudflare account
+```
+
+### 5.2 Set server-side secrets
+
+The `NEXT_PUBLIC_*` vars are inlined at build time (from `.env.local`), so they
+don't need to be secrets. The server-only vars must be set as Worker secrets:
+
+```bash
+pnpm wrangler secret put SUPABASE_SERVICE_ROLE_KEY
+pnpm wrangler secret put R2_ACCOUNT_ID
+pnpm wrangler secret put R2_ACCESS_KEY_ID
+pnpm wrangler secret put R2_SECRET_ACCESS_KEY
+pnpm wrangler secret put R2_BUCKET_NAME
+pnpm wrangler secret put ADMIN_PASSWORD
+pnpm wrangler secret put ADMIN_COOKIE_SECRET
+```
+
+Paste the same values you use in `.env.local` when each prompt appears.
+
+### 5.3 Build + deploy
+
+```bash
+pnpm cf:build      # runs next build, then bundles the Worker
+pnpm cf:deploy     # deploys the Worker to Cloudflare
+```
+
+The first deploy creates a Worker named `portofolio-v2`. You can change the name
+in `wrangler.jsonc`.
+
+### 5.4 Attach a custom domain
+
+Cloudflare dashboard → **Workers & Pages** → `portofolio-v2` → **Settings →
+Domains & Routes** → **Add → Custom Domain** → your domain. Cloudflare manages the
+DNS automatically (it's already the host for your R2 bucket).
+
+### 5.5 Local preview (the deployed Worker)
+
+```bash
+pnpm cf:preview        # runs the Worker locally via wrangler dev
+```
+
+For local preview, copy your server-only env vars into `.dev.vars` (gitignored,
+never committed) so the local Worker can access them:
+
+```bash
+# .dev.vars (server-only vars; NEXT_PUBLIC_* are baked into the build)
+SUPABASE_SERVICE_ROLE_KEY=...
+R2_ACCOUNT_ID=...
+R2_ACCESS_KEY_ID=...
+R2_SECRET_ACCESS_KEY=...
+R2_BUCKET_NAME=...
+ADMIN_PASSWORD=...
+ADMIN_COOKIE_SECRET=...
+```
+
+### 5.6 Notes / gotchas
+
+- **R2 presigning** uses [`aws4fetch`](https://developers.cloudflare.com/r2/examples/aws/aws4fetch/)
+  (SigV4 via Web Crypto), not the AWS SDK — the SDK pulls in Node-only modules
+  (`http`/`fs`) that don't run on Workers. See `src/lib/r2.ts`.
+- **Images** use `images.unoptimized: true` (see `next.config.ts`) — required so
+  the Worker doesn't need the image-optimization runtime.
+- If you previously deployed to Vercel, remove the Vercel project or point the
+  DNS at Cloudflare so the domain no longer resolves to Vercel.
+
+The admin login is at `https://your-domain.pages.dev/admin` (or your custom domain).
+
+> Note: `next dev` still works locally as before. Only the production deployment
+> target changed.
 
 ---
 

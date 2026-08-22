@@ -1,11 +1,6 @@
-import {
-  S3Client,
-  PutObjectCommand,
-  DeleteObjectCommand,
-} from "@aws-sdk/client-s3";
-import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
+import { AwsV4Signer, AwsClient } from "aws4fetch";
 
-function getR2Client(): S3Client {
+function getR2Credentials() {
   const accountId = process.env.R2_ACCOUNT_ID;
   const accessKeyId = process.env.R2_ACCESS_KEY_ID;
   const secretAccessKey = process.env.R2_SECRET_ACCESS_KEY;
@@ -14,19 +9,11 @@ function getR2Client(): S3Client {
     throw new Error("R2 credentials are not configured.");
   }
 
-  return new S3Client({
-    region: "auto",
-    endpoint: `https://${accountId}.r2.cloudflarestorage.com`,
-    credentials: { accessKeyId, secretAccessKey },
-    // The presigned PUT is later replayed by a plain browser `fetch()`, which
-    // cannot recompute the CRC32 checksum that the SDK otherwise injects into
-    // the presigned URL by default (`WHEN_SUPPORTED`). That baked-in placeholder
-    // checksum (`x-amz-checksum-crc32=AAAAAA==`) makes R2 reject the real file
-    // body with a 400 Bad Request. Only calculate checksums when the model
-    // requires them, so the presigned URL carries no checksum at all and the
-    // direct browser upload succeeds.
-    requestChecksumCalculation: "WHEN_REQUIRED",
-  });
+  return { accountId, accessKeyId, secretAccessKey };
+}
+
+function getObjectKeyUrl(accountId: string, bucket: string, key: string): string {
+  return `https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key}`;
 }
 
 export type PresignedUpload = {
@@ -37,6 +24,9 @@ export type PresignedUpload = {
 
 /**
  * Generate a presigned PUT url so the browser can upload a file directly to R2.
+ *
+ * Uses aws4fetch (SigV4 via Web Crypto) instead of the AWS SDK, because the
+ * SDK pulls in Node-only modules (http/fs) that don't run on Cloudflare Workers.
  */
 export async function createPresignedUpload(params: {
   filename: string;
@@ -45,6 +35,7 @@ export async function createPresignedUpload(params: {
 }): Promise<PresignedUpload> {
   const bucket = process.env.R2_BUCKET_NAME;
   const publicBase = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
+  const { accountId, accessKeyId, secretAccessKey } = getR2Credentials();
   if (!bucket) throw new Error("R2_BUCKET_NAME is not configured.");
   if (!publicBase) throw new Error("NEXT_PUBLIC_R2_PUBLIC_URL is not configured.");
 
@@ -54,28 +45,43 @@ export async function createPresignedUpload(params: {
   const prefix = folder ? `${folder}/` : "";
   const key = `${prefix}${Date.now()}-${crypto.randomUUID()}-${clean}`;
 
-  const client = getR2Client();
-  const command = new PutObjectCommand({
-    Bucket: bucket,
-    Key: key,
-    ContentType: params.contentType,
-    CacheControl: "public, max-age=31536000, immutable",
+  const objectUrl = new URL(getObjectKeyUrl(accountId, bucket, key));
+  // aws4fetch defaults S3 to 86400s; match the original 1-hour expiry.
+  objectUrl.searchParams.set("X-Amz-Expires", "3600");
+
+  const signer = new AwsV4Signer({
+    url: objectUrl.toString(),
+    method: "PUT",
+    accessKeyId,
+    secretAccessKey,
+    service: "s3",
+    region: "auto",
+    signQuery: true,
+    // The browser replays this PUT with exactly this Content-Type, so sign it
+    // (it shows up in X-Amz-SignedHeaders and R2 requires the match).
+    headers: { "Content-Type": params.contentType },
   });
 
-  const url = await getSignedUrl(client, command, { expiresIn: 3600 });
+  const { url } = await signer.sign();
 
   return {
     key,
-    url,
+    url: url.toString(),
     publicUrl: `${publicBase.replace(/\/+$/, "")}/${key}`,
   };
 }
 
 export async function deleteR2Object(key: string): Promise<void> {
   const bucket = process.env.R2_BUCKET_NAME;
+  const { accountId, accessKeyId, secretAccessKey } = getR2Credentials();
   if (!bucket) throw new Error("R2_BUCKET_NAME is not configured.");
-  const client = getR2Client();
-  await client.send(
-    new DeleteObjectCommand({ Bucket: bucket, Key: key }),
-  );
+
+  const aws = new AwsClient({ accessKeyId, secretAccessKey, service: "s3", region: "auto" });
+  const url = getObjectKeyUrl(accountId, bucket, key);
+  const res = await aws.fetch(url, { method: "DELETE" });
+
+  // R2 returns 204 on success; treat a 404 (already gone) as success too.
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`Failed to delete object from R2 (${res.status})`);
+  }
 }
