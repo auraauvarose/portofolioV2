@@ -36,11 +36,6 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# internal tool state
-.mimosa/
-.zcode/
-.playwright-mcp/
-
 # local npm cache (used because the sandboxed home ~/.npm is read-only)
 .npm-cache/
 .pnpm-store/

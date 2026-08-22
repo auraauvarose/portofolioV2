@@ -52,7 +52,7 @@ const client = new S3Client({
   credentials: { accessKeyId, secretAccessKey },
 });
 
-// The CORS policy documented in README §2 / FINAL-NOTES §5.
+// The CORS policy documented in README §2.
 const recommendedRules = [
   {
     AllowedOrigins: ["*"],

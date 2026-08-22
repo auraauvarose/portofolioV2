@@ -10,6 +10,7 @@ import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import SectionHeading from "@/components/SectionHeading";
 import { useLanguage } from "@/components/providers";
 import { techStack } from "@/lib/config";
+import { techIcon } from "@/components/tech-icons";
 import type { Localized } from "@/types";
 
 /* ---------------------------------------------------------------------------
@@ -564,8 +565,11 @@ export default function TechStack() {
                     <div
                       onMouseEnter={() => activate(i)}
                       onMouseLeave={deactivate}
-                      className="whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
+                      className="flex items-center gap-2 whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
                     >
+                      <span className="text-zinc-500 transition-colors group-hover:text-accent dark:text-gray-500">
+                        {techIcon(it.label, "h-4 w-4")}
+                      </span>
                       {it.label}
                     </div>
                   </Node>
