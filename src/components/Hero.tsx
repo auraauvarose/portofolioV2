@@ -77,19 +77,30 @@ export default function Hero() {
 
       {/* Character cutout — transparent PNG floating over the artwork (which has
           the character inpainted out). 3D tilt toward the cursor + gentle float
-          + soft drop shadow make the character pop out of the background. */}
-      <Tilt3D max={10} scale={1.05} className="absolute inset-0">
+          + baked-in soft shadow make the character pop out of the background.
+          Float lives on the Tilt3D OUTER wrapper (one promoted layer) so the
+          hidden theme img never composites per-frame. Mobile: tilt is
+          neutralized via CSS (hero-tilt-inner) so the layer stays 2D — no
+          per-frame re-raster on touch scroll; float stays. */}
+      <Tilt3D
+        max={10}
+        scale={1.05}
+        innerClassName="hero-tilt-inner"
+        className="absolute inset-0 animate-hero-float motion-reduce:animate-none will-change-transform"
+      >
         <img
           aria-hidden="true"
           alt=""
           src="/photo/character-dark.png"
-          className="pointer-events-none absolute inset-0 h-full w-full animate-hero-float object-cover opacity-0 transition-opacity duration-700 ease-in-out motion-reduce:animate-none dark:opacity-100"
+          decoding="async"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 ease-in-out dark:opacity-100"
         />
         <img
           aria-hidden="true"
           alt=""
           src="/photo/character-light.png"
-          className="pointer-events-none absolute inset-0 h-full w-full animate-hero-float object-cover opacity-100 shadow-2xl transition-opacity duration-700 ease-in-out drop-shadow-[0_24px_38px_rgba(0,0,0,0.38)] motion-reduce:animate-none dark:opacity-0 dark:drop-shadow-[0_24px_38px_rgba(0,0,0,0.60)]"
+          decoding="async"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-in-out dark:opacity-0"
         />
       </Tilt3D>
 

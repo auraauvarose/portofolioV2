@@ -33,6 +33,7 @@ WANT = {
     "Tanker":      [(400, False)],
     "Cabinet Grotesk": [(400, False), (500, False), (700, False), (800, False), (900, False)],
     "Comico":      [(400, False)],
+    "Chillax":     [(600, False)],
     "Bevellier":   [(600, False), (700, False)],
     "Zodiak":      [(700, True)],  # Bold Italic (Fontshare internal 701 -> CSS 700)
 }

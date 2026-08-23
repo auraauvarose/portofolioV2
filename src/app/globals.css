@@ -321,6 +321,12 @@ body {
     letter-spacing: -0.02em;
     line-height: 0.92;
   }
+  /* Chillax SemiBold — About me body paragraphs (Fontshare "Semibold" = 600). */
+  .text-chillax-semibold {
+    font-family: var(--font-chillax);
+    font-weight: 600;
+    letter-spacing: 0.08em;
+  }
   /* Zodiak italic — editorial serif accent for hover-reveal labels. */
   .text-serif-accent {
     font-family: var(--font-serif);
@@ -658,6 +664,13 @@ summary {
   a.menu-link:active,
   button.menu-link:active {
     color: #eb5939;
+  }
+  /* Hero character: kill the 3D tilt on touch devices. Touch scroll fires
+     pointermove per frame; a 3D-transformed full-screen layer gets re-rasterized
+     each frame on mobile GPUs (jank). The float animation + crossfade stay. */
+  .hero-tilt-inner {
+    transform: none !important;
+    will-change: auto;
   }
 }
 

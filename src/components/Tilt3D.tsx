@@ -20,11 +20,13 @@ export default function Tilt3D({
   className = "",
   max = 9,
   scale = 1.02,
+  innerClassName = "",
 }: {
   children: ReactNode;
   className?: string;
   max?: number;
   scale?: number;
+  innerClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
 
@@ -48,7 +50,13 @@ export default function Tilt3D({
     el.style.setProperty("--s", `${tiltScale}`);
   };
 
-  const onMove = (e: PointerEvent<HTMLDivElement>) => tiltAt(e.clientX, e.clientY, scale);
+  // Skip tilt work for touch moves: touch scroll fires pointermove per frame
+  // and reading layout (getBoundingClientRect) per frame causes jank on mobile.
+  // Tap tilt (pointerdown) still works on touch.
+  const onMove = (e: PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType !== "mouse") return;
+    tiltAt(e.clientX, e.clientY, scale);
+  };
   const onDown = (e: PointerEvent<HTMLDivElement>) => tiltAt(e.clientX, e.clientY, scale * 0.96);
   const onLeave = () => reset();
   const onUp = () => reset();
@@ -65,7 +73,7 @@ export default function Tilt3D({
       onPointerLeave={onLeave}
     >
       <div
-        className="h-full w-full transition-transform duration-200 ease-out will-change-transform"
+        className={`h-full w-full transition-transform duration-200 ease-out will-change-transform ${innerClassName}`}
         style={{
           transform:
             "rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s, 1))",

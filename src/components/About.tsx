@@ -1,7 +1,6 @@
 "use client";
 
 import Reveal from "@/components/Reveal";
-import LetterReveal from "@/components/LetterReveal";
 import ScrollWordReveal from "@/components/ScrollWordReveal";
 import { useLanguage } from "@/components/providers";
 import { about, profile } from "@/lib/config";
@@ -18,18 +17,14 @@ export default function About() {
             <span className="h-px flex-1 bg-white/10" />
           </Reveal>
 
-          <h2 className="text-bevellier mb-12 max-w-4xl text-3xl uppercase leading-tight text-white sm:text-4xl md:text-6xl">
-            <LetterReveal text={t(about.heading)} />
-          </h2>
-
-          <div className="max-w-4xl">
-            <div className="space-y-7 text-xl leading-relaxed text-ecru md:text-2xl">
+          <div>
+            <div className="space-y-7 text-2xl leading-relaxed text-ecru md:text-[40px]">
               {about.paragraphs.map((p, i) => (
                 <ScrollWordReveal
                   key={i}
                   text={t(p)}
-                  className="text-ecru"
-                  baseOpacity={0.5}
+                  className="text-chillax-semibold text-ecru"
+                  baseOpacity={0.4}
                   scanRange={0.5}
                   highlight={p.highlight?.[lang] ?? []}
                   highlightClassName="text-highlight"

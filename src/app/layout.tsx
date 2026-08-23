@@ -59,6 +59,14 @@ const bevellier = localFont({
   display: "swap",
 });
 
+const chillax = localFont({
+  src: [
+    { path: "../../public/fonts/Chillax-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-chillax",
+  display: "swap",
+});
+
 const zodiak = localFont({
   src: [
     { path: "../../public/fonts/Zodiak-700i.woff2", weight: "700", style: "italic" },
@@ -81,7 +89,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${zodiak.variable} dark`}
+      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${chillax.variable} ${zodiak.variable} dark`}
       style={{ colorScheme: "dark" }}
     >
       <body className="antialiased">

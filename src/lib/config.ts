@@ -53,10 +53,6 @@ export const hero = {
 
 export const about = {
   kicker: { en: "About Me", id: "Tentang Saya" },
-  heading: {
-    en: "Bridging design and technology.",
-    id: "Menjembatani desain dan teknologi.",
-  },
   paragraphs: [
     {
       en: "Hi! I'm Aura Auvarose, a first-semester Informatics student carving my path in the tech world. My journey isn't about ease — it's about persistence through limitations.",
