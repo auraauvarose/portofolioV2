@@ -9,7 +9,7 @@ import {
 import type { PointerEvent as ReactPointerEvent, ReactNode } from "react";
 import SectionHeading from "@/components/SectionHeading";
 import { useLanguage } from "@/components/providers";
-import { techStack } from "@/lib/config";
+import { techStack, techDescriptions, techLinks } from "@/lib/config";
 import { techIcon } from "@/components/tech-icons";
 import type { Localized } from "@/types";
 
@@ -54,6 +54,10 @@ type Gesture = {
   midX: number;
   midY: number;
 };
+
+// Hover tooltip state in screen-space (outside the scaled world, so it never
+// gets blurred by the world transform or clipped by world bounds).
+type Tip = { label: string; x: number; y: number; above: boolean };
 
 function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
@@ -179,6 +183,7 @@ export default function TechStack() {
   const [tilt, setTilt] = useState<Vec>({ x: 0, y: 0 });
   const [defaultZoom, setDefaultZoom] = useState(1);
   const [hovered, setHovered] = useState<number | null>(null);
+  const [tip, setTip] = useState<Tip | null>(null);
   const [dragging, setDragging] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [entered, setEntered] = useState(false);
@@ -396,7 +401,25 @@ export default function TechStack() {
 
   const deactivate = useCallback(() => {
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
-    hoverTimerRef.current = window.setTimeout(() => setHovered(null), 90);
+    hoverTimerRef.current = window.setTimeout(() => {
+      setHovered(null);
+      setTip(null);
+    }, 90);
+  }, []);
+
+  // Place the tooltip above the chip, flipping below when the chip sits near
+  // the top edge of the container so it never gets clipped.
+  const showTip = useCallback((label: string, el: HTMLElement) => {
+    const c = containerRef.current;
+    if (!c) return;
+    const cr = c.getBoundingClientRect();
+    const r = el.getBoundingClientRect();
+    if (r.width === 0) return;
+    const x = Math.min(Math.max(r.left - cr.left + r.width / 2, 128), cr.width - 128);
+    const y = r.top - cr.top;
+    const h = r.height;
+    const above = y - 170 > 0;
+    setTip({ label, x, y: above ? y - 8 : y + h + 8, above });
   }, []);
 
   useEffect(() => {
@@ -416,7 +439,8 @@ export default function TechStack() {
 
   return (
     <section className="px-6 py-24 md:px-10 md:py-32">
-      <style>{`@keyframes mm-rotate { to { transform: rotate(360deg); } }`}</style>
+      <style>{`@keyframes mm-rotate { to { transform: rotate(360deg); } }
+@keyframes tip-fade { from { opacity: 0; } }`}</style>
       <div className="mx-auto max-w-7xl">
         <SectionHeading kicker={techStack.kicker} heading={techStack.heading} index="05" />
 
@@ -553,7 +577,10 @@ export default function TechStack() {
                   </div>
                 </Node>
 
-                {cat.items.map((it, j) => (
+                {cat.items.map((it, j) => {
+                  const link = techLinks[it.label];
+                  const tipEnabled = !!techDescriptions[it.label] && !!link;
+                  return (
                   <Node
                     key={it.label}
                     x={it.pos.x}
@@ -562,21 +589,63 @@ export default function TechStack() {
                     delay={220 + i * 120 + j * 45}
                     entered={entered}
                   >
-                    <div
-                      onMouseEnter={() => activate(i)}
+                    <a
+                      href={link ?? undefined}
+                      target={link ? "_blank" : undefined}
+                      rel={link ? "noreferrer" : undefined}
+                      role={link ? undefined : "button"}
+                      tabIndex={link ? undefined : -1}
+                      onMouseEnter={(e) => {
+                        activate(i);
+                        if (tipEnabled) showTip(it.label, e.currentTarget);
+                      }}
                       onMouseLeave={deactivate}
-                      className="flex items-center gap-2 whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
+                      onFocus={(e) => {
+                        activate(i);
+                        if (tipEnabled) showTip(it.label, e.currentTarget);
+                      }}
+                      onBlur={deactivate}
+                      onClick={(e) => {
+                        if (!link) e.preventDefault();
+                      }}
+                      className="group relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 no-underline shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
                     >
                       <span className="text-zinc-500 transition-colors group-hover:text-accent dark:text-gray-500">
                         {techIcon(it.label, "h-4 w-4")}
                       </span>
                       {it.label}
-                    </div>
+                    </a>
                   </Node>
-                ))}
+                );
+                })}
               </div>
             ))}
           </div>
+
+          {/* Hover tooltip card — rendered in screen space (outside the scaled
+              world) so it stays crisp and never gets clipped. */}
+          {tip && techDescriptions[tip.label] && (
+            <div
+              role="tooltip"
+              className="pointer-events-none absolute z-30 w-60 whitespace-normal rounded-xl border border-black/10 bg-panel/95 px-4 py-3 text-left shadow-[0_20px_50px_-16px_rgba(0,0,0,0.6)] backdrop-blur dark:border-white/10"
+              style={{
+                left: tip.x,
+                top: tip.y,
+                transform: `translate(-50%, ${tip.above ? "-100%" : "0"})`,
+                animation: "tip-fade 0.15s ease-out",
+              }}
+            >
+              <p className="text-[13px] font-semibold text-zinc-800 dark:text-gray-100">
+                {tip.label}
+              </p>
+              <p className="mt-1 text-xs leading-relaxed text-zinc-600 dark:text-gray-400">
+                {t(techDescriptions[tip.label])}
+              </p>
+              <p className="mt-2 text-[10px] uppercase tracking-widest text-accent">
+                ↗ {t({ en: "Official site", id: "Situs resmi" })}
+              </p>
+            </div>
+          )}
 
           {/* Reset button */}
           <button
