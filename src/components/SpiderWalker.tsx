@@ -2,22 +2,6 @@
 
 import { useEffect, useRef } from "react";
 
-/**
- * SpiderWalker — laba-laba SVG kecil yang "jalan-jalan santai" mengelilingi
- * perimeter viewport (atas → kanan → bawah → kiri → ulang).
- *
- * - Posisi digerakkan via requestAnimationFrame (transform saja, tanpa
- *   re-render React per frame), kecepatan 40–60px/detik dengan variasi acak.
- * - Rotasi otomatis per sisi (0/90/180/270) supaya kaki selalu "napak" ke
- *   tepi layar yang sedang dilewati.
- * - Animasi kaki terpisah dari posisi: CSS @keyframes pendek (0.4s) yang
- *   berjalan hanya saat spider bergerak (`spider-walking` class).
- * - Setiap 20–40 detik berhenti: idle 2–3 detik, atau (jika sedang di sisi
- *   atas) turun memakai benang jaring ke tengah layar, lalu naik lagi.
- * - prefers-reduced-motion: reduce → spider parkir statis, tidak bergerak.
- * - Perimeter di-re-measure ulang saat window di-resize.
- */
-
 const SIZE = 30;
 const SPEED_MIN = 40;
 const SPEED_MAX = 60;
@@ -26,14 +10,11 @@ const STOP_EVERY_MAX = 40000;
 const IDLE_MIN = 2000;
 const IDLE_MAX = 3000;
 const WEB_CHANCE = 0.45;
-const WEB_DROP_SPEED = 90; // px/s turun
-const WEB_RISE_SPEED = 120; // px/s naik
+const WEB_DROP_SPEED = 90;
+const WEB_RISE_SPEED = 120;
 
 type Mode = "walk" | "idle" | "webDown" | "webHang" | "webUp";
 
-// Kaki: titik tempel (x,y) + path melengkung (Q-curve) menjauhi badan.
-// `d` = delay animasi (s) supaya kaki-kaki saling bergantian.
-// Silhouette monokrom: badan 2 elips + 8 kaki, semua pakai currentColor.
 const LEGS: { x: number; y: number; d: string; delay: number }[] = [
   { x: 12.7, y: 13.2, d: "M0 0 Q -2.8 -4.5 -6.5 -6", delay: 0 },
   { x: 12.5, y: 15.4, d: "M0 0 Q -3 -2.6 -7 -3", delay: 0.1 },
@@ -57,10 +38,10 @@ export default function SpiderWalker() {
     const st = {
       w: 0,
       h: 0,
-      dist: 0, // jarak (px) di sepanjang perimeter
+      dist: 0,
       mode: "walk" as Mode,
       speed: SPEED_MIN,
-      nextStop: 0, // timestamp kapan berhenti berikutnya
+      nextStop: 0,
       idleUntil: 0,
       webX: 0,
       webY: 0,
@@ -77,8 +58,6 @@ export default function SpiderWalker() {
       st.dist = ((st.dist % perim) + perim) % perim;
     };
 
-    // Peta jarak perimeter → (x, y, rotasi). Spider digambar menghadap ke atas,
-    // jadi rotasi 0/90/180/270 membuat kaki "napak" ke tepi yang sedang dilewati.
     const pos = () => {
       const perim = 2 * (st.w + st.h);
       const d = ((st.dist % perim) + perim) % perim;
@@ -113,7 +92,6 @@ export default function SpiderWalker() {
     };
 
     const park = () => {
-      // Mode reduce-motion: spider statis di pojok kanan atas.
       applyPose(Math.max(SIZE + 12, st.w - 80), 0, 0);
       setThread(0);
       setWalking(false);
@@ -133,7 +111,6 @@ export default function SpiderWalker() {
           setWalking(true);
           if (now >= st.nextStop) {
             if (p.rot === 0 && st.w > 100 && Math.random() < WEB_CHANCE) {
-              // Di sisi atas → turun pakai benang jaring.
               st.mode = "webDown";
               st.webX = p.x;
               st.webY = 0;
@@ -196,7 +173,7 @@ export default function SpiderWalker() {
     };
 
     measure();
-    st.dist = st.w / 2; // mulai dari tengah sisi atas
+    st.dist = st.w / 2;
     st.last = performance.now();
     window.addEventListener("resize", measure);
 
@@ -222,7 +199,6 @@ export default function SpiderWalker() {
       className="spider-walker pointer-events-none fixed left-0 top-0 z-[99995] h-[30px] w-[30px]"
       style={{ willChange: "transform" }}
     >
-      {/* Benang jaring — di-resize dari JS saat mode web */}
       <div className="spider-thread" />
       <svg width={SIZE} height={SIZE} viewBox="0 0 30 30" fill="none" aria-hidden>
         {LEGS.map((l, i) => (
@@ -238,7 +214,6 @@ export default function SpiderWalker() {
             />
           </g>
         ))}
-        {/* Abdomen + kepala — silhouette monokrom */}
         <ellipse cx="15" cy="21.5" rx="5.2" ry="6" fill="currentColor" />
         <ellipse cx="15" cy="12.4" rx="3.3" ry="3" fill="currentColor" />
       </svg>

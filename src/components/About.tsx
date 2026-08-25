@@ -47,7 +47,6 @@ export default function About() {
                   >
                     <path d="M12 3v12M7 10l5 5 5-5M4 21h16" />
                   </svg>
-                  {/* growing underline */}
                   <span className="absolute -bottom-1 left-0 h-px w-0 bg-accent transition-all duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:w-full" />
                 </a>
               </Reveal>

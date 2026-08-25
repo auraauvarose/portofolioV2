@@ -7,14 +7,10 @@ type Props = {
   total: number;
   idx: number;
   onSlide: (i: number) => void;
-  /** ClassName for the Reveal wrapper (sizing). Default fills height. */
   revealClassName?: string;
   children: React.ReactNode;
 };
 
-/** Mobile-only single-card carousel. Controls (counter + arrows) sit ABOVE the
- *  card so they never overlap content; card re-mounts with a directional
- *  slide-in animation whenever the index changes. */
 export default function MobileCarousel({
   total,
   idx,
@@ -33,7 +29,6 @@ export default function MobileCarousel({
 
   return (
     <div>
-      {/* Controls above the card — never cover the content. */}
       <div className="mb-4 flex items-center justify-between">
         <span className="text-xs uppercase tracking-widest text-gray-500">
           {String(idx + 1).padStart(2, "0")} /{" "}
@@ -62,7 +57,6 @@ export default function MobileCarousel({
       </div>
 
       <Reveal className={revealClassName}>
-        {/* key remount replays the slide-in animation on every index change */}
         <div key={idx} className={changed ? dir : ""}>
           {children}
         </div>

@@ -19,12 +19,6 @@ export default function Marquee({
         >
           {label}
         </span>
-        {/* Star, vertically centred on the display text:
-            the star's outer box is given the SAME font-size as the text so the
-            translate offset below is expressed in the TEXT's em (not the star's
-            smaller em). With `items-center` both boxes are centred, and the
-            small correction accounts for the display font's glyphs sitting
-            visually high in their em box (Anton-style tall ascenders). */}
         <span
           className="inline-flex shrink-0 translate-y-[-0.09em] items-center justify-center text-5xl md:text-8xl"
           style={{ lineHeight: 1 }}
@@ -36,8 +30,6 @@ export default function Marquee({
       </span>
     ));
 
-  // ponytail: relative z-[1] — positioned hero wrapper (z-0) paints above non-positioned
-  // elements, so without this the pinned hero shows THROUGH the marquee strip.
   return (
     <div className="marquee-mask relative z-[1] overflow-hidden border-y border-white/5 bg-ink py-6">
       <div

@@ -1,9 +1,5 @@
 "use client";
 
-/**
- * Small thumbnail for admin list rows: shows the image preview, or a PDF badge
- * for PDF files, and nothing (empty box) when there is no file yet.
- */
 export default function FileThumb({ url }: { url: string | null }) {
   const isPdf = url
     ? (() => {

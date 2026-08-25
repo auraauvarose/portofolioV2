@@ -26,10 +26,8 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
   const [theme, setTheme] = useState<Theme>("dark");
-  // Reused to clear the theme-transition window timer on unmount + retoggle.
   const themeTimer = useRef<number | null>(null);
 
-  // Restore language + theme from localStorage, and apply theme class to <html>.
   useEffect(() => {
     const storedLang = window.localStorage.getItem("lang");
     if (storedLang === "en" || storedLang === "id") setLangState(storedLang);
@@ -44,7 +42,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Clean up the theme-transition timer on unmount.
   useEffect(
     () => () => {
       if (themeTimer.current) window.clearTimeout(themeTimer.current);
@@ -54,7 +51,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const applyTheme = useCallback((next: Theme) => {
     const root = document.documentElement;
-    // Brief transition window so colors crossfade smoothly on theme switch.
     root.classList.add("theme-anim");
     if (next === "light") {
       root.classList.remove("dark");

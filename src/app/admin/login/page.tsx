@@ -36,7 +36,6 @@ function LoginForm() {
 
   return (
     <div className="tv-static relative flex min-h-screen items-center justify-center overflow-hidden bg-ink px-6">
-      {/* ambient glow */}
       <div className="pointer-events-none absolute -left-24 top-1/4 h-[25rem] w-[25rem] rounded-full bg-accent/10 blur-[120px]" />
       <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 blur-[100px]" />
 

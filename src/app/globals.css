@@ -1,6 +1,5 @@
 @import "tailwindcss";
 
-/* Class-based dark mode (matches the reference site's next-themes approach) */
 @custom-variant dark (&:where(.dark, .dark *));
 
 @theme {
@@ -9,15 +8,15 @@
   --font-hero: var(--font-tanker), var(--font-cabinet), sans-serif;
   --font-serif: var(--font-zodiak), Georgia, serif;
 
-  /* Warm-neutral palette matching the reference site (Apriyanto Dwi Herlambang) */
+  /* Warm-neutral palette (Apriyanto Dwi Herlambang reference) */
   --color-accent: #eb5939; /* terracotta / warm orange accent */
   --color-accent-soft: #d5542f;
-  --color-ink: #0d0e13; /* near-black, slightly blue like the original */
+  --color-ink: #0d0e13;
   --color-panel: #13151c;
-  --color-ecru: #d6d0c4; /* warm off-white body text */
-  --color-khaki: #b7ab98; /* muted warm secondary text */
-  --color-fg: #ffffff; /* primary foreground (light override below) */
-  --color-muted: #9ca3af; /* secondary foreground (light override below) */
+  --color-ecru: #d6d0c4;
+  --color-khaki: #b7ab98;
+  --color-fg: #ffffff;
+  --color-muted: #9ca3af;
 
   --animate-marquee: marquee 30s linear infinite;
   --animate-marquee-reverse: marquee-reverse 30s linear infinite;
@@ -83,13 +82,6 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Brief global color-transition window toggled during a theme switch, so the
-   whole site crossfades smoothly between dark and light. `opacity` is included
-   so the hero's background artwork crossfades during the switch too.
-   Desktop only: transitioning EVERY element (incl. ::before/::after) for
-   400-500ms forces a full-page repaint that hangs on mobile GPUs (tap lag on
-   theme toggle). Coarse-pointer devices flip instantly instead; the hero
-   artwork still crossfades via its own component transitions. */
 @media (hover: hover) and (pointer: fine) {
   .theme-anim,
   .theme-anim *,
@@ -118,10 +110,6 @@ html {
   border-color: var(--color-accent);
 }
 
-/* ---------------------------------------------------------------------------
- * Light-mode adjustments (enabled via the theme toggle in the right rail).
- * The site is dark-first; these overrides keep it readable in `light`.
- * ------------------------------------------------------------------------- */
 :root:not(.dark) {
   --color-ink: #f4f4f5;
   --color-panel: #ffffff;
@@ -166,17 +154,16 @@ html {
 :root:not(.dark) .text-zinc-800 {
   color: #444444;
 }
-/* text-black: keep dark in light mode (it is already dark) */
 
-/* Loading curtain always sits on a dark backdrop (#0D0E13), so keep its text
-   white (not flipped to dark) even when the theme toggle is set to light. */
+/* Loading curtain always sits on a dark backdrop, so keep its text white
+   even when the theme toggle is set to light. */
 :root:not(.dark) .loading-curtain,
 :root:not(.dark) .loading-curtain .text-white,
 :root:not(.dark) .loading-curtain .text-display {
   color: #ffffff;
 }
 
-/* Subtle dark surfaces (bg-black/xx) used as light hovers / hairline fills */
+/* Subtle dark surfaces used as light hovers / hairline fills */
 :root:not(.dark) .bg-black\/5 {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -186,8 +173,7 @@ html {
 :root:not(.dark) .bg-black\/20 {
   background-color: rgba(0, 0, 0, 0.12);
 }
-/* Keep the strong overlays dark for photo/input contrast */
-/* (bg-black/40, /50, /60, /90 intentionally unchanged) */
+/* Strong overlays stay dark for photo/input contrast */
 
 /* White-tinted surfaces become dark-tinted in light mode */
 :root:not(.dark) [class*="bg-white/"] {
@@ -200,12 +186,10 @@ html {
   background-color: rgba(255, 255, 255, 0.85);
 }
 
-/* Opacity-tinted white text → dark in light mode (latent footgun safety) */
 :root:not(.dark) [class*="text-white/"] {
   color: #1c1c1e;
 }
 
-/* Light-mode surfaces that must stand out from the near-white page bg. */
 :root:not(.dark) .how-card {
   background-color: #ffffff;
   box-shadow: 0 8px 30px -12px rgba(0, 0, 0, 0.14);
@@ -219,9 +203,7 @@ html {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Carousel slide arrows (Certifications / Projects / Gallery): in light mode
-   keep them SOLID dark with WHITE arrows — the generic `.text-white` flip
-   above would turn the arrows dark gray on the translucent black button. */
+/* Carousel slide arrows: solid dark with white arrows in light mode */
 :root:not(.dark) button.carousel-arrow {
   background-color: #0d0e13;
   border-color: rgba(255, 255, 255, 0.2);
@@ -236,9 +218,6 @@ html {
 :root:not(.dark) .text-outline {
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
 }
-/* Marquee watermark — light mode: drop the outlined "border shadow" around the
-   letters AND the ghosted translucent look; use a solid, blended fill instead so
-   it reads as clean muted text that melts into the page (outline kept in dark). */
 :root:not(.dark) .marquee-mask .text-outline {
   -webkit-text-stroke: 0;
   color: #a8a29e;
@@ -256,18 +235,11 @@ html {
   color: inherit;
 }
 
-/* Scrollbar is fully hidden in every theme (see "Hide the scrollbar entirely"
-   below), so no light-mode scrollbar override is needed here. */
-
 body {
   background-color: var(--color-ink);
   color: var(--color-ecru);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
-  /* overflow-x: clip (NOT hidden): `hidden` turns body into a scroll container,
-     which breaks `position: sticky` on descendants (the hero reveal). `clip`
-     clips overflow identically but does NOT create a scroll container, so
-     sticky keeps working. */
   overflow-x: clip;
 }
 
@@ -276,10 +248,8 @@ body {
   color: #000;
 }
 
-/* Hide the scrollbar entirely across all browsers (Chrome / Brave / Edge /
-   Safari via WebKit pseudo-elements, Firefox via the standard property). We
-   still `overflow` so the page remains scrollable — only the visual bar is
-   gone. */
+/* Hide the scrollbar across all browsers (only the visual bar; page stays
+   scrollable). */
 ::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -298,36 +268,29 @@ body {
     letter-spacing: -0.02em;
     line-height: 0.92;
   }
-  /* Hero signature — Tanker, wide confident geometric (single weight 400).
-     Slight positive letter-spacing so the big all-caps lines breathe. */
   .text-hero {
     font-family: var(--font-hero);
     font-weight: 400;
     letter-spacing: 0.03em;
     line-height: 0.9;
   }
-  /* Comico — playful handwriting/comic display for the moving marquees. */
   .text-comico {
     font-family: var(--font-comico), ui-sans-serif, system-ui, sans-serif;
     font-weight: 400;
     letter-spacing: 0.01em;
     line-height: 1;
   }
-  /* Bevellier — display signature for section H2s + WhatIDo mega rows
-     (Fontshare "SemiBold" = weight 600). */
   .text-bevellier {
     font-family: var(--font-bevellier);
     font-weight: 600;
     letter-spacing: -0.02em;
     line-height: 0.92;
   }
-  /* Chillax SemiBold — About me body paragraphs (Fontshare "Semibold" = 600). */
   .text-chillax-semibold {
     font-family: var(--font-chillax);
     font-weight: 600;
     letter-spacing: 0.08em;
   }
-  /* Zodiak italic — editorial serif accent for hover-reveal labels. */
   .text-serif-accent {
     font-family: var(--font-serif);
     font-style: italic;
@@ -370,8 +333,7 @@ body {
     scrollbar-width: none;
   }
 
-  /* Film-grain / "TV static" overlay — fine black+white noise that shimmers,
-     giving the raw "ants / broken TV" texture. */
+  /* Film-grain / "TV static" overlay */
   .grain::before,
   .tv-static::before {
     content: "";
@@ -387,7 +349,6 @@ body {
     z-index: 90;
     mix-blend-mode: overlay;
   }
-  /* a second, faster vertical jitter layer for the "ants" feel */
   .tv-static::after {
     content: "";
     position: fixed;
@@ -471,8 +432,7 @@ body {
   white-space: pre-wrap;
 }
 
-/* Orange brand highlight for scroll-reveal words — theme-aware so it clears
-   WCAG contrast in BOTH themes (and at 20px body size on mobile). */
+/* Orange brand highlight for scroll-reveal words — theme-aware */
 .text-highlight {
   color: #ff7a50; /* lighter warm orange — ~7:1 on dark ink */
 }
@@ -480,19 +440,13 @@ body {
   color: #b3391f; /* darker terracotta — ~5.5:1 on light backgrounds */
 }
 
-/* On a WhatIDo row hover (or tap — `.is-active` on touch), force the words
-   fully opaque so the flipped title color (ink/near-black on the orange
-   overlay) stays legible regardless of the scroll-linked dim state. Only
-   applies inside a `group` row (not the bio). */
+/* On a WhatIDo row hover/tap, force words fully opaque */
 .group:hover .scroll-word-inner,
 .group.is-active .scroll-word-inner {
   opacity: 1 !important;
 }
 
-/* WhatIDo hover/tap: the scroll-reveal color animation sets inline `color` on
-   each word, which would otherwise beat the inherited group-hover text color —
-   force ink/black (theme-aware via --color-ink) so the title stays legible on
-   the orange overlay. */
+/* WhatIDo hover/tap: force ink/black on the orange overlay */
 #whatido .group:hover .scroll-word-inner,
 #whatido .group.is-active .scroll-word-inner {
   color: black !important;
@@ -529,9 +483,7 @@ body {
   }
 }
 
-/* ---------------------------------------------------------------------------
- * Music player equalizer — animated bars shown while the Spotify track plays.
- * ------------------------------------------------------------------------- */
+/* Music player equalizer — animated bars */
 .eq-bar {
   display: inline-block;
   width: 3px;
@@ -557,18 +509,11 @@ body {
   }
 }
 
-/* ---------------------------------------------------------------------------
- * Mobile / touch improvements
- * ------------------------------------------------------------------------- */
-
-/* Hard-stop any horizontal overflow at the root (complements body/main rules).
-   overflow-x: clip (NOT hidden) so the root does NOT become a scroll container,
-   which would break `position: sticky` (hero reveal) on descendants. */
 html {
   overflow-x: clip;
 }
 
-/* Tap targets: avoid the 300ms double-tap zoom delay and remove the flash. */
+/* Avoid 300ms tap delay and remove tap flash */
 button,
 a,
 [role="button"],
@@ -581,17 +526,14 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Tailwind v4 preflight leaves buttons at `cursor: default`; restore pointer
-   affordance for anything clickable. */
+/* Tailwind v4 preflight leaves buttons at `cursor: default`; restore pointer */
 button:not(:disabled),
 [role="button"]:not(:disabled),
 summary {
   cursor: pointer;
 }
 
-/* ---------------------------------------------------------------------------
- * Mobile menu + touch interactivity
- * ------------------------------------------------------------------------- */
+/* Mobile menu + touch interactivity */
 
 /* Staggered entrance for mobile menu items */
 @keyframes menu-item-in {
@@ -622,7 +564,7 @@ summary {
   animation: menu-fade-in 0.6s ease-out forwards;
 }
 
-/* Mobile carousel slide-in: content enters from the travel direction */
+/* Mobile carousel slide-in */
 @keyframes slide-in-right {
   from {
     opacity: 0;
@@ -656,7 +598,7 @@ summary {
   }
 }
 
-/* Tap feedback so hover-only effects still respond on touch screens */
+/* Tap feedback for touch screens */
 @media (hover: none) {
   .touch-active:active {
     transform: scale(0.94);
@@ -665,18 +607,14 @@ summary {
   button.menu-link:active {
     color: #eb5939;
   }
-  /* Hero character: kill the 3D tilt on touch devices. Touch scroll fires
-     pointermove per frame; a 3D-transformed full-screen layer gets re-rasterized
-     each frame on mobile GPUs (jank). The float animation + crossfade stay. */
+  /* Hero character: kill 3D tilt on touch devices */
   .hero-tilt-inner {
     transform: none !important;
     will-change: auto;
   }
 }
 
-/* Spider Walker — laba-laba yang patroli mengelilingi perimeter viewport.
-   Posisi digerakkan dari JS (rAF); animasi kaki di sini, terpisah, dan
-   hanya berjalan saat container punya class `spider-walking`. */
+/* Spider Walker — laba-laba yang patroli mengelilingi perimeter viewport */
 .spider-walker {
   /* Warna silhouette monokrom — mengikuti tema: putih di dark, hitam di light */
   color: var(--color-fg);
@@ -705,7 +643,7 @@ summary {
   );
   will-change: height, opacity;
 }
-/* Benang ikut tema: gelap di light mode biar tetap kelihatan */
+/* Benang ikut tema: gelap di light mode */
 :root:not(.dark) .spider-thread {
   background: linear-gradient(
     to bottom,
@@ -724,7 +662,7 @@ summary {
     transform: rotate(14deg);
   }
 }
-/* Scroll hint arrow — gentle bob down while at the top of the page. */
+/* Scroll hint arrow — gentle bob */
 @keyframes scroll-hint-bob {
   from {
     transform: translateY(-3px);

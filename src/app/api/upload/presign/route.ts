@@ -18,8 +18,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Enforce the max upload size (50 MB) server-side before handing out a
-    // presigned URL.
     if (typeof size === "number" && size > MAX_UPLOAD_BYTES) {
       return NextResponse.json(
         {

@@ -14,18 +14,14 @@ export default function Projects({ items }: { items: Project[] }) {
   const { t, lang } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Project | null>(null);
-  // Mobile carousel: which filtered item is shown as the big card.
   const [slide, setSlide] = useState(0);
-  // Desktop paged carousel: which page of 2 cards is shown.
   const [deskPage, setDeskPage] = useState(0);
 
-  // Reset both carousels to the first card whenever the filter changes.
   useEffect(() => {
     setSlide(0);
     setDeskPage(0);
   }, [active]);
 
-  // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
     if (!selected) return;
     const onKey = (e: KeyboardEvent) => {
@@ -47,8 +43,6 @@ export default function Projects({ items }: { items: Project[] }) {
   const filtered =
     active === "all" ? items : items.filter((p) => p.category === active);
 
-  // Single card renderer shared by the mobile slide scroller and the
-  // desktop grid so both stay in sync.
   const projectCard = (project: Project, i: number) => {
     const title = lang === "en" ? project.title_en : project.title_id;
     const description =
@@ -148,7 +142,6 @@ export default function Projects({ items }: { items: Project[] }) {
       <div className="mx-auto max-w-7xl">
         <SectionHeading kicker={work.kicker} heading={work.heading} index="07" />
 
-        {/* Filter */}
         <Reveal className="mb-10 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setActive("all")}
@@ -186,8 +179,6 @@ export default function Projects({ items }: { items: Project[] }) {
           </Reveal>
         ) : (
           <>
-            {/* Mobile: one big card at a time. Controls (counter + arrows)
-                sit ABOVE the card; card slides in from the travel direction. */}
             <div className="md:hidden">
               {(() => {
                 const idx = Math.min(slide, filtered.length - 1);
@@ -205,7 +196,6 @@ export default function Projects({ items }: { items: Project[] }) {
               })()}
             </div>
 
-            {/* Desktop: paged carousel — 2 cards per page, rest slides */}
             <div className="hidden md:block">
               {(() => {
                 const pages = chunk(filtered, 2);
@@ -232,9 +222,6 @@ export default function Projects({ items }: { items: Project[] }) {
         )}
       </div>
 
-      {/* Project popup — portaled to <body> so it escapes the ancestor
-          `relative z-[1]` stacking context and can truly paint ABOVE the nav
-          (z-100), social rail (z-40) and tv-static (z-90). */}
       {selected &&
         createPortal(
           <div
@@ -329,7 +316,6 @@ export default function Projects({ items }: { items: Project[] }) {
   );
 }
 
-// Split a list into fixed-size pages (desktop carousel shows 2 per page).
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));

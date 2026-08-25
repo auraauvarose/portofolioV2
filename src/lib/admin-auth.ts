@@ -5,19 +5,12 @@ import { ADMIN_COOKIE, computeSessionValue } from "@/lib/admin-cookie";
 
 export { ADMIN_COOKIE };
 
-/**
- * The exact cookie value we expect to find to consider a request "logged in".
- * Bound to a server-side secret so it isn't trivially forgeable. If no secret
- * is configured we fall back to the admin password itself.
- */
 function expectedSessionValue(): string {
   return computeSessionValue(ADMIN_COOKIE_SECRET || ADMIN_PASSWORD);
 }
 
 export function verifyAdminPassword(password: string): boolean {
   if (!ADMIN_PASSWORD) return false;
-  // Ignore accidental surrounding whitespace on the typed input too, matching
-  // the normalization applied to the stored password in config.ts.
   const a = String(password).trim();
   const b = String(ADMIN_PASSWORD);
   if (a.length !== b.length) return false;
@@ -49,10 +42,6 @@ export async function clearAdminCookie(): Promise<void> {
   store.delete(ADMIN_COOKIE);
 }
 
-/**
- * Guard for Route Handlers / Server Components: returns null when authed,
- * otherwise a 401 NextResponse that the caller should return immediately.
- */
 export async function requireAdmin() {
   if (await isAdmin()) return { error: null };
   return { error: NextResponse.json({ error: "Unauthorized" }, { status: 401 }) };

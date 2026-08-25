@@ -13,9 +13,7 @@ import type { GalleryPhoto } from "@/types";
 export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   const { t, lang } = useLanguage();
   const [lightbox, setLightbox] = useState<number | null>(null);
-  // Mobile carousel: which photo is shown as the big card.
   const [slide, setSlide] = useState(0);
-  // Desktop paged carousel: which page of 3 photos is shown.
   const [deskPage, setDeskPage] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
 
@@ -24,7 +22,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
       if (e.key === "Escape") closeLightbox();
     };
     window.addEventListener("keydown", onKey);
-    // Lock body scroll while the lightbox is open.
     document.body.style.overflow = lightbox !== null ? "hidden" : "";
     return () => {
       window.removeEventListener("keydown", onKey);
@@ -32,7 +29,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
     };
   }, [lightbox]);
 
-  // Track screen orientation (mobile only).
   useEffect(() => {
     if (typeof window === "undefined") return;
     const mql = window.matchMedia("(orientation: landscape)");
@@ -48,7 +44,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
       const orientation = screen.orientation as ScreenOrientation & {
         lock?: (o: "landscape") => Promise<void>;
       };
-      // Chrome/Android: orientation lock only works while fullscreen.
       if (!document.fullscreenElement) {
         await document.documentElement.requestFullscreen();
       }
@@ -77,8 +72,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
     screen.orientation?.unlock?.();
   }
 
-  // Single photo renderer shared by the mobile slide scroller and the
-  // desktop masonry so both stay in sync.
   const photoCard = (photo: GalleryPhoto, i: number) => {
     const title =
       lang === "en"
@@ -130,8 +123,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
           </Reveal>
         ) : (
           <>
-            {/* Mobile: one big photo at a time. Controls (counter + arrows)
-                sit ABOVE the photo; photo slides in from the travel direction. */}
             <div className="md:hidden">
               {(() => {
                 const idx = Math.min(slide, items.length - 1);
@@ -149,7 +140,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
               })()}
             </div>
 
-            {/* Desktop: paged carousel — 3 photos per page, rest slides */}
             <div className="hidden md:block">
               {(() => {
                 const pages = chunk(items, 3);
@@ -177,9 +167,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
         )}
       </div>
 
-      {/* Lightbox — portaled to <body> so it escapes the ancestor `relative
-          z-[1]` stacking context and truly paints ABOVE the nav (z-100),
-          social rail (z-40) and tv-static (z-90). */}
       {lightbox !== null &&
         items[lightbox] &&
         createPortal(
@@ -195,7 +182,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
               ✕
             </button>
 
-            {/* Portrait icon — top-right when landscape (mobile only) */}
             {isLandscape && (
               <button
                 className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
@@ -221,7 +207,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
               </button>
             )}
 
-            {/* Image + rotate button grouped together */}
             <div className="flex flex-col items-center gap-4">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -231,7 +216,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
                 onClick={(e) => e.stopPropagation()}
               />
 
-              {/* Rotate to landscape — below image (mobile only) */}
               <button
                 className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
                 onClick={(e) => {
@@ -263,7 +247,6 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
   );
 }
 
-// Split a list into fixed-size pages (desktop carousel shows 3 per page).
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));

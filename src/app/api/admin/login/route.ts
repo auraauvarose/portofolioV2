@@ -6,7 +6,6 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    // ignore malformed body
   }
 
   const password = typeof body.password === "string" ? body.password : "";

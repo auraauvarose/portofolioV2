@@ -13,25 +13,20 @@ import { techStack, techDescriptions, techLinks } from "@/lib/config";
 import { techIcon } from "@/components/tech-icons";
 import type { Localized } from "@/types";
 
-/* ---------------------------------------------------------------------------
- * Layout geometry (a radial mind map laid out on a fixed "world" canvas).
- * All coordinates are absolute pixels inside the world, centered on the
- * central node. Branches are spread around the four cardinal directions.
- * ------------------------------------------------------------------------- */
-
 const WORLD = 1200;
 const CENTER = WORLD / 2;
 const CENTER_POS: Vec = { x: CENTER, y: CENTER };
-const CAT_RADIUS = 210; // distance from center to category nodes
-const ITEM_RADIUS = 400; // distance from center to item chips
-const ITEM_SPACING = 132; // spacing between chips along a branch
-const CAT_ANGLES = [-90, 0, 90, 180]; // top, right, bottom, left (degrees)
+const CAT_RADIUS = 210;
+const ITEM_RADIUS = 400;
+const ITEM_SPACING = 132;
+const CAT_ANGLES = [-90, 0, 90, 180];
 
 const MIN_ZOOM = 0.28;
 const MAX_ZOOM = 2.4;
 const ZOOM_STEP = 1.1;
-const TILT_MAX = 3; // max parallax tilt in degrees
-const FIT_PAD = 100; // padding around the map when auto-fitting
+const TILT_MAX = 3;
+const FIT_PAD = 100;
+const HOVER_R = 88;
 
 type Vec = { x: number; y: number };
 
@@ -55,8 +50,6 @@ type Gesture = {
   midY: number;
 };
 
-// Hover tooltip state in screen-space (outside the scaled world, so it never
-// gets blurred by the world transform or clipped by world bounds).
 type Tip = { label: string; x: number; y: number; above: boolean };
 
 function clamp(v: number, min: number, max: number) {
@@ -67,7 +60,6 @@ function buildLayout(): CategoryNode[] {
   return techStack.categories.map((cat, i) => {
     const angle = CAT_ANGLES[i % CAT_ANGLES.length];
     const a = (angle * Math.PI) / 180;
-    // outward (radial) unit vector and its perpendicular
     const ux = Math.cos(a);
     const uy = Math.sin(a);
     const vx = -uy;
@@ -115,11 +107,9 @@ function getMapSize(layout: CategoryNode[]) {
   return { w: maxX - minX, h: maxY - minY };
 }
 
-// Deterministic layout + bounds computed once at module load.
 const LAYOUT = buildLayout();
 const MAP_SIZE = getMapSize(LAYOUT);
 
-/** Quadratic bezier between two world points with a gentle outward bow. */
 function makePath(a: Vec, b: Vec, bow = 0.14) {
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
@@ -134,10 +124,6 @@ function makePath(a: Vec, b: Vec, bow = 0.14) {
   return `M ${a.x} ${a.y} Q ${cx} ${cy} ${b.x} ${b.y}`;
 }
 
-/* ---------------------------------------------------------------------------
- * Positioning wrapper: places a node at world coordinates, applies 3D depth
- * (translateZ) and the staggered entrance animation (scale + fade).
- * ------------------------------------------------------------------------- */
 function Node({
   x,
   y,
@@ -177,7 +163,6 @@ export default function TechStack() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Camera state (pan in px, zoom as scale, tilt for parallax).
   const [panState, setPanState] = useState<Vec>({ x: 0, y: 0 });
   const [zoomState, setZoomState] = useState(1);
   const [tilt, setTilt] = useState<Vec>({ x: 0, y: 0 });
@@ -188,7 +173,6 @@ export default function TechStack() {
   const [resetting, setResetting] = useState(false);
   const [entered, setEntered] = useState(false);
 
-  // Refs mirror camera state so gesture/zoom math never reads stale values.
   const panRef = useRef<Vec>({ x: 0, y: 0 });
   const zoomRef = useRef(1);
 
@@ -196,6 +180,7 @@ export default function TechStack() {
   const gestureRef = useRef<Gesture | null>(null);
   const hoverTimerRef = useRef<number | null>(null);
   const resetTimerRef = useRef<number | null>(null);
+  const hoveredRef = useRef<number | null>(null);
 
   const setPan = useCallback((p: Vec) => {
     panRef.current = p;
@@ -207,7 +192,6 @@ export default function TechStack() {
     setZoomState(z);
   }, []);
 
-  // Initial fit + entrance animation (client only).
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -231,12 +215,11 @@ export default function TechStack() {
     setEntered(true);
   }, [setPan, setZoom]);
 
-  // Native non-passive wheel listener for zoom-to-cursor.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const onWheel = (e: WheelEvent) => {
-      if (e.ctrlKey || e.metaKey) return; // allow browser pinch / ctrl-zoom
+      if (e.ctrlKey || e.metaKey) return;
       e.preventDefault();
       const rect = el.getBoundingClientRect();
       const px = e.clientX - rect.left;
@@ -257,13 +240,72 @@ export default function TechStack() {
     return () => el.removeEventListener("wheel", onWheel);
   }, [setPan, setZoom]);
 
-  // Pointer gesture handlers (mouse drag + touch pan/pinch).
+  const activate = useCallback((i: number) => {
+    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
+    hoveredRef.current = i;
+    setHovered(i);
+  }, []);
+
+  const deactivate = useCallback(() => {
+    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = window.setTimeout(() => {
+      hoveredRef.current = null;
+      setHovered(null);
+      setTip(null);
+    }, 90);
+  }, []);
+
+  const placeTip = useCallback((label: string, wx: number, wy: number) => {
+    const c = containerRef.current;
+    if (!c) return;
+    const cr = c.getBoundingClientRect();
+    const zoom = zoomRef.current;
+    const pan = panRef.current;
+    const sx = cr.width / 2 + (wx - CENTER) * zoom + pan.x;
+    const sy = cr.height / 2 + (wy - CENTER) * zoom + pan.y;
+    const x = Math.min(Math.max(sx, 128), cr.width - 128);
+    const above = sy - 170 > 0;
+    setTip({ label, x, y: above ? sy - 24 : sy + 24, above });
+  }, []);
+
+  const trackHover = useCallback((clientX: number, clientY: number) => {
+    const c = containerRef.current;
+    if (!c) return;
+    const cr = c.getBoundingClientRect();
+    const zoom = zoomRef.current;
+    const pan = panRef.current;
+    const wx = (clientX - cr.left - cr.width / 2 - pan.x) / zoom + CENTER;
+    const wy = (clientY - cr.top - cr.height / 2 - pan.y) / zoom + CENTER;
+    let best: { label: string; cat: number; d2: number; wx: number; wy: number } | null = null;
+    for (let ci = 0; ci < LAYOUT.length; ci++) {
+      const cat = LAYOUT[ci];
+      for (let j = 0; j < cat.items.length; j++) {
+        const it = cat.items[j];
+        const dx = it.pos.x - wx;
+        const dy = it.pos.y - wy;
+        const d2 = dx * dx + dy * dy;
+        if (d2 <= HOVER_R * HOVER_R && (!best || d2 < best.d2)) {
+          best = { label: it.label, cat: ci, d2, wx: it.pos.x, wy: it.pos.y };
+        }
+      }
+    }
+    if (best) {
+      if (hoverTimerRef.current) {
+        window.clearTimeout(hoverTimerRef.current);
+        hoverTimerRef.current = null;
+      }
+      hoveredRef.current = best.cat;
+      setHovered(best.cat);
+      if (techDescriptions[best.label]) placeTip(best.label, best.wx, best.wy);
+    } else if (hoveredRef.current !== null) {
+      deactivate();
+    }
+  }, [deactivate, placeTip]);
+
   const onPointerDown = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
       if (e.pointerType === "mouse" && e.button !== 0) return;
-      // Don't hijack the press when it starts on an interactive control
-      // (e.g. the Reset button). setPointerCapture would otherwise swallow
-      // the resulting click event and the button would do nothing.
       const target = e.target as HTMLElement | null;
       if (target && target.closest("button, a, input, [role='button']")) return;
 
@@ -308,11 +350,18 @@ export default function TechStack() {
 
   const onPointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
+      if (e.pointerType === "mouse" && !gestureRef.current) {
+        trackHover(e.clientX, e.clientY);
+      }
+
       if (!pointersRef.current.has(e.pointerId)) return;
       pointersRef.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
 
-      // Parallax tilt follows the mouse only (not touch).
-      if (e.pointerType === "mouse" && containerRef.current) {
+      if (
+        e.pointerType === "mouse" &&
+        containerRef.current &&
+        hoveredRef.current === null
+      ) {
         const rect = containerRef.current.getBoundingClientRect();
         const nx = (e.clientX - rect.left) / rect.width - 0.5;
         const ny = (e.clientY - rect.top) / rect.height - 0.5;
@@ -343,7 +392,7 @@ export default function TechStack() {
         }
       }
     },
-    [setPan, setZoom],
+    [setPan, setZoom, trackHover],
   );
 
   const releasePointer = useCallback((id: number) => {
@@ -380,6 +429,11 @@ export default function TechStack() {
 
   const onPointerLeave = useCallback(() => {
     setTilt({ x: 0, y: 0 });
+    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
+    hoverTimerRef.current = null;
+    hoveredRef.current = null;
+    setHovered(null);
+    setTip(null);
   }, []);
 
   const reset = useCallback(() => {
@@ -390,37 +444,6 @@ export default function TechStack() {
     if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
     resetTimerRef.current = window.setTimeout(() => setResetting(false), 500);
   }, [defaultZoom, setPan, setZoom]);
-
-  // Branch highlight (with a short debounce so moving between sibling
-  // chips in the same category doesn't flicker).
-  const activate = useCallback((i: number) => {
-    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
-    hoverTimerRef.current = null;
-    setHovered(i);
-  }, []);
-
-  const deactivate = useCallback(() => {
-    if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
-    hoverTimerRef.current = window.setTimeout(() => {
-      setHovered(null);
-      setTip(null);
-    }, 90);
-  }, []);
-
-  // Place the tooltip above the chip, flipping below when the chip sits near
-  // the top edge of the container so it never gets clipped.
-  const showTip = useCallback((label: string, el: HTMLElement) => {
-    const c = containerRef.current;
-    if (!c) return;
-    const cr = c.getBoundingClientRect();
-    const r = el.getBoundingClientRect();
-    if (r.width === 0) return;
-    const x = Math.min(Math.max(r.left - cr.left + r.width / 2, 128), cr.width - 128);
-    const y = r.top - cr.top;
-    const h = r.height;
-    const above = y - 170 > 0;
-    setTip({ label, x, y: above ? y - 8 : y + h + 8, above });
-  }, []);
 
   useEffect(() => {
     return () => {
@@ -458,7 +481,6 @@ export default function TechStack() {
           }`}
           style={{ perspective: "1400px" }}
         >
-          {/* Decorative background: dot grid + accent glow with parallax. */}
           <div
             aria-hidden
             className="pointer-events-none absolute inset-0 transition-transform duration-150 ease-out"
@@ -474,7 +496,6 @@ export default function TechStack() {
             }}
           />
 
-          {/* World canvas */}
           <div
             className={`absolute left-1/2 top-1/2 ${worldTransition}`}
             style={{
@@ -485,7 +506,6 @@ export default function TechStack() {
               willChange: "transform",
             }}
           >
-            {/* Soft glow behind the central node */}
             <div
               aria-hidden
               className="absolute rounded-full blur-2xl"
@@ -499,7 +519,6 @@ export default function TechStack() {
               }}
             />
 
-            {/* Connector lines */}
             <svg
               className="absolute inset-0 h-full w-full overflow-visible"
               viewBox={`0 0 ${WORLD} ${WORLD}`}
@@ -537,7 +556,6 @@ export default function TechStack() {
               })}
             </svg>
 
-            {/* Central node */}
             <Node x={CENTER} y={CENTER} depth={40} delay={0} entered={entered}>
               <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-2 border-accent/60 bg-panel text-center shadow-[0_30px_80px_-20px_rgba(235,89,57,0.55)] transition-all duration-300 hover:scale-105 hover:border-accent hover:shadow-[0_36px_90px_-20px_rgba(235,89,57,0.75)] md:h-48 md:w-48">
                 <span
@@ -561,7 +579,6 @@ export default function TechStack() {
               </div>
             </Node>
 
-            {/* Category nodes + item chips */}
             {LAYOUT.map((cat, i) => (
               <div key={i}>
                 <Node x={cat.pos.x} y={cat.pos.y} depth={18} delay={140 + i * 120} entered={entered}>
@@ -595,25 +612,23 @@ export default function TechStack() {
                       rel={link ? "noreferrer" : undefined}
                       role={link ? undefined : "button"}
                       tabIndex={link ? undefined : -1}
-                      onMouseEnter={(e) => {
-                        activate(i);
-                        if (tipEnabled) showTip(it.label, e.currentTarget);
-                      }}
-                      onMouseLeave={deactivate}
-                      onFocus={(e) => {
-                        activate(i);
-                        if (tipEnabled) showTip(it.label, e.currentTarget);
+                      draggable={false}
+                      onFocus={() => {
+                        hoveredRef.current = i;
+                        setHovered(i);
+                        if (tipEnabled) placeTip(it.label, it.pos.x, it.pos.y);
                       }}
                       onBlur={deactivate}
                       onClick={(e) => {
                         if (!link) e.preventDefault();
                       }}
-                      className="group relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 no-underline shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:scale-110 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
+                      className="group relative flex cursor-pointer items-center gap-2 whitespace-nowrap rounded-full border border-black/10 bg-panel px-4 py-2 text-sm font-medium text-zinc-700 no-underline shadow-[0_8px_24px_-10px_rgba(0,0,0,0.5)] transition-all duration-300 hover:border-accent/70 hover:text-accent hover:shadow-[0_16px_40px_-12px_rgba(235,89,57,0.55)] dark:border-white/10 dark:text-gray-300"
                     >
                       <span className="text-zinc-500 transition-colors group-hover:text-accent dark:text-gray-500">
                         {techIcon(it.label, "h-4 w-4")}
                       </span>
                       {it.label}
+                      <span aria-hidden className="absolute -inset-1.5 rounded-full" />
                     </a>
                   </Node>
                 );
@@ -622,8 +637,6 @@ export default function TechStack() {
             ))}
           </div>
 
-          {/* Hover tooltip card — rendered in screen space (outside the scaled
-              world) so it stays crisp and never gets clipped. */}
           {tip && techDescriptions[tip.label] && (
             <div
               role="tooltip"
@@ -647,7 +660,6 @@ export default function TechStack() {
             </div>
           )}
 
-          {/* Reset button */}
           <button
             type="button"
             onClick={reset}
@@ -670,7 +682,6 @@ export default function TechStack() {
             {t({ en: "Reset", id: "Reset" })}
           </button>
 
-          {/* Hint */}
           <div className="pointer-events-none absolute bottom-4 left-4 z-20 text-[11px] uppercase tracking-[0.18em] text-zinc-500 dark:text-gray-500">
             {t({ en: "Drag to pan · Scroll to zoom", id: "Seret untuk geser · Scroll untuk zoom" })}
           </div>

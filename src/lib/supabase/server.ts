@@ -2,10 +2,6 @@ import { createServerClient } from "@supabase/ssr";
 import type { CookieOptions } from "@supabase/ssr";
 import { cookies } from "next/headers";
 
-/**
- * Server-side Supabase client (for Server Components, Route Handlers, Middleware).
- * Reads the auth session from the request cookies.
- */
 export async function createSupabaseServer() {
   const cookieStore = await cookies();
 
@@ -24,10 +20,7 @@ export async function createSupabaseServer() {
             cookiesToSet.forEach(({ name, value, options }) =>
               cookieStore.set(name, value, options),
             );
-          } catch {
-            // Called from a Server Component — safe to ignore when middleware
-            // is refreshing sessions.
-          }
+          } catch {}
         },
       },
     },

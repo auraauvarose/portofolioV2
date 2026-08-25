@@ -1,10 +1,9 @@
 -- ============================================================================
 -- Portfolio V2 — Supabase schema
--- Run this whole file in: Supabase Dashboard → SQL Editor → New query → Run
+-- Run in: Supabase Dashboard → SQL Editor → New query → Run
 -- ============================================================================
 
--- ---------------------------------------------------------------------------
--- 1. Projects (Selected Works)
+-- 1. Projects
 -- ---------------------------------------------------------------------------
 create table if not exists public.projects (
   id            uuid primary key default gen_random_uuid(),

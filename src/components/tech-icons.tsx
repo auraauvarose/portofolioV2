@@ -1,8 +1,3 @@
-// Brand icons for the Tech Stack mind map chips.
-// Official brand paths from simple-icons (CC0), inlined as 24×24 SVGs.
-// Labels with no brand glyph (SQL, Bash CLI, VS Code) fall back to generic
-// outline icons so every chip still gets a mark.
-
 type IconProps = { className?: string };
 
 function Brand({
@@ -147,8 +142,6 @@ export function CppIcon(p: IconProps) {
   );
 }
 
-/* --- Generic fallbacks (no single-brand glyph) ---------------------------- */
-
 export function DatabaseIcon(p: IconProps) {
   return (
     <svg
@@ -204,7 +197,6 @@ export function CodeIcon(p: IconProps) {
   );
 }
 
-/** Resolve the brand icon for a tech-stack label (case-insensitive). */
 export function techIcon(label: string, className?: string) {
   const l = label.toLowerCase();
   if (l.includes("javascript")) return <JsIcon className={className} />;

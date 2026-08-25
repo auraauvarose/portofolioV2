@@ -3,15 +3,6 @@
 import { useEffect, useState } from "react";
 import { subscribeMusic, toggleMusic } from "@/lib/music";
 
-/**
- * MusicPlayer — a compact play/pause toggle backed by a single shared
- * background-music track (see src/lib/music.ts). While "playing" it shows an
- * animated equalizer.
- *
- * Desktop usage: sits in the right rail above the EN/ID toggle (Sidebars).
- * Mobile usage: sits at the very bottom of the mobile menu (Nav).
- * The `variant` prop switches the button styling / size.
- */
 export default function MusicPlayer({
   variant = "rail",
 }: {
@@ -19,8 +10,6 @@ export default function MusicPlayer({
 }) {
   const [playing, setPlaying] = useState(false);
 
-  // Reflect the shared playback state (both the rail and menu buttons stay in
-  // sync through the single audio store).
   useEffect(() => {
     return subscribeMusic(setPlaying);
   }, []);
@@ -68,10 +57,7 @@ export default function MusicPlayer({
   );
 }
 
-/* ----------------------------- Icons ------------------------------------- */
-
-function PlayIcon({ className }: { className?: string }) {
-  return (
+function PlayIcon({ className }: { className?: string }) {  return (
     <svg
       width="14"
       height="14"
@@ -85,7 +71,6 @@ function PlayIcon({ className }: { className?: string }) {
   );
 }
 
-/** Three animated equalizer bars — pulse with independent timing while playing. */
 function Equalizer({ className }: { className?: string }) {
   return (
     <span

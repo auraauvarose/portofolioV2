@@ -1,19 +1,9 @@
 import type { Localized } from "@/types";
 
-// --- Admin auth -------------------------------------------------------------
-// Password-only admin gate. Prefer setting ADMIN_PASSWORD in .env.local; this
-// value acts as the "stored in code" fallback/seed so /admin works out of the box.
-// Trim surrounding whitespace: env vars pasted into dashboards (e.g. Vercel)
-// often pick up a stray trailing/leading space, which silently changes the
-// effective password and makes the real one get rejected.
 export const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD ?? "aura2007").trim();
-// Optional extra secret to bind the session cookie value. If unset, derived
-// from ADMIN_PASSWORD.
 export const ADMIN_COOKIE_SECRET =
   process.env.ADMIN_COOKIE_SECRET ?? "";
 
-// --- Uploads ---------------------------------------------------------------
-// Max allowed file upload size in bytes (50 MB).
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export const profile = {
@@ -221,7 +211,6 @@ export const techStack = {
   ],
 } as const;
 
-// Hover descriptions for each TechStack item chip (shown as a tooltip card).
 export const techDescriptions: Record<string, Localized> = {
   JavaScript: {
     en: "The programming language of the web — powers interactive pages and server logic.",
@@ -293,7 +282,6 @@ export const techDescriptions: Record<string, Localized> = {
   },
 };
 
-// Official site per tech item — chips link out on click.
 export const techLinks: Record<string, string> = {
   JavaScript: "https://developer.mozilla.org/en-US/docs/Web/JavaScript",
   TypeScript: "https://www.typescriptlang.org/",

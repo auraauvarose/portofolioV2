@@ -20,18 +20,14 @@ export default function Certifications({
   const { t } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Certification | null>(null);
-  // Mobile carousel: which filtered item is shown as the big card.
   const [slide, setSlide] = useState(0);
-  // Desktop paged carousel: which page of 3 cards is shown.
   const [deskPage, setDeskPage] = useState(0);
 
-  // Reset both carousels to the first card whenever the filter changes.
   useEffect(() => {
     setSlide(0);
     setDeskPage(0);
   }, [active]);
 
-  // Close the popup on Escape / lock body scroll while open.
   useEffect(() => {
     if (!selected) return;
     const onKey = (e: KeyboardEvent) => {
@@ -48,8 +44,6 @@ export default function Certifications({
   const filtered =
     active === "all" ? items : items.filter((c) => c.category === active);
 
-  // Single card renderer shared by the mobile slide scroller and the
-  // desktop grid so both stay in sync.
   const certCard = (cert: Certification) => (
     <Tilt3D className="h-full">
       <article
@@ -119,7 +113,6 @@ export default function Certifications({
           {t(certifications.description)}
         </Reveal>
 
-        {/* Category filter */}
         <Reveal className="mb-10 flex flex-wrap gap-3">
           <button
             onClick={() => setActive("all")}
@@ -157,8 +150,6 @@ export default function Certifications({
           </Reveal>
         ) : (
           <>
-            {/* Mobile: one big card at a time. Controls (counter + arrows)
-                sit ABOVE the card; card slides in from the travel direction. */}
             <div className="md:hidden">
               {(() => {
                 const idx = Math.min(slide, filtered.length - 1);
@@ -176,7 +167,6 @@ export default function Certifications({
               })()}
             </div>
 
-            {/* Desktop: paged carousel — 3 cards per page, rest slides */}
             <div className="hidden md:block">
               {(() => {
                 const pages = chunk(filtered, 3);
@@ -203,9 +193,6 @@ export default function Certifications({
         )}
       </div>
 
-      {/* Certification popup — portaled to <body> so it escapes the ancestor
-          `relative z-[1]` stacking context and can truly paint ABOVE the nav
-          (z-100), social rail (z-40) and tv-static (z-90). */}
       {selected &&
         createPortal(
           <div
@@ -228,8 +215,6 @@ export default function Certifications({
             onClick={(e) => e.stopPropagation()}
           >
             {selected.image_url ? (
-              // Full-bleed image: natural aspect so there are no leftover
-              // left/right bars — the popup focuses purely on the document.
               <div className="flex w-full items-center justify-center bg-black/40">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -283,7 +268,6 @@ export default function Certifications({
   );
 }
 
-// Small helper so the component can pick title based on active language.
 function lang_title(
   cert: Certification,
   t: (v: { en: string; id: string }) => string,
@@ -291,7 +275,6 @@ function lang_title(
   return t({ en: cert.title_en, id: cert.title_id });
 }
 
-// Split a list into fixed-size pages (desktop carousel shows 3 per page).
 function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));

@@ -3,16 +3,6 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers";
 
-/* Self-hosted Fontshare fonts (see scripts/download-fonts.sh to refresh).
-   Modern-minimalist type system — each role has its own voice so the page
-   feels designed, not templated:
-
-   - Switzer       → body / UI  (warm humanist grotesque; replaces General Sans)
-   - Tanker        → HERO      (single-weight wide geometric signature)
-   - Cabinet Grotesk → display  (workhorse for marquees, card titles, nav)
-   - Comico        → marquee   (playful handwriting/comic display strip)
-   - Bevellier     → section H2s + WhatIDo mega rows (display signature)
-   - Zodiak Italic → editoral serif accent for hover-reveal labels */
 const switzer = localFont({
   src: [
     { path: "../../public/fonts/Switzer-400.woff2", weight: "400", style: "normal" },
@@ -93,7 +83,6 @@ export default function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="antialiased">
-        {/* Theme boot — apply persisted theme before hydration to avoid FOUC */}
         <script
           dangerouslySetInnerHTML={{
             __html: `(function(){try{var t=localStorage.getItem('theme');var dark=t==='light'?false:(t==='dark'?true:true);var r=document.documentElement;if(dark){r.classList.add('dark');r.style.colorScheme='dark';}else{r.classList.remove('dark');r.style.colorScheme='light';}}catch(e){}})();`,

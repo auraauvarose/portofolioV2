@@ -1,12 +1,3 @@
-/**
- * Inspect and (optionally) set the CORS policy on the Cloudflare R2 bucket.
- *
- * R2 is S3-compatible, so this uses the AWS S3 API against the R2 endpoint.
- *
- * Usage:
- *   node scripts/check-r2-cors.mjs            # read-only: print current CORS
- *   node scripts/check-r2-cors.mjs --apply    # set the README CORS policy if absent
- */
 import fs from "node:fs";
 import path from "node:path";
 import {
@@ -15,7 +6,6 @@ import {
 } from "@aws-sdk/client-s3";
 import { S3Client } from "@aws-sdk/client-s3";
 
-// Load environment from .env.local (project root) without needing dotenv.
 const root = process.cwd();
 const envPath = path.join(root, ".env.local");
 if (fs.existsSync(envPath)) {
@@ -52,7 +42,6 @@ const client = new S3Client({
   credentials: { accessKeyId, secretAccessKey },
 });
 
-// The CORS policy documented in README §2.
 const recommendedRules = [
   {
     AllowedOrigins: ["*"],
@@ -71,7 +60,7 @@ async function getCors() {
     return res.CORSRules ?? [];
   } catch (err) {
     if (String(err?.$metadata?.httpStatusCode) === "404") {
-      return []; // no CORS policy configured
+      return [];
     }
     throw err;
   }
@@ -92,7 +81,6 @@ const allowsPut =
   );
 
 if (apply) {
-  // Only overwrite when there is no policy, or when it doesn't allow PUT.
   if (missing || !allowsPut) {
     await client.send(
       new PutBucketCorsCommand({

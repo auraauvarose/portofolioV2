@@ -6,7 +6,6 @@ import { nav, profile } from "@/lib/config";
 import { socialIcon } from "@/components/social-icons";
 import MusicPlayer from "@/components/MusicPlayer";
 
-// Ordered menu → anchor mapping (matches reference header).
 const ANCHORS = ["#about", "#work", "#contact"];
 
 const PROFILE_IMG = "/profile.png";
@@ -16,7 +15,6 @@ export default function Nav() {
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
-  // Close the mobile menu / profile popup on Escape.
   useEffect(() => {
     if (!open && !profileOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -29,7 +27,6 @@ export default function Nav() {
     return () => window.removeEventListener("keydown", onKey);
   }, [open, profileOpen]);
 
-  // Lock body scroll while the mobile menu or profile popup is open.
   useEffect(() => {
     document.body.style.overflow = open || profileOpen ? "hidden" : "";
     return () => {
@@ -40,7 +37,6 @@ export default function Nav() {
   return (
     <>
       <header className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-6 py-6 md:px-12 md:py-8">
-        {/* Logo — round profile photo, clickable to view a larger popup */}
         <button
           type="button"
           onClick={() => setProfileOpen(true)}
@@ -55,7 +51,6 @@ export default function Nav() {
           />
         </button>
 
-        {/* Menu — vertical, right-aligned, dual-layer rollover animation (desktop) */}
         <nav className="pointer-events-auto hidden flex-col items-end gap-1 md:flex">
           {nav.map((item, i) => {
             const anchor = ANCHORS[i] ?? "#";
@@ -78,7 +73,6 @@ export default function Nav() {
           })}
         </nav>
 
-        {/* Mobile hamburger toggle */}
         <button
           type="button"
           onClick={() => setOpen((v) => !v)}
@@ -107,7 +101,6 @@ export default function Nav() {
         </button>
       </header>
 
-      {/* Mobile full-screen menu overlay */}
       <div
         id="mobile-menu"
         className={`fixed inset-0 z-[95] flex flex-col items-center justify-center gap-2 bg-ink/95 px-6 backdrop-blur-xl transition-opacity duration-300 md:hidden ${
@@ -131,7 +124,6 @@ export default function Nav() {
           </a>
         ))}
 
-        {/* Controls: language + theme toggle */}
         <div className="menu-fade-in mt-10 flex items-center gap-4" style={open ? { animationDelay: `${nav.length * 70 + 160}ms` } : undefined}>
           <button
             onClick={() => setLang("en")}
@@ -168,7 +160,6 @@ export default function Nav() {
           </button>
         </div>
 
-        {/* Socials — icon-only logos */}
         <div className="menu-fade-in mt-8 flex items-center gap-5" style={open ? { animationDelay: `${nav.length * 70 + 240}ms` } : undefined}>
           {profile.socials.map((s) => (
             <a
@@ -185,13 +176,11 @@ export default function Nav() {
           ))}
         </div>
 
-        {/* Music player — pinned at the very bottom of the mobile menu */}
         <div className="mt-10 mb-2">
           <MusicPlayer variant="menu" />
         </div>
       </div>
 
-      {/* Profile photo popup */}
       {profileOpen && (
         <div
           className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
@@ -208,8 +197,6 @@ export default function Nav() {
           >
             ✕
           </button>
-          {/* Square frame — image cropped to a neat square (matching the round
-              avatar crop) and enlarged so it reads as a big framed picture. */}
           <div
             className="max-h-[85vh] w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}

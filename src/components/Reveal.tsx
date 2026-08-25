@@ -9,7 +9,6 @@ type RevealProps = {
   as?: keyof React.JSX.IntrinsicElements;
 };
 
-/** Fades + slides content in when it scrolls into view. */
 export default function Reveal({
   children,
   className = "",

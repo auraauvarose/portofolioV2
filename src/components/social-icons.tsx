@@ -1,7 +1,3 @@
-// Shared social-media icons (used by the side rails and the mobile menu).
-// Each icon is a self-contained component; `socialIcon(label)` resolves the
-// right icon for a profile.socials label.
-
 type IconProps = { className?: string };
 
 export function GithubIcon({ className }: IconProps) {
@@ -58,7 +54,6 @@ export function LinkedinIcon({ className }: IconProps) {
   );
 }
 
-/** Resolve the icon for a social label (case-insensitive, matches config labels). */
 export function socialIcon(label: string, className?: string) {
   const l = label.toLowerCase();
   if (l.includes("github")) return <GithubIcon className={className} />;

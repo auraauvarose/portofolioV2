@@ -12,7 +12,6 @@ export async function middleware(request: NextRequest) {
 
   const isLoginPage = path === "/admin/login";
 
-  // Protect the whole /admin area except the login page itself.
   if (path.startsWith("/admin") && !loggedIn && !isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
@@ -20,7 +19,6 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  // Already logged in → skip the login page.
   if (loggedIn && isLoginPage) {
     const url = request.nextUrl.clone();
     url.pathname = "/admin";
@@ -32,7 +30,6 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-  // /admin pages + the admin data/upload API routes (login/logout stay open).
   matcher: [
     "/admin/:path*",
     "/api/projects/:path*",

@@ -1,17 +1,5 @@
 #!/usr/bin/env bash
 # Download Fontshare fonts as self-hosted woff2 for the portfolio's type system.
-#
-# Type system (each role has a distinct voice — modern-minimalist):
-#   Switzer   400-700   → body / UI            (replaces General Sans)
-#   Tanker    400       → HERO signature        (requested)
-#   Cabinet Grotesk     → display workhorse: marquees, card titles, nav, loading
-#   Comico    400       → moving marquee strips (playful handwriting/comic)
-#   Bevellier 600/700   → section H2s + WhatIDo mega rows (display signature)
-#   Zodiak    700 italic→ editorial serif accent for hover-reveal labels
-#
-# Source: the Fontshare catalog endpoint (api.fontshare.com/v2/fonts) is NOT
-# rate-limited (unlike the /v2/css API), and each style's `file` path points
-# straight at the CDN woff2. We append ".woff2" to that path.
 set -euo pipefail
 
 DIR="$(dirname "$0")/../public/fonts"

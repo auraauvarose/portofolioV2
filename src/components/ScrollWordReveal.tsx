@@ -13,52 +13,17 @@ import {
 type ScrollWordRevealProps = {
   text: string;
   className?: string;
-  /** Opacity of words before they've entered their scroll range. Keep it
-      readable (0.35–0.5) for body copy so centered text is never illegible —
-      0.15 leaves it nearly invisible on a dark background. */
   baseOpacity?: number;
-  /** Opacity once a word is fully in its scroll range. */
   fullOpacity?: number;
-  /** Fraction (0..1) of viewport travel over which the WHOLE word scan
-      completes. Lower = words finish lighting sooner (more readable while
-      centered). 0.5–0.6 => the last word is full once the block is centered. */
   scanRange?: number;
-  /** Color of words before they enter their scroll range (inherited from the
-      parent's `color` when omitted — no per-word color animation). */
   baseColor?: string;
-  /** Color once a word is fully lit. When both baseColor and fullColor are
-      given, each word's color interpolates base→full in lockstep with its
-      opacity reveal. */
   fullColor?: string;
-  /** Words (case-insensitive, trailing-punctuation-insensitive) to render with
-      `highlightClassName` (e.g. brand orange) instead of the default color —
-      while still animating opacity through the scroll reveal. */
   highlight?: readonly string[];
-  /** Class applied to highlighted words. */
   highlightClassName?: string;
   as?: "p" | "span" | "h2" | "h3" | "h4" | "div";
-  /** Aria label override; defaults to the full text so screen readers hear the
-      complete sentence instead of per-word fragments. */
   "aria-label"?: string;
 };
 
-/**
- * Scroll-linked word reveal ("Apple/Linear style" text illumination).
- *
- * Text is split into per-word <span>s. `useScroll` tracks the container's
- * progress through the viewport; each word then lights up in reading order,
- * tied directly to scroll position (scrolling back up dims it again in real
- * time). Raw scroll progress is passed through `useSpring` so the reveal
- * glides smoothly instead of stepping with scroll jitter, and each word's
- * reveal is eased (fast snap to full opacity + slight slide-up + blur-to-sharp)
- * so it reads clearly the moment it enters the scan range.
- *
- * HOOKS RULES: every per-word transform lives inside the small `<RevealWord>`
- * child, so each instance calls a fixed number of hooks no matter what the
- * word is. The parent only ever calls a fixed set of hooks (useRef,
- * useReducedMotion, useScroll, useSpring) — so switching language (which
- * changes the word count) is safe and never trips "rendered fewer/more hooks".
- */
 export default function ScrollWordReveal({
   text,
   className = "",
@@ -82,15 +47,12 @@ export default function ScrollWordReveal({
     target: ref,
     offset: ["start end", "end start"],
   });
-  // Smooth the raw scroll progress so word illumination glides instead of
-  // snapping with each scroll tick. Stiff-but-damped: no visible lag.
   const smooth = useSpring(scrollYProgress, {
     stiffness: 140,
     damping: 26,
     mass: 0.6,
   });
 
-  // Punctuation-stripped matching so "Auvarose," matches "Auvarose" (and "—").
   const norm = (w: string) => w.toLowerCase().replace(/[.,!?;:)]+$/, "");
   const highlightSet = new Set(highlight.map(norm));
 
@@ -131,7 +93,6 @@ export default function ScrollWordReveal({
   );
 }
 
-/** Cubic ease-out — each word snaps toward its final state fast, then settles. */
 const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
 type RevealWordProps = {
@@ -149,12 +110,6 @@ type RevealWordProps = {
   children: string;
 };
 
-/**
- * One word. Calls a FIXED set of transforms (normalize, eased, opacity, color,
- * y, blur) so the child's hook count is constant regardless of word text /
- * language — the Rules of Hooks stay satisfied even though the number of
- * rendered words varies.
- */
 function RevealWord({
   progress,
   index,
@@ -173,20 +128,13 @@ function RevealWord({
     (index / count) * scanRange,
     ((index + 1) / count) * scanRange,
   ];
-  // 0→1 over this word's slice of the scroll range.
   const t = useTransform(progress, input, [0, 1]);
-  // Eased so the word is already at ~88% opacity when it's a quarter into its
-  // range — readable almost immediately after it enters the scan window.
   const eased = useTransform(t, (v) => easeOutCubic(v));
   const opacity = useTransform(eased, [0, 1], [baseOpacity, fullOpacity]);
-  // Color interpolates in lockstep with the reveal. Always called (fixed hook
-  // count), but only APPLIED when baseColor/fullColor are provided — otherwise
-  // the word keeps its inherited/class color (e.g. About's text-highlight).
   const color = useTransform(eased, [0, 1], [
     baseColor ?? "currentColor",
     fullColor ?? "currentColor",
   ]);
-  // Subtle rise + blur-to-sharp as the word lights up.
   const y = useTransform(eased, [0, 1], [12, 0]);
   const blur = useTransform(eased, [0, 1], [6, 0]);
   const colorStyle: { color: string | MotionValue<string> } | null =
@@ -206,10 +154,6 @@ function RevealWord({
         }}
       >
         {children}
-        {/* Non-breaking space kept INSIDE the inline-block so a visible gap
-            always separates words (guaranteed not to collapse, and it moves
-            with the animated word). `white-space: pre-wrap` on .scroll-word-inner
-            preserves it. */}
         {isLast ? "" : "\u00A0"}
       </motion.span>
     </span>

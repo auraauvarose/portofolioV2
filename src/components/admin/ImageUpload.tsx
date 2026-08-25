@@ -36,7 +36,6 @@ export default function ImageUpload({
     setUploading(true);
     setError(null);
     try {
-      // 1. Get a presigned upload URL from our API
       const presignRes = await fetch("/api/upload/presign", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -53,7 +52,6 @@ export default function ImageUpload({
       }
       const { url, publicUrl } = await presignRes.json();
 
-      // 2. Upload the file directly to R2
       let putRes: Response;
       try {
         putRes = await fetch(url, {
@@ -62,15 +60,12 @@ export default function ImageUpload({
           body: file,
         });
       } catch (fetchErr) {
-        // A network/CORS failure (browser "Failed to fetch") — almost always
-        // means the R2 bucket is missing a CORS policy for browser uploads.
         throw new Error(
           "Upload terputus oleh browser (CORS). Pastikan bucket R2 sudah punya konfigurasi CORS yang mengizinkan PUT dari domain ini (lihat README).",
         );
       }
       if (!putRes.ok) throw new Error(`Upload to R2 failed (${putRes.status})`);
 
-      // 3. Hand the public URL back to the form
       onChange(publicUrl);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Upload failed";
@@ -91,7 +86,6 @@ export default function ImageUpload({
         <div className="flex h-28 w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/40">
           {value ? (
             isPdf ? (
-              // PDF placeholder — link out to the actual file
               <a
                 href={value}
                 target="_blank"

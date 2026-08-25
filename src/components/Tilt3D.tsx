@@ -3,18 +3,6 @@
 import { useRef } from "react";
 import type { ReactNode, PointerEvent } from "react";
 
-/**
- * Tilt3D — wraps a card and tilts it in 3D toward the cursor (or the tap
- * point on touch screens).
- *
- * The outer wrapper carries the `perspective`; the inner layer rotates around
- * X/Y based on the pointer position (driven by CSS vars, no re-render on
- * move) and scales up slightly, giving the card a tactile "lift toward you"
- * effect. On touch devices there is no hover, so a quick tilt is applied on
- * tap (pointerdown) and animates back on release — this makes the cards feel
- * interactive when scrolling / tapping on mobile. Pointer events pass straight
- * through so any onClick on the children still works normally.
- */
 export default function Tilt3D({
   children,
   className = "",
@@ -43,16 +31,13 @@ export default function Tilt3D({
     if (!el) return;
     const r = el.getBoundingClientRect();
     if (!r.width || !r.height) return;
-    const px = (clientX - r.left) / r.width - 0.5; // -0.5 .. 0.5
+    const px = (clientX - r.left) / r.width - 0.5;
     const py = (clientY - r.top) / r.height - 0.5;
     el.style.setProperty("--rx", `${(-py * max).toFixed(2)}deg`);
     el.style.setProperty("--ry", `${(px * max).toFixed(2)}deg`);
     el.style.setProperty("--s", `${tiltScale}`);
   };
 
-  // Skip tilt work for touch moves: touch scroll fires pointermove per frame
-  // and reading layout (getBoundingClientRect) per frame causes jank on mobile.
-  // Tap tilt (pointerdown) still works on touch.
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
     if (e.pointerType !== "mouse") return;
     tiltAt(e.clientX, e.clientY, scale);

@@ -19,7 +19,6 @@ import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
 import type { Project, Certification, GalleryPhoto } from "@/types";
 
-// Loading curtain inline timing (replaced the old dedicated /loading page).
 const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
 const GREET_MS = 320;
 const HOLD_MS = 500;
@@ -35,27 +34,18 @@ export default function HomeClient({
   certifications: Certification[];
   gallery: GalleryPhoto[];
 }) {
-  // The curtain now runs on EVERY visit/reload (chosen behavior): it covers the
-  // (already-rendered) content, then slides away to reveal it. No separate route
-  // hop, no black boot screen — the loading appears immediately.
   const [phase, setPhase] = useState<Phase>("enter");
   const [index, setIndex] = useState(0);
   const [revealed, setRevealed] = useState(false);
   const exitedRef = useRef(false);
 
-  // Scroll hint state: visible at the very top (arrow down) and at the very
-  // bottom (arrow rotated up); hidden while scrolling through the middle.
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
 
   useEffect(() => {
     const onScroll = () => {
-      setAtTop(window.scrollY <= 40);
-      // "At bottom" only counts once the user has actually scrolled down.
-      // At first paint the document is still short (loading curtain, images
-      // not loaded) — without the scrollY guard it would report bottom at
-      // scrollY=0 and flip the arrow up on load.
       const doc = document.documentElement;
+      setAtTop(window.scrollY <= 40);
       setAtBottom(
         window.scrollY > 40 &&
           window.innerHeight + window.scrollY >= doc.scrollHeight - 120,
@@ -70,13 +60,11 @@ export default function HomeClient({
     };
   }, []);
 
-  // Curtain "open": slide up from below the screen to cover it right after mount.
   useEffect(() => {
     const raf = requestAnimationFrame(() => setPhase("show"));
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  // Greeting cycle while the curtain covers the screen.
   useEffect(() => {
     if (phase !== "show") return;
     let i = 0;
@@ -97,7 +85,6 @@ export default function HomeClient({
     };
   }, [phase]);
 
-  // Once the curtain has fully descended (off-screen), reveal the content.
   const finishClose = () => {
     if (exitedRef.current) return;
     exitedRef.current = true;
@@ -113,17 +100,12 @@ export default function HomeClient({
     transform: curtainTransform,
   } as const;
 
-  // While the curtain is animating in (phase "enter"), keep everything under a
-  // plain ink screen so content doesn't flash before the curtain covers it.
   if (phase === "enter") {
     return <div className="fixed inset-0 bg-ink" aria-hidden="true" />;
   }
 
-  // ponytail: overflow-x-clip, not -hidden. -hidden forces overflow-y auto and breaks sticky below.
   return (
     <main className="relative min-h-screen overflow-x-clip bg-ink">
-      {/* Loading curtain — covers the whole page on every visit, then slides away
-          and is removed from the DOM once revealed. */}
       {curtainVisible && !revealed && (
         <div
           className="loading-curtain fixed inset-0 z-[99999] overflow-hidden bg-ink"
@@ -164,17 +146,11 @@ export default function HomeClient({
         </div>
       )}
 
-      {/* Fixed overlays */}
       <Sidebars />
-      {/* Custom cursor (dot + ring) */}
       <CustomCursor />
-      {/* Spider laba-laba yang patroli di tepi viewport */}
       <SpiderWalker />
-      {/* Film-grain / TV-static overlay ("ants") */}
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
 
-      {/* Scroll hint — fixed bottom-right. Bobs down at the top; when the user
-          reaches the bottom of the page the arrow rotates 180° to point up. */}
       <div
         className={`pointer-events-none fixed right-6 bottom-8 z-[95] flex flex-col items-center gap-3 transition-all duration-500 ease-out lg:right-12 ${
           atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
@@ -207,18 +183,11 @@ export default function HomeClient({
       </div>
 
       <Nav />
-      {/* Hero pins at top; the solid page below scrolls up and covers it */}
       <div className="sticky top-0 z-0 h-screen">
         <Hero />
       </div>
 
-      {/* Solid page that scrolls UP and covers the hero — the "reveal under
-          the fold" effect. Everything below the hero lives on this one opaque
-          ink sheet (positioned z-[1] + bg-ink) so no later section lets the
-          pinned hero show through, the way the non-positioned sections 05+
-          used to. */}
       <div className="relative z-[1] bg-ink">
-        {/* Marquee strip sits right under the hero */}
         <Marquee label="AURA AUVAROSE" />
 
         <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)]">

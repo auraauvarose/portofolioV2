@@ -5,12 +5,6 @@ function isConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
-// ---------------------------------------------------------------------------
-// Demo / seed fallback data — shown only when Supabase isn't configured yet,
-// so the site still looks complete on first run. Production data takes over
-// automatically once NEXT_PUBLIC_SUPABASE_URL is set.
-// ---------------------------------------------------------------------------
-
 const DEMO_PROJECTS: Project[] = [
   {
     id: "demo-portfolio",

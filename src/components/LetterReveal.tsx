@@ -7,7 +7,6 @@ type LetterRevealProps = {
   className?: string;
 };
 
-/** Splits text into letters and reveals them one by one on scroll. */
 export default function LetterReveal({ text, className = "" }: LetterRevealProps) {
   const ref = useRef<HTMLSpanElement>(null);
   const [inView, setInView] = useState(false);

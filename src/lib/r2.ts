@@ -22,12 +22,6 @@ export type PresignedUpload = {
   publicUrl: string;
 };
 
-/**
- * Generate a presigned PUT url so the browser can upload a file directly to R2.
- *
- * Uses aws4fetch (SigV4 via Web Crypto) instead of the AWS SDK, because the
- * SDK pulls in Node-only modules (http/fs) that don't run on Cloudflare Workers.
- */
 export async function createPresignedUpload(params: {
   filename: string;
   contentType: string;
@@ -39,14 +33,12 @@ export async function createPresignedUpload(params: {
   if (!bucket) throw new Error("R2_BUCKET_NAME is not configured.");
   if (!publicBase) throw new Error("NEXT_PUBLIC_R2_PUBLIC_URL is not configured.");
 
-  // Sanitize filename and build a collision-free key.
   const clean = params.filename.replace(/[^a-zA-Z0-9._-]/g, "-");
   const folder = params.folder ? params.folder.replace(/^\/+|\/+$/g, "") : "";
   const prefix = folder ? `${folder}/` : "";
   const key = `${prefix}${Date.now()}-${crypto.randomUUID()}-${clean}`;
 
   const objectUrl = new URL(getObjectKeyUrl(accountId, bucket, key));
-  // aws4fetch defaults S3 to 86400s; match the original 1-hour expiry.
   objectUrl.searchParams.set("X-Amz-Expires", "3600");
 
   const signer = new AwsV4Signer({
@@ -57,8 +49,6 @@ export async function createPresignedUpload(params: {
     service: "s3",
     region: "auto",
     signQuery: true,
-    // The browser replays this PUT with exactly this Content-Type, so sign it
-    // (it shows up in X-Amz-SignedHeaders and R2 requires the match).
     headers: { "Content-Type": params.contentType },
   });
 
@@ -80,7 +70,6 @@ export async function deleteR2Object(key: string): Promise<void> {
   const url = getObjectKeyUrl(accountId, bucket, key);
   const res = await aws.fetch(url, { method: "DELETE" });
 
-  // R2 returns 204 on success; treat a 404 (already gone) as success too.
   if (!res.ok && res.status !== 404) {
     throw new Error(`Failed to delete object from R2 (${res.status})`);
   }

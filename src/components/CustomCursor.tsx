@@ -2,16 +2,6 @@
 
 import { useEffect } from "react";
 
-/**
- * CustomCursor — replaces the native pointer with a small accent dot plus a
- * larger ring that trails behind it ("cursor dengan bulatan mengelilingi").
- *
- * - Dot follows the pointer instantly.
- * - Ring chases the dot with an eased lag via requestAnimationFrame (no
- *   per-frame re-render — only transform changes).
- * - The ring uses `mix-blend-difference` so it stays visible on both light
- *   and dark surfaces, and it grows slightly over interactive elements.
- */
 export default function CustomCursor() {
   useEffect(() => {
     const dot = document.getElementById("cursor-dot");

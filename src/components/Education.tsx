@@ -5,11 +5,6 @@ import ScrollWordReveal from "@/components/ScrollWordReveal";
 import { useLanguage } from "@/components/providers";
 import { education } from "@/lib/config";
 
-/**
- * Education — card boxes (school/degree/description) with scroll-linked word
- * reveal on the degree. On hover the whole card flips: background becomes the
- * orange accent and all text goes dark (ink) for contrast.
- */
 export default function Education() {
   const { t } = useLanguage();
 
