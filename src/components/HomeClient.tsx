@@ -117,7 +117,7 @@ export default function HomeClient({
                 finishClose();
               }
             }}
-            className="fixed inset-0 flex items-center justify-center bg-[#0D0E13]"
+            className="fixed inset-0 flex items-center justify-center bg-ink"
             style={curtainStyle}
           >
             <div className="pointer-events-none absolute h-[30rem] w-[30rem] rounded-full bg-accent/10 blur-[120px]" />
@@ -190,7 +190,7 @@ export default function HomeClient({
       <div className="relative z-[1] bg-ink">
         <Marquee label="AURA AUVAROSE" />
 
-        <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)]">
+        <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)] dark:shadow-[0_-40px_80px_rgba(255,255,255,0.25)] [clip-path:inset(-130px_0_0_0)]">
           <About />
           <WhatIDo />
           <Education />

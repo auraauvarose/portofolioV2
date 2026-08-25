@@ -26,7 +26,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function LanguageProvider({ children }: { children: React.ReactNode }) {
   const [lang, setLangState] = useState<Lang>("en");
   const [theme, setTheme] = useState<Theme>("dark");
-  const themeTimer = useRef<number | null>(null);
+  const themePanels = useRef<HTMLDivElement[] | null>(null);
 
   useEffect(() => {
     const storedLang = window.localStorage.getItem("lang");
@@ -44,14 +44,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(
     () => () => {
-      if (themeTimer.current) window.clearTimeout(themeTimer.current);
+      if (themePanels.current) {
+        themePanels.current.forEach((p) => p.remove());
+        themePanels.current = null;
+      }
     },
     [],
   );
 
   const applyTheme = useCallback((next: Theme) => {
     const root = document.documentElement;
-    root.classList.add("theme-anim");
     if (next === "light") {
       root.classList.remove("dark");
       root.style.colorScheme = "light";
@@ -60,11 +62,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
       root.style.colorScheme = "dark";
     }
     window.localStorage.setItem("theme", next);
-    if (themeTimer.current) window.clearTimeout(themeTimer.current);
-    themeTimer.current = window.setTimeout(
-      () => root.classList.remove("theme-anim"),
-      500,
-    );
   }, []);
 
   const setLang = useCallback((next: Lang) => {
@@ -81,11 +78,64 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const toggleTheme = useCallback(() => {
-    setTheme((prev) => {
-      const next: Theme = prev === "dark" ? "light" : "dark";
+    const root = document.documentElement;
+    const next: Theme = root.classList.contains("dark") ? "light" : "dark";
+
+    const apply = () => {
       applyTheme(next);
-      return next;
+      setTheme(next);
+    };
+
+    // Reduced motion → skip animation, swap directly
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      apply();
+      return;
+    }
+
+    // Window-opening overlay: two panels split top/bottom.
+    // Only composited transforms → zero layout thrash, no lag.
+    if (themePanels.current) {
+      themePanels.current.forEach((p) => p.remove());
+      themePanels.current = null;
+    }
+
+    // Determine ink color from the current theme (no getComputedStyle → no forced recalc)
+    const ink = root.classList.contains("dark") ? "#0d0e13" : "#f4f4f5";
+
+    const mk = (cls: string) => {
+      const p = document.createElement("div");
+      p.className = `theme-panel ${cls}`;
+      p.style.backgroundColor = ink;
+      document.body.appendChild(p);
+      return p;
+    };
+
+    const top = mk("theme-panel-top");
+    const bottom = mk("theme-panel-bottom");
+    themePanels.current = [top, bottom];
+
+    const ease = "cubic-bezier(0.76, 0, 0.24, 1)";
+    top.animate(
+      [{ transform: "translateY(0)" }, { transform: "translateY(-101%)" }],
+      { duration: 550, easing: ease, fill: "forwards" },
+    );
+    bottom.animate(
+      [{ transform: "translateY(0)" }, { transform: "translateY(101%)" }],
+      { duration: 550, easing: ease, fill: "forwards" },
+    );
+
+    // Swap theme behind the panels — deferred to the next frame so the
+    // panel animation starts before the class swap triggers style recalc.
+    requestAnimationFrame(() => {
+      apply();
     });
+
+    window.setTimeout(() => {
+      if (themePanels.current) {
+        themePanels.current.forEach((p) => p.remove());
+        themePanels.current = null;
+      }
+    }, 600);
   }, [applyTheme]);
 
   const t = useCallback(

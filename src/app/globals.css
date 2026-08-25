@@ -82,22 +82,6 @@ html {
   scroll-behavior: smooth;
 }
 
-@media (hover: hover) and (pointer: fine) {
-  .theme-anim,
-  .theme-anim *,
-  .theme-anim *::before,
-  .theme-anim *::after {
-    transition:
-      background-color 0.4s ease,
-      border-color 0.4s ease,
-      color 0.4s ease,
-      fill 0.4s ease,
-      stroke 0.4s ease,
-      box-shadow 0.4s ease,
-      opacity 0.5s ease !important;
-  }
-}
-
 /* Custom cursor: hide the native pointer only where the cursor is mounted
    (main site), and grow the ring over interactive elements. */
 .no-native-cursor,
@@ -116,7 +100,7 @@ html {
   --color-ecru: #2f2f2f;
   --color-khaki: #6b6b6b;
   --color-fg: #0d0e13;
-  --color-muted: #6b6b6b;
+  --color-muted: #1c1c1e; /* nav links — keep clearly readable on light bg */
 }
 /* ===========================================================================
    LIGHT MODE — comprehensive overrides so the whole site stays readable when
@@ -153,14 +137,6 @@ html {
 }
 :root:not(.dark) .text-zinc-800 {
   color: #444444;
-}
-
-/* Loading curtain always sits on a dark backdrop, so keep its text white
-   even when the theme toggle is set to light. */
-:root:not(.dark) .loading-curtain,
-:root:not(.dark) .loading-curtain .text-white,
-:root:not(.dark) .loading-curtain .text-display {
-  color: #ffffff;
 }
 
 /* Subtle dark surfaces used as light hovers / hairline fills */
@@ -218,9 +194,14 @@ html {
 :root:not(.dark) .text-outline {
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
 }
+/* Marquee: filled — white in dark mode, black in light mode */
+.marquee-mask .text-outline {
+  -webkit-text-stroke: 0;
+  color: #ffffff;
+}
 :root:not(.dark) .marquee-mask .text-outline {
   -webkit-text-stroke: 0;
-  color: #a8a29e;
+  color: #000000;
 }
 :root:not(.dark) .glass {
   background: rgba(255, 255, 255, 0.7);
@@ -674,5 +655,30 @@ summary {
 @media (prefers-reduced-motion: reduce) {
   .spider-walker .spider-leg {
     animation: none !important;
+  }
+}
+
+/* ── Theme toggle: window-opening panels (top/bottom split) ──
+   Two fixed halves slide up/down, revealing the new theme.
+   Only `transform` animates → GPU-composited, no layout thrash. */
+.theme-panel {
+  position: fixed;
+  left: 0;
+  right: 0;
+  height: 50.5%;
+  z-index: 99998;
+  pointer-events: none;
+  will-change: transform;
+}
+.theme-panel-top {
+  top: 0;
+}
+.theme-panel-bottom {
+  bottom: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-panel {
+    display: none;
   }
 }
