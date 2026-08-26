@@ -87,8 +87,8 @@ export default function Hero() {
         />
       </Tilt3D>
 
-      <div className="pointer-events-none absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur" />
+      <div className="absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/20" />
+      <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/10" />
 
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 text-center">
         <div

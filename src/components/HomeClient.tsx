@@ -133,8 +133,6 @@ export default function HomeClient({
             className="fixed inset-0 flex items-center justify-center bg-ink"
             style={curtainStyle}
           >
-            <div className="pointer-events-none absolute h-[30rem] w-[30rem] rounded-full bg-accent/10 hero-blur" />
-
             <div className="relative flex flex-col items-center">
               <span
                 key={GREETINGS[index]}
