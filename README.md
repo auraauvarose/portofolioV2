@@ -16,15 +16,24 @@ photo gallery**. Bilingual **EN / ID** with a language toggle.
 
 ## Table of Contents
 
-1. [Features](#features)
-2. [Project structure](#project-structure)
-3. [Getting started](#getting-started)
-4. [Environment variables](#environment-variables)
-5. [Supabase setup](#1-supabase-setup)
-6. [Cloudflare R2 setup](#2-cloudflare-r2-setup)
-7. [Deploy to Cloudflare Workers](#3-deploy-to-cloudflare-workers)
-8. [Customizing](#4-customizing)
-9. [Scripts](#scripts)
+
+- [Portfolio V2 — Aura Auvarose](#portfolio-v2--aura-auvarose)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Project structure](#project-structure)
+  - [Getting started](#getting-started)
+  - [Environment variables](#environment-variables)
+  - [1. Supabase setup](#1-supabase-setup)
+  - [2. Cloudflare R2 setup](#2-cloudflare-r2-setup)
+  - [3. Deploy to Cloudflare Workers](#3-deploy-to-cloudflare-workers)
+    - [One-time setup](#one-time-setup)
+    - [Set server-side secrets](#set-server-side-secrets)
+    - [Build + deploy](#build--deploy)
+    - [Custom domain](#custom-domain)
+    - [Local preview of the deployed Worker](#local-preview-of-the-deployed-worker)
+    - [Gotchas](#gotchas)
+  - [4. Customizing](#4-customizing)
+  - [Scripts](#scripts)
 
 ---
 
