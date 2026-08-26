@@ -41,15 +41,27 @@ export default function HomeClient({
 
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
+  const scrollRAF = useRef(0);
+  const scrollState = useRef({ top: true, bottom: false });
 
   useEffect(() => {
     const onScroll = () => {
-      const doc = document.documentElement;
-      setAtTop(window.scrollY <= 40);
-      setAtBottom(
-        window.scrollY > 40 &&
-          window.innerHeight + window.scrollY >= doc.scrollHeight - 120,
-      );
+      // rAF-throttle + early-exit: avoids re-rendering the whole tree on
+      // every scroll event (multiple per frame on mobile).
+      if (scrollRAF.current) return;
+      scrollRAF.current = requestAnimationFrame(() => {
+        scrollRAF.current = 0;
+        const doc = document.documentElement;
+        const top = window.scrollY <= 40;
+        const bottom =
+          window.scrollY > 40 &&
+          window.innerHeight + window.scrollY >= doc.scrollHeight - 120;
+        if (top === scrollState.current.top && bottom === scrollState.current.bottom)
+          return;
+        scrollState.current = { top, bottom };
+        setAtTop(top);
+        setAtBottom(bottom);
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -57,6 +69,7 @@ export default function HomeClient({
     return () => {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
+      cancelAnimationFrame(scrollRAF.current);
     };
   }, []);
 
@@ -120,7 +133,7 @@ export default function HomeClient({
             className="fixed inset-0 flex items-center justify-center bg-ink"
             style={curtainStyle}
           >
-            <div className="pointer-events-none absolute h-[30rem] w-[30rem] rounded-full bg-accent/10 blur-[120px]" />
+            <div className="pointer-events-none absolute h-[30rem] w-[30rem] rounded-full bg-accent/10 hero-blur" />
 
             <div className="relative flex flex-col items-center">
               <span

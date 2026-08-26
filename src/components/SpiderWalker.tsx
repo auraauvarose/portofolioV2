@@ -98,8 +98,8 @@ export default function SpiderWalker() {
     };
 
     let raf = 0;
+    let wakeup: ReturnType<typeof setTimeout> | null = null;
     const tick = (now: number) => {
-      raf = requestAnimationFrame(tick);
       const dt = Math.min((now - st.last) / 1000, 0.1);
       st.last = now;
 
@@ -158,6 +158,24 @@ export default function SpiderWalker() {
           break;
         }
       }
+
+      // Pause the rAF loop while the spider is idle/hanging — nothing moves,
+      // so no DOM writes are needed until the next scheduled action. The
+      // visual is identical; this just stops a permanent 60fps loop on mobile.
+      if (st.mode === "idle" || st.mode === "webHang") {
+        const wait = st.idleUntil - performance.now();
+        if (wait > 0) {
+          raf = 0;
+          wakeup = setTimeout(() => {
+            wakeup = null;
+            if (raf) return;
+            st.last = performance.now();
+            raf = requestAnimationFrame(tick);
+          }, Math.max(wait + 30, 50));
+          return;
+        }
+      }
+      raf = requestAnimationFrame(tick);
     };
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -187,6 +205,7 @@ export default function SpiderWalker() {
 
     return () => {
       cancelAnimationFrame(raf);
+      if (wakeup) clearTimeout(wakeup);
       window.removeEventListener("resize", measure);
       mq.removeEventListener("change", onMotionChange);
     };

@@ -4,6 +4,9 @@ import { useEffect } from "react";
 
 export default function CustomCursor() {
   useEffect(() => {
+    // Touch devices have no mouse — the cursor is never seen. Skip the
+    // permanent rAF loop entirely (big mobile perf/battery win).
+    if (window.matchMedia("(pointer: coarse)").matches) return;
     const dot = document.getElementById("cursor-dot");
     const ring = document.getElementById("cursor-ring");
     if (!dot || !ring) return;

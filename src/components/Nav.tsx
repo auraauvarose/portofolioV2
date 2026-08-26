@@ -8,7 +8,7 @@ import MusicPlayer from "@/components/MusicPlayer";
 
 const ANCHORS = ["#about", "#work", "#contact"];
 
-const PROFILE_IMG = "/profile.png";
+const PROFILE_IMG = "/profile.webp";
 
 export default function Nav() {
   const { t, lang, setLang, theme, toggleTheme } = useLanguage();

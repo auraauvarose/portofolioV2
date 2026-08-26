@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { profile } from "@/lib/config";
 import { useLanguage } from "@/components/providers";
 import Tilt3D from "@/components/Tilt3D";
@@ -12,6 +12,8 @@ export default function Hero() {
   const { theme } = useLanguage();
   const [dim, setDim] = useState(0);
   const [active, setActive] = useState(false);
+  const scrollRAF = useRef(0);
+  const lastDim = useRef(0);
 
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
     e.currentTarget.style.setProperty("--mx", `${e.clientX}px`);
@@ -20,11 +22,22 @@ export default function Hero() {
 
   useEffect(() => {
     const onScroll = () => {
-      setDim(Math.min(1, window.scrollY / window.innerHeight));
+      // rAF-throttle: at most one setState per frame, skip if unchanged.
+      if (scrollRAF.current) return;
+      scrollRAF.current = requestAnimationFrame(() => {
+        scrollRAF.current = 0;
+        const d = Math.min(1, window.scrollY / window.innerHeight);
+        if (Math.abs(d - lastDim.current) < 0.001) return;
+        lastDim.current = d;
+        setDim(d);
+      });
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      cancelAnimationFrame(scrollRAF.current);
+    };
   }, []);
 
   return (
@@ -37,12 +50,12 @@ export default function Hero() {
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-0 transition-opacity duration-700 ease-in-out dark:opacity-100"
-        style={{ backgroundImage: "url(/photo/dakmode-bg.png)" }}
+        style={{ backgroundImage: "url(/photo/dakmode-bg.webp)" }}
       />
       <div
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-100 transition-opacity duration-700 ease-in-out dark:opacity-0"
-        style={{ backgroundImage: "url(/photo/lightmode-bg.png)" }}
+        style={{ backgroundImage: "url(/photo/lightmode-bg.webp)" }}
       />
       <div
         aria-hidden="true"
@@ -61,21 +74,21 @@ export default function Hero() {
         <img
           aria-hidden="true"
           alt=""
-          src="/photo/character-dark.png"
+          src="/photo/character-dark.webp"
           decoding="async"
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-0 transition-opacity duration-700 ease-in-out dark:opacity-100"
         />
         <img
           aria-hidden="true"
           alt=""
-          src="/photo/character-light.png"
+          src="/photo/character-light.webp"
           decoding="async"
           className="pointer-events-none absolute inset-0 h-full w-full object-cover opacity-100 transition-opacity duration-700 ease-in-out dark:opacity-0"
         />
       </Tilt3D>
 
-      <div className="pointer-events-none absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 blur-[120px]" />
-      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 blur-[100px]" />
+      <div className="pointer-events-none absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur" />
+      <div className="pointer-events-none absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur" />
 
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 text-center">
         <div
