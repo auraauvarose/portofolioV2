@@ -10,7 +10,13 @@ import { useLanguage } from "@/components/providers";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
 
-export default function Gallery({ items }: { items: GalleryPhoto[] }) {
+export default function Gallery({
+  items,
+  embedded = false,
+}: {
+  items: GalleryPhoto[];
+  embedded?: boolean;
+}) {
   const { t, lang } = useLanguage();
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [slide, setSlide] = useState(0);
@@ -103,14 +109,11 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
     );
   };
 
-  return (
-    <section className="px-6 py-16 md:px-10 md:py-32">
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} index="08" />
-
-        <Reveal className="mb-10 max-w-2xl text-gray-400">
-          {t(gallery.description)}
-        </Reveal>
+  const body = (
+    <>
+      <Reveal className="mb-10 max-w-2xl text-gray-400">
+        {t(gallery.description)}
+      </Reveal>
 
         {items.length === 0 ? (
           <Reveal>
@@ -165,11 +168,13 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
             </div>
           </>
         )}
-      </div>
+    </>
+  );
 
-      {lightbox !== null &&
-        items[lightbox] &&
-        createPortal(
+  const modal =
+    lightbox !== null &&
+    items[lightbox] &&
+    createPortal(
           <div
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
             onClick={closeLightbox}
@@ -242,7 +247,24 @@ export default function Gallery({ items }: { items: GalleryPhoto[] }) {
             </div>
           </div>,
           document.body
-        )}
+        );
+
+  if (embedded) {
+    return (
+      <>
+        {body}
+        {modal}
+      </>
+    );
+  }
+
+  return (
+    <section className="px-6 py-16 md:px-10 md:py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} index="07" />
+        {body}
+      </div>
+      {modal}
     </section>
   );
 }

@@ -10,7 +10,13 @@ import { useLanguage } from "@/components/providers";
 import { work } from "@/lib/config";
 import type { Project } from "@/types";
 
-export default function Projects({ items }: { items: Project[] }) {
+export default function Projects({
+  items,
+  embedded = false,
+}: {
+  items: Project[];
+  embedded?: boolean;
+}) {
   const { t, lang } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Project | null>(null);
@@ -137,12 +143,9 @@ export default function Projects({ items }: { items: Project[] }) {
     );
   };
 
-  return (
-    <section id="work" className="px-6 py-16 md:px-10 md:py-32">
-      <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={work.kicker} heading={work.heading} index="07" />
-
-        <Reveal className="mb-10 flex flex-wrap items-center gap-3">
+  const body = (
+    <>
+      <Reveal className="mb-10 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setActive("all")}
             className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors ${
@@ -220,10 +223,10 @@ export default function Projects({ items }: { items: Project[] }) {
             </div>
           </>
         )}
-      </div>
+    </>
+  );
 
-      {selected &&
-        createPortal(
+  const modal = selected && createPortal(
           <div
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
             onClick={() => setSelected(null)}
@@ -311,7 +314,24 @@ export default function Projects({ items }: { items: Project[] }) {
           </div>
           ,
           document.body
-        )}
+        );
+
+  if (embedded) {
+    return (
+      <>
+        {body}
+        {modal}
+      </>
+    );
+  }
+
+  return (
+    <section id="work" className="px-6 py-16 md:px-10 md:py-32">
+      <div className="mx-auto max-w-7xl">
+        <SectionHeading kicker={work.kicker} heading={work.heading} index="06" />
+        {body}
+      </div>
+      {modal}
     </section>
   );
 }

@@ -42,8 +42,7 @@ photo gallery**. Bilingual **EN / ID** with a language toggle.
 **Public site**
 
 - Hero with cursor-following orange lens reveal, About, What I Do, Experience,
-  Education, Certifications, Tech Stack, How I Work, Selected Works, Photo
-  Gallery, Contact, Footer
+  Education, Certifications, Tech Stack, Showcase (Projects & Photo Gallery), Contact, Footer
 - Letter-by-letter text reveal, marquee strips, scroll-reveal animations,
   gallery lightbox with keyboard navigation, custom cursor, music player
 - Loading curtain on every visit — inline in `HomeClient.tsx`, no separate

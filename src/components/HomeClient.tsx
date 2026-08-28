@@ -8,9 +8,7 @@ import WhatIDo from "@/components/WhatIDo";
 import Education from "@/components/Education";
 import Certifications from "@/components/Certifications";
 import TechStack from "@/components/TechStack";
-import HowIWork from "@/components/HowIWork";
-import Projects from "@/components/Projects";
-import Gallery from "@/components/Gallery";
+import Showcase from "@/components/Showcase";
 import Contact from "@/components/Contact";
 import Footer from "@/components/Footer";
 import Marquee from "@/components/Marquee";
@@ -211,12 +209,10 @@ export default function HomeClient({
 
         <Certifications items={certifications} />
         <TechStack />
-        <HowIWork />
 
         <Marquee label="SOFTWARE ENGINEER" />
 
-        <Projects items={projects} />
-        <Gallery items={gallery} />
+        <Showcase projects={projects} gallery={gallery} />
         <Contact />
         <Footer />
       </div>

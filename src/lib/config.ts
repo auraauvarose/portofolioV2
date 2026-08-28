@@ -302,39 +302,6 @@ export const techLinks: Record<string, string> = {
   "C++": "https://isocpp.org/",
 };
 
-export const howIWork = {
-  kicker: { en: "How I Work", id: "Cara Saya Bekerja" },
-  steps: [
-    {
-      number: "01",
-      title: { en: "Discovery", id: "Discovery" },
-      subtitle: { en: "Requirement Gathering", id: "Pengumpulan Kebutuhan" },
-      description: {
-        en: "Deeply analyzing business and technical needs before writing any code.",
-        id: "Menganalisa kebutuhan bisnis dan teknis secara mendalam sebelum memulai koding.",
-      },
-    },
-    {
-      number: "02",
-      title: { en: "Architecture", id: "Architecture" },
-      subtitle: { en: "System Design", id: "Desain Sistem" },
-      description: {
-        en: "Designing a scalable database structure and robust architecture.",
-        id: "Merancang struktur database dan arsitektur yang scalable dan andal.",
-      },
-    },
-    {
-      number: "03",
-      title: { en: "Development", id: "Development" },
-      subtitle: { en: "Iterative Coding", id: "Iterative Coding" },
-      description: {
-        en: "A development process with CI/CD that keeps every update well-tested.",
-        id: "Proses development dengan CI/CD yang memastikan setiap update teruji dengan baik.",
-      },
-    },
-  ],
-} as const;
-
 export const work = {
   kicker: { en: "Selected Works", id: "Karya Terpilih" },
   heading: { en: "Projects", id: "Proyek" },
@@ -351,6 +318,13 @@ export const gallery = {
     en: "Moments, events, and behind-the-scenes snapshots.",
     id: "Momen, acara, dan cuplikan di balik layar.",
   },
+} as const;
+
+export const showcase = {
+  kicker: { en: "Selected Works", id: "Karya Terpilih" },
+  heading: { en: "Works & Gallery", id: "Karya & Galeri" },
+  workTab: { en: "Projects", id: "Proyek" },
+  galleryTab: { en: "Photo Gallery", id: "Galeri Foto" },
 } as const;
 
 export const contact = {
