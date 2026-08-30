@@ -8,11 +8,14 @@ import {
   useSpring,
   useTransform,
   type MotionValue,
+  type UseScrollOptions,
 } from "motion/react";
 
 type ScrollWordRevealProps = {
   text: string;
   className?: string;
+  /** Scroll window for the reveal; default completes when the element exits the top */
+  offset?: UseScrollOptions["offset"];
   baseOpacity?: number;
   fullOpacity?: number;
   scanRange?: number;
@@ -27,6 +30,7 @@ type ScrollWordRevealProps = {
 export default function ScrollWordReveal({
   text,
   className = "",
+  offset = ["start end", "end start"] as UseScrollOptions["offset"],
   baseOpacity = 0.4,
   fullOpacity = 1,
   scanRange = 0.6,
@@ -45,7 +49,7 @@ export default function ScrollWordReveal({
 
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    offset,
   });
   const smooth = useSpring(scrollYProgress, {
     stiffness: 140,

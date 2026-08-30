@@ -17,6 +17,7 @@ export default function Reveal({
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
+  const [fromTop, setFromTop] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
@@ -24,10 +25,10 @@ export default function Reveal({
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setVisible(true);
-            observer.unobserve(entry.target);
-          }
+          // Replays every pass: enter from the bottom edge (scrolling down)
+          // slides up; enter from the top edge (scrolling up) slides down.
+          setFromTop(entry.boundingClientRect.top <= 0);
+          setVisible(entry.isIntersecting);
         });
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
@@ -41,8 +42,8 @@ export default function Reveal({
   return (
     <Component
       ref={ref}
-      className={`reveal ${visible ? "is-visible" : ""} ${className}`}
-      style={delay ? { transitionDelay: `${delay}ms` } : undefined}
+      className={`reveal ${fromTop ? "reveal-from-top" : ""} ${visible ? "is-visible" : ""} ${className}`}
+      style={{ transitionDelay: visible && delay ? `${delay}ms` : "0ms" }}
     >
       {children}
     </Component>

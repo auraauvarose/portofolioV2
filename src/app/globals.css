@@ -409,6 +409,10 @@ body {
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
+/* Entering from the top edge (scrolling up): slide down instead */
+.reveal.reveal-from-top {
+  transform: translateY(-28px);
+}
 .reveal.is-visible {
   opacity: 1;
   transform: translateY(0);

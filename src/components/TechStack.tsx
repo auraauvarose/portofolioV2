@@ -130,6 +130,8 @@ function Node({
   depth,
   delay,
   entered,
+  floatDelay,
+  floatDuration = 6,
   children,
 }: {
   x: number;
@@ -137,6 +139,9 @@ function Node({
   depth: number;
   delay: number;
   entered: boolean;
+  /** seconds; negative = start mid-phase. Omit to disable floating */
+  floatDelay?: number;
+  floatDuration?: number;
   children: ReactNode;
 }) {
   return (
@@ -153,7 +158,19 @@ function Node({
         willChange: "transform, opacity",
       }}
     >
-      {children}
+      <div
+        className={floatDelay === undefined ? undefined : "mm-float"}
+        style={
+          floatDelay === undefined
+            ? undefined
+            : {
+                animationDuration: `${floatDuration}s`,
+                animationDelay: `${floatDelay}s`,
+              }
+        }
+      >
+        {children}
+      </div>
     </div>
   );
 }
@@ -212,8 +229,21 @@ export default function TechStack() {
       setDefaultZoom(z);
     };
     fit();
-    setEntered(true);
   }, [setPan, setZoom]);
+
+  // Pop-in + line draw replay every time the section enters the viewport
+  useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((en) => setEntered(en.isIntersecting));
+      },
+      { threshold: 0.25 },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -463,7 +493,15 @@ export default function TechStack() {
   return (
     <section className="px-6 py-24 md:px-10 md:py-32">
       <style>{`@keyframes mm-rotate { to { transform: rotate(360deg); } }
-@keyframes tip-fade { from { opacity: 0; } }`}</style>
+@keyframes tip-fade { from { opacity: 0; } }
+@keyframes mm-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+@keyframes mm-glow { 0%, 100% { opacity: 0.75; } 50% { opacity: 1; } }
+.mm-link { stroke-dasharray: 1; stroke-dashoffset: 1; transition: stroke-dashoffset 1s cubic-bezier(0.16, 1, 0.3, 1); }
+.mm-links-in .mm-link { stroke-dashoffset: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .mm-float, .mm-glow { animation: none !important; }
+  .mm-link { stroke-dasharray: none; stroke-dashoffset: 0; transition: none; }
+}`}</style>
       <div className="mx-auto max-w-7xl">
         <SectionHeading kicker={techStack.kicker} heading={techStack.heading} index="05" />
 
@@ -508,7 +546,7 @@ export default function TechStack() {
           >
             <div
               aria-hidden
-              className="absolute rounded-full blur-2xl"
+              className="mm-glow absolute rounded-full blur-2xl"
               style={{
                 left: CENTER - 180,
                 top: CENTER - 180,
@@ -516,11 +554,12 @@ export default function TechStack() {
                 height: 360,
                 background:
                   "radial-gradient(circle, rgba(235,89,57,0.22), transparent 70%)",
+                animation: "mm-glow 5s ease-in-out infinite",
               }}
             />
 
             <svg
-              className="absolute inset-0 h-full w-full overflow-visible"
+              className={`absolute inset-0 h-full w-full overflow-visible ${entered ? "mm-links-in" : ""}`}
               viewBox={`0 0 ${WORLD} ${WORLD}`}
               fill="none"
               aria-hidden
@@ -536,19 +575,25 @@ export default function TechStack() {
                   >
                     <path
                       d={makePath(CENTER_POS, cat.pos, 0.16)}
+                      pathLength={1}
                       strokeWidth={2}
                       strokeLinecap="round"
-                      className={active ? "stroke-accent" : "stroke-black/[0.18] dark:stroke-white/[0.18]"}
+                      className={`mm-link ${
+                        active ? "stroke-accent" : "stroke-black/[0.18] dark:stroke-white/[0.18]"
+                      }`}
+                      style={{ transitionDelay: `${i * 120}ms` }}
                     />
                     {cat.items.map((it, j) => (
                       <path
                         key={j}
                         d={makePath(cat.pos, it.pos, 0.12)}
+                        pathLength={1}
                         strokeWidth={1.25}
                         strokeLinecap="round"
-                        className={
+                        className={`mm-link ${
                           active ? "stroke-accent/80" : "stroke-black/[0.12] dark:stroke-white/[0.12]"
-                        }
+                        }`}
+                        style={{ transitionDelay: `${180 + i * 120 + j * 45}ms` }}
                       />
                     ))}
                   </g>
@@ -581,7 +626,15 @@ export default function TechStack() {
 
             {LAYOUT.map((cat, i) => (
               <div key={i}>
-                <Node x={cat.pos.x} y={cat.pos.y} depth={18} delay={140 + i * 120} entered={entered}>
+                <Node
+                  x={cat.pos.x}
+                  y={cat.pos.y}
+                  depth={18}
+                  delay={140 + i * 120}
+                  entered={entered}
+                  floatDelay={-i * 1.3}
+                  floatDuration={7.5}
+                >
                   <div
                     onMouseEnter={() => activate(i)}
                     onMouseLeave={deactivate}
@@ -605,6 +658,8 @@ export default function TechStack() {
                     depth={(j % 2) * 8}
                     delay={220 + i * 120 + j * 45}
                     entered={entered}
+                    floatDelay={-(i * 0.9 + j * 0.5)}
+                    floatDuration={4.5 + ((i + j) % 4) * 0.7}
                   >
                     <a
                       href={link ?? undefined}

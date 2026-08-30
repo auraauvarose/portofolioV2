@@ -17,10 +17,8 @@ export default function LetterReveal({ text, className = "" }: LetterRevealProps
     const observer = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            setInView(true);
-            observer.unobserve(entry.target);
-          }
+          // Replays every pass — animates in both scroll directions.
+          setInView(entry.isIntersecting);
         });
       },
       { threshold: 0.4 },
