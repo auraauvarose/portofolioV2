@@ -179,9 +179,6 @@ export default function TechStack() {
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
-  const [panState, setPanState] = useState<Vec>({ x: 0, y: 0 });
-  const [zoomState, setZoomState] = useState(1);
-  const [tilt, setTilt] = useState<Vec>({ x: 0, y: 0 });
   const [defaultZoom, setDefaultZoom] = useState(1);
   const [hovered, setHovered] = useState<number | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
@@ -191,6 +188,36 @@ export default function TechStack() {
 
   const panRef = useRef<Vec>({ x: 0, y: 0 });
   const zoomRef = useRef(1);
+  const tiltRef = useRef<Vec>({ x: 0, y: 0 });
+  const worldRef = useRef<HTMLDivElement | null>(null);
+  const bgRef = useRef<HTMLDivElement | null>(null);
+  const worldRaf = useRef(0);
+
+  // Gestures bypass React state: they write refs and paint exactly one
+  // transform per frame. setState-per-pointermove re-rendered the whole map
+  // (~35 nodes + ~30 SVG paths) at touch frequency — the mobile jank source.
+  const applyWorldTransform = useCallback(() => {
+    const w = worldRef.current;
+    if (!w) return;
+    const p = panRef.current;
+    const z = zoomRef.current;
+    const t = tiltRef.current;
+    w.style.transform = `translate(-50%, -50%) translate(${p.x}px, ${p.y}px) scale(${z}) rotateX(${t.x}deg) rotateY(${t.y}deg)`;
+    const b = bgRef.current;
+    if (b) {
+      b.style.transform = `translate(${p.x * -0.15}px, ${p.y * -0.15}px) scale(${
+        1 + (z - 1) * 0.1
+      })`;
+    }
+  }, []);
+
+  const scheduleWorldTransform = useCallback(() => {
+    if (worldRaf.current) return;
+    worldRaf.current = requestAnimationFrame(() => {
+      worldRaf.current = 0;
+      applyWorldTransform();
+    });
+  }, [applyWorldTransform]);
 
   const pointersRef = useRef<Map<number, Vec>>(new Map());
   const gestureRef = useRef<Gesture | null>(null);
@@ -200,13 +227,13 @@ export default function TechStack() {
 
   const setPan = useCallback((p: Vec) => {
     panRef.current = p;
-    setPanState(p);
-  }, []);
+    scheduleWorldTransform();
+  }, [scheduleWorldTransform]);
 
   const setZoom = useCallback((z: number) => {
     zoomRef.current = z;
-    setZoomState(z);
-  }, []);
+    scheduleWorldTransform();
+  }, [scheduleWorldTransform]);
 
   useEffect(() => {
     const el = containerRef.current;
@@ -223,12 +250,13 @@ export default function TechStack() {
         MIN_ZOOM,
         1.1,
       );
-      setZoom(z);
-      setPan({ x: 0, y: 0 });
+      zoomRef.current = z;
+      panRef.current = { x: 0, y: 0 };
+      applyWorldTransform();
       setDefaultZoom(z);
     };
     fit();
-  }, [setPan, setZoom]);
+  }, [applyWorldTransform]);
 
   // Pop-in + line draw replay every time the section enters the viewport
   useEffect(() => {
@@ -394,7 +422,8 @@ export default function TechStack() {
         const rect = containerRef.current.getBoundingClientRect();
         const nx = (e.clientX - rect.left) / rect.width - 0.5;
         const ny = (e.clientY - rect.top) / rect.height - 0.5;
-        setTilt({ x: -ny * TILT_MAX, y: nx * TILT_MAX });
+        tiltRef.current = { x: -ny * TILT_MAX, y: nx * TILT_MAX };
+        scheduleWorldTransform();
       }
 
       const g = gestureRef.current;
@@ -457,27 +486,30 @@ export default function TechStack() {
   );
 
   const onPointerLeave = useCallback(() => {
-    setTilt({ x: 0, y: 0 });
+    tiltRef.current = { x: 0, y: 0 };
+    applyWorldTransform();
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
     hoverTimerRef.current = null;
     hoveredRef.current = null;
     setHovered(null);
     setTip(null);
-  }, []);
+  }, [applyWorldTransform]);
 
   const reset = useCallback(() => {
     setResetting(true);
-    setPan({ x: 0, y: 0 });
-    setZoom(defaultZoom);
-    setTilt({ x: 0, y: 0 });
+    panRef.current = { x: 0, y: 0 };
+    zoomRef.current = defaultZoom;
+    tiltRef.current = { x: 0, y: 0 };
+    applyWorldTransform();
     if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
     resetTimerRef.current = window.setTimeout(() => setResetting(false), 500);
-  }, [defaultZoom, setPan, setZoom]);
+  }, [applyWorldTransform, defaultZoom]);
 
   useEffect(() => {
     return () => {
       if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
       if (resetTimerRef.current) window.clearTimeout(resetTimerRef.current);
+      if (worldRaf.current) cancelAnimationFrame(worldRaf.current);
     };
   }, []);
 
@@ -519,12 +551,11 @@ export default function TechStack() {
           style={{ perspective: "1400px" }}
         >
           <div
+            ref={bgRef}
             aria-hidden
-            className="pointer-events-none absolute inset-0 transition-transform duration-150 ease-out"
+            className={`pointer-events-none absolute inset-0 ${worldTransition}`}
             style={{
-              transform: `translate(${panState.x * -0.15}px, ${panState.y * -0.15}px) scale(${
-                1 + (zoomState - 1) * 0.1
-              })`,
+              transform: "translate(0px, 0px) scale(1)",
               backgroundImage: [
                 "radial-gradient(rgba(127,127,127,0.22) 1px, transparent 1px)",
                 "radial-gradient(circle at 50% 50%, rgba(235,89,57,0.12), transparent 55%)",
@@ -534,18 +565,19 @@ export default function TechStack() {
           />
 
           <div
+            ref={worldRef}
             className={`absolute left-1/2 top-1/2 ${worldTransition}`}
             style={{
               width: WORLD,
               height: WORLD,
-              transform: `translate(-50%, -50%) translate(${panState.x}px, ${panState.y}px) scale(${zoomState}) rotateX(${tilt.x}deg) rotateY(${tilt.y}deg)`,
+              transform: "translate(-50%, -50%)",
               transformStyle: "preserve-3d",
               willChange: "transform",
             }}
           >
             <div
               aria-hidden
-              className="mm-glow absolute rounded-full blur-2xl"
+              className="mm-glow absolute rounded-full"
               style={{
                 left: CENTER - 180,
                 top: CENTER - 180,
