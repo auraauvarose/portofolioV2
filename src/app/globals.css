@@ -80,6 +80,9 @@
 
 html {
   scroll-behavior: smooth;
+  /* Paint the canvas behind the page (theme-aware) so rubber-band overscroll
+     never exposes a white band at the screen edges. */
+  background-color: var(--color-ink);
 }
 
 /* Custom cursor: hide the native pointer only where the cursor is mounted
@@ -87,6 +90,14 @@ html {
 .no-native-cursor,
 .no-native-cursor * {
   cursor: none !important;
+}
+/* Touch devices: the custom cursor is never mounted; hide any pre-hydration
+   ghost layers too (blend layers there cause mobile GPU flicker). */
+@media (hover: none), (pointer: coarse) {
+  #cursor-dot,
+  #cursor-ring {
+    display: none;
+  }
 }
 .cursor-ring-grow {
   width: 3.5rem;
@@ -330,21 +341,23 @@ body {
     z-index: 90;
     mix-blend-mode: overlay;
   }
-  /* Mobile: the 400% layer is 16x the viewport area of GPU memory. The noise
-     tile is repeating, so a viewport-sized layer looks identical while the
-     animation stays exactly the same (same keyframes, same % offsets). */
+  /* Mobile: keep the layer small (GPU memory) but overscan past the edges —
+     the grain keyframes translate ±5%, so a viewport-exact layer exposed
+     empty bands at the screen edges (the dark-mode edge-flicker bug). */
   @media (max-width: 768px) {
     .grain::before,
     .tv-static::before {
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      inset: -8%;
+      width: 116%;
+      height: 116%;
     }
   }
   .tv-static::after {
     content: "";
     position: fixed;
-    inset: 0;
+    /* Extend 8px past top/bottom: scan-jump translates down 8px, which on an
+       inset-0 layer exposed a flickering gap band at the top edge. */
+    inset: -8px 0;
     z-index: 89;
     pointer-events: none;
     background: repeating-linear-gradient(
@@ -407,7 +420,8 @@ body {
   transition:
     opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
+  /* No permanent will-change: dozens of pre-promoted layers starve mobile
+     GPUs. Browsers auto-promote elements during active transitions. */
 }
 /* Entering from the top edge (scrolling up): slide down instead */
 .reveal.reveal-from-top {
@@ -424,7 +438,8 @@ body {
 }
 .scroll-word-inner {
   display: inline-block;
-  will-change: opacity;
+  /* No will-change here: one per WORD = hundreds of promoted layers on
+     mobile. Opacity is promoted on the fly while animating. */
   white-space: pre-wrap;
 }
 

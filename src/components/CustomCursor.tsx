@@ -1,12 +1,21 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function CustomCursor() {
+  // Touch devices: never render the dot/ring and never start the rAF loop.
+  // The mix-blend-difference ring is a GPU blend layer — a known mobile
+  // flicker source — so it must not exist there at all.
+  const [enabled, setEnabled] = useState(false);
+
   useEffect(() => {
-    // Touch devices have no mouse — the cursor is never seen. Skip the
-    // permanent rAF loop entirely (big mobile perf/battery win).
-    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (window.matchMedia("(hover: hover) and (pointer: fine)").matches) {
+      setEnabled(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!enabled) return;
     const dot = document.getElementById("cursor-dot");
     const ring = document.getElementById("cursor-ring");
     if (!dot || !ring) return;
@@ -46,7 +55,9 @@ export default function CustomCursor() {
       cancelAnimationFrame(raf);
       document.body.classList.remove("no-native-cursor");
     };
-  }, []);
+  }, [enabled]);
+
+  if (!enabled) return null;
 
   return (
     <>
