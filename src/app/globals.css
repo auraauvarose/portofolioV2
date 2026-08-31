@@ -136,6 +136,18 @@
       filter: hue-rotate(25deg);
     }
   }
+  /* Mobile variant: filter-only (GPU-composited) — animating background-position
+     repaints a 30vw text layer every frame on phones. The hue cycle (the
+     visible color change) is preserved with a slightly wider swing. */
+  @keyframes mark-hue-gpu {
+    0%,
+    100% {
+      filter: hue-rotate(0deg);
+    }
+    50% {
+      filter: hue-rotate(45deg);
+    }
+  }
 }
 
 html {
@@ -270,6 +282,19 @@ html {
     rgba(124, 58, 237, 0.35),
     rgba(211, 84, 47, 0.4)
   );
+}
+/* Pause the watermark animation while it is offscreen (toggled from Footer). */
+.footer-mark.footer-mark-color.mark-halt {
+  animation-play-state: paused !important;
+}
+/* Mobile: static gradient + GPU hue-rotate only. Same colors, same cycle,
+   but no per-frame repaint of the huge text layer. */
+@media (max-width: 768px) {
+  .footer-mark.footer-mark-color {
+    animation-name: mark-hue-gpu;
+    animation-duration: 7s;
+    will-change: filter;
+  }
 }
 
 /* Borders: white-tinted → dark-tinted */

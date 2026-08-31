@@ -19,8 +19,20 @@ function useLocalTime() {
       setTime(formatted);
     };
     update();
-    const id = setInterval(update, 1000);
-    return () => clearInterval(id);
+    // Skip re-renders while the tab is hidden/phone screen is off: the clock
+    // format only changes per minute, so nothing visible is lost.
+    const id = setInterval(() => {
+      if (typeof document !== "undefined" && document.hidden) return;
+      update();
+    }, 1000);
+    const onVisible = () => {
+      if (!document.hidden) update();
+    };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      clearInterval(id);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
   }, []);
   return time;
 }

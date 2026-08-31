@@ -84,9 +84,9 @@ export default function Marquee({
       className="marquee-mask relative z-[1] overflow-hidden border-y border-white/5 bg-ink py-6"
     >
       <div
-        className={`flex w-max ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
+        className={`flex w-max [will-change:transform] ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
       >
-        <div ref={skewRef} className="flex w-max">
+        <div ref={skewRef} className="flex w-max [will-change:transform]">
           {copy("a")}
           {copy("b")}
         </div>

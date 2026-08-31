@@ -10,10 +10,10 @@ const DISC = 280;
 export default function Hero() {
   const eyebrow = `${profile.name}`.toUpperCase();
   const { theme } = useLanguage();
-  const [dim, setDim] = useState(0);
   const [active, setActive] = useState(false);
   const scrollRAF = useRef(0);
   const lastDim = useRef(0);
+  const heroRef = useRef<HTMLElement>(null);
 
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
     e.currentTarget.style.setProperty("--mx", `${e.clientX}px`);
@@ -22,14 +22,16 @@ export default function Hero() {
 
   useEffect(() => {
     const onScroll = () => {
-      // rAF-throttle: at most one setState per frame, skip if unchanged.
+      // rAF-throttled, write-only: updates a CSS variable instead of calling
+      // setState, so scrolling never re-renders the Hero subtree. The dim
+      // overlay resolves the value in CSS via --hero-dim.
       if (scrollRAF.current) return;
       scrollRAF.current = requestAnimationFrame(() => {
         scrollRAF.current = 0;
         const d = Math.min(1, window.scrollY / window.innerHeight);
         if (Math.abs(d - lastDim.current) < 0.001) return;
         lastDim.current = d;
-        setDim(d);
+        heroRef.current?.style.setProperty("--hero-dim", String(d));
       });
     };
     onScroll();
@@ -42,10 +44,11 @@ export default function Hero() {
 
   return (
     <section
+      ref={heroRef}
       id="top"
       onMouseMove={onMove}
       className="relative flex h-screen w-full items-center justify-center overflow-hidden px-4 text-ecru"
-      style={{ "--mx": "-200px", "--my": "-200px" } as React.CSSProperties}
+      style={{ "--mx": "-200px", "--my": "-200px", "--hero-dim": 0 } as React.CSSProperties}
     >
       <div
         aria-hidden="true"
@@ -61,7 +64,7 @@ export default function Hero() {
         aria-hidden="true"
         className="pointer-events-none absolute inset-0 bg-black transition-opacity duration-300"
         style={{
-          opacity: theme === "dark" ? 0.35 + dim * 0.6 : 0,
+          opacity: theme === "dark" ? "calc(0.35 + var(--hero-dim, 0) * 0.6)" : 0,
         }}
       />
 
