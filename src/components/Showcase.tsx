@@ -25,14 +25,30 @@ export default function Showcase({
       <div className="mx-auto max-w-7xl">
         <Reveal className="mb-12 md:mb-16">
           <div className="flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
-            <span className="font-display text-accent">06</span>
-            <span>{t(showcase.kicker)}</span>
-            <span className="h-px flex-1 bg-white/10" />
+            <span className="sh-index font-display text-accent">06</span>
+            <span className="sh-kicker">{t(showcase.kicker)}</span>
+            <span className="sh-line h-px flex-1 bg-white/10" />
           </div>
 
           <div className="mt-4 flex flex-wrap items-center justify-between gap-x-8 gap-y-6">
-            <h2 className="text-bevellier bg-ink text-4xl uppercase text-white sm:text-5xl md:text-7xl">
-              {t(showcase.heading)}
+            <h2
+              aria-label={t(showcase.heading)}
+              className="text-bevellier bg-ink text-4xl uppercase text-white sm:text-5xl md:text-7xl"
+            >
+              {t(showcase.heading)
+                .split(/\s+/)
+                .filter(Boolean)
+                .map((word, i, arr) => (
+                  <span key={`${word}-${i}`} aria-hidden="true" className="sh-mask">
+                    <span
+                      className="sh-word"
+                      style={{ transitionDelay: `${140 + i * 70}ms` }}
+                    >
+                      {word}
+                      {i < arr.length - 1 ? "\u00A0" : ""}
+                    </span>
+                  </span>
+                ))}
             </h2>
 
             <div className="flex flex-col items-end self-stretch">

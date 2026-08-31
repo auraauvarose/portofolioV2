@@ -22,6 +22,9 @@
   --animate-marquee-reverse: marquee-reverse 30s linear infinite;
   --animate-spin-slow: spin 6s linear infinite;
   --animate-pulse-dot: pulse-dot 2s ease-in-out infinite;
+  --animate-color-cycle: color-cycle 8s linear infinite;
+  --animate-color-cycle-ink: color-cycle-ink 8s linear infinite;
+  --animate-ping-soft: ping-soft 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
   --animate-preloader-word: preloader-word 0.42s cubic-bezier(0.16, 1, 0.3, 1)
     forwards;
   --animate-hero-float: hero-float 5s ease-in-out infinite;
@@ -74,6 +77,63 @@
     50% {
       opacity: 0.4;
       transform: scale(0.8);
+    }
+  }
+  /* Status dot color rotation (shared 8s loop so every element stays in sync) */
+  @keyframes color-cycle {
+    0%,
+    100% {
+      background-color: #22c55e;
+    }
+    25% {
+      background-color: #38bdf8;
+    }
+    50% {
+      background-color: #a78bfa;
+    }
+    75% {
+      background-color: #eb5939;
+    }
+  }
+  @keyframes color-cycle-ink {
+    0%,
+    100% {
+      color: #22c55e;
+      border-color: rgb(34 197 94 / 0.35);
+      background-color: rgb(34 197 94 / 0.1);
+    }
+    25% {
+      color: #38bdf8;
+      border-color: rgb(56 189 248 / 0.35);
+      background-color: rgb(56 189 248 / 0.1);
+    }
+    50% {
+      color: #a78bfa;
+      border-color: rgb(167 139 250 / 0.35);
+      background-color: rgb(167 139 250 / 0.1);
+    }
+    75% {
+      color: #eb5939;
+      border-color: rgb(235 89 57 / 0.35);
+      background-color: rgb(235 89 57 / 0.1);
+    }
+  }
+  @keyframes ping-soft {
+    75%,
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  @keyframes mark-hue {
+    0%,
+    100% {
+      background-position: 0% 50%;
+      filter: hue-rotate(0deg);
+    }
+    50% {
+      background-position: 100% 50%;
+      filter: hue-rotate(25deg);
     }
   }
 }
@@ -183,6 +243,33 @@ html {
 }
 :root:not(.dark) .footer-mark {
   color: rgba(0, 0, 0, 0.08);
+}
+
+/* Watermark AURA (font Array): tint the letterform dots with a shifting
+   gradient. Clipped to the glyphs, so only the letters get color. */
+.footer-mark.footer-mark-color {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+  background-image: linear-gradient(
+    120deg,
+    rgba(235, 89, 57, 0.55),
+    rgba(56, 189, 248, 0.5),
+    rgba(167, 139, 250, 0.5),
+    rgba(235, 89, 57, 0.55)
+  );
+  background-size: 300% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  animation: mark-hue 10s ease-in-out infinite;
+}
+:root:not(.dark) .footer-mark.footer-mark-color {
+  background-image: linear-gradient(
+    120deg,
+    rgba(211, 84, 47, 0.4),
+    rgba(2, 132, 199, 0.35),
+    rgba(124, 58, 237, 0.35),
+    rgba(211, 84, 47, 0.4)
+  );
 }
 
 /* Borders: white-tinted → dark-tinted */
@@ -413,23 +500,94 @@ body {
   }
 }
 
-/* Reveal-on-scroll base state (activated by IntersectionObserver) */
+/* Reveal-on-scroll v2 — lift + settle with a soft overshoot. Direction-aware
+   (entering from the top edge mirrors the motion), replays on every pass. */
 .reveal {
   opacity: 0;
-  transform: translateY(28px);
+  transform: translateY(46px) scale(0.965) rotate(0.75deg);
   transition:
-    opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.9s cubic-bezier(0.22, 1.15, 0.32, 1);
   /* No permanent will-change: dozens of pre-promoted layers starve mobile
      GPUs. Browsers auto-promote elements during active transitions. */
 }
-/* Entering from the top edge (scrolling up): slide down instead */
+/* Entering from the top edge (scrolling up): mirrored motion */
 .reveal.reveal-from-top {
-  transform: translateY(-28px);
+  transform: translateY(-46px) scale(0.965) rotate(-0.75deg);
 }
 .reveal.is-visible {
   opacity: 1;
+  transform: translateY(0) scale(1) rotate(0deg);
+}
+/* Media variant: images inside start zoomed-in and un-clip to rest scale.
+   Only the pre-visible state sets a transform, so hover zooms keep working. */
+.reveal-media img {
+  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-media:not(.is-visible) img {
+  transform: scale(1.14);
+}
+
+/* SectionHeading — masked word-by-word headline reveal + kicker/line choreography.
+   Triggerable from a `.sh` root (SectionHeading) or any `.reveal` root (custom
+   headings that embed the same classes). */
+.sh-mask {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: bottom;
+  padding-bottom: 0.12em;
+  margin-bottom: -0.12em;
+}
+.sh-word {
+  display: inline-block;
+  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sh .sh-word,
+.reveal .sh-word {
+  transform: translateY(125%);
+}
+.sh.sh-from-top .sh-word,
+.reveal.reveal-from-top .sh-word {
+  transform: translateY(-125%);
+}
+.sh.sh-in .sh-word,
+.reveal.is-visible .sh-word {
   transform: translateY(0);
+}
+.sh-kicker,
+.sh-index {
+  transition:
+    opacity 0.7s ease,
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.sh .sh-kicker,
+.sh .sh-index,
+.reveal .sh-kicker,
+.reveal .sh-index {
+  opacity: 0;
+  transform: translateY(14px);
+}
+.sh-index {
+  transition-delay: 60ms;
+}
+.sh.sh-in .sh-kicker,
+.sh.sh-in .sh-index,
+.reveal.is-visible .sh-kicker,
+.reveal.is-visible .sh-index {
+  opacity: 1;
+  transform: translateY(0);
+}
+.sh-line {
+  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
+}
+.sh .sh-line,
+.reveal .sh-line {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+.sh.sh-in .sh-line,
+.reveal.is-visible .sh-line {
+  transform: scaleX(1);
 }
 
 /* Scroll-linked word reveal (About bio + What I Do rows) */
@@ -484,9 +642,17 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .reveal,
   .letter,
-  .scroll-word-inner {
+  .scroll-word-inner,
+  .sh-word,
+  .sh-kicker,
+  .sh-index,
+  .reveal-media img {
     opacity: 1 !important;
     transform: none !important;
+    transition: none !important;
+  }
+  .sh-line {
+    transform: scaleX(1) !important;
     transition: none !important;
   }
   html {

@@ -130,6 +130,7 @@ function Node({
   depth,
   delay,
   entered,
+  flat = false,
   floatDelay,
   floatDuration = 6,
   children,
@@ -139,18 +140,28 @@ function Node({
   depth: number;
   delay: number;
   entered: boolean;
+  /** Mobile: skip translateZ — no 3D sorting while scrolling */
+  flat?: boolean;
   /** seconds; negative = start mid-phase. Omit to disable floating */
   floatDelay?: number;
   floatDuration?: number;
   children: ReactNode;
 }) {
+  // Ambient float only while the section is on screen — when `entered` flips
+  // off, the animation is removed entirely so off-screen layers cost nothing.
+  const floatAnim =
+    floatDelay === undefined
+      ? undefined
+      : entered
+        ? `mm-float ${floatDuration}s ease-in-out ${floatDelay}s infinite`
+        : undefined;
   return (
     <div
       className="absolute left-0 top-0"
       style={{
-        transform: `translate(${x}px, ${y}px) translate(-50%, -50%) translateZ(${depth}px) scale(${
-          entered ? 1 : 0.4
-        })`,
+        transform: `translate(${x}px, ${y}px) translate(-50%, -50%) ${
+          flat ? "" : `translateZ(${depth}px) `
+        }scale(${entered ? 1 : 0.4})`,
         opacity: entered ? 1 : 0,
         transition:
           "transform 0.7s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -159,14 +170,7 @@ function Node({
     >
       <div
         className={floatDelay === undefined ? undefined : "mm-float"}
-        style={
-          floatDelay === undefined
-            ? undefined
-            : {
-                animationDuration: `${floatDuration}s`,
-                animationDelay: `${floatDelay}s`,
-              }
-        }
+        style={floatAnim ? { animation: floatAnim } : undefined}
       >
         {children}
       </div>
@@ -185,6 +189,17 @@ export default function TechStack() {
   const [dragging, setDragging] = useState(false);
   const [resetting, setResetting] = useState(false);
   const [entered, setEntered] = useState(false);
+  // Mobile/touch: flatten the 3D world. Tilt (the only depth consumer) is
+  // mouse-only, so preserve-3d + perspective there is pure scroll cost.
+  const [flat, setFlat] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(pointer: coarse), (max-width: 767px)");
+    const update = () => setFlat(mq.matches);
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
 
   const panRef = useRef<Vec>({ x: 0, y: 0 });
   const zoomRef = useRef(1);
@@ -548,7 +563,7 @@ export default function TechStack() {
           className={`relative h-[460px] w-full cursor-grab touch-none select-none overflow-hidden rounded-3xl border border-black/10 bg-white/50 dark:border-white/10 dark:bg-white/[0.02] sm:h-[520px] md:h-[660px] ${
             dragging ? "cursor-grabbing" : ""
           }`}
-          style={{ perspective: "1400px" }}
+          style={{ perspective: flat ? undefined : "1400px" }}
         >
           <div
             ref={bgRef}
@@ -571,7 +586,7 @@ export default function TechStack() {
               width: WORLD,
               height: WORLD,
               transform: "translate(-50%, -50%)",
-              transformStyle: "preserve-3d",
+              transformStyle: flat ? undefined : "preserve-3d",
               willChange: "transform",
             }}
           >
@@ -585,7 +600,7 @@ export default function TechStack() {
                 height: 360,
                 background:
                   "radial-gradient(circle, rgba(235,89,57,0.22), transparent 70%)",
-                animation: "mm-glow 5s ease-in-out infinite",
+                animation: entered ? "mm-glow 5s ease-in-out infinite" : undefined,
               }}
             />
 
@@ -632,12 +647,12 @@ export default function TechStack() {
               })}
             </svg>
 
-            <Node x={CENTER} y={CENTER} depth={40} delay={0} entered={entered}>
+            <Node x={CENTER} y={CENTER} depth={40} delay={0} entered={entered} flat={flat}>
               <div className="relative flex h-44 w-44 items-center justify-center rounded-full border-2 border-accent/60 bg-panel text-center shadow-[0_30px_80px_-20px_rgba(235,89,57,0.55)] transition-all duration-300 hover:scale-105 hover:border-accent hover:shadow-[0_36px_90px_-20px_rgba(235,89,57,0.75)] md:h-48 md:w-48">
                 <span
                   aria-hidden
                   className="pointer-events-none absolute -inset-3 rounded-full border border-dashed border-accent/30"
-                  style={{ animation: "mm-rotate 18s linear infinite" }}
+                  style={{ animation: entered ? "mm-rotate 18s linear infinite" : undefined }}
                 />
                 <span className="relative flex flex-col items-center">
                   {headingWords.map((word) => (
@@ -663,6 +678,7 @@ export default function TechStack() {
                   depth={18}
                   delay={140 + i * 120}
                   entered={entered}
+                  flat={flat}
                   floatDelay={-i * 1.3}
                   floatDuration={7.5}
                 >
@@ -689,6 +705,7 @@ export default function TechStack() {
                     depth={(j % 2) * 8}
                     delay={220 + i * 120 + j * 45}
                     entered={entered}
+                    flat={flat}
                     floatDelay={-(i * 0.9 + j * 0.5)}
                     floatDuration={4.5 + ((i + j) % 4) * 0.7}
                   >

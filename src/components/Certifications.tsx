@@ -180,7 +180,7 @@ export default function Certifications({
                   >
                     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                       {pages[idx].map((cert, i) => (
-                        <Reveal key={cert.id} delay={i * 80} className="h-full">
+                        <Reveal key={cert.id} delay={i * 80} media className="h-full">
                           {certCard(cert)}
                         </Reveal>
                       ))}

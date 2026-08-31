@@ -38,10 +38,10 @@ export default function Contact() {
           <span className="h-px flex-1 bg-white/10" />
         </Reveal>
 
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#22c55e]">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#22c55e] animate-color-cycle-ink">
           <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-[#22c55e] opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e]" />
+            <span className="absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75 [animation:ping-soft_1.6s_ease-out_infinite,color-cycle_8s_linear_infinite]" />
+            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e] animate-color-cycle" />
           </span>
           {t(contact.available)}
         </div>

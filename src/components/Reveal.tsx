@@ -7,6 +7,8 @@ type RevealProps = {
   className?: string;
   delay?: number;
   as?: keyof React.JSX.IntrinsicElements;
+  /** Media variant: images inside un-clip from a zoomed-in state */
+  media?: boolean;
 };
 
 export default function Reveal({
@@ -14,6 +16,7 @@ export default function Reveal({
   className = "",
   delay = 0,
   as: Tag = "div",
+  media = false,
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
@@ -26,7 +29,7 @@ export default function Reveal({
       (entries) => {
         entries.forEach((entry) => {
           // Replays every pass: enter from the bottom edge (scrolling down)
-          // slides up; enter from the top edge (scrolling up) slides down.
+          // lifts up; enter from the top edge (scrolling up) mirrors it.
           setFromTop(entry.boundingClientRect.top <= 0);
           setVisible(entry.isIntersecting);
         });
@@ -42,7 +45,7 @@ export default function Reveal({
   return (
     <Component
       ref={ref}
-      className={`reveal ${fromTop ? "reveal-from-top" : ""} ${visible ? "is-visible" : ""} ${className}`}
+      className={`reveal ${media ? "reveal-media" : ""} ${fromTop ? "reveal-from-top" : ""} ${visible ? "is-visible" : ""} ${className}`}
       style={{ transitionDelay: visible && delay ? `${delay}ms` : "0ms" }}
     >
       {children}

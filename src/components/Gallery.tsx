@@ -157,7 +157,7 @@ export default function Gallery({
                   >
                     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                       {pages[idx].map((photo, i) => (
-                        <Reveal key={photo.id} delay={i * 60} className="break-inside-avoid">
+                        <Reveal key={photo.id} delay={i * 60} media className="break-inside-avoid">
                           {photoCard(photo, start + i)}
                         </Reveal>
                       ))}

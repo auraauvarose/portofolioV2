@@ -212,7 +212,7 @@ export default function Projects({
                   >
                     <div className="grid gap-6 md:grid-cols-2">
                       {pages[idx].map((project, i) => (
-                        <Reveal key={project.id} delay={i * 80} className="h-full">
+                        <Reveal key={project.id} delay={i * 80} media className="h-full">
                           {projectCard(project, i)}
                         </Reveal>
                       ))}

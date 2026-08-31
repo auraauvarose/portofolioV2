@@ -65,6 +65,14 @@ const zodiak = localFont({
   display: "swap",
 });
 
+const array = localFont({
+  src: [
+    { path: "../../public/fonts/Array-600.woff2", weight: "600", style: "normal" },
+  ],
+  variable: "--font-array",
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: "Aura Auvarose — Full Stack Developer",
   description:
@@ -79,7 +87,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${chillax.variable} ${zodiak.variable} dark`}
+      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${chillax.variable} ${zodiak.variable} ${array.variable} dark`}
       style={{ colorScheme: "dark" }}
     >
       <body className="antialiased">
