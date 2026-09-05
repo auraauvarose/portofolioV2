@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { useLanguage } from "@/components/providers";
+import { getLenis } from "@/components/SmoothScroll";
 import { footer, profile } from "@/lib/config";
 
 export default function Footer() {
@@ -40,7 +41,11 @@ export default function Footer() {
             <span>© {year} {profile.name.split(" ")[0].toUpperCase()}</span>
           </div>
           <button
-            onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+            onClick={() => {
+              const lenis = getLenis();
+              if (lenis) lenis.scrollTo(0);
+              else window.scrollTo({ top: 0, behavior: "smooth" });
+            }}
             className="uppercase tracking-widest transition-colors hover:text-accent"
           >
             {t(footer.backToTop)} ↑

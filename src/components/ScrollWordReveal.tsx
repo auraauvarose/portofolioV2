@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useReducedMotion,
@@ -43,6 +43,12 @@ export default function ScrollWordReveal({
 }: ScrollWordRevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
+  // Touch GPUs repaint text on every animated-filter frame. Phones get the
+  // same reveal (opacity + y + color) without the per-frame blur raster.
+  const [coarse, setCoarse] = useState(false);
+  useEffect(() => {
+    setCoarse(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
 
   const words = text.split(/\s+/).filter(Boolean).map((w) => w.trim());
   const count = Math.max(words.length, 1);
@@ -86,6 +92,7 @@ export default function ScrollWordReveal({
             baseColor={baseColor}
             fullColor={fullColor}
             reduceMotion={reduceMotion}
+            light={coarse}
             className={wordClass}
             isLast={i === words.length - 1}
           >
@@ -109,6 +116,8 @@ type RevealWordProps = {
   baseColor?: string;
   fullColor?: string;
   reduceMotion: boolean | null;
+  /** Coarse-pointer mode: same reveal minus the per-frame blur raster. */
+  light?: boolean;
   className: string;
   isLast: boolean;
   children: string;
@@ -124,6 +133,7 @@ function RevealWord({
   baseColor,
   fullColor,
   reduceMotion,
+  light = false,
   className,
   isLast,
   children,
@@ -140,7 +150,11 @@ function RevealWord({
     fullColor ?? "currentColor",
   ]);
   const y = useTransform(eased, [0, 1], [12, 0]);
-  const blur = useTransform(eased, [0, 1], [6, 0]);
+  // Snap to "none" once revealed: a permanent blur(0px) still forces a
+  // filter/raster context on the span for the rest of the session.
+  const blur = useTransform(eased, (v) =>
+    v >= 1 || light ? "none" : `blur(${((1 - v) * 6).toFixed(2)}px)`,
+  );
   const colorStyle: { color: string | MotionValue<string> } | null =
     baseColor && fullColor
       ? { color: reduceMotion ? fullColor : color }
@@ -153,7 +167,7 @@ function RevealWord({
         style={{
           opacity: reduceMotion ? 1 : opacity,
           y: reduceMotion ? 0 : y,
-          filter: reduceMotion ? "none" : `blur(${blur}px)`,
+          filter: reduceMotion ? "none" : blur,
           ...colorStyle,
         }}
       >

@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import Nav from "@/components/Nav";
+import SmoothScroll from "@/components/SmoothScroll";
+import { EASE_INOUT } from "@/lib/motion";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
 import WhatIDo from "@/components/WhatIDo";
@@ -20,7 +23,6 @@ import type { Project, Certification, GalleryPhoto } from "@/types";
 const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
 const GREET_MS = 320;
 const HOLD_MS = 500;
-const CURTAIN_MS = 700;
 type Phase = "enter" | "show" | "exit";
 
 export default function HomeClient({
@@ -34,8 +36,6 @@ export default function HomeClient({
 }) {
   const [phase, setPhase] = useState<Phase>("enter");
   const [index, setIndex] = useState(0);
-  const [revealed, setRevealed] = useState(false);
-  const exitedRef = useRef(false);
 
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
@@ -96,64 +96,48 @@ export default function HomeClient({
     };
   }, [phase]);
 
-  const finishClose = () => {
-    if (exitedRef.current) return;
-    exitedRef.current = true;
-    setRevealed(true);
-  };
-
-  const curtainVisible = phase !== "enter";
-  const curtainTransform = phase === "show" ? "translateY(0)" : "translateY(100%)";
-  const curtainStyle = {
-    transitionProperty: "transform",
-    transitionDuration: `${CURTAIN_MS}ms`,
-    transitionTimingFunction: "cubic-bezier(0.76, 0, 0.24, 1)",
-    transform: curtainTransform,
-  } as const;
-
   if (phase === "enter") {
     return <div className="fixed inset-0 bg-ink" aria-hidden="true" />;
   }
 
   return (
-    <main className="relative min-h-screen overflow-x-clip bg-ink">
-      {curtainVisible && !revealed && (
-        <div
-          className="loading-curtain fixed inset-0 z-[99999] overflow-hidden bg-ink"
-          aria-hidden="true"
-        >
-          <div
-            onTransitionEnd={(e) => {
-              if (e.propertyName === "transform" && phase === "exit") {
-                finishClose();
-              }
-            }}
-            className="fixed inset-0 flex items-center justify-center bg-ink"
-            style={curtainStyle}
-          >
-            <div className="relative flex flex-col items-center">
-              <span
-                key={GREETINGS[index]}
-                className="text-display animate-preloader-word text-5xl uppercase tracking-tight text-white md:text-7xl"
-              >
-                {GREETINGS[index]}
-                <span className="text-accent">.</span>
-              </span>
+    <SmoothScroll>
+      <main className="relative min-h-screen overflow-x-clip bg-ink">
+        {/* Mounted only during "show": flipping to "exit" unmounts the child,
+            which is what tells AnimatePresence to play the slide-down exit. */}
+        <AnimatePresence>
+          {phase === "show" && (
+            <motion.div
+              key="loading-curtain"
+              className="fixed inset-0 z-[99999] flex items-center justify-center bg-ink"
+              aria-hidden="true"
+              initial={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ duration: 0.7, ease: EASE_INOUT }}
+            >
+              <div className="relative flex flex-col items-center">
+                <span
+                  key={GREETINGS[index]}
+                  className="text-display animate-preloader-word text-5xl uppercase tracking-tight text-white md:text-7xl"
+                >
+                  {GREETINGS[index]}
+                  <span className="text-accent">.</span>
+                </span>
 
-              <div className="mt-8 h-px w-40 overflow-hidden bg-white/15">
-                <div
-                  className="h-full bg-accent transition-all duration-300 ease-out"
-                  style={{ width: `${((index + 1) / GREETINGS.length) * 100}%` }}
-                />
+                <div className="mt-8 h-px w-40 overflow-hidden bg-white/15">
+                  <div
+                    className="h-full bg-accent transition-all duration-300 ease-out"
+                    style={{ width: `${((index + 1) / GREETINGS.length) * 100}%` }}
+                  />
+                </div>
+
+                <span className="mt-6 text-[10px] uppercase tracking-[0.4em] text-white">
+                  Loading
+                </span>
               </div>
-
-              <span className="mt-6 text-[10px] uppercase tracking-[0.4em] text-white">
-                Loading
-              </span>
-            </div>
-          </div>
-        </div>
-      )}
+            </motion.div>
+          )}
+        </AnimatePresence>
 
       <Sidebars />
       <CustomCursor />
@@ -216,6 +200,7 @@ export default function HomeClient({
         <Contact />
         <Footer />
       </div>
-    </main>
+      </main>
+    </SmoothScroll>
   );
 }

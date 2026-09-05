@@ -58,7 +58,7 @@ export default function Tilt3D({
       onPointerLeave={onLeave}
     >
       <div
-        className={`h-full w-full transition-transform duration-200 ease-out will-change-transform ${innerClassName}`}
+        className={`tilt-inner h-full w-full transition-transform duration-200 ease-out will-change-transform ${innerClassName}`}
         style={{
           transform:
             "rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) scale(var(--s, 1))",

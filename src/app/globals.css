@@ -151,7 +151,8 @@
 }
 
 html {
-  scroll-behavior: smooth;
+  /* No scroll-behavior: smooth — Lenis owns scrolling (globals intent:
+     CSS smooth scrolling fights Lenis's per-frame scroll position). */
   /* Paint the canvas behind the page (theme-aware) so rubber-band overscroll
      never exposes a white band at the screen edges. */
   background-color: var(--color-ink);
@@ -813,6 +814,15 @@ summary {
   .hero-tilt-inner {
     transform: none !important;
     will-change: auto;
+  }
+  /* Tilt3D never tilts on touch (its own pointer guard is mouse-only), so
+     drop its permanent GPU layers: preserve-3d + will-change keep every
+     tilted card rasterized for the whole session for zero visible motion. */
+  .tilt-inner {
+    transform: none !important;
+    transform-style: flat !important;
+    will-change: auto !important;
+    transition: none !important;
   }
 }
 

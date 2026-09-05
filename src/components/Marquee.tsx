@@ -11,6 +11,7 @@ export default function Marquee({
 }) {
   const wrapRef = useRef<HTMLDivElement | null>(null);
   const skewRef = useRef<HTMLDivElement | null>(null);
+  const trackRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     const wrap = wrapRef.current;
@@ -40,6 +41,9 @@ export default function Marquee({
     const io = new IntersectionObserver(
       (entries) => {
         visible = entries[0]?.isIntersecting ?? false;
+        // Offscreen: also pause the infinite translateX loop (compositor
+        // keeps ticking an always-on animation even when culled).
+        trackRef.current?.classList.toggle("marquee-paused", !visible);
         if (visible && !raf) {
           lastY = window.scrollY;
           raf = requestAnimationFrame(tick);
@@ -84,6 +88,7 @@ export default function Marquee({
       className="marquee-mask relative z-[1] overflow-hidden border-y border-white/5 bg-ink py-6"
     >
       <div
+        ref={trackRef}
         className={`flex w-max [will-change:transform] ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
       >
         <div ref={skewRef} className="flex w-max [will-change:transform]">
