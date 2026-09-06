@@ -125,20 +125,8 @@
       opacity: 0;
     }
   }
-  @keyframes mark-hue {
-    0%,
-    100% {
-      background-position: 0% 50%;
-      filter: hue-rotate(0deg);
-    }
-    50% {
-      background-position: 100% 50%;
-      filter: hue-rotate(25deg);
-    }
-  }
-  /* Mobile variant: filter-only (GPU-composited) — animating background-position
-     repaints a 30vw text layer every frame on phones. The hue cycle (the
-     visible color change) is preserved with a slightly wider swing. */
+  /* Filter-only animation keeps the huge watermark out of the paint loop.
+     Animating background-position repaints the clipped text on every frame. */
   @keyframes mark-hue-gpu {
     0%,
     100% {
@@ -273,7 +261,8 @@ html {
   background-size: 300% 100%;
   -webkit-background-clip: text;
   background-clip: text;
-  animation: mark-hue 10s ease-in-out infinite;
+  animation: mark-hue-gpu 10s ease-in-out infinite;
+  will-change: filter;
 }
 :root:not(.dark) .footer-mark.footer-mark-color {
   background-image: linear-gradient(
@@ -288,15 +277,7 @@ html {
 .footer-mark.footer-mark-color.mark-halt {
   animation-play-state: paused !important;
 }
-/* Mobile: static gradient + GPU hue-rotate only. Same colors, same cycle,
-   but no per-frame repaint of the huge text layer. */
-@media (max-width: 768px) {
-  .footer-mark.footer-mark-color {
-    animation-name: mark-hue-gpu;
-    animation-duration: 7s;
-    will-change: filter;
-  }
-}
+/* Keep one compositor-friendly animation on every viewport. */
 
 /* Borders: white-tinted → dark-tinted */
 :root:not(.dark) [class*="border-white/"] {
