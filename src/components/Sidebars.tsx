@@ -68,7 +68,7 @@ export default function Sidebars() {
 
   return (
     <>
-      <div className="fixed left-0 top-1/2 z-40 ml-6 hidden -translate-y-1/2 md:flex lg:ml-12">
+      <div className="fixed left-0 top-1/2 z-[5] ml-6 hidden -translate-y-1/2 md:flex lg:ml-12">
         <div className="glass flex flex-col items-center gap-6 rounded-2xl py-4 shadow-xl">
           <div className="h-14 w-[0.2px] bg-gray-400/50 dark:bg-gray-500/60" />
           {LEFT_SOCIALS.map((s) => (
@@ -87,7 +87,7 @@ export default function Sidebars() {
         </div>
       </div>
 
-      <div className="fixed right-0 top-1/2 z-40 mr-6 hidden -translate-y-1/2 md:flex lg:mr-12">
+      <div className="fixed right-0 top-1/2 z-[5] mr-6 hidden -translate-y-1/2 md:flex lg:mr-12">
         <div className="glass flex flex-col items-center gap-8 rounded-2xl py-4 shadow-xl">
           <div className="h-12 w-[0.2px] bg-gray-400/50 dark:bg-gray-500/60" />
           <MusicPlayer variant="rail" />

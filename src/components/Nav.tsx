@@ -36,7 +36,7 @@ export default function Nav() {
 
   return (
     <>
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-between px-6 py-6 md:px-12 md:py-8">
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-[5] flex px-6 py-6 md:px-12 md:py-8">
         <button
           type="button"
           onClick={() => setProfileOpen(true)}
@@ -50,7 +50,9 @@ export default function Nav() {
             className="h-full w-full object-cover object-center"
           />
         </button>
+      </div>
 
+      <header className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-end px-6 py-6 md:px-12 md:py-8">
         <nav className="pointer-events-auto hidden flex-col items-end gap-1 md:flex">
           {nav.map((item, i) => {
             const anchor = ANCHORS[i] ?? "#";

@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Nav from "@/components/Nav";
-import SmoothScroll from "@/components/SmoothScroll";
+import SmoothScroll, { getLenis } from "@/components/SmoothScroll";
 import { EASE_INOUT } from "@/lib/motion";
 import Hero from "@/components/Hero";
 import About from "@/components/About";
@@ -134,13 +134,28 @@ export default function HomeClient({
       <SpiderWalker />
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
 
-      <div
-        className={`pointer-events-none fixed right-6 bottom-8 z-[95] flex flex-col items-center gap-3 transition-all duration-500 ease-out lg:right-12 ${
-          atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0"
+      <button
+        type="button"
+        onClick={() => {
+          const lenis = getLenis();
+          if (atBottom) {
+            if (lenis) lenis.scrollTo(0);
+            else window.scrollTo({ top: 0, behavior: "smooth" });
+          } else {
+            if (lenis) lenis.scrollTo("#about");
+            else
+              document
+                .getElementById("about")
+                ?.scrollIntoView({ behavior: "smooth" });
+          }
+        }}
+        aria-label={atBottom ? "Scroll ke atas" : "Scroll ke bawah"}
+        className={`fixed right-6 bottom-8 z-[95] flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out lg:right-12 ${
+          atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0 pointer-events-none"
         }`}
       >
           <span className="text-[13px] uppercase tracking-[0.4em] text-[#6b6b6b] [writing-mode:vertical-rl] dark:text-[#b7ab98]">
-            SCROLL
+            {atBottom ? "TOP" : "SCROLL"}
           </span>
           <span
             className={`block ${
@@ -163,14 +178,14 @@ export default function HomeClient({
             <path d="M12 5v14M5 12l7 7 7-7" />
           </svg>
         </span>
-      </div>
+      </button>
 
       <Nav />
       <div className="sticky top-0 z-0 h-screen">
         <Hero />
       </div>
 
-      <div className="relative z-[1] bg-ink">
+      <div className="relative z-[10] bg-ink">
         <Marquee label="AURA AUVAROSE" />
 
         <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)] dark:shadow-[0_-40px_80px_rgba(255,255,255,0.25)] [clip-path:inset(-130px_0_0_0)]">
