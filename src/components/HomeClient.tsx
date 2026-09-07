@@ -118,22 +118,12 @@ export default function HomeClient({
               <div className="relative flex flex-col items-center">
                 <span
                   key={GREETINGS[index]}
-                  className="text-display animate-preloader-word text-5xl uppercase tracking-tight text-white md:text-7xl"
+                  className="text-display animate-preloader-word text-6xl uppercase tracking-tight text-white md:text-8xl"
                 >
                   {GREETINGS[index]}
                   <span className="text-accent">.</span>
                 </span>
 
-                <div className="mt-8 h-px w-40 overflow-hidden bg-white/15">
-                  <div
-                    className="h-full bg-accent transition-all duration-300 ease-out"
-                    style={{ width: `${((index + 1) / GREETINGS.length) * 100}%` }}
-                  />
-                </div>
-
-                <span className="mt-6 text-[10px] uppercase tracking-[0.4em] text-white">
-                  Loading
-                </span>
               </div>
             </motion.div>
           )}

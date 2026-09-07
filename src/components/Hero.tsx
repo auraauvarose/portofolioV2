@@ -11,6 +11,7 @@ export default function Hero() {
   const eyebrow = `${profile.name}`.toUpperCase();
   const { theme } = useLanguage();
   const [active, setActive] = useState(false);
+  const [backgroundHovered, setBackgroundHovered] = useState(false);
   const scrollRAF = useRef(0);
   const lastDim = useRef(0);
   const heroRef = useRef<HTMLElement>(null);
@@ -90,15 +91,18 @@ export default function Hero() {
         />
       </Tilt3D>
 
-      <div className="absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/20" />
+      <div
+        aria-hidden="true"
+        onMouseEnter={() => setBackgroundHovered(true)}
+        onMouseLeave={() => setBackgroundHovered(false)}
+        className={`absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur transition-[transform,background-color] duration-700 ease-out ${
+          backgroundHovered ? "scale-110 bg-accent/20" : ""
+        }`}
+      />
       <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/10" />
 
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 text-center">
-        <div
-          className="relative"
-          onMouseEnter={() => setActive(true)}
-          onMouseLeave={() => setActive(false)}
-        >
+        <div className="relative">
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-[#EB5939] sm:text-base md:mb-8 md:text-xl">
             {eyebrow}
           </p>
