@@ -50,6 +50,9 @@ export default function Hero() {
   };
 
   const onTitleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    // Touch moves belong to native page scrolling, not the desktop-only title
+    // tilt. Avoid scheduling CSS-variable writes while a finger is scrolling.
+    if (e.pointerType !== "mouse") return;
     const el = e.currentTarget;
     titlePointer.current = { x: e.clientX, y: e.clientY };
     if (tiltRaf.current) return;
@@ -86,6 +89,8 @@ export default function Hero() {
   };
 
   useEffect(() => {
+    if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
+
     const onScroll = () => {
       // rAF-throttled, write-only: updates a CSS variable instead of calling
       // setState, so scrolling never re-renders the Hero subtree. The dim

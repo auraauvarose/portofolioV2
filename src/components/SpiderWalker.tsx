@@ -179,37 +179,60 @@ export default function SpiderWalker() {
     };
 
     const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    const onMotionChange = (e: MediaQueryListEvent) => {
-      if (e.matches) {
-        cancelAnimationFrame(raf);
+    const touchMq = window.matchMedia("(hover: none), (pointer: coarse)");
+    let scrollResumeTimer: number | null = null;
+
+    const stopLoop = () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      if (wakeup) {
+        clearTimeout(wakeup);
+        wakeup = null;
+      }
+      setWalking(false);
+    };
+
+    const startLoop = () => {
+      if (document.hidden || mq.matches || raf) return;
+      st.last = performance.now();
+      if (st.mode === "idle" || st.mode === "webHang") {
+        startWalking(st.last);
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    const onMotionChange = () => {
+      if (mq.matches) {
+        stopLoop();
         park();
       } else {
-        st.last = performance.now();
-        startWalking(st.last);
-        raf = requestAnimationFrame(tick);
+        startLoop();
       }
+    };
+
+    // Keep the spider's animation, but yield its tiny rAF loop to native
+    // touch scrolling. It resumes at the same perimeter position after the
+    // gesture settles instead of being removed from mobile altogether.
+    const onScroll = () => {
+      if (!touchMq.matches || mq.matches) return;
+      stopLoop();
+      if (scrollResumeTimer) clearTimeout(scrollResumeTimer);
+      scrollResumeTimer = window.setTimeout(() => {
+        scrollResumeTimer = null;
+        startLoop();
+      }, 140);
     };
 
     // Background tabs: stop the loop + timers entirely, resume on return.
     const onVisibility = () => {
       if (document.hidden) {
-        if (raf) cancelAnimationFrame(raf);
-        raf = 0;
-        if (wakeup) {
-          clearTimeout(wakeup);
-          wakeup = null;
-        }
-        setWalking(false);
-      } else {
-        st.last = performance.now();
-        if (st.mode === "idle" || st.mode === "webHang") {
-          park();
-          return;
-        }
-        raf = requestAnimationFrame(tick);
+        stopLoop();
+      } else if (!touchMq.matches) {
+        startLoop();
       }
     };
     document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("scroll", onScroll, { passive: true });
 
     measure();
     st.dist = st.w / 2;
@@ -223,12 +246,15 @@ export default function SpiderWalker() {
       raf = requestAnimationFrame(tick);
     }
     mq.addEventListener("change", onMotionChange);
+    touchMq.addEventListener("change", onMotionChange);
 
     return () => {
-      cancelAnimationFrame(raf);
-      if (wakeup) clearTimeout(wakeup);
+      stopLoop();
+      if (scrollResumeTimer) clearTimeout(scrollResumeTimer);
       window.removeEventListener("resize", measure);
+      window.removeEventListener("scroll", onScroll);
       mq.removeEventListener("change", onMotionChange);
+      touchMq.removeEventListener("change", onMotionChange);
       document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
@@ -238,7 +264,7 @@ export default function SpiderWalker() {
       ref={elRef}
       aria-hidden
       className="spider-walker pointer-events-none fixed left-0 top-0 z-[99995] h-[30px] w-[30px]"
-      style={{ willChange: "transform" }}
+      style={{ willChange: "auto" }}
     >
       <div className="spider-thread" />
       <svg width={SIZE} height={SIZE} viewBox="0 0 30 30" fill="none" aria-hidden>

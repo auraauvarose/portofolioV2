@@ -87,10 +87,26 @@ export default function HomeClient({
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
   const scrollRAF = useRef(0);
+  const scrollEndTimer = useRef<number | null>(null);
   const scrollState = useRef({ top: true, bottom: false });
 
   useEffect(() => {
-    const onScroll = () => {
+    const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    const markScrolling = () => {
+      if (!isTouchDevice) return;
+      // Keep the decorative full-viewport effects intact, but stop their
+      // invalidation while a finger is actively moving the page. They resume
+      // automatically after the gesture settles.
+      document.documentElement.classList.add("is-scrolling");
+      if (scrollEndTimer.current) window.clearTimeout(scrollEndTimer.current);
+      scrollEndTimer.current = window.setTimeout(() => {
+        document.documentElement.classList.remove("is-scrolling");
+        scrollEndTimer.current = null;
+      }, 140);
+    };
+
+    const onScroll = (event?: Event) => {
+      if (event?.type === "scroll") markScrolling();
       // rAF-throttle + early-exit: avoids re-rendering the whole tree on
       // every scroll event (multiple per frame on mobile).
       if (scrollRAF.current) return;
@@ -115,6 +131,8 @@ export default function HomeClient({
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onScroll);
       cancelAnimationFrame(scrollRAF.current);
+      if (scrollEndTimer.current) window.clearTimeout(scrollEndTimer.current);
+      document.documentElement.classList.remove("is-scrolling");
     };
   }, []);
 

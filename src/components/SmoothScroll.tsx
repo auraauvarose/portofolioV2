@@ -13,7 +13,12 @@ export const getLenis = () => lenis;
 export default function SmoothScroll({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Users who ask for less motion get the native scroller untouched.
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    // Touch scrolling already has browser-level momentum. Letting Lenis
+    // interpolate the same gesture adds a second scroll loop and makes text
+    // rasterization compete with the finger on mobile.
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    if (prefersReducedMotion || isTouchDevice) return;
 
     const instance = new Lenis({
       lerp: 0.11, // slightly weightier glide than the 0.1 default

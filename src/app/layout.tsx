@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import localFont from "next/font/local";
 import "./globals.css";
 import { LanguageProvider } from "@/components/providers";
@@ -77,6 +77,12 @@ export const metadata: Metadata = {
   title: "Aura Auvarose — Full Stack Developer",
   description:
     "Aura Auvarose — full stack developer & IT student based in Indonesia, building polished, high-performance web and mobile applications.",
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
 };
 
 export default function RootLayout({
