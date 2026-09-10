@@ -38,6 +38,16 @@ export type GalleryPhoto = {
   created_at: string;
 };
 
+export type GuestComment = {
+  id: string;
+  name: string;
+  email: string | null;
+  message: string;
+  rating: number | null;
+  approved: boolean;
+  created_at: string;
+};
+
 export type Lang = "en" | "id";
 
 export type Localized = { en: string; id: string };

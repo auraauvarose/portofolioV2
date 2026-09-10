@@ -25,7 +25,7 @@ export default function About() {
                   text={t(p)}
                   className="text-chillax-semibold text-ecru"
                   baseOpacity={0.3}
-                  replay
+                  scrub
                   highlight={p.highlight?.[lang] ?? []}
                   highlightClassName="text-highlight"
                 />

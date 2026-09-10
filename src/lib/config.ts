@@ -344,3 +344,42 @@ export const footer = {
   status: { en: "System Active", id: "Sistem Aktif" },
   backToTop: { en: "Back to Top", id: "Kembali ke Atas" },
 } as const;
+
+export const comments = {
+  kicker: { en: "Guestbook", id: "Buku Tamu" },  index: "08",
+  heading: { en: "Visitor Notes", id: "Catatan Pengunjung" },
+  description: {
+    en: "Drop a message — say hi, share thoughts, or just leave a trace that you were here.",
+    id: "Tinggalkan pesan — sapa, bagikan pikiran, atau tinggalkan jejak bahwa kamu pernah singgah.",
+  },
+  formTitle: { en: "Leave a Comment", id: "Tinggalkan Komentar" },
+  nameLabel: { en: "Name", id: "Nama" },
+  namePlaceholder: { en: "Your name", id: "Namamu" },
+  emailLabel: { en: "Email (optional)", id: "Email (opsional)" },
+  emailPlaceholder: { en: "you@example.com", id: "kamu@contoh.com" },
+  messageLabel: { en: "Message", id: "Pesan" },
+  messagePlaceholder: {
+    en: "Write something nice…",
+    id: "Tulis sesuatu yang baik…",
+  },
+  ratingLabel: { en: "Rating (optional)", id: "Rating (opsional)" },
+  submit: { en: "Send Comment", id: "Kirim Komentar" },
+  sending: { en: "Sending…", id: "Mengirim…" },
+  success: { en: "Comment posted. Thank you!", id: "Komentar terkirim. Terima kasih!" },
+  errorGeneric: {
+    en: "Something went wrong. Please try again.",
+    id: "Terjadi kesalahan. Silakan coba lagi.",
+  },
+  empty: {
+    en: "No comments yet — be the first to write one.",
+    id: "Belum ada komentar — jadilah yang pertama menulis.",
+  },
+  count: { en: "comments", id: "komentar" },
+  backHome: { en: "Back to Home", id: "Kembali ke Beranda" },
+  replyHint: { en: "Reply", id: "Balas" },
+  justNow: { en: "just now", id: "baru saja" },
+} as const;
+
+export const commentsPage = {
+  cta: { en: "Leave a Comment", id: "Tulis Komentar" },
+} as const;

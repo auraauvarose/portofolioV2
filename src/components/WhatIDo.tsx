@@ -44,7 +44,7 @@ export default function WhatIDo() {
                 as="h2"
                 text={t(item.title)}
                 baseOpacity={0.3}
-                replay
+                scrub
                 baseColor={baseColor}
                 fullColor={fullColor}
                 className="text-bevellier relative z-10 text-[14vw] uppercase leading-[0.9] text-[#2F2F2F] transition-colors duration-500 group-hover:text-black sm:text-[11vw] md:text-[9vw] lg:text-[110px] dark:text-white dark:group-hover:text-ink"

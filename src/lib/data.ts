@@ -1,5 +1,5 @@
 import { createSupabaseServer } from "@/lib/supabase/server";
-import type { Project, Certification, GalleryPhoto } from "@/types";
+import type { Project, Certification, GalleryPhoto, GuestComment } from "@/types";
 
 function isConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
@@ -136,5 +136,26 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   } catch (err) {
     console.error("getGalleryPhotos failed:", err);
     return DEMO_GALLERY;
+  }
+}
+
+export async function getComments(): Promise<GuestComment[]> {
+  if (!isConfigured()) return [];
+  try {
+    const supabase = await createSupabaseServer();
+    const { data, error } = await supabase
+      .from("comments")
+      .select("*")
+      .eq("approved", true)
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) {
+      console.error("getComments error:", error.message);
+      return [];
+    }
+    return (data as GuestComment[]) ?? [];
+  } catch (err) {
+    console.error("getComments failed:", err);
+    return [];
   }
 }

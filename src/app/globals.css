@@ -1160,14 +1160,18 @@ summary {
     transform-style: flat;
   }
   .hero-title-3d__depth {
-    /* Keep the title's interactive depth animation for fine pointers. On a
-       phone this duplicate glyph layer only softens the readable heading. */
-    filter: none;
-    opacity: 0.55;
+    /* Remove the duplicate depth layer on phones so the headline is flat and
+       stays crisp while the page is being scrolled. */
+    display: none;
+  }
+  .hero-title-3d__heading {
+    transform: none;
+    transform-style: flat;
     will-change: auto;
   }
-  .hero-title-3d__heading,
   .hero-title-3d__line {
+    transform: none;
+    transform-style: flat;
     will-change: auto;
   }
   body {
