@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { motion, useReducedMotion, type Variants } from "motion/react";
+import { getScrollDirection } from "@/lib/scroll-direction";
 
 type ScrollWordRevealProps = {
   text: string;
@@ -55,17 +56,10 @@ export default function ScrollWordReveal({
   const [isIntersecting, setIsIntersecting] = useState(false);
   const [hasEntered, setHasEntered] = useState(false);
   const [entryDirection, setEntryDirection] = useState<"from-top" | "from-bottom">("from-bottom");
-  const scrollDirection = useRef<"up" | "down">("down");
 
   useEffect(() => {
-    let previous = window.scrollY;
-    const onScroll = () => {
-      scrollDirection.current = window.scrollY < previous ? "up" : "down";
-      previous = window.scrollY;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (replay) getScrollDirection();
+  }, [replay]);
 
   useEffect(() => {
     const node = rootRef.current;
@@ -75,7 +69,7 @@ export default function ScrollWordReveal({
         const next = Boolean(entry?.isIntersecting);
         if (next && replay) {
           setEntryDirection(
-            scrollDirection.current === "up" ? "from-top" : "from-bottom",
+            getScrollDirection() === "up" ? "from-top" : "from-bottom",
           );
         }
         setIsIntersecting(next);

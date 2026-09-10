@@ -276,6 +276,7 @@ html {
 /* Pause the watermark animation while it is offscreen (toggled from Footer). */
 .footer-mark.footer-mark-color.mark-halt {
   animation-play-state: paused !important;
+  will-change: auto;
 }
 /* Keep one compositor-friendly animation on every viewport. */
 
@@ -395,6 +396,10 @@ body {
     border: 1px solid rgba(255, 255, 255, 0.08);
     backdrop-filter: blur(12px);
   }
+  .marquee-paused {
+    animation-play-state: paused !important;
+  }
+
   .marquee-mask {
     -webkit-mask-image: linear-gradient(
       to right,
@@ -419,14 +424,18 @@ body {
     scrollbar-width: none;
   }
 
-  /* Film-grain / "TV static" overlay */
+  /* Film-grain / "TV static" overlay.
+     Layer sizing: the grain keyframes translate ±5%, so the layer only needs
+     ~116% of the viewport with 8% overscan — the old desktop 400%×400% layer
+     was 16 viewport-sized textures to rasterize and blend for zero visual
+     difference. Same texture, same animation, ~12x less GPU memory/paint. */
   .grain::before,
   .tv-static::before {
     content: "";
     position: fixed;
-    inset: -200%;
-    width: 400%;
-    height: 400%;
+    inset: -8%;
+    width: 116%;
+    height: 116%;
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
     opacity: 0.09;
     pointer-events: none;
@@ -435,17 +444,18 @@ body {
     z-index: 90;
     mix-blend-mode: overlay;
   }
-  /* Mobile: keep the layer small (GPU memory) but overscan past the edges —
-     the grain keyframes translate ±5%, so a viewport-exact layer exposed
-     empty bands at the screen edges (the dark-mode edge-flicker bug). */
-  @media (max-width: 768px) {
+  @media (prefers-reduced-motion: reduce) {
     .grain::before,
-    .tv-static::before {
-      inset: -8%;
-      width: 116%;
-      height: 116%;
+    .tv-static::before,
+    .tv-static::after,
+    .footer-mark.footer-mark-color,
+    .eq-bar,
+    .animate-marquee,
+    .animate-marquee-reverse {
+      animation: none !important;
     }
   }
+
   .tv-static::after {
     content: "";
     position: fixed;
@@ -505,6 +515,20 @@ body {
       transform: translateY(8px);
     }
   }
+}
+
+.marquee-paused {
+  animation-play-state: paused !important;
+}
+
+/* Freeze ambient color/animation loops for a paused section (Contact badge).
+   !important beats the inline arbitrary-value animation shorthand.
+   Offscreen visuals are identical; the compositor just stops waking up. */
+.cycle-halt .animate-color-cycle,
+.cycle-halt .animate-color-cycle-ink,
+.cycle-halt [class*="ping-soft"],
+.cycle-halt [class*="color-cycle"] {
+  animation-play-state: paused !important;
 }
 
 /* Reveal-on-scroll v3 — plays exactly once (JS adds .is-visible and never
@@ -581,24 +605,52 @@ body {
   from {
     opacity: 0;
     transform: translateY(-42px) scale(0.985);
-    filter: blur(7px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
   }
 }
 @keyframes reveal-in-from-bottom {
   from {
     opacity: 0;
     transform: translateY(42px) scale(0.985);
-    filter: blur(7px);
   }
   to {
     opacity: 1;
     transform: none;
-    filter: none;
+  }
+}
+@media (hover: hover) and (pointer: fine) {
+  .reveal.replay-from-top.is-visible {
+    animation-name: reveal-in-from-top-blur !important;
+  }
+  .reveal.replay-from-bottom.is-visible {
+    animation-name: reveal-in-from-bottom-blur !important;
+  }
+  @keyframes reveal-in-from-top-blur {
+    from {
+      opacity: 0;
+      transform: translateY(-42px) scale(0.985);
+      filter: blur(7px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+  @keyframes reveal-in-from-bottom-blur {
+    from {
+      opacity: 0;
+      transform: translateY(42px) scale(0.985);
+      filter: blur(7px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
   }
 }
 .reveal.v-right.is-visible:not(.replay-from-top):not(.replay-from-bottom) {

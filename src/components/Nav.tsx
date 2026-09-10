@@ -105,7 +105,7 @@ export default function Nav() {
 
       <div
         id="mobile-menu"
-        className={`fixed inset-0 z-[95] flex flex-col items-center justify-center gap-2 bg-ink/95 px-6 backdrop-blur-xl transition-opacity duration-300 md:hidden ${
+        className={`fixed inset-0 z-[95] flex flex-col items-center justify-center gap-2 bg-ink/95 px-6 transition-opacity duration-300 md:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
       >

@@ -26,28 +26,39 @@ export default function CustomCursor() {
     let ringY = targetY;
     let raf = 0;
     let hover = false;
+    let dirty = false;
+
+    const schedule = () => {
+      if (raf) return;
+      raf = requestAnimationFrame(tick);
+    };
 
     const onMove = (e: MouseEvent) => {
       targetX = e.clientX;
       targetY = e.clientY;
+      dirty = true;
       const t = e.target as HTMLElement | null;
       const interactive = !!t?.closest?.("a, button, [role='button'], input, [contenteditable]");
       if (interactive !== hover) {
         hover = interactive;
         ring.classList.toggle("cursor-ring-grow", hover);
       }
+      schedule();
     };
 
     const tick = () => {
+      raf = 0;
       ringX += (targetX - ringX) * 0.16;
       ringY += (targetY - ringY) * 0.16;
       dot.style.transform = `translate(${targetX}px, ${targetY}px) translate(-50%, -50%)`;
       ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
-      raf = requestAnimationFrame(tick);
+      dirty = Math.abs(targetX - ringX) > 0.1 || Math.abs(targetY - ringY) > 0.1;
+      if (dirty) schedule();
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
-    raf = requestAnimationFrame(tick);
+    dot.style.transform = `translate(${targetX}px, ${targetY}px) translate(-50%, -50%)`;
+    ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
     document.body.classList.add("no-native-cursor");
 
     return () => {

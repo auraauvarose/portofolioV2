@@ -19,8 +19,9 @@ export default function Marquee({
     if (!wrap || !skewEl) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // rAF loop runs only while the marquee is on screen: skew follows scroll
-    // velocity and eases back to straight. Transform-only (compositor).
+    // rAF loop runs only while the marquee is on screen AND the scroll skew
+    // has not settled: once it eases back to straight the loop stops until
+    // the next scroll event. Transform-only (compositor), same visuals.
     let visible = false;
     let raf = 0;
     let lastY = window.scrollY;
@@ -34,27 +35,41 @@ export default function Marquee({
       lastY = y;
       const target = Math.max(-7, Math.min(7, v * 0.3));
       skew += (target - skew) * 0.1;
+      if (target === 0 && Math.abs(skew) < 0.02) {
+        // Fully settled: snap straight and stop scheduling frames.
+        if (skew !== 0) {
+          skew = 0;
+          skewEl.style.transform = "skewX(0deg)";
+        }
+        return;
+      }
       skewEl.style.transform = `skewX(${skew.toFixed(2)}deg)`;
       raf = requestAnimationFrame(tick);
+    };
+
+    const wake = () => {
+      if (visible && !raf) raf = requestAnimationFrame(tick);
     };
 
     const io = new IntersectionObserver(
       (entries) => {
         visible = entries[0]?.isIntersecting ?? false;
-        // Offscreen: also pause the infinite translateX loop (compositor
-        // keeps ticking an always-on animation even when culled).
+        // Offscreen: pause both the infinite translateX loop and its layer
+        // hints. The visual state is unchanged when the marquee is visible.
         trackRef.current?.classList.toggle("marquee-paused", !visible);
-        if (visible && !raf) {
+        if (visible) {
           lastY = window.scrollY;
-          raf = requestAnimationFrame(tick);
+          wake();
         }
       },
       { threshold: 0 },
     );
     io.observe(wrap);
+    window.addEventListener("scroll", wake, { passive: true });
 
     return () => {
       io.disconnect();
+      window.removeEventListener("scroll", wake);
       if (raf) cancelAnimationFrame(raf);
     };
   }, []);
@@ -89,9 +104,9 @@ export default function Marquee({
     >
       <div
         ref={trackRef}
-        className={`flex w-max [will-change:transform] ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
+        className={`flex w-max ${reverse ? "animate-marquee-reverse" : "animate-marquee"}`}
       >
-        <div ref={skewRef} className="flex w-max [will-change:transform]">
+        <div ref={skewRef} className="flex w-max">
           {copy("a")}
           {copy("b")}
         </div>

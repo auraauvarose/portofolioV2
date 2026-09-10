@@ -7,6 +7,7 @@ import SectionHeading from "@/components/SectionHeading";
 import Tilt3D from "@/components/Tilt3D";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { certifications } from "@/lib/config";
 import type { Certification } from "@/types";
 
@@ -18,6 +19,7 @@ export default function Certifications({
   items: Certification[];
 }) {
   const { t } = useLanguage();
+  const isDesktop = useIsDesktop();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Certification | null>(null);
   const [slide, setSlide] = useState(0);
@@ -150,45 +152,48 @@ export default function Certifications({
           </Reveal>
         ) : (
           <>
-            <div className="md:hidden">
-              {(() => {
-                const idx = Math.min(slide, filtered.length - 1);
-                const current = filtered[idx];
-                const total = filtered.length;
-                return (
-                  <MobileCarousel
-                    total={total}
-                    idx={idx}
-                    onSlide={setSlide}
-                  >
-                    {certCard(current)}
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
-
-            <div className="hidden md:block">
-              {(() => {
-                const pages = chunk(filtered, 3);
-                const idx = Math.min(deskPage, pages.length - 1);
-                return (
-                  <MobileCarousel
-                    total={pages.length}
-                    idx={idx}
-                    onSlide={setDeskPage}
-                    revealClassName="h-auto"
-                  >
-                    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                      {pages[idx].map((cert, i) => (
-                        <Reveal key={cert.id} delay={i * 80} media className="h-full">
-                          {certCard(cert)}
-                        </Reveal>
-                      ))}
-                    </div>
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
+            {/* Mount only the active breakpoint's tree (see Projects). */}
+            {isDesktop ? (
+              <div className="hidden md:block">
+                {(() => {
+                  const pages = chunk(filtered, 3);
+                  const idx = Math.min(deskPage, pages.length - 1);
+                  return (
+                    <MobileCarousel
+                      total={pages.length}
+                      idx={idx}
+                      onSlide={setDeskPage}
+                      revealClassName="h-auto"
+                    >
+                      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {pages[idx].map((cert, i) => (
+                          <Reveal key={cert.id} delay={i * 80} media className="h-full">
+                            {certCard(cert)}
+                          </Reveal>
+                        ))}
+                      </div>
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="md:hidden">
+                {(() => {
+                  const idx = Math.min(slide, filtered.length - 1);
+                  const current = filtered[idx];
+                  const total = filtered.length;
+                  return (
+                    <MobileCarousel
+                      total={total}
+                      idx={idx}
+                      onSlide={setSlide}
+                    >
+                      {certCard(current)}
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            )}
           </>
         )}
       </div>

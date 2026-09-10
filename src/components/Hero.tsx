@@ -17,20 +17,53 @@ export default function Hero() {
   const scrollRAF = useRef(0);
   const lastDim = useRef(0);
   const heroRef = useRef<HTMLElement>(null);
+  const lensRef = useRef({ x: 0, y: 0, raf: 0 });
+  const tiltRaf = useRef(0);
+  const titlePointer = useRef({ x: 0, y: 0 });
+  const titleRect = useRef<DOMRect | null>(null);
+
+  // Cache the title rect once (and on resize) instead of forcing layout on
+  // every pointermove — the hero title never moves in the layout.
+  useEffect(() => {
+    const el = heroRef.current?.querySelector<HTMLElement>(".hero-title-3d");
+    if (!el) return;
+    const cache = () => {
+      titleRect.current = el.getBoundingClientRect();
+    };
+    cache();
+    window.addEventListener("resize", cache);
+    return () => window.removeEventListener("resize", cache);
+  }, []);
 
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
-    e.currentTarget.style.setProperty("--mx", `${e.clientX}px`);
-    e.currentTarget.style.setProperty("--my", `${e.clientY}px`);
+    // Coalesce CSS var writes to one per frame — mousemove fires faster than
+    // the display refreshes, and each write restyles the whole hero subtree.
+    const el = e.currentTarget;
+    lensRef.current.x = e.clientX;
+    lensRef.current.y = e.clientY;
+    if (lensRef.current.raf) return;
+    lensRef.current.raf = requestAnimationFrame(() => {
+      lensRef.current.raf = 0;
+      el.style.setProperty("--mx", `${lensRef.current.x}px`);
+      el.style.setProperty("--my", `${lensRef.current.y}px`);
+    });
   };
 
   const onTitleMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = clamp((e.clientX - rect.left) / rect.width - 0.5, -0.5, 0.5);
-    const y = clamp((e.clientY - rect.top) / rect.height - 0.5, -0.5, 0.5);
-    e.currentTarget.style.setProperty("--title-rotate-x", `${(-y * 12).toFixed(2)}deg`);
-    e.currentTarget.style.setProperty("--title-rotate-y", `${(x * 18).toFixed(2)}deg`);
-    e.currentTarget.style.setProperty("--title-depth", `${(Math.abs(x) * 34).toFixed(1)}px`);
-    e.currentTarget.style.setProperty("--title-shift-x", `${(x * 22).toFixed(1)}px`);
+    const el = e.currentTarget;
+    titlePointer.current = { x: e.clientX, y: e.clientY };
+    if (tiltRaf.current) return;
+    tiltRaf.current = requestAnimationFrame(() => {
+      tiltRaf.current = 0;
+      const rect = titleRect.current;
+      if (!rect || !rect.width || !rect.height) return;
+      const x = clamp((titlePointer.current.x - rect.left) / rect.width - 0.5, -0.5, 0.5);
+      const y = clamp((titlePointer.current.y - rect.top) / rect.height - 0.5, -0.5, 0.5);
+      el.style.setProperty("--title-rotate-x", `${(-y * 12).toFixed(2)}deg`);
+      el.style.setProperty("--title-rotate-y", `${(x * 18).toFixed(2)}deg`);
+      el.style.setProperty("--title-depth", `${(Math.abs(x) * 34).toFixed(1)}px`);
+      el.style.setProperty("--title-shift-x", `${(x * 22).toFixed(1)}px`);
+    });
   };
 
   const resetTitleTilt = (element: HTMLDivElement) => {
@@ -104,7 +137,7 @@ export default function Hero() {
         max={10}
         scale={1.05}
         innerClassName="hero-tilt-inner"
-        className="absolute inset-0 animate-hero-float motion-reduce:animate-none will-change-transform"
+        className="absolute inset-0 animate-hero-float motion-reduce:animate-none"
       >
         <img
           aria-hidden="true"

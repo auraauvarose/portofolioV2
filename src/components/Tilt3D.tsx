@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode, PointerEvent } from "react";
 
 export default function Tilt3D({
@@ -17,6 +17,18 @@ export default function Tilt3D({
   innerClassName?: string;
 }) {
   const ref = useRef<HTMLDivElement | null>(null);
+  const rectRef = useRef<DOMRect | null>(null);
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(() => {
+      rectRef.current = el.getBoundingClientRect();
+    });
+    observer.observe(el);
+    rectRef.current = el.getBoundingClientRect();
+    return () => observer.disconnect();
+  }, []);
 
   const reset = () => {
     const el = ref.current;
@@ -29,7 +41,7 @@ export default function Tilt3D({
   const tiltAt = (clientX: number, clientY: number, tiltScale: number) => {
     const el = ref.current;
     if (!el) return;
-    const r = el.getBoundingClientRect();
+    const r = rectRef.current ?? el.getBoundingClientRect();
     if (!r.width || !r.height) return;
     const px = (clientX - r.left) / r.width - 0.5;
     const py = (clientY - r.top) / r.height - 0.5;

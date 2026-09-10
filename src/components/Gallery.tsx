@@ -8,6 +8,7 @@ import MobileCarousel from "@/components/MobileCarousel";
 import Tilt3D from "@/components/Tilt3D";
 import Spotlight from "@/components/Spotlight";
 import { useLanguage } from "@/components/providers";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
 
@@ -19,6 +20,7 @@ export default function Gallery({
   embedded?: boolean;
 }) {
   const { t, lang } = useLanguage();
+  const isDesktop = useIsDesktop();
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
@@ -129,46 +131,49 @@ export default function Gallery({
           </Reveal>
         ) : (
           <>
-            <div className="md:hidden">
-              {(() => {
-                const idx = Math.min(slide, items.length - 1);
-                const total = items.length;
-                return (
-                  <MobileCarousel
-                    total={total}
-                    idx={idx}
-                    onSlide={setSlide}
-                    revealClassName="aspect-[4/3] w-full"
-                  >
-                    {photoCard(items[idx], idx)}
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
-
-            <div className="hidden md:block">
-              {(() => {
-                const pages = chunk(items, 3);
-                const idx = Math.min(deskPage, pages.length - 1);
-                const start = idx * 3;
-                return (
-                  <MobileCarousel
-                    total={pages.length}
-                    idx={idx}
-                    onSlide={setDeskPage}
-                    revealClassName="h-auto"
-                  >
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                      {pages[idx].map((photo, i) => (
-                        <Reveal key={photo.id} delay={i * 60} media className="break-inside-avoid">
-                          {photoCard(photo, start + i)}
-                        </Reveal>
-                      ))}
-                    </div>
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
+            {/* Mount only the active breakpoint's tree (see Projects). */}
+            {isDesktop ? (
+              <div className="hidden md:block">
+                {(() => {
+                  const pages = chunk(items, 3);
+                  const idx = Math.min(deskPage, pages.length - 1);
+                  const start = idx * 3;
+                  return (
+                    <MobileCarousel
+                      total={pages.length}
+                      idx={idx}
+                      onSlide={setDeskPage}
+                      revealClassName="h-auto"
+                    >
+                      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                        {pages[idx].map((photo, i) => (
+                          <Reveal key={photo.id} delay={i * 60} media className="break-inside-avoid">
+                            {photoCard(photo, start + i)}
+                          </Reveal>
+                        ))}
+                      </div>
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="md:hidden">
+                {(() => {
+                  const idx = Math.min(slide, items.length - 1);
+                  const total = items.length;
+                  return (
+                    <MobileCarousel
+                      total={total}
+                      idx={idx}
+                      onSlide={setSlide}
+                      revealClassName="aspect-[4/3] w-full"
+                    >
+                      {photoCard(items[idx], idx)}
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            )}
           </>
         )}
     </>

@@ -8,6 +8,7 @@ import Tilt3D from "@/components/Tilt3D";
 import Spotlight from "@/components/Spotlight";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
+import { useIsDesktop } from "@/lib/use-media-query";
 import { work } from "@/lib/config";
 import type { Project } from "@/types";
 
@@ -19,6 +20,7 @@ export default function Projects({
   embedded?: boolean;
 }) {
   const { t, lang } = useLanguage();
+  const isDesktop = useIsDesktop();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Project | null>(null);
   const [slide, setSlide] = useState(0);
@@ -185,45 +187,49 @@ export default function Projects({
           </Reveal>
         ) : (
           <>
-            <div className="md:hidden">
-              {(() => {
-                const idx = Math.min(slide, filtered.length - 1);
-                const current = filtered[idx];
-                const total = filtered.length;
-                return (
-                  <MobileCarousel
-                    total={total}
-                    idx={idx}
-                    onSlide={setSlide}
-                  >
-                    {projectCard(current, idx)}
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
-
-            <div className="hidden md:block">
-              {(() => {
-                const pages = chunk(filtered, 2);
-                const idx = Math.min(deskPage, pages.length - 1);
-                return (
-                  <MobileCarousel
-                    total={pages.length}
-                    idx={idx}
-                    onSlide={setDeskPage}
-                    revealClassName="h-auto"
-                  >
-                    <div className="grid gap-6 md:grid-cols-2">
-                      {pages[idx].map((project, i) => (
-                        <Reveal key={project.id} delay={i * 80} media className="h-full">
-                          {projectCard(project, i)}
-                        </Reveal>
-                      ))}
-                    </div>
-                  </MobileCarousel>
-                );
-              })()}
-            </div>
+            {/* Mount only the active breakpoint's tree: both copies used to
+                render (CSS-hidden), doubling cards, observers and image work. */}
+            {isDesktop ? (
+              <div className="hidden md:block">
+                {(() => {
+                  const pages = chunk(filtered, 2);
+                  const idx = Math.min(deskPage, pages.length - 1);
+                  return (
+                    <MobileCarousel
+                      total={pages.length}
+                      idx={idx}
+                      onSlide={setDeskPage}
+                      revealClassName="h-auto"
+                    >
+                      <div className="grid gap-6 md:grid-cols-2">
+                        {pages[idx].map((project, i) => (
+                          <Reveal key={project.id} delay={i * 80} media className="h-full">
+                            {projectCard(project, i)}
+                          </Reveal>
+                        ))}
+                      </div>
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            ) : (
+              <div className="md:hidden">
+                {(() => {
+                  const idx = Math.min(slide, filtered.length - 1);
+                  const current = filtered[idx];
+                  const total = filtered.length;
+                  return (
+                    <MobileCarousel
+                      total={total}
+                      idx={idx}
+                      onSlide={setSlide}
+                    >
+                      {projectCard(current, idx)}
+                    </MobileCarousel>
+                  );
+                })()}
+              </div>
+            )}
           </>
         )}
     </>

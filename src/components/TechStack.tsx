@@ -313,6 +313,20 @@ function TechStackMindMap() {
   }, []);
 
   useEffect(() => {
+    // Ambient loops (glow pulse, rotating rings, node floats) keep invalidating
+    // styles every frame even while the section is far below the viewport.
+    // Pause them offscreen; the visuals are identical when the map is seen.
+    const el = containerRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => el.classList.toggle("mm-halt", !entry?.isIntersecting),
+      { rootMargin: "160px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
+
+  useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     const fit = () => {
@@ -568,10 +582,18 @@ function TechStackMindMap() {
     stroke-dashoffset 1.2s cubic-bezier(0.16, 1, 0.3, 1) var(--mm-d, 0ms),
     stroke 0.25s ease,
     opacity 0.25s ease;
-  will-change: stroke-dashoffset;
 }
 .mm-in .mm-link { stroke-dashoffset: 0; }
 .mm-link.mm-active { stroke-dashoffset: 0.24; }
+/* Offscreen: freeze ambient loops (visuals unchanged while visible).
+   !important is required because node wrappers carry inline animation
+   shorthands that would otherwise outrank this rule. */
+.mm-halt .mm-float,
+.mm-halt .mm-glow,
+.mm-halt .mm-ring,
+.mm-halt .mm-ring-rev {
+  animation-play-state: paused !important;
+}
 @media (prefers-reduced-motion: reduce) {
   .mm-float, .mm-glow, .mm-ring { animation: none !important; }
   .mm-link { stroke-dasharray: none; stroke-dashoffset: 0; transition: none; }

@@ -27,6 +27,53 @@ const GREET_MS = 320;
 const HOLD_MS = 500;
 type Phase = "enter" | "show" | "exit";
 
+/** Isolated so greeting state changes never rerender the page tree behind
+ *  the curtain (previously every 320ms tick re-rendered the whole page). */
+function LoadingCurtain({ onDone }: { onDone: () => void }) {
+  const [index, setIndex] = useState(0);
+
+  useEffect(() => {
+    let i = 0;
+    const total = GREETINGS.length;
+    const iv = setInterval(() => {
+      i += 1;
+      if (i < total) setIndex(i);
+    }, GREET_MS);
+
+    const go = setTimeout(() => {
+      clearInterval(iv);
+      onDone();
+    }, GREET_MS * total + HOLD_MS);
+
+    return () => {
+      clearInterval(iv);
+      clearTimeout(go);
+    };
+  }, [onDone]);
+
+  return (
+    <motion.div
+      key="loading-curtain"
+      className="fixed inset-0 z-[99999] flex items-center justify-center bg-ink"
+      aria-hidden="true"
+      initial={{ y: 0 }}
+      exit={{ y: "100%" }}
+      transition={{ duration: 0.7, ease: EASE_INOUT }}
+    >
+      <div className="relative flex flex-col items-center">
+        <span
+          key={GREETINGS[index]}
+          className="text-display animate-preloader-word text-6xl uppercase tracking-tight text-white md:text-8xl"
+        >
+          {GREETINGS[index]}
+          <span className="text-accent">.</span>
+        </span>
+
+      </div>
+    </motion.div>
+  );
+}
+
 export default function HomeClient({
   projects,
   certifications,
@@ -37,8 +84,6 @@ export default function HomeClient({
   gallery: GalleryPhoto[];
 }) {
   const [phase, setPhase] = useState<Phase>("enter");
-  const [index, setIndex] = useState(0);
-
   const [atTop, setAtTop] = useState(true);
   const [atBottom, setAtBottom] = useState(false);
   const scrollRAF = useRef(0);
@@ -51,11 +96,11 @@ export default function HomeClient({
       if (scrollRAF.current) return;
       scrollRAF.current = requestAnimationFrame(() => {
         scrollRAF.current = 0;
-        const doc = document.documentElement;
         const top = window.scrollY <= 40;
         const bottom =
           window.scrollY > 40 &&
-          window.innerHeight + window.scrollY >= doc.scrollHeight - 120;
+          window.innerHeight + window.scrollY >=
+            document.documentElement.scrollHeight - 120;
         if (top === scrollState.current.top && bottom === scrollState.current.bottom)
           return;
         scrollState.current = { top, bottom };
@@ -78,26 +123,6 @@ export default function HomeClient({
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  useEffect(() => {
-    if (phase !== "show") return;
-    let i = 0;
-    const total = GREETINGS.length;
-    const iv = setInterval(() => {
-      i += 1;
-      if (i < total) setIndex(i);
-    }, GREET_MS);
-
-    const go = setTimeout(() => {
-      clearInterval(iv);
-      setPhase("exit");
-    }, GREET_MS * total + HOLD_MS);
-
-    return () => {
-      clearInterval(iv);
-      clearTimeout(go);
-    };
-  }, [phase]);
-
   if (phase === "enter") {
     return <div className="fixed inset-0 bg-ink" aria-hidden="true" />;
   }
@@ -108,27 +133,7 @@ export default function HomeClient({
         {/* Mounted only during "show": flipping to "exit" unmounts the child,
             which is what tells AnimatePresence to play the slide-down exit. */}
         <AnimatePresence>
-          {phase === "show" && (
-            <motion.div
-              key="loading-curtain"
-              className="fixed inset-0 z-[99999] flex items-center justify-center bg-ink"
-              aria-hidden="true"
-              initial={{ y: 0 }}
-              exit={{ y: "100%" }}
-              transition={{ duration: 0.7, ease: EASE_INOUT }}
-            >
-              <div className="relative flex flex-col items-center">
-                <span
-                  key={GREETINGS[index]}
-                  className="text-display animate-preloader-word text-6xl uppercase tracking-tight text-white md:text-8xl"
-                >
-                  {GREETINGS[index]}
-                  <span className="text-accent">.</span>
-                </span>
-
-              </div>
-            </motion.div>
-          )}
+          {phase === "show" && <LoadingCurtain onDone={() => setPhase("exit")} />}
         </AnimatePresence>
 
       <Sidebars />

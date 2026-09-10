@@ -190,6 +190,27 @@ export default function SpiderWalker() {
       }
     };
 
+    // Background tabs: stop the loop + timers entirely, resume on return.
+    const onVisibility = () => {
+      if (document.hidden) {
+        if (raf) cancelAnimationFrame(raf);
+        raf = 0;
+        if (wakeup) {
+          clearTimeout(wakeup);
+          wakeup = null;
+        }
+        setWalking(false);
+      } else {
+        st.last = performance.now();
+        if (st.mode === "idle" || st.mode === "webHang") {
+          park();
+          return;
+        }
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    document.addEventListener("visibilitychange", onVisibility);
+
     measure();
     st.dist = st.w / 2;
     st.last = performance.now();
@@ -208,6 +229,7 @@ export default function SpiderWalker() {
       if (wakeup) clearTimeout(wakeup);
       window.removeEventListener("resize", measure);
       mq.removeEventListener("change", onMotionChange);
+      document.removeEventListener("visibilitychange", onVisibility);
     };
   }, []);
 

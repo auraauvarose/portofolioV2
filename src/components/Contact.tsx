@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Reveal from "@/components/Reveal";
 import { useLanguage } from "@/components/providers";
 import { contact, profile } from "@/lib/config";
@@ -8,29 +8,38 @@ import { contact, profile } from "@/lib/config";
 function useLocalTime() {
   const [time, setTime] = useState("--:--");
   useEffect(() => {
+    const formatter = new Intl.DateTimeFormat("en-GB", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+      timeZone: "Asia/Jakarta",
+    });
+    let previous = "";
     const update = () => {
-      const now = new Date();
-      const formatted = new Intl.DateTimeFormat("en-GB", {
-        hour: "2-digit",
-        minute: "2-digit",
-        hour12: false,
-        timeZone: "Asia/Jakarta",
-      }).format(now);
-      setTime(formatted);
+      const formatted = formatter.format(new Date());
+      if (formatted !== previous) {
+        previous = formatted;
+        setTime(formatted);
+      }
     };
     update();
-    // Skip re-renders while the tab is hidden/phone screen is off: the clock
-    // format only changes per minute, so nothing visible is lost.
-    const id = setInterval(() => {
-      if (typeof document !== "undefined" && document.hidden) return;
-      update();
-    }, 1000);
+    // The displayed value has minute precision, so schedule the next check
+    // at the next minute boundary instead of waking React every second.
+    let id: ReturnType<typeof setTimeout>;
+    const schedule = () => {
+      const delay = 60_000 - (Date.now() % 60_000) + 50;
+      id = setTimeout(() => {
+        if (!document.hidden) update();
+        schedule();
+      }, delay);
+    };
+    schedule();
     const onVisible = () => {
       if (!document.hidden) update();
     };
     document.addEventListener("visibilitychange", onVisible);
     return () => {
-      clearInterval(id);
+      clearTimeout(id);
       document.removeEventListener("visibilitychange", onVisible);
     };
   }, []);
@@ -40,9 +49,23 @@ function useLocalTime() {
 export default function Contact() {
   const { t } = useLanguage();
   const time = useLocalTime();
+  const sectionRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    // The status badge interpolates colors every frame; pause that loop while
+    // the section is offscreen so it cannot invalidate the blend backdrop.
+    const el = sectionRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver(
+      ([entry]) => el.classList.toggle("cycle-halt", !entry?.isIntersecting),
+      { rootMargin: "160px 0px" },
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
   return (
-    <section id="contact" className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
+    <section id="contact" ref={sectionRef} className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-7xl">
         <Reveal variant="left" className="mb-10 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
           <span className="font-display text-accent">07</span>

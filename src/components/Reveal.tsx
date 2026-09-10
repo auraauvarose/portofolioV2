@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { getScrollDirection } from "@/lib/scroll-direction";
 
 type RevealProps = {
   children: React.ReactNode;
@@ -35,17 +36,10 @@ export default function Reveal({
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
   const [entryDirection, setEntryDirection] = useState<"from-top" | "from-bottom">("from-bottom");
-  const scrollDirection = useRef<"up" | "down">("down");
 
   useEffect(() => {
-    let previous = window.scrollY;
-    const onScroll = () => {
-      scrollDirection.current = window.scrollY < previous ? "up" : "down";
-      previous = window.scrollY;
-    };
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+    if (replay) getScrollDirection();
+  }, [replay]);
 
   useEffect(() => {
     const node = ref.current;
@@ -56,7 +50,7 @@ export default function Reveal({
           if (entry.isIntersecting) {
             if (replay) {
               setEntryDirection(
-                scrollDirection.current === "up" ? "from-top" : "from-bottom",
+                getScrollDirection() === "up" ? "from-top" : "from-bottom",
               );
             }
             setVisible(true);
