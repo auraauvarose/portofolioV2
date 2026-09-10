@@ -6,6 +6,7 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import MobileCarousel from "@/components/MobileCarousel";
 import Tilt3D from "@/components/Tilt3D";
+import Spotlight from "@/components/Spotlight";
 import { useLanguage } from "@/components/providers";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
@@ -85,7 +86,8 @@ export default function Gallery({
         : photo.title_id ?? photo.title_en ?? "";
     return (
       <Tilt3D className="h-full">
-        <button
+        <Spotlight className="rounded-2xl">
+          <button
           onClick={() => setLightbox(i)}
           className="group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
           aria-label={title || `Photo ${i + 1}`}
@@ -104,7 +106,8 @@ export default function Gallery({
               </p>
             )}
           </div>
-        </button>
+          </button>
+        </Spotlight>
       </Tilt3D>
     );
   };

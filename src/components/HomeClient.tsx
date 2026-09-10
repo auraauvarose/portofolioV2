@@ -18,6 +18,8 @@ import Marquee from "@/components/Marquee";
 import Sidebars from "@/components/Sidebars";
 import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
+import ScrollProgress from "@/components/ScrollProgress";
+import Magnetic from "@/components/Magnetic";
 import type { Project, Certification, GalleryPhoto } from "@/types";
 
 const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
@@ -132,8 +134,10 @@ export default function HomeClient({
       <Sidebars />
       <CustomCursor />
       <SpiderWalker />
+      <ScrollProgress />
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
 
+      <Magnetic className="fixed right-6 bottom-8 z-[95] lg:right-12" strength={0.3}>
       <button
         type="button"
         onClick={() => {
@@ -150,7 +154,7 @@ export default function HomeClient({
           }
         }}
         aria-label={atBottom ? "Scroll ke atas" : "Scroll ke bawah"}
-        className={`fixed right-6 bottom-8 z-[95] flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out lg:right-12 ${
+        className={`flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out ${
           atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0 pointer-events-none"
         }`}
       >
@@ -179,6 +183,7 @@ export default function HomeClient({
           </svg>
         </span>
       </button>
+      </Magnetic>
 
       <Nav />
       <div className="sticky top-0 z-0 h-screen">

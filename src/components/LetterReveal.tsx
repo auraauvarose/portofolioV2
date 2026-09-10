@@ -16,10 +16,14 @@ export default function LetterReveal({ text, className = "" }: LetterRevealProps
     if (!node) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          // Replays every pass — animates in both scroll directions.
-          setInView(entry.isIntersecting);
-        });
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            // Plays exactly once — letters never drop back out on scroll-back.
+            setInView(true);
+            observer.disconnect();
+            break;
+          }
+        }
       },
       { threshold: 0.4 },
     );
@@ -36,7 +40,7 @@ export default function LetterReveal({ text, className = "" }: LetterRevealProps
           key={i}
           aria-hidden
           className={`letter ${inView ? "is-in" : ""}`}
-          style={{ transitionDelay: `${i * 28}ms` }}
+          style={{ animationDelay: `${i * 28}ms` }}
         >
           {letter === " " ? "\u00A0" : letter}
         </span>

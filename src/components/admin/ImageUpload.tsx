@@ -83,7 +83,7 @@ export default function ImageUpload({
         {label}
       </p>
       <div className="flex items-start gap-4">
-        <div className="flex h-28 w-40 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/10 bg-black/40">
+        <div className="flex h-28 w-40 shrink-0 items-center justify-center overflow-hidden border border-white/10 bg-black/20">
           {value ? (
             isPdf ? (
               <a
@@ -135,7 +135,7 @@ export default function ImageUpload({
             type="button"
             onClick={() => inputRef.current?.click()}
             disabled={uploading}
-            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-white transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+            className="rounded-md border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
           >
             {uploading ? "Uploading…" : value ? "Replace file" : "Upload file"}
           </button>
@@ -143,7 +143,7 @@ export default function ImageUpload({
             <button
               type="button"
               onClick={() => onChange("")}
-              className="ml-2 rounded-lg px-4 py-2 text-sm text-gray-500 hover:text-red-400"
+              className="ml-2 rounded-md px-4 py-2 text-xs text-gray-500 transition-colors hover:text-red-400"
             >
               Remove
             </button>
@@ -157,7 +157,7 @@ export default function ImageUpload({
               type="text"
               value={value}
               onChange={(e) => onChange(e.target.value)}
-              className="mt-2 w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-xs text-gray-400"
+              className="mt-2 w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-xs text-gray-400 outline-none transition-colors focus:border-accent"
               placeholder="File URL"
             />
           )}

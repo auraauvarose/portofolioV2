@@ -31,78 +31,103 @@ export default function AdminDashboard() {
 
   if (!configured) {
     return (
-      <div className="tv-static relative flex min-h-screen items-center justify-center overflow-hidden bg-ink px-6">
-        <div className="relative max-w-md rounded-2xl border border-white/10 bg-panel p-8 text-center">
-          <h1 className="text-display mb-3 text-2xl uppercase text-white">
-            Not configured
-          </h1>
-          <p className="mb-6 text-sm leading-relaxed text-gray-400">
-            Supabase environment variables are missing. Add them to{" "}
-            <code className="text-accent">.env.local</code> (see README), rebuild,
-            then try again.
-          </p>
-          <a
-            href="/"
-            className="text-sm uppercase tracking-widest text-accent hover:underline"
-          >
-            ← Back to site
-          </a>
+      <div className="min-h-[100dvh] bg-ink px-6 text-ecru">
+        <div className="mx-auto flex min-h-[100dvh] max-w-6xl items-center justify-center">
+          <div className="admin-fade-up w-full max-w-md border-y border-white/10 py-8 text-center sm:border sm:px-8">
+            <p className="mb-3 text-[10px] uppercase tracking-[0.28em] text-accent">
+              Admin access
+            </p>
+            <h1 className="text-display mb-3 text-2xl uppercase text-white">
+              Not configured<span className="text-accent">.</span>
+            </h1>
+            <p className="mb-6 text-sm leading-6 text-gray-400">
+              Supabase environment variables are missing. Add them to{" "}
+              <code className="text-accent">.env.local</code>, rebuild, then try
+              again.
+            </p>
+            <a
+              href="/"
+              className="text-sm text-gray-500 transition-colors hover:text-accent"
+            >
+              ← Back to site
+            </a>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="tv-static relative min-h-screen overflow-x-hidden bg-ink px-6 py-8 md:px-10">
-      <div className="relative mx-auto max-w-5xl">
-      <header className="mb-8 flex flex-wrap items-center justify-between gap-4">
-        <div>
-          <h1 className="text-display text-3xl uppercase text-white">
-            Admin<span className="text-accent">.</span>
-          </h1>
-          <p className="mt-1 text-sm text-gray-500">
-            Manage your portfolio content.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
+    <div className="min-h-[100dvh] overflow-x-clip bg-ink text-ecru">
+      <header className="border-b border-white/10">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-6 md:px-10">
           <a
             href="/"
-            target="_blank"
-            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-gray-300 hover:border-accent hover:text-accent"
+            className="text-display text-sm uppercase tracking-[0.14em] text-white transition-colors hover:text-accent"
           >
-            View site
+            Aura <span className="text-accent">Auvarose</span>
           </a>
-          <button
-            onClick={signOut}
-            className="rounded-lg border border-white/15 px-4 py-2 text-sm text-gray-300 hover:border-red-500 hover:text-red-400"
-          >
-            Sign out
-          </button>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-2 text-xs">
+            <span className="text-[10px] uppercase tracking-[0.24em] text-gray-400">
+              Admin workspace
+            </span>
+            <a
+              href="/"
+              target="_blank"
+              rel="noreferrer"
+              className="text-gray-400 transition-colors hover:text-accent"
+            >
+              View site ↗
+            </a>
+            <button
+              onClick={signOut}
+              className="text-gray-400 transition-colors hover:text-red-300"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
       </header>
 
-      <nav className="mb-8 flex gap-2 border-b border-white/10">
-        {TABS.map((t) => (
-          <button
-            key={t.key}
-            onClick={() => setTab(t.key)}
-            className={`-mb-px border-b-2 px-4 py-3 text-sm font-medium uppercase tracking-widest transition-colors ${
-              tab === t.key
-                ? "border-accent text-accent"
-                : "border-transparent text-gray-400 hover:text-white"
-            }`}
-          >
-            {t.label}
-          </button>
-        ))}
-      </nav>
+      <main className="mx-auto max-w-6xl px-6 py-12 md:px-10 md:py-16">
+        <div className="admin-fade-up mb-12 max-w-2xl">
+          <p className="mb-4 text-[10px] uppercase tracking-[0.28em] text-accent">
+            Content library
+          </p>
+          <h1 className="text-display text-4xl uppercase text-white md:text-5xl">
+            Manage the work<span className="text-accent">.</span>
+          </h1>
+          <p className="mt-5 max-w-md text-sm leading-7 text-gray-500">
+            Keep your projects, credentials, and selected images up to date.
+          </p>
+        </div>
 
-      <div>
-        {tab === "projects" && <ProjectsManager />}
-        {tab === "certifications" && <CertificationsManager />}
-        {tab === "gallery" && <GalleryManager />}
-      </div>
-      </div>
+        <nav
+          aria-label="Content sections"
+          className="mb-10 flex flex-wrap gap-x-7 gap-y-3 border-b border-white/10"
+        >
+          {TABS.map((item) => (
+            <button
+              key={item.key}
+              onClick={() => setTab(item.key)}
+              aria-current={tab === item.key ? "page" : undefined}
+              className={`relative -mb-px border-b pb-3 text-xs uppercase tracking-[0.18em] transition-colors duration-300 active:scale-[0.98] ${
+                tab === item.key
+                  ? "border-accent text-accent"
+                  : "border-transparent text-gray-500 hover:text-white"
+              }`}
+            >
+              {item.label}
+            </button>
+          ))}
+        </nav>
+
+        <div key={tab} className="admin-fade-up">
+          {tab === "projects" && <ProjectsManager />}
+          {tab === "certifications" && <CertificationsManager />}
+          {tab === "gallery" && <GalleryManager />}
+        </div>
+      </main>
     </div>
   );
 }

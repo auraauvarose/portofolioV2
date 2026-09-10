@@ -9,6 +9,18 @@ type RevealProps = {
   as?: keyof React.JSX.IntrinsicElements;
   /** Media variant: images inside un-clip from a zoomed-in state */
   media?: boolean;
+  /** Entrance flavor */
+  variant?: "rise" | "left" | "right" | "zoom" | "flip";
+  /** Replay while entering/leaving the viewport instead of playing once */
+  replay?: boolean;
+};
+
+const VARIANT_CLASS: Record<NonNullable<RevealProps["variant"]>, string> = {
+  rise: "",
+  left: "v-left",
+  right: "v-right",
+  zoom: "v-zoom",
+  flip: "v-flip",
 };
 
 export default function Reveal({
@@ -17,36 +29,62 @@ export default function Reveal({
   delay = 0,
   as: Tag = "div",
   media = false,
+  variant = "rise",
+  replay = false,
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
   const [visible, setVisible] = useState(false);
-  const [fromTop, setFromTop] = useState(false);
+  const [entryDirection, setEntryDirection] = useState<"from-top" | "from-bottom">("from-bottom");
+  const scrollDirection = useRef<"up" | "down">("down");
+
+  useEffect(() => {
+    let previous = window.scrollY;
+    const onScroll = () => {
+      scrollDirection.current = window.scrollY < previous ? "up" : "down";
+      previous = window.scrollY;
+    };
+    window.addEventListener("scroll", onScroll, { passive: true });
+    return () => window.removeEventListener("scroll", onScroll);
+  }, []);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
     const observer = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          // Replays every pass: enter from the bottom edge (scrolling down)
-          // lifts up; enter from the top edge (scrolling up) mirrors it.
-          setFromTop(entry.boundingClientRect.top <= 0);
-          setVisible(entry.isIntersecting);
-        });
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            if (replay) {
+              setEntryDirection(
+                scrollDirection.current === "up" ? "from-top" : "from-bottom",
+              );
+            }
+            setVisible(true);
+            if (!replay) {
+              // Default behavior: play once and keep the final state.
+              observer.disconnect();
+            }
+          } else if (replay) {
+            // Replay mode is intentionally opt-in for About/What I Do only.
+            setVisible(false);
+          }
+        }
       },
       { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();
-  }, []);
+  }, [replay]);
 
   const Component = Tag as React.ElementType;
 
   return (
     <Component
       ref={ref}
-      className={`reveal ${media ? "reveal-media" : ""} ${fromTop ? "reveal-from-top" : ""} ${visible ? "is-visible" : ""} ${className}`}
-      style={{ transitionDelay: visible && delay ? `${delay}ms` : "0ms" }}
+      className={`reveal ${media ? "reveal-media" : ""} ${VARIANT_CLASS[variant]} ${replay ? `replay-${entryDirection}` : ""} ${visible ? "is-visible" : ""} ${className}`}
+      // Backwards fill holds the from-state for the whole delay, so grid
+      // stagger stays invisible until each card's turn.
+      style={delay ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}
     </Component>

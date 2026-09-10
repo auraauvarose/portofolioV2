@@ -16,19 +16,20 @@ export default function SectionHeading({
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement | null>(null);
   const [visible, setVisible] = useState(false);
-  const [fromTop, setFromTop] = useState(false);
 
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
     const io = new IntersectionObserver(
       (entries) => {
-        entries.forEach((entry) => {
-          // Replays on every pass, both scroll directions: words drop back
-          // behind their masks when the heading leaves the viewport.
-          setFromTop(entry.boundingClientRect.top <= 0);
-          setVisible(entry.isIntersecting);
-        });
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            // Reveal exactly once — scrolling away never re-masks the words.
+            setVisible(true);
+            io.disconnect();
+            break;
+          }
+        }
       },
       { threshold: 0.35 },
     );
@@ -41,7 +42,7 @@ export default function SectionHeading({
   return (
     <div
       ref={ref}
-      className={`sh mb-12 md:mb-16 ${fromTop ? "sh-from-top" : ""} ${visible ? "sh-in" : ""}`}
+      className={`sh mb-12 md:mb-16 ${visible ? "sh-in" : ""}`}
     >
       <div className="flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
         {index && <span className="sh-index font-display text-accent">{index}</span>}

@@ -9,7 +9,7 @@ export default function FileThumb({ url }: { url: string | null }) {
     : false;
 
   return (
-    <div className="h-14 w-20 shrink-0 overflow-hidden rounded-lg bg-black/40">
+    <div className="h-14 w-20 shrink-0 overflow-hidden border border-white/10 bg-black/20">
       {url ? (
         isPdf ? (
           <a

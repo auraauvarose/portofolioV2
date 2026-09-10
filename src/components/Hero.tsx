@@ -6,6 +6,8 @@ import { useLanguage } from "@/components/providers";
 import Tilt3D from "@/components/Tilt3D";
 
 const DISC = 280;
+const clamp = (value: number, min: number, max: number) =>
+  Math.min(max, Math.max(min, value));
 
 export default function Hero() {
   const eyebrow = `${profile.name}`.toUpperCase();
@@ -19,6 +21,35 @@ export default function Hero() {
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
     e.currentTarget.style.setProperty("--mx", `${e.clientX}px`);
     e.currentTarget.style.setProperty("--my", `${e.clientY}px`);
+  };
+
+  const onTitleMove = (e: React.PointerEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = clamp((e.clientX - rect.left) / rect.width - 0.5, -0.5, 0.5);
+    const y = clamp((e.clientY - rect.top) / rect.height - 0.5, -0.5, 0.5);
+    e.currentTarget.style.setProperty("--title-rotate-x", `${(-y * 12).toFixed(2)}deg`);
+    e.currentTarget.style.setProperty("--title-rotate-y", `${(x * 18).toFixed(2)}deg`);
+    e.currentTarget.style.setProperty("--title-depth", `${(Math.abs(x) * 34).toFixed(1)}px`);
+    e.currentTarget.style.setProperty("--title-shift-x", `${(x * 22).toFixed(1)}px`);
+  };
+
+  const resetTitleTilt = (element: HTMLDivElement) => {
+    element.style.setProperty("--title-rotate-x", "0deg");
+    element.style.setProperty("--title-rotate-y", "0deg");
+    element.style.setProperty("--title-depth", "0px");
+    element.style.setProperty("--title-shift-x", "0px");
+  };
+
+  const onTitlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") {
+      e.currentTarget.setPointerCapture(e.pointerId);
+    }
+  };
+
+  const onTitlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.pointerType === "touch") {
+      resetTitleTilt(e.currentTarget);
+    }
   };
 
   useEffect(() => {
@@ -102,16 +133,37 @@ export default function Hero() {
       <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/10" />
 
       <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 text-center">
-        <div className="relative">
+        <div
+          className="hero-title-3d relative"
+          onPointerMove={onTitleMove}
+          onPointerDown={onTitlePointerDown}
+          onPointerUp={onTitlePointerUp}
+          onPointerCancel={onTitlePointerUp}
+          onPointerEnter={() => setActive(true)}
+          onPointerLeave={(e) => {
+            setActive(false);
+            resetTitleTilt(e.currentTarget);
+          }}
+        >
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-[#EB5939] sm:text-base md:mb-8 md:text-xl">
             {eyebrow}
           </p>
 
-          <h1 className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
-            FULLSTACK
-            <br />
-            DEVELOPER
-          </h1>
+          <div className="hero-title-3d__stage relative">
+            <div
+              className="hero-title-3d__depth text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]"
+              aria-hidden="true"
+            >
+              <span className="hero-title-3d__line">FULLSTACK</span>
+              <br />
+              <span className="hero-title-3d__line">DEVELOPER</span>
+            </div>
+            <h1 className="hero-title-3d__heading text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
+              <span>FULLSTACK</span>
+              <br />
+              <span>DEVELOPER</span>
+            </h1>
+          </div>
         </div>
       </div>
 

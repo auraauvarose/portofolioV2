@@ -11,7 +11,7 @@ export default function About() {
   return (
     <section id="about" className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-          <Reveal className="mb-8 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
+          <Reveal variant="left" replay className="mb-8 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
             <span className="font-display text-accent">01</span>
             <span>{t(about.kicker)}</span>
             <span className="h-px flex-1 bg-white/10" />
@@ -21,16 +21,16 @@ export default function About() {
             <div className="space-y-7 text-2xl leading-relaxed text-ecru md:text-[40px]">
               {about.paragraphs.map((p, i) => (
                 <ScrollWordReveal
-                  key={i}
+                  key={`${lang}-${i}`}
                   text={t(p)}
                   className="text-chillax-semibold text-ecru"
-                  baseOpacity={0.4}
-                  scanRange={0.5}
+                  baseOpacity={0.3}
+                  replay
                   highlight={p.highlight?.[lang] ?? []}
                   highlightClassName="text-highlight"
                 />
               ))}
-              <Reveal delay={240}>
+              <Reveal delay={240} replay>
                 <a
                   href={profile.cvUrl}
                   className="group relative inline-flex items-center gap-3 py-1 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:text-accent"

@@ -507,32 +507,176 @@ body {
   }
 }
 
-/* Reveal-on-scroll v2 — lift + settle with a soft overshoot. Direction-aware
-   (entering from the top edge mirrors the motion), replays on every pass. */
+/* Reveal-on-scroll v3 — plays exactly once (JS adds .is-visible and never
+   removes it). "Emersion": rise + fade (+ a de-blur pass on precise
+   pointers), settling on an expo-out curve with no overshoot wobble.
+   Keyframes end at `transform: none` / `filter: none` so nothing keeps a
+   raster or layer context after the settle. */
 .reveal {
   opacity: 0;
-  transform: translateY(46px) scale(0.965) rotate(0.75deg);
-  transition:
-    opacity 0.85s cubic-bezier(0.22, 1, 0.36, 1),
-    transform 0.9s cubic-bezier(0.22, 1.15, 0.32, 1);
-  /* No permanent will-change: dozens of pre-promoted layers starve mobile
-     GPUs. Browsers auto-promote elements during active transitions. */
-}
-/* Entering from the top edge (scrolling up): mirrored motion */
-.reveal.reveal-from-top {
-  transform: translateY(-46px) scale(0.965) rotate(-0.75deg);
+  /* No will-change: browsers auto-promote elements during active animations. */
 }
 .reveal.is-visible {
-  opacity: 1;
-  transform: translateY(0) scale(1) rotate(0deg);
+  animation: reveal-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+    transform: translateY(44px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* De-blur pass — fine pointers only. Touch GPUs re-raster filtered surfaces
+   every frame, so phones/tablets get the rise + fade without the blur. */
+@media (hover: hover) and (pointer: fine) {
+  .reveal.is-visible {
+    animation-name: reveal-in-blur;
+  }
+}
+@keyframes reveal-in-blur {
+  from {
+    opacity: 0;
+    transform: translateY(44px) scale(0.985);
+    filter: blur(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 /* Media variant: images inside start zoomed-in and un-clip to rest scale.
    Only the pre-visible state sets a transform, so hover zooms keep working. */
 .reveal-media img {
-  transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-media:not(.is-visible) img {
-  transform: scale(1.14);
+  transform: scale(1.12);
+}
+
+/* Entrance flavors — same timing/curve as the base rise, different staging. */
+.reveal.v-left.is-visible:not(.replay-from-top):not(.replay-from-bottom) {
+  animation-name: reveal-in-left;
+}
+@keyframes reveal-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-48px) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal.replay-from-top.is-visible {
+  animation: reveal-in-from-top 0.85s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+.reveal.replay-from-bottom.is-visible {
+  animation: reveal-in-from-bottom 0.85s cubic-bezier(0.16, 1, 0.3, 1) both !important;
+}
+@keyframes reveal-in-from-top {
+  from {
+    opacity: 0;
+    transform: translateY(-42px) scale(0.985);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+@keyframes reveal-in-from-bottom {
+  from {
+    opacity: 0;
+    transform: translateY(42px) scale(0.985);
+    filter: blur(7px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
+}
+.reveal.v-right.is-visible:not(.replay-from-top):not(.replay-from-bottom) {
+  animation-name: reveal-in-right;
+}
+@keyframes reveal-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(48px) translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal.v-zoom.is-visible {
+  animation-name: reveal-in-zoom;
+}
+@keyframes reveal-in-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.88);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.reveal.v-flip.is-visible {
+  animation-name: reveal-in-flip;
+}
+@keyframes reveal-in-flip {
+  from {
+    opacity: 0;
+    transform: perspective(900px) rotateX(-14deg) translateY(28px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+/* Spotlight card glow — a soft radial light that follows the cursor. Positioned
+   by --sx/--sy (set in JS on pointermove), tinted by --sc (rgb triple). The
+   host must clip the glow, hence the same radius as the cards it wraps. */
+.spotlight-glow {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.45s ease;
+  background: radial-gradient(
+    340px circle at var(--sx, 50%) var(--sy, 50%),
+    rgba(var(--sc, 255, 122, 80), 0.14),
+    transparent 68%
+  );
+  border-radius: inherit;
+}
+.spotlight:hover .spotlight-glow {
+  opacity: 1;
+}
+@media (hover: none) {
+  .spotlight-glow {
+    display: none;
+  }
+}
+
+/* Contact — masked line-by-line headline. The Reveal root flips the inner
+   spans up from behind their masks, staggered via inline transition-delay. */
+.reveal.is-visible [data-contact-line] {
+  transform: translateY(0) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  [data-contact-line] {
+    transform: none !important;
+    transition: none !important;
+  }
 }
 
 /* SectionHeading — masked word-by-word headline reveal + kicker/line choreography.
@@ -552,10 +696,6 @@ body {
 .sh .sh-word,
 .reveal .sh-word {
   transform: translateY(125%);
-}
-.sh.sh-from-top .sh-word,
-.reveal.reveal-from-top .sh-word {
-  transform: translateY(-125%);
 }
 .sh.sh-in .sh-word,
 .reveal.is-visible .sh-word {
@@ -632,22 +772,47 @@ body {
   color: var(--color-ink) !important;
 }
 
-/* Letter-by-letter reveal for the About headline */
+/* Letter-by-letter reveal for the About headline — plays exactly once.
+   Keyframes rest at `transform: none` / `filter: none` (no kept raster). */
 .letter {
   display: inline-block;
   opacity: 0;
-  transform: translateY(0.6em) rotate(4deg);
-  transition:
-    opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .letter.is-in {
-  opacity: 1;
-  transform: translateY(0) rotate(0);
+  animation: letter-in 0.55s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+@keyframes letter-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) rotate(4deg);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+/* De-blur pass — fine pointers only (see .reveal note). */
+@media (hover: hover) and (pointer: fine) {
+  .letter.is-in {
+    animation-name: letter-in-blur;
+  }
+}
+@keyframes letter-in-blur {
+  from {
+    opacity: 0;
+    transform: translateY(0.6em) rotate(4deg);
+    filter: blur(5px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+    filter: none;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .reveal,
+  .scroll-word-cascade,
   .letter,
   .scroll-word-inner,
   .sh-word,
@@ -656,7 +821,9 @@ body {
   .reveal-media img {
     opacity: 1 !important;
     transform: none !important;
+    filter: none !important;
     transition: none !important;
+    animation: none !important;
   }
   .sh-line {
     transform: scaleX(1) !important;
@@ -870,6 +1037,75 @@ summary {
   }
 }
 
+/* Cursor/touch tilt for the hero headline. This is the light CSS 3D version
+   of interactive depth typography: perspective + rotateX/Y + translateZ.
+   It stays outside the orange lens interaction and settles back on leave. */
+.hero-title-3d {
+  --title-rotate-x: 0deg;
+  --title-rotate-y: 0deg;
+  --title-depth: 0px;
+  --title-shift-x: 0px;
+  perspective: 900px;
+  transform-style: preserve-3d;
+  touch-action: pan-y;
+}
+.hero-title-3d__stage {
+  position: relative;
+  display: inline-block;
+  transform-style: preserve-3d;
+}
+.hero-title-3d__depth,
+.hero-title-3d__heading {
+  position: relative;
+  transform: translate3d(var(--title-shift-x), 0, 0) rotateX(var(--title-rotate-x)) rotateY(var(--title-rotate-y));
+  transform-style: preserve-3d;
+  transition: transform 460ms cubic-bezier(0.2, 0, 0, 1), color 300ms ease;
+  will-change: transform;
+}
+.hero-title-3d__depth {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  color: rgb(235 89 57 / 0.62);
+  transform: translate3d(calc(var(--title-shift-x) - var(--title-depth)), 0.2rem, -20px) rotateX(var(--title-rotate-x)) rotateY(var(--title-rotate-y));
+  transform-origin: center;
+  pointer-events: none;
+  filter: blur(0.2px);
+}
+.hero-title-3d__heading {
+  z-index: 1;
+}
+.hero-title-3d__line {
+  display: inline-block;
+  transform: translateZ(var(--title-depth));
+  transform-style: preserve-3d;
+  transition: transform 460ms cubic-bezier(0.2, 0, 0, 1), color 300ms ease;
+}
+.hero-title-3d:hover .hero-title-3d__heading > span {
+  color: rgb(255 255 255 / 0.78);
+}
+:root:not(.dark) .hero-title-3d:hover .hero-title-3d__heading > span {
+  color: rgb(13 14 19 / 0.78);
+}
+@media (hover: none), (pointer: coarse) {
+  .hero-title-3d {
+    perspective: 650px;
+  }
+  .hero-title-3d__heading {
+    transition-duration: 620ms;
+  }
+  .hero-title-3d__depth {
+    opacity: 0.55;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .hero-title-3d__depth,
+  .hero-title-3d__heading,
+  .hero-title-3d__line {
+    transition: none;
+  }
+}
+
 /* Mobile: cap huge decorative blur circles (hero glow, preloader halo) at a
    much smaller radius. 120px+ blurs create enormous GPU layers that jank
    mobile compositing; the glow reads identically at 40px on a phone. */
@@ -898,8 +1134,68 @@ summary {
   bottom: 0;
 }
 
+/* ── Admin: entrance + micro-interactions (matches main-site motion) ── */
+@keyframes admin-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.admin-fade-up {
+  opacity: 0;
+  animation: admin-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+/* Staggered children inside an admin-fade-up host */
+.admin-stagger > * {
+  opacity: 0;
+  animation: admin-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.admin-stagger > *:nth-child(1) { animation-delay: 0.05s; }
+.admin-stagger > *:nth-child(2) { animation-delay: 0.12s; }
+.admin-stagger > *:nth-child(3) { animation-delay: 0.19s; }
+.admin-stagger > *:nth-child(4) { animation-delay: 0.26s; }
+.admin-stagger > *:nth-child(5) { animation-delay: 0.33s; }
+.admin-stagger > *:nth-child(6) { animation-delay: 0.4s; }
+/* Error shake for the login card */
+@keyframes admin-shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-7px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(3px); }
+}
+.admin-shake {
+  animation: admin-shake 0.45s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-fade-up,
+  .admin-stagger > * {
+    opacity: 1 !important;
+    animation: none !important;
+  }
+  .admin-shake {
+    animation: none !important;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .theme-panel {
     display: none;
   }
 }
+
+/* Admin uses the same restrained entrance language as the login screen. */
+.admin-list > * {
+  opacity: 0;
+  animation: admin-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.admin-list > *:nth-child(1) { animation-delay: 0.04s; }
+.admin-list > *:nth-child(2) { animation-delay: 0.08s; }
+.admin-list > *:nth-child(3) { animation-delay: 0.12s; }
+.admin-list > *:nth-child(4) { animation-delay: 0.16s; }
+.admin-list > *:nth-child(5) { animation-delay: 0.2s; }
+.admin-list > *:nth-child(6) { animation-delay: 0.24s; }

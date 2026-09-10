@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Reveal from "@/components/Reveal";
+import Magnetic from "@/components/Magnetic";
 
 type Props = {
   total: number;
@@ -36,22 +37,26 @@ export default function MobileCarousel({
         </span>
         {total > 1 && (
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              aria-label="Sebelumnya"
-              onClick={() => go(idx - 1)}
-              className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
-            >
-              ‹
-            </button>
-            <button
-              type="button"
-              aria-label="Berikutnya"
-              onClick={() => go(idx + 1)}
-              className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
-            >
-              ›
-            </button>
+            <Magnetic strength={0.4}>
+              <button
+                type="button"
+                aria-label="Sebelumnya"
+                onClick={() => go(idx - 1)}
+                className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              >
+                ‹
+              </button>
+            </Magnetic>
+            <Magnetic strength={0.4}>
+              <button
+                type="button"
+                aria-label="Berikutnya"
+                onClick={() => go(idx + 1)}
+                className="carousel-arrow flex h-10 w-10 cursor-pointer items-center justify-center rounded-full border border-white/15 bg-black/60 text-white backdrop-blur transition-colors hover:border-accent hover:text-accent"
+              >
+                ›
+              </button>
+            </Magnetic>
           </div>
         )}
       </div>

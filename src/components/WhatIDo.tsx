@@ -7,7 +7,7 @@ import { useLanguage } from "@/components/providers";
 import { whatIDo } from "@/lib/config";
 
 export default function WhatIDo() {
-  const { t, theme } = useLanguage();
+  const { t, lang, theme } = useLanguage();
   const [active, setActive] = useState<number | null>(null);
   const [touch, setTouch] = useState(false);
 
@@ -25,7 +25,7 @@ export default function WhatIDo() {
   return (
     <section id="whatido" className="w-full">
       <div className="mx-auto flex max-w-6xl flex-col px-4 pt-2 pb-2 md:px-12 lg:pt-24 lg:pb-24 lg:px-20">
-        <Reveal className="mb-10 flex items-center gap-4 text-sm uppercase tracking-[0.4em] text-gray-500 md:mb-14">
+        <Reveal variant="left" replay className="mb-10 flex items-center gap-4 text-sm uppercase tracking-[0.4em] text-gray-500 md:mb-14">
           <span className="font-display text-accent">02</span>
           <span>{t(whatIDo.kicker)}</span>
           <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
@@ -33,7 +33,7 @@ export default function WhatIDo() {
 
         {whatIDo.items.map((item, i) => (
           <div
-            key={i}
+            key={`${lang}-${i}`}
             className={`group relative w-full ${active === i ? "is-active" : ""}`}
             onClick={
               touch ? () => setActive(active === i ? null : i) : undefined
@@ -44,7 +44,7 @@ export default function WhatIDo() {
                 as="h2"
                 text={t(item.title)}
                 baseOpacity={0.3}
-                scanRange={0.7}
+                replay
                 baseColor={baseColor}
                 fullColor={fullColor}
                 className="text-bevellier relative z-10 text-[14vw] uppercase leading-[0.9] text-[#2F2F2F] transition-colors duration-500 group-hover:text-black sm:text-[11vw] md:text-[9vw] lg:text-[110px] dark:text-white dark:group-hover:text-ink"

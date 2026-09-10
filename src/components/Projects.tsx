@@ -5,6 +5,7 @@ import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import Tilt3D from "@/components/Tilt3D";
+import Spotlight from "@/components/Spotlight";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
 import { work } from "@/lib/config";
@@ -58,7 +59,8 @@ export default function Projects({
 
     return (
       <Tilt3D className="h-full">
-        <article
+        <Spotlight className="rounded-2xl">
+          <article
           onClick={() => setSelected(project)}
           className="group h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-all duration-500 hover:border-accent/50"
         >
@@ -139,6 +141,7 @@ export default function Projects({
             </div>
           </div>
         </article>
+        </Spotlight>
       </Tilt3D>
     );
   };

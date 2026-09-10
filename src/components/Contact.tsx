@@ -44,7 +44,7 @@ export default function Contact() {
   return (
     <section id="contact" className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-7xl">
-        <Reveal className="mb-10 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
+        <Reveal variant="left" className="mb-10 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
           <span className="font-display text-accent">07</span>
           <span>{t(contact.kicker)}</span>
           <span className="h-px flex-1 bg-white/10" />
@@ -58,16 +58,33 @@ export default function Contact() {
           {t(contact.available)}
         </div>
 
-        <h2 className="text-display uppercase leading-[0.86]">
-          <span className="block text-[clamp(3rem,12vw,9rem)]">{t(contact.line1)}</span>
-          <span className="block text-[clamp(3rem,12vw,9rem)] text-outline">{t(contact.line2)}</span>
-          <span className="block text-[clamp(3rem,12vw,9rem)] text-accent">
-            {t(contact.line3)}
-          </span>
-        </h2>
+        <Reveal className="mt-2">
+          <h2
+            aria-label={[contact.line1, contact.line2, contact.line3]
+              .map((l) => t(l))
+              .join(" ")}
+            className="text-display uppercase leading-[0.86]"
+          >
+            {[contact.line1, contact.line2, contact.line3].map((line, i) => (
+              <span key={i} aria-hidden="true" className="block overflow-hidden">
+                <span
+                  className={`block text-[clamp(3rem,12vw,9rem)] ${i === 1 ? "text-outline" : ""} ${i === 2 ? "text-accent" : ""}`}
+                  style={{
+                    transform: "translateY(115%)",
+                    transition: "transform 0.95s cubic-bezier(0.16, 1, 0.3, 1)",
+                    transitionDelay: `${160 + i * 130}ms`,
+                  }}
+                  data-contact-line
+                >
+                  {t(line)}
+                </span>
+              </span>
+            ))}
+          </h2>
+        </Reveal>
 
         <div className="mt-16 grid gap-8 md:grid-cols-4">
-          <Reveal>
+          <Reveal variant="left">
             <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
               {t(contact.emailLabel)}
             </p>
@@ -92,7 +109,7 @@ export default function Contact() {
               {time} <span className="text-gray-500">{contact.timezone}</span>
             </p>
           </Reveal>
-          <Reveal delay={240}>
+          <Reveal delay={240} variant="right">
             <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
               {t(contact.socialsLabel)}
             </p>

@@ -121,18 +121,21 @@ export default function CertificationsManager() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-display text-2xl uppercase text-white">Certifications</h2>
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">Library</p>
+          <h2 className="text-display text-2xl uppercase text-white">Certifications</h2>
+        </div>
         <button
           onClick={openNew}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-widest text-black hover:opacity-90"
+          className="rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
         >
           + Add certification
         </button>
       </div>
 
       {message && (
-        <p className="mb-4 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
+        <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-gray-300">
           {message}
         </p>
       )}
@@ -140,15 +143,15 @@ export default function CertificationsManager() {
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="mb-8 rounded-xl border border-white/10 bg-black/20 p-8 text-center text-gray-500">
+        <p className="mb-8 border-y border-white/10 py-10 text-center text-sm text-gray-500">
           No certifications yet.
         </p>
       ) : (
-        <div className="mb-8 space-y-3">
+        <div className="admin-list mb-8 space-y-0">
           {items.map((c) => (
             <div
               key={c.id}
-              className="flex items-center gap-4 rounded-xl border border-white/10 bg-black/20 p-3"
+              className="flex flex-wrap items-center gap-4 border-b border-white/10 py-4 transition-colors duration-300 hover:border-accent/40"
             >
               <FileThumb url={c.image_url} />
               <div className="min-w-0 flex-1">
@@ -159,13 +162,13 @@ export default function CertificationsManager() {
               </div>
               <button
                 onClick={() => openEdit(c)}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-white hover:border-accent hover:text-accent"
+                className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
               >
                 Edit
               </button>
               <button
                 onClick={() => remove(c)}
-                className="rounded-lg border border-white/15 px-3 py-1.5 text-xs text-gray-400 hover:border-red-500 hover:text-red-400"
+                className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
               >
                 Delete
               </button>
@@ -175,7 +178,7 @@ export default function CertificationsManager() {
       )}
 
       {showForm && (
-        <form onSubmit={save} className="rounded-2xl border border-white/10 bg-black/20 p-6">
+        <form onSubmit={save} className="admin-fade-up border-y border-white/10 py-7">
           <h3 className="mb-5 text-lg font-semibold text-white">
             {editing ? "Edit certification" : "New certification"}
           </h3>
@@ -189,7 +192,7 @@ export default function CertificationsManager() {
               <select
                 value={form.category}
                 onChange={(e) => setForm({ ...form, category: e.target.value })}
-                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2.5 text-sm text-white outline-none focus:border-accent"
+                className="w-full rounded-md border border-white/10 bg-transparent px-3 py-2.5 text-sm text-white outline-none transition-colors duration-300 hover:border-white/30 focus:border-accent"
               >
                 {CATEGORIES.map((cat) => (
                   <option key={cat} value={cat} className="bg-black">
@@ -218,14 +221,14 @@ export default function CertificationsManager() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-widest text-black hover:opacity-90 disabled:opacity-50"
+              className="rounded-md bg-accent px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-white/15 px-6 py-2.5 text-sm text-gray-300 hover:text-white"
+              className="rounded-md border border-white/15 px-6 py-2.5 text-xs text-gray-300 transition-colors duration-300 hover:border-white/30 hover:text-white active:scale-[0.98]"
             >
               Cancel
             </button>

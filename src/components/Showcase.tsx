@@ -23,7 +23,7 @@ export default function Showcase({
   return (
     <section id="work" className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <Reveal className="mb-12 md:mb-16">
+        <Reveal variant="zoom" className="mb-12 md:mb-16">
           <div className="flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
             <span className="sh-index font-display text-accent">06</span>
             <span className="sh-kicker">{t(showcase.kicker)}</span>

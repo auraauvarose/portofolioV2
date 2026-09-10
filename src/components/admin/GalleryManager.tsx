@@ -117,18 +117,21 @@ export default function GalleryManager() {
 
   return (
     <div>
-      <div className="mb-6 flex items-center justify-between">
-        <h2 className="text-display text-2xl uppercase text-white">Gallery</h2>
+      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
+        <div>
+          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">Library</p>
+          <h2 className="text-display text-2xl uppercase text-white">Gallery</h2>
+        </div>
         <button
           onClick={openNew}
-          className="rounded-lg bg-accent px-4 py-2 text-sm font-semibold uppercase tracking-widest text-black hover:opacity-90"
+          className="rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
         >
           + Add photo
         </button>
       </div>
 
       {message && (
-        <p className="mb-4 rounded-lg border border-white/10 bg-white/5 px-4 py-2 text-sm text-gray-300">
+        <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-gray-300">
           {message}
         </p>
       )}
@@ -136,15 +139,15 @@ export default function GalleryManager() {
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="mb-8 rounded-xl border border-white/10 bg-black/20 p-8 text-center text-gray-500">
+        <p className="mb-8 border-y border-white/10 py-10 text-center text-sm text-gray-500">
           No photos yet.
         </p>
       ) : (
-        <div className="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="admin-list mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((g) => (
             <div
               key={g.id}
-              className="overflow-hidden rounded-xl border border-white/10 bg-black/20"
+              className="overflow-hidden border border-white/10 transition-colors duration-300 hover:border-accent/40"
             >
               <div className="aspect-[4/3] w-full overflow-hidden bg-black/40">
                 {isPdf(g.image_url) ? (
@@ -186,13 +189,13 @@ export default function GalleryManager() {
                 <div className="flex shrink-0 gap-2">
                   <button
                     onClick={() => openEdit(g)}
-                    className="rounded-lg border border-white/15 px-2.5 py-1 text-xs text-white hover:border-accent hover:text-accent"
+                    className="rounded-md border border-white/15 px-2.5 py-1 text-xs text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
                   >
                     Edit
                   </button>
                   <button
                     onClick={() => remove(g)}
-                    className="rounded-lg border border-white/15 px-2.5 py-1 text-xs text-gray-400 hover:border-red-500 hover:text-red-400"
+                    className="rounded-md border border-white/15 px-2.5 py-1 text-xs text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
                   >
                     ✕
                   </button>
@@ -204,7 +207,7 @@ export default function GalleryManager() {
       )}
 
       {showForm && (
-        <form onSubmit={save} className="rounded-2xl border border-white/10 bg-black/20 p-6">
+        <form onSubmit={save} className="admin-fade-up border-y border-white/10 py-7">
           <h3 className="mb-5 text-lg font-semibold text-white">
             {editing ? "Edit photo" : "New photo"}
           </h3>
@@ -226,14 +229,14 @@ export default function GalleryManager() {
             <button
               type="submit"
               disabled={saving}
-              className="rounded-lg bg-accent px-6 py-2.5 text-sm font-semibold uppercase tracking-widest text-black hover:opacity-90 disabled:opacity-50"
+              className="rounded-md bg-accent px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
             >
               {saving ? "Saving…" : "Save"}
             </button>
             <button
               type="button"
               onClick={() => setShowForm(false)}
-              className="rounded-lg border border-white/15 px-6 py-2.5 text-sm text-gray-300 hover:text-white"
+              className="rounded-md border border-white/15 px-6 py-2.5 text-xs text-gray-300 transition-colors duration-300 hover:border-white/30 hover:text-white active:scale-[0.98]"
             >
               Cancel
             </button>
