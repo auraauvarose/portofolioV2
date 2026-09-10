@@ -47,10 +47,10 @@ export default function Certifications({
     active === "all" ? items : items.filter((c) => c.category === active);
 
   const certCard = (cert: Certification) => (
-    <Tilt3D className="h-full">
+    <Tilt3D className="h-full" scale={1}>
       <article
         onClick={() => setSelected(cert)}
-        className="group flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-all duration-500 hover:border-accent/50"
+        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)]"
       >
         {cert.image_url ? (
           <div className="relative aspect-[4/3] overflow-hidden bg-black/40">
@@ -58,7 +58,7 @@ export default function Certifications({
             <img
               src={cert.image_url}
               alt={cert.title_en}
-              className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              className="h-full w-full object-cover"
               loading="lazy"
             />
           </div>

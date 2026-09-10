@@ -6,7 +6,6 @@ import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import MobileCarousel from "@/components/MobileCarousel";
 import Tilt3D from "@/components/Tilt3D";
-import Spotlight from "@/components/Spotlight";
 import { useLanguage } from "@/components/providers";
 import { useIsDesktop } from "@/lib/use-media-query";
 import { gallery } from "@/lib/config";
@@ -87,29 +86,27 @@ export default function Gallery({
         ? photo.title_en ?? ""
         : photo.title_id ?? photo.title_en ?? "";
     return (
-      <Tilt3D className="h-full">
-        <Spotlight className="rounded-2xl">
-          <button
+      <Tilt3D className="h-full" scale={1}>
+        <button
           onClick={() => setLightbox(i)}
-          className="group relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 transition-colors hover:border-accent/50"
+          className="relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 focus-visible:border-accent focus-visible:outline-none"
           aria-label={title || `Photo ${i + 1}`}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
             src={photo.image_url}
             alt={title || `Photo ${i + 1}`}
-            className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+            className="h-full w-full object-cover"
             loading="lazy"
           />
-          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 transition-opacity duration-500 group-hover:opacity-100">
+          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent">
             {title && (
               <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
                 {title}
               </p>
             )}
           </div>
-          </button>
-        </Spotlight>
+        </button>
       </Tilt3D>
     );
   };

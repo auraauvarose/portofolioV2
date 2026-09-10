@@ -5,7 +5,6 @@ import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
 import Tilt3D from "@/components/Tilt3D";
-import Spotlight from "@/components/Spotlight";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
 import { useIsDesktop } from "@/lib/use-media-query";
@@ -60,11 +59,10 @@ export default function Projects({
         : project.description_id ?? project.description_en ?? "";
 
     return (
-      <Tilt3D className="h-full">
-        <Spotlight className="rounded-2xl">
-          <article
+      <Tilt3D className="h-full" scale={1}>
+        <article
           onClick={() => setSelected(project)}
-          className="group h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-all duration-500 hover:border-accent/50"
+          className="h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)]"
         >
           <div className="relative aspect-[16/10] overflow-hidden bg-black/40">
             {project.image_url ? (
@@ -72,7 +70,7 @@ export default function Projects({
               <img
                 src={project.image_url}
                 alt={title}
-                className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+                className="h-full w-full object-cover"
                 loading="lazy"
               />
             ) : (
@@ -143,7 +141,6 @@ export default function Projects({
             </div>
           </div>
         </article>
-        </Spotlight>
       </Tilt3D>
     );
   };

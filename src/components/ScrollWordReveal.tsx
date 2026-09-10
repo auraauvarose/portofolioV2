@@ -81,8 +81,10 @@ export default function ScrollWordReveal({
     return () => observer.disconnect();
   }, []);
 
-  // Touch GPUs re-raster filtered text every frame — phones/tablets get the
-  // same cascade (opacity + y + color) without the per-frame blur raster.
+  // Touch scrolling can move the page faster than a per-word cascade can
+  // settle. On coarse pointers the variants below intentionally collapse to
+  // readable, geometry-stable text; fine pointers keep the richer desktop
+  // reveal.
   const fine = useFinePointer();
 
   const words = text.split(/\s+/).filter(Boolean).map((w) => w.trim());
@@ -92,8 +94,11 @@ export default function ScrollWordReveal({
 
   const Component = Tag as React.ElementType;
 
-  // Reduced motion: plain, fully-revealed text — no cascade, no transforms.
-  if (reduceMotion) {
+  // Touch devices also use plain, fully-revealed text. A phone can interrupt
+  // the parent cascade while scrolling even when the individual word variant
+  // is stable, leaving copy partially transparent. Desktop keeps the full
+  // reveal because fine pointers can afford the choreography.
+  if (reduceMotion || !fine) {
     return (
       <Component className={className} aria-label={ariaLabel ?? text}>
         <span aria-hidden="true">
@@ -103,7 +108,7 @@ export default function ScrollWordReveal({
               className={highlightSet.has(norm(word)) ? highlightClassName : undefined}
             >
               {word}
-              {i < words.length - 1 ? "\u00A0" : ""}
+              {i < words.length - 1 ? " " : ""}
             </span>
           ))}
         </span>
@@ -124,9 +129,17 @@ export default function ScrollWordReveal({
 
   const word: Variants = {
     hidden: {
-      opacity: baseOpacity,
-      y: replay && entryDirection === "from-top" ? -14 : 14,
-      rotateZ: replay && entryDirection === "from-top" ? -1.2 : 1.2,
+      // A phone can interrupt the cascade while the user is flick-scrolling.
+      // Keep touch text readable and geometrically stable instead of leaving
+      // words dimmed, offset, and rotated between observer updates.
+      opacity: fine ? baseOpacity : 1,
+      y: fine && replay && entryDirection === "from-top" ? -14 : fine ? 14 : 0,
+      rotateZ:
+        fine && replay && entryDirection === "from-top"
+          ? -1.2
+          : fine
+            ? 1.2
+            : 0,
       ...(hasColorRamp ? { color: baseColor } : {}),
       ...(fine ? { filter: "blur(7px)" } : {}),
     },
