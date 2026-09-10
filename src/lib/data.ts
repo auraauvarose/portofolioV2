@@ -143,9 +143,10 @@ export async function getComments(): Promise<GuestComment[]> {
   if (!isConfigured()) return [];
   try {
     const supabase = await createSupabaseServer();
+    // Email sengaja tidak diseleksikan — kolom itu hanya untuk admin.
     const { data, error } = await supabase
       .from("comments")
-      .select("*")
+      .select("id,name,message,rating,approved,created_at")
       .eq("approved", true)
       .order("created_at", { ascending: false })
       .limit(100);

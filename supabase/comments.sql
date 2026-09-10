@@ -38,3 +38,11 @@ create policy "comments_public_insert" on public.comments
 drop policy if exists "comments_admin_write" on public.comments;
 create policy "comments_admin_write" on public.comments
   for delete to authenticated using (true);
+
+-- ============================================================================
+-- Privasi kolom email — anon (pengunjung publik) hanya boleh membaca kolom
+-- aman; email hanya bisa dibaca lewat API admin (service_role) yang melewati
+-- grant ini. Jalankan ulang file ini jika sebelumnya sudah pernah dijalankan.
+-- ============================================================================
+revoke select on public.comments from anon;
+grant select (id, name, message, rating, approved, created_at) on public.comments to anon;

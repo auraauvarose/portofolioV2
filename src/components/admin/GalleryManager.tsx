@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
+import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
 import type { GalleryPhoto } from "@/types";
 
 const isPdf = (url: string) => {
@@ -124,9 +125,10 @@ export default function GalleryManager() {
         </div>
         <button
           onClick={openNew}
-          className="rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
+          className="flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
         >
-          + Add photo
+          <PlusIcon />
+          Add photo
         </button>
       </div>
 
@@ -139,9 +141,10 @@ export default function GalleryManager() {
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="mb-8 border-y border-white/10 py-10 text-center text-sm text-gray-500">
-          No photos yet.
-        </p>
+        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
+          <InboxIcon className="text-gray-600" />
+          <p className="text-sm text-gray-500">No photos yet.</p>
+        </div>
       ) : (
         <div className="admin-list mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((g) => (
@@ -189,15 +192,19 @@ export default function GalleryManager() {
                 <div className="flex shrink-0 gap-2">
                   <button
                     onClick={() => openEdit(g)}
-                    className="rounded-md border border-white/15 px-2.5 py-1 text-xs text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
+                    aria-label={g.title_en ? `Edit ${g.title_en}` : "Edit photo"}
+                    title="Edit"
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
                   >
-                    Edit
+                    <PencilIcon />
                   </button>
                   <button
                     onClick={() => remove(g)}
-                    className="rounded-md border border-white/15 px-2.5 py-1 text-xs text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
+                    aria-label={g.title_en ? `Delete ${g.title_en}` : "Delete photo"}
+                    title="Delete"
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
                   >
-                    ✕
+                    <TrashIcon />
                   </button>
                 </div>
               </div>

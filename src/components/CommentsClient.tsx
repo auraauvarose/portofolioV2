@@ -3,8 +3,6 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
-import Spotlight from "@/components/Spotlight";
-import Magnetic from "@/components/Magnetic";
 import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
 import ScrollProgress from "@/components/ScrollProgress";
@@ -87,8 +85,9 @@ function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: numbe
       variant={index % 2 === 0 ? "left" : "right"}
       className="h-full"
     >
-      <Spotlight color="235,89,57" className="h-full rounded-2xl">
-        <article className="glass relative z-[1] flex h-full flex-col gap-4 rounded-2xl p-6 transition-transform duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1">
+      {/* Kartu murah: hover hanya border-color (paint kecil), bukan glow
+          radial yang harus di-raster ulang tiap pointermove. */}
+      <article className="glass flex h-full flex-col gap-4 rounded-2xl border border-white/10 p-6 transition-[border-color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-accent/50 hover:-translate-y-1">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
               <span
@@ -113,7 +112,6 @@ function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: numbe
             {c.message}
           </p>
         </article>
-      </Spotlight>
     </Reveal>
   );
 }
@@ -192,16 +190,17 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         <CustomCursor />
         <SpiderWalker />
         <ScrollProgress />
-        <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
+        {/* tv-static (grain full-viewport) sengaja tidak dipakai di halaman
+            ini — repaint viewport tiap 0.5s adalah sumber lag di GPU lemah. */}
 
-        <section id="comments" ref={sectionRef} className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
-          {/* Glow ambient di belakang heading — sama dengan hero */}
-          <div
-            aria-hidden="true"
-            className="hero-blur pointer-events-none absolute -top-32 left-1/2 h-[420px] w-[680px] -translate-x-1/2 rounded-full bg-accent/10 blur-[120px]"
-          />
-
-          <div className="relative mx-auto max-w-7xl">
+        <section
+          id="comments"
+          ref={sectionRef}
+          className="comments-stage relative overflow-hidden px-6 py-16 md:px-10 md:py-32"
+        >
+          {/* Latar minimalis: hanya warna flat + hairline — tanpa blur/orb/
+              animasi latar agar scrolling tetap ringan di perangkat lemah. */}
+          <div className="comments-stage__frame relative mx-auto max-w-7xl">
             <SectionHeading
               index={comments.index}
               kicker={comments.kicker}
@@ -227,12 +226,11 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
 
             {/* ── Form komentar ── */}
             <Reveal variant="zoom" className="mb-16 md:mb-20">
-              <Spotlight color="235,89,57" className="rounded-3xl">
-                <form
-                  onSubmit={onSubmit}
-                  className="glass relative z-[1] rounded-3xl p-6 md:p-10"
-                  noValidate
-                >
+              <form
+                onSubmit={onSubmit}
+                className="glass rounded-3xl p-6 md:p-10"
+                noValidate
+              >
                   {/* Honeypot — tersembunyi dari manusia */}
                   <div className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
                     <label>
@@ -338,27 +336,25 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                   </div>
 
                   <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <Magnetic strength={0.25}>
-                      <button
-                        type="submit"
-                        disabled={status === "sending"}
-                        className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-accent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-all duration-300 hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-60"
+                    <button
+                      type="submit"
+                      disabled={status === "sending"}
+                      className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-accent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-all duration-300 hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {status === "sending" ? t(comments.sending) : t(comments.submit)}
+                      <svg
+                        width="16"
+                        height="16"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="2.5"
+                        className="transition-transform duration-300 group-hover:translate-x-1"
+                        aria-hidden="true"
                       >
-                        {status === "sending" ? t(comments.sending) : t(comments.submit)}
-                        <svg
-                          width="16"
-                          height="16"
-                          viewBox="0 0 24 24"
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="2.5"
-                          className="transition-transform duration-300 group-hover:translate-x-1"
-                          aria-hidden="true"
-                        >
-                          <path d="M5 12h14M13 6l6 6-6 6" />
-                        </svg>
-                      </button>
-                    </Magnetic>
+                        <path d="M5 12h14M13 6l6 6-6 6" />
+                      </svg>
+                    </button>
 
                     {status === "ok" && (
                       <motion.p
@@ -384,8 +380,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                     )}
                   </div>
                 </form>
-              </Spotlight>
-            </Reveal>
+              </Reveal>
 
             {/* ── Daftar komentar ── */}
             {items.length === 0 ? (
@@ -405,26 +400,24 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
 
             {/* ── Tombol kembali ke beranda ── */}
             <Reveal className="mt-20 flex justify-center">
-              <Magnetic strength={0.3}>
-                <a
-                  href="/"
-                  className="group relative inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors duration-300 hover:border-accent hover:text-accent"
+              <a
+                href="/"
+                className="group relative inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors duration-300 hover:border-accent hover:text-accent"
+              >
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  className="transition-transform duration-300 group-hover:-translate-x-1"
+                  aria-hidden="true"
                 >
-                  <svg
-                    width="16"
-                    height="16"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    className="transition-transform duration-300 group-hover:-translate-x-1"
-                    aria-hidden="true"
-                  >
-                    <path d="M19 12H5M11 18l-6-6 6-6" />
-                  </svg>
-                  {t(comments.backHome)}
-                </a>
-              </Magnetic>
+                  <path d="M19 12H5M11 18l-6-6 6-6" />
+                </svg>
+                {t(comments.backHome)}
+              </a>
             </Reveal>
           </div>
         </section>

@@ -5,6 +5,7 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
 import FileThumb from "@/components/admin/FileThumb";
+import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
 import type { Certification } from "@/types";
 
 const CATEGORIES = ["internship", "professional", "technical"];
@@ -128,9 +129,10 @@ export default function CertificationsManager() {
         </div>
         <button
           onClick={openNew}
-          className="rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
+          className="flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
         >
-          + Add certification
+          <PlusIcon />
+          Add certification
         </button>
       </div>
 
@@ -143,9 +145,10 @@ export default function CertificationsManager() {
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
-        <p className="mb-8 border-y border-white/10 py-10 text-center text-sm text-gray-500">
-          No certifications yet.
-        </p>
+        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
+          <InboxIcon className="text-gray-600" />
+          <p className="text-sm text-gray-500">No certifications yet.</p>
+        </div>
       ) : (
         <div className="admin-list mb-8 space-y-0">
           {items.map((c) => (
@@ -160,18 +163,24 @@ export default function CertificationsManager() {
                   {c.category} · {c.issuer}
                 </p>
               </div>
-              <button
-                onClick={() => openEdit(c)}
-                className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
-              >
-                Edit
-              </button>
-              <button
-                onClick={() => remove(c)}
-                className="rounded-md border border-white/15 px-3 py-1.5 text-xs text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
-              >
-                Delete
-              </button>
+              <div className="flex shrink-0 gap-2">
+                <button
+                  onClick={() => openEdit(c)}
+                  aria-label={`Edit ${c.title_en}`}
+                  title="Edit"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
+                >
+                  <PencilIcon />
+                </button>
+                <button
+                  onClick={() => remove(c)}
+                  aria-label={`Delete ${c.title_en}`}
+                  title="Delete"
+                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
+                >
+                  <TrashIcon />
+                </button>
+              </div>
             </div>
           ))}
         </div>

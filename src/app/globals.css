@@ -1279,3 +1279,74 @@ summary {
 .admin-list > *:nth-child(4) { animation-delay: 0.16s; }
 .admin-list > *:nth-child(5) { animation-delay: 0.2s; }
 .admin-list > *:nth-child(6) { animation-delay: 0.24s; }
+
+/* ── Guestbook stage (minimalis) ─────────────────────────────────────────────
+   Performance-first: satu warna flat + hairline saja. Tanpa grid overlay,
+   orb blur, gradient bertumpuk, atau animasi background — semuanya paint-only
+   sekali saat render, nol invalidasi saat scroll. Tetap dibedakan dari
+   sekitarnya lewat tint terracotta sangat tipis dan border atas aksen. */
+.comments-stage {
+  background-color: #0d0e13;
+  border-top: 1px solid rgb(235 89 57 / 0.22);
+  border-bottom: 1px solid rgb(255 255 255 / 0.06);
+}
+
+.comments-stage__frame {
+  border: 1px solid rgb(255 255 255 / 0.1);
+  border-radius: clamp(1.25rem, 2.5vw, 2rem);
+  background-color: rgb(16 17 23 / 0.5);
+  padding: clamp(1.25rem, 3vw, 2.75rem);
+}
+
+.comments-stage .sh h2 {
+  background: transparent;
+}
+
+.comments-stage__frame label {
+  color: #b7ab98;
+}
+
+.comments-stage__frame input,
+.comments-stage__frame textarea {
+  border-color: rgb(255 255 255 / 0.16);
+  background-color: rgb(255 255 255 / 0.06);
+}
+
+.comments-stage__frame input::placeholder,
+.comments-stage__frame textarea::placeholder {
+  color: rgb(214 208 196 / 0.58);
+}
+
+.comments-stage__frame textarea + p {
+  color: rgb(183 171 152 / 0.8);
+}
+
+:root:not(.dark) .comments-stage {
+  background-color: #eeeee9;
+  border-color: rgb(211 84 47 / 0.22);
+  border-bottom-color: rgb(13 14 19 / 0.08);
+}
+
+:root:not(.dark) .comments-stage__frame {
+  border-color: rgb(13 14 19 / 0.1);
+  background-color: rgb(255 255 255 / 0.55);
+}
+
+:root:not(.dark) .comments-stage__frame label {
+  color: #555555;
+}
+
+:root:not(.dark) .comments-stage__frame input,
+:root:not(.dark) .comments-stage__frame textarea {
+  border-color: rgb(13 14 19 / 0.18);
+  background-color: rgb(13 14 19 / 0.045);
+}
+
+:root:not(.dark) .comments-stage__frame input::placeholder,
+:root:not(.dark) .comments-stage__frame textarea::placeholder {
+  color: rgb(13 14 19 / 0.52);
+}
+
+:root:not(.dark) .comments-stage__frame textarea + p {
+  color: rgb(85 85 85 / 0.8);
+}

@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import { MAX_UPLOAD_BYTES } from "@/lib/config";
+import { PlusIcon, TrashIcon, ImageIcon } from "@/components/admin/icons";
 
 const MAX_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
 
@@ -116,7 +117,13 @@ export default function ImageUpload({
               <img src={value} alt="" className="h-full w-full object-cover" />
             )
           ) : (
-            <span className="text-xs text-gray-600">No file</span>
+            <span
+              className="flex flex-col items-center justify-center gap-1.5 text-gray-600"
+              title="No file"
+            >
+              <ImageIcon />
+              <span className="text-[10px] uppercase tracking-widest">Empty</span>
+            </span>
           )}
         </div>
         <div className="flex-1">
@@ -131,23 +138,28 @@ export default function ImageUpload({
               e.target.value = "";
             }}
           />
-          <button
-            type="button"
-            onClick={() => inputRef.current?.click()}
-            disabled={uploading}
-            className="rounded-md border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
-          >
-            {uploading ? "Uploading…" : value ? "Replace file" : "Upload file"}
-          </button>
-          {value && (
+          <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
-              onClick={() => onChange("")}
-              className="ml-2 rounded-md px-4 py-2 text-xs text-gray-500 transition-colors hover:text-red-400"
+              onClick={() => inputRef.current?.click()}
+              disabled={uploading}
+              className="flex items-center gap-2 rounded-md border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
             >
-              Remove
+              <PlusIcon />
+              {uploading ? "Uploading…" : value ? "Replace file" : "Upload file"}
             </button>
-          )}
+            {value && (
+              <button
+                type="button"
+                onClick={() => onChange("")}
+                aria-label="Remove file"
+                title="Remove file"
+                className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-500 transition-colors hover:border-red-500 hover:text-red-400"
+              >
+                <TrashIcon />
+              </button>
+            )}
+          </div>
           {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
           <p className="mt-2 text-[11px] leading-relaxed text-gray-600">
             Supports images (JPG, PNG, WebP) and PDF. Max {MAX_MB} MB.

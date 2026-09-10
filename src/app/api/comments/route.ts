@@ -34,9 +34,28 @@ function clean(v: unknown): string {
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
 // ---------------------------------------------------------------------------
-// GET — daftar komentar terpublikasi (read via anon key / server client)
+// GET — daftar komentar.
+//   ?scope=admin  → semua komentar + email pengirim (admin only)
+//   (default)     → komentar terpublikasi tanpa email (publik)
 // ---------------------------------------------------------------------------
-export const GET = withJsonErrors(async function GET() {
+export const GET = withJsonErrors(async function GET(req: NextRequest) {
+  const { searchParams } = new URL(req.url);
+  const scope = searchParams.get("scope");
+
+  if (scope === "admin") {
+    const { error: authError } = await requireUser();
+    if (authError) return authError;
+
+    const supabase = await createSupabaseAdmin();
+    const { data, error } = await supabase
+      .from("comments")
+      .select("id,name,email,message,rating,approved,created_at")
+      .order("created_at", { ascending: false })
+      .limit(500);
+    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    return NextResponse.json({ comments: data ?? [] });
+  }
+
   const supabase = await createSupabaseServer();
   const { data, error } = await supabase
     .from("comments")
