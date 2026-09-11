@@ -60,6 +60,7 @@ export default function Certifications({
               alt={cert.title_en}
               className="h-full w-full object-cover"
               loading="lazy"
+              decoding="async"
             />
           </div>
         ) : (
@@ -226,6 +227,7 @@ export default function Certifications({
                   src={selected.image_url}
                   alt={selected.title_en ?? "Certification"}
                   className="max-h-[58vh] w-auto max-w-full object-contain"
+                  decoding="async"
                 />
               </div>
             ) : (

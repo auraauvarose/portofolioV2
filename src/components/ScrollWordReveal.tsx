@@ -58,6 +58,7 @@ type ScrubWordProps = {
   baseColor?: string;
   fullColor?: string;
   className: string;
+  fine: boolean;
 };
 
 function ScrubWord({
@@ -69,7 +70,10 @@ function ScrubWord({
   baseColor,
   fullColor,
   className,
+  fine,
 }: ScrubWordProps) {
+  // Hooks stay unconditional (rules of hooks); the filter only reaches the
+  // DOM on fine pointers so touch GPUs never rasterize a blurred layer.
   const opacity = useTransform(progress, range, [baseOpacity, 1]);
   const blur = useTransform(progress, range, [8, 0]);
   const filter = useMotionTemplate`blur(${blur}px)`;
@@ -81,7 +85,7 @@ function ScrubWord({
         className={`scroll-word-inner ${className}`.trim()}
         style={{
           opacity,
-          filter,
+          ...(fine ? { filter } : {}),
           ...(baseColor && fullColor ? { color } : {}),
         }}
       >
@@ -147,9 +151,10 @@ export default function ScrollWordReveal({
   }, []);
 
   // Touch scrolling can move the page faster than a per-word cascade can
-  // settle. On coarse pointers the variants below intentionally collapse to
-  // readable, geometry-stable text; fine pointers keep the richer desktop
-  // reveal.
+  // settle, and touch GPUs re-raster filtered text every frame. Coarse
+  // pointers therefore collapse the timed cascade to readable,
+  // geometry-stable text and scrub with opacity/color only (no filter, no
+  // spring); fine pointers keep the richer desktop reveal.
   const fine = useFinePointer();
 
   const words = text.split(/\s+/).filter(Boolean).map((w) => w.trim());
@@ -159,9 +164,10 @@ export default function ScrollWordReveal({
 
   const Component = Tag as React.ElementType;
 
-  // Reduced-motion users get stable, fully-readable copy. Scrub mode is
-  // intentionally available on coarse pointers too, so phones follow the
-  // same blur-to-sharp reveal while scrolling down and back up.
+  // Reduced-motion users get stable, fully-readable copy. Scrub mode stays
+  // available on coarse pointers too, but there it binds straight to scroll
+  // position with opacity/color only; fine pointers keep the full
+  // blur-to-sharp spring reveal.
   if (reduceMotion) {
     return (
       <Component className={className} aria-label={ariaLabel ?? text}>
@@ -192,7 +198,8 @@ export default function ScrollWordReveal({
                 key={`${word}-${i}`}
                 word={word}
                 trailingSpace={i < words.length - 1}
-                progress={scrubProgress}
+                progress={fine ? scrubProgress : scrollYProgress}
+                fine={fine}
                 range={[i / words.length, Math.min(1, i / words.length + wordSpan)]}
                 baseOpacity={baseOpacity}
                 baseColor={baseColor}

@@ -98,6 +98,7 @@ export default function Gallery({
             alt={title || `Photo ${i + 1}`}
             className="h-full w-full object-cover"
             loading="lazy"
+            decoding="async"
           />
           <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent">
             {title && (
@@ -223,6 +224,7 @@ export default function Gallery({
                 src={items[lightbox].image_url}
                 alt={items[lightbox].title_en ?? "Photo"}
                 className="max-h-[85vh] max-w-full rounded-xl object-contain"
+                decoding="async"
                 onClick={(e) => e.stopPropagation()}
               />
 

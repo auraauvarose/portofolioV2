@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   motion,
   useReducedMotion,
@@ -18,6 +18,15 @@ export default function Education() {
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
+  const [touch, setTouch] = useState(false);
+
+  useEffect(() => {
+    const mq = window.matchMedia("(hover: none)");
+    setTouch(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setTouch(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -49,9 +58,11 @@ export default function Education() {
             />
           </div>
           <div className="hidden h-48 w-px bg-white/10 md:block">
+            {/* The rail is display:none on phones — without this the spring
+                would burn rAF frames writing scaleY to a hidden element. */}
             <motion.div
               className="h-full w-px origin-top bg-accent"
-              style={reduceMotion ? undefined : { scaleY: lineScale }}
+              style={reduceMotion || touch ? undefined : { scaleY: lineScale }}
             />
           </div>
         </div>
