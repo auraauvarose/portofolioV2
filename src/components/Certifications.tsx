@@ -47,13 +47,16 @@ export default function Certifications({
     active === "all" ? items : items.filter((c) => c.category === active);
 
   const certCard = (cert: Certification) => (
-    <Tilt3D className="h-full" scale={1}>
+    <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
       <article
         onClick={() => setSelected(cert)}
-        className="flex h-full cursor-pointer flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)]"
+        className="group flex h-full cursor-pointer flex-col rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)]"
       >
         {cert.image_url ? (
-          <div className="relative aspect-[4/3] overflow-hidden bg-black/40">
+          <div
+            className="tilt-layer relative aspect-[4/3] self-stretch overflow-hidden rounded-t-2xl bg-black/40"
+            style={{ "--tz": "34px" } as React.CSSProperties}
+          >
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={cert.image_url}
@@ -64,13 +67,19 @@ export default function Certifications({
             />
           </div>
         ) : (
-          <div className="relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/5 to-transparent">
+          <div
+            className="tilt-layer relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/5 to-transparent"
+            style={{ "--tz": "34px" } as React.CSSProperties}
+          >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-14 w-14 text-accent/50">
               <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
             </svg>
           </div>
         )}
-        <div className="flex flex-1 flex-col p-5 md:p-6">
+        <div
+          className="tilt-layer flex flex-1 flex-col p-5 md:p-6"
+          style={{ "--tz": "52px" } as React.CSSProperties}
+        >
           <div className="mb-3 flex flex-col items-start gap-1 md:flex-row md:items-center md:justify-between">
             <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
               {t(certifications.categories[cert.category] ?? {

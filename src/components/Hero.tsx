@@ -50,9 +50,10 @@ export default function Hero() {
   };
 
   const onTitleMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Touch moves belong to native page scrolling, not the desktop-only title
-    // tilt. Avoid scheduling CSS-variable writes while a finger is scrolling.
-    if (e.pointerType !== "mouse") return;
+    // Touch moves belong to native page scrolling, and narrow viewports keep
+    // the headline completely flat. Avoid scheduling 3D CSS-variable writes
+    // on mobile even when a browser reports a fine pointer.
+    if (e.pointerType !== "mouse" || window.matchMedia("(max-width: 767px)").matches) return;
     const el = e.currentTarget;
     titlePointer.current = { x: e.clientX, y: e.clientY };
     if (tiltRaf.current) return;

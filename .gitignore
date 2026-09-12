@@ -39,3 +39,18 @@ next-env.d.ts
 # local npm cache (used because the sandboxed home ~/.npm is read-only)
 .npm-cache/
 .pnpm-store/
+
+# temporary/debug files
+.abruntimedir/
+.chrome-profile/
+.raf-test.mjs
+.tilt-check*.mjs
+.tilt-debug*.mjs
+.tilt-final.mjs
+.tilt-hover.png
+.tilt-idle.png
+.tilt-verify.png
+ANALISIS-WEBSITE.md
+.chrome.log
+.design/
+.dsh-vision-router/

@@ -59,12 +59,15 @@ export default function Projects({
         : project.description_id ?? project.description_en ?? "";
 
     return (
-      <Tilt3D className="h-full" scale={1}>
+      <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
         <article
           onClick={() => setSelected(project)}
-          className="h-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)]"
+          className="group h-full cursor-pointer rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)]"
         >
-          <div className="relative aspect-[16/10] overflow-hidden bg-black/40">
+          <div
+            className="tilt-layer relative aspect-[16/10] overflow-hidden rounded-t-2xl bg-black/40"
+            style={{ "--tz": "34px" } as React.CSSProperties}
+          >
             {project.image_url ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -93,7 +96,10 @@ export default function Projects({
             )}
           </div>
 
-          <div className="p-5 md:p-6">
+          <div
+            className="tilt-layer p-5 md:p-6"
+            style={{ "--tz": "52px" } as React.CSSProperties}
+          >
             <div className="mb-3 flex items-start justify-between">
               <h3 className="text-display text-3xl uppercase text-white">
                 {title}

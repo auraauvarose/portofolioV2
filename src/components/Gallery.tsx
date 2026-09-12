@@ -86,26 +86,34 @@ export default function Gallery({
         ? photo.title_en ?? ""
         : photo.title_id ?? photo.title_en ?? "";
     return (
-      <Tilt3D className="h-full" scale={1}>
+      <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
         <button
           onClick={() => setLightbox(i)}
-          className="relative block aspect-[4/3] w-full overflow-hidden rounded-2xl border border-white/10 focus-visible:border-accent focus-visible:outline-none"
+          className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-[0_28px_60px_-26px_rgba(235,89,57,0.4)] focus-visible:border-accent focus-visible:outline-none"
           aria-label={title || `Photo ${i + 1}`}
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={photo.image_url}
-            alt={title || `Photo ${i + 1}`}
-            className="h-full w-full object-cover"
-            loading="lazy"
-            decoding="async"
-          />
-          <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent">
-            {title && (
-              <p className="p-5 text-left text-sm font-medium text-[#ffffff]">
-                {title}
-              </p>
-            )}
+          <div
+            className="tilt-layer relative h-full w-full"
+            style={{ "--tz": "40px" } as React.CSSProperties}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={photo.image_url}
+              alt={title || `Photo ${i + 1}`}
+              className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
+              loading="lazy"
+              decoding="async"
+            />
+            <div className="absolute inset-0 flex items-end bg-gradient-to-t from-black/80 via-transparent to-transparent">
+              {title && (
+                <p
+                  className="tilt-layer p-5 text-left text-sm font-medium text-[#ffffff]"
+                  style={{ "--tz": "60px" } as React.CSSProperties}
+                >
+                  {title}
+                </p>
+              )}
+            </div>
           </div>
         </button>
       </Tilt3D>

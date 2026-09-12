@@ -285,11 +285,69 @@ html {
    texture or a full-screen hero image over every scroll frame. */
 @media (hover: none), (pointer: coarse) {
   /* Keep the hero float and decorative static animation on mobile, but let
-     native touch scroll own the frame budget while the finger is moving. */
+     native touch scroll own the frame budget while the finger is moving.
+     The footer watermark joins in: its 30vw hue-rotate re-rasterizes a
+     viewport-wide text surface on every scroll frame. */
   html.is-scrolling .tv-static::before,
   html.is-scrolling .tv-static::after,
-  html.is-scrolling .animate-hero-float {
+  html.is-scrolling .animate-hero-float,
+  html.is-scrolling .footer-mark.footer-mark-color {
     animation-play-state: paused !important;
+  }
+
+  /* ── Motion-blur text saat scroll ("efek buram") ──────────────────────
+     Mekanisme: class html.is-scrolling sudah di-toggle SEKALI per gesture
+     (HomeClient), jadi semua di bawah ini adalah perubahan paint-state
+     tunggal per gesture — nol JS per-frame, nol filter: blur(), nol
+     backdrop-filter, nol promosi layer. Browser me-render text-shadow di
+     jalur rasterisasi tile yang sama dengan teks biasa, jadi biayanya
+     hanya sedikit kerja raster di tile yang baru masuk viewport — bukan
+     kerja compositor di setiap frame saat jari bergerak.
+
+     Dua tingkat: teks kecil dapat halo tipis; heading besar dapat halo
+     lebih lebar (buram baru terasa pada huruf besar). Warna ikut
+     currentColor lewat color-mix (didukung Tailwind v4 baseline), dan
+     teks transparan (marquee .text-outline, watermark gradient) otomatis
+     tidak terpengaruh karena shadownya juga transparan.
+
+     Snap ON: saat gesture mulai, blur langsung penuh. Fade OFF: transisi
+     hidup di keadaan normal, jadi blur melebur tajam kembali saat
+     is-scrolling dilepas — tepat ketika frame budget sudah kosong kembali.
+
+     PENTING: transisi HARUS dimatikan selama gesture (transition: none di
+     bawah). Kalau transisi hidup dua arah, browser menganimasikan
+     text-shadow selama ~0.2s sambil jari masih bergerak — itu repaint
+     teks di SETIAP frame dan justru menjadi sumber lag-nya (terukur:
+     11 frame >25ms vs 0 frame saat efek dimatikan). Dengan
+     transition: none, halo dipaint SEKALI di awal gesture, lalu frame
+     berikutnya hanya menggeser tile yang sudah jadi. */
+  html main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
+    transition: text-shadow 0.22s ease-out;
+  }
+  html.is-scrolling main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
+    transition: none;
+    text-shadow:
+      0 0 1px currentColor,
+      0 0 3px color-mix(in srgb, currentColor 42%, transparent),
+      0 0 6px color-mix(in srgb, currentColor 20%, transparent);
+  }
+  /* Heading besar: blur hanya terbaca di huruf besar, jadi halo-nya lebih
+     lebar dan lebih jelas. */
+  html.is-scrolling main :is(h1, h2, h3) {
+    text-shadow:
+      0 0 1px currentColor,
+      0 0 4px color-mix(in srgb, currentColor 55%, transparent),
+      0 0 10px color-mix(in srgb, currentColor 26%, transparent);
+  }
+}
+
+/* Reduced motion: teks selalu tajam, tanpa halo scroll apa pun. */
+@media (prefers-reduced-motion: reduce) {
+  html.is-scrolling main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
+    text-shadow: none !important;
+  }
+  html main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
+    transition: none !important;
   }
 }
 
@@ -732,6 +790,52 @@ body {
   }
 }
 
+/* Tilt3D glare — a wide, soft sheen that tracks the cursor across the card
+   (--gx/--gy are percentages written by Tilt3D on pointermove). Mix-blend
+   keeps the underlying image/colors visible; opacity animates in on hover.
+   The glare sits above card content but is pointer-transparent. */
+.tilt-glare {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.35s ease;
+  background: radial-gradient(
+    420px circle at var(--gx, 50%) var(--gy, 50%),
+    rgba(255, 255, 255, 0.16),
+    rgba(255, 255, 255, 0.05) 45%,
+    transparent 70%
+  );
+  mix-blend-mode: soft-light;
+}
+.tilt-host:hover .tilt-glare {
+  opacity: 1;
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt-glare {
+    display: none;
+  }
+}
+
+/* Tilt3D parallax layers — children marked .tilt-layer pop out of the card
+   plane by their own --tz while the parent tilts (parent keeps preserve-3d).
+   Only render-time static transforms: no transition needed, the damped tilt
+   loop is what animates. Must be disabled wherever 3D itself is disabled. */
+.tilt-layer {
+  transform: translateZ(var(--tz, 0px));
+}
+@media (hover: none) {
+  .tilt-layer {
+    transform: none !important;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tilt-layer {
+    transform: none !important;
+  }
+}
+
 /* Contact — masked line-by-line headline. The Reveal root flips the inner
    spans up from behind their masks, staggered via inline transition-delay. */
 .reveal.is-visible [data-contact-line] {
@@ -980,6 +1084,18 @@ summary {
   animation: menu-fade-in 0.6s ease-out forwards;
 }
 
+/* Mobile menu panel: fully opaque, unblended backdrop. The old bg-ink/95
+   (95% alpha) let the page bleed through behind the links on phones, which
+   read as a smeared/ghosted background. Solid fill + no filter/backdrop
+   keeps it flat — it also skips the per-frame backdrop raster on mobile GPUs. */
+.mobile-menu-panel {
+  background-color: var(--color-ink);
+  background-image: none;
+  isolation: isolate;
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+}
+
 /* Mobile carousel slide-in */
 @keyframes slide-in-right {
   from {
@@ -1036,6 +1152,10 @@ summary {
     transform-style: flat !important;
     will-change: auto !important;
     transition: none !important;
+  }
+  /* The glare sheen is a pointer decoration — never rendered on touch. */
+  .tilt-glare {
+    display: none;
   }
 }
 
@@ -1151,11 +1271,15 @@ summary {
 :root:not(.dark) .hero-title-3d:hover .hero-title-3d__heading > span {
   color: rgb(13 14 19 / 0.78);
 }
-@media (hover: none), (pointer: coarse) {
-  /* Touch has no hover tilt. Keep the layered title, but flatten it so the
-     browser can keep glyphs sharp instead of re-rasterizing 3D text while the
-     page scrolls. Desktop pointer motion keeps the full depth animation. */
-  .hero-title-3d {
+/* Flat hero title only on mobile-sized viewports. The width clause guarantees
+   phones see no 3D at all even when the browser reports a fine pointer
+   (desktop-site mode, narrow desktop window, or devtools without touch
+   emulation). Desktop and tablet viewports keep the full effect. */
+@media (max-width: 767px) {
+  /* Keep the mobile headline flat and crisp. Desktop pointer motion keeps the
+     full depth animation. */
+  .hero-title-3d,
+  .hero-title-3d__stage {
     perspective: none;
     transform-style: flat;
   }
@@ -1192,6 +1316,50 @@ summary {
 @media (max-width: 768px) {
   .hero-blur {
     filter: blur(40px);
+  }
+}
+
+/* Touch: take every per-frame filter raster out of the scroll path.
+   Backdrop-filtered surfaces (glass cards, carousel arrows, photo badges)
+   re-sample the backdrop on each scroll frame on mobile GPUs, so they keep
+   their semi-opaque dark fills and drop only the blur. The hero glow swaps
+   its blur(40px) for an equivalent radial gradient — the tint reads the
+   same, but a gradient is painted once and never re-rasterized.
+   Fine-pointer viewports keep the full effects, including the 768px blur
+   cap directly above. */
+@media (hover: none), (pointer: coarse) {
+  /* !important beats Tailwind's backdrop-blur utilities and the .glass rule
+     in the utilities layer; -webkit- is the property iOS Safari reads.
+     Backgrounds are untouched — the semi-opaque fills stay readable. */
+  [class*="backdrop-blur"],
+  .carousel-arrow,
+  .glass {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
+  }
+
+  /* Base swap for both circles: no filter, and the gradient replaces the
+     utility tint (background-color: transparent drops the bg-accent fill). */
+  .hero-blur {
+    filter: none !important;
+    background-color: transparent;
+    background-image: radial-gradient(
+      circle,
+      rgb(235 89 57 / 0.1) 0%,
+      rgb(235 89 57 / 0.1) 26%,
+      transparent 70%
+    );
+  }
+
+  /* Softer circle (bg-accent/5): the attribute selector outranks the base
+     rule above, so only this circle halves the tint. */
+  .hero-blur[class*="bg-accent/5"] {
+    background-image: radial-gradient(
+      circle,
+      rgb(235 89 57 / 0.05) 0%,
+      rgb(235 89 57 / 0.05) 26%,
+      transparent 70%
+    );
   }
 }
 
