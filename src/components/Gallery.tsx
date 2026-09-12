@@ -86,7 +86,7 @@ export default function Gallery({
         ? photo.title_en ?? ""
         : photo.title_id ?? photo.title_en ?? "";
     return (
-      <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
+      <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
         <button
           onClick={() => setLightbox(i)}
           className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-[0_28px_60px_-26px_rgba(235,89,57,0.4)] focus-visible:border-accent focus-visible:outline-none"

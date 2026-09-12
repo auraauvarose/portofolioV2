@@ -47,7 +47,7 @@ export default function Certifications({
     active === "all" ? items : items.filter((c) => c.category === active);
 
   const certCard = (cert: Certification) => (
-    <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
+    <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
       <article
         onClick={() => setSelected(cert)}
         className="group flex h-full cursor-pointer flex-col rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)]"

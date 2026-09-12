@@ -59,7 +59,7 @@ export default function Projects({
         : project.description_id ?? project.description_en ?? "";
 
     return (
-      <Tilt3D className="h-full" max={10} scale={1.035} lift={18}>
+      <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
         <article
           onClick={() => setSelected(project)}
           className="group h-full cursor-pointer rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)]"

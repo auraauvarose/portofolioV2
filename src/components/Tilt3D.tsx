@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import type { ReactNode, PointerEvent } from "react";
+import type { ReactNode, PointerEvent, MouseEvent as ReactMouseEvent } from "react";
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
@@ -13,12 +13,13 @@ const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
  *    on leave, so the card never snaps (the old 200ms CSS transition made
  *    it feel stuck/asleep).
  *  - translateZ lift: the whole card floats toward the viewer on hover.
- *  - cursor-following glare sheen (hidden on touch).
+ *  - cursor-following glare sheen, kept subtle during touch gestures.
  *  - inner layers (children with translateZ) get real parallax because the
  *    inner wrapper keeps `transform-style: preserve-3d`.
  *
- * Touch devices stay flat: pointerType guard here + the `@media (hover:none)`
- * CSS neutralizer in globals.css. prefers-reduced-motion disables motion too.
+ * Touch devices use press + drag instead of hover: a finger can explore the
+ * card depth without hijacking normal vertical page scrolling. Reduced-motion
+ * preferences still disable the effect.
  */
 export default function Tilt3D({
   children,
@@ -48,18 +49,22 @@ export default function Tilt3D({
   const innerRef = useRef<HTMLDivElement | null>(null);
   const glareRef = useRef<HTMLSpanElement | null>(null);
   const rectRef = useRef<DOMRect | null>(null);
+  const suppressClickRef = useRef(false);
   const rectDirtyRef = useRef(true);
   const rafRef = useRef(0);
   const enabledRef = useRef(false);
+  const touchActiveRef = useRef(false);
+  const touchStartRef = useRef({ x: 0, y: 0 });
+  const gestureRef = useRef<"idle" | "undecided" | "tilt" | "scroll">("idle");
   const target = useRef({ rx: 0, ry: 0, s: 1, tz: 0 });
   const cur = useRef({ rx: 0, ry: 0, s: 1, tz: 0 });
 
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
-    enabledRef.current =
-      window.matchMedia("(hover: hover) and (pointer: fine)").matches &&
-      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    enabledRef.current = !window.matchMedia(
+      "(prefers-reduced-motion: reduce)",
+    ).matches;
     if (typeof ResizeObserver === "undefined") return;
     const markDirty = () => {
       rectDirtyRef.current = true;
@@ -119,6 +124,7 @@ export default function Tilt3D({
   const tiltAt = (clientX: number, clientY: number) => {
     const el = hostRef.current;
     if (!el) return;
+    el.dataset.tilting = "true";
     // Lazy re-measure: never trust a rect captured before the last scroll.
     if (rectDirtyRef.current || !rectRef.current) {
       rectRef.current = el.getBoundingClientRect();
@@ -143,22 +149,72 @@ export default function Tilt3D({
     ensureLoop();
   };
 
-  const guard = (e: PointerEvent<HTMLDivElement>) =>
-    !enabledRef.current || e.pointerType !== "mouse";
-
   const onMove = (e: PointerEvent<HTMLDivElement>) => {
-    if (guard(e)) return;
-    tiltAt(e.clientX, e.clientY);
+    if (!enabledRef.current) return;
+
+    if (e.pointerType === "mouse") {
+      tiltAt(e.clientX, e.clientY);
+      return;
+    }
+    if (e.pointerType !== "touch" || !touchActiveRef.current) return;
+
+    // Let a mostly vertical gesture remain a page scroll. A small horizontal
+    // movement is the intentional "explore depth" gesture for the card.
+    if (gestureRef.current === "undecided") {
+      const dx = e.clientX - touchStartRef.current.x;
+      const dy = e.clientY - touchStartRef.current.y;
+      if (Math.hypot(dx, dy) < 8) return;
+      gestureRef.current = Math.abs(dx) > Math.abs(dy) * 0.72 ? "tilt" : "scroll";
+      if (gestureRef.current === "scroll") {
+        touchActiveRef.current = false;
+        release();
+        return;
+      }
+      if (gestureRef.current === "tilt") {
+        suppressClickRef.current = true;
+        const el = hostRef.current;
+        if (el) el.dataset.tilting = "true";
+      }
+    }
+    if (gestureRef.current === "tilt") {
+      const el = hostRef.current;
+      if (el) el.dataset.tilting = "true";
+      tiltAt(e.clientX, e.clientY);
+    }
   };
+
   const onDown = (e: PointerEvent<HTMLDivElement>) => {
-    if (guard(e)) return;
+    if (!enabledRef.current) return;
+    if (e.pointerType === "mouse") {
+      tiltAt(e.clientX, e.clientY);
+      target.current.s = scale * 0.97;
+      ensureLoop();
+      return;
+    }
+    if (e.pointerType !== "touch") return;
+    touchActiveRef.current = true;
+    gestureRef.current = "undecided";
+    touchStartRef.current = { x: e.clientX, y: e.clientY };
+    // Give every press an immediate depth response; a vertical drag can still
+    // hand control back to the page once its direction becomes clear.
     tiltAt(e.clientX, e.clientY);
-    target.current.s = scale * 0.97;
+    target.current.s = scale * 0.98;
     ensureLoop();
   };
+
   const release = () => {
+    touchActiveRef.current = false;
+    gestureRef.current = "idle";
+    hostRef.current?.removeAttribute("data-tilting");
     target.current = { rx: 0, ry: 0, s: 1, tz: 0 };
     ensureLoop();
+  };
+
+  const onClickCapture = (e: ReactMouseEvent<HTMLDivElement>) => {
+    if (!suppressClickRef.current) return;
+    suppressClickRef.current = false;
+    e.preventDefault();
+    e.stopPropagation();
   };
 
   return (
@@ -169,12 +225,18 @@ export default function Tilt3D({
       onPointerMove={onMove}
       onPointerDown={onDown}
       onPointerUp={release}
-      onPointerCancel={release}
-      onPointerLeave={release}
+      onPointerCancel={() => {
+        suppressClickRef.current = false;
+        release();
+      }}
+      onPointerLeave={(e) => {
+        if (e.pointerType === "mouse") release();
+      }}
+      onClickCapture={onClickCapture}
     >
       <div
         ref={innerRef}
-        className={`tilt-inner h-full w-full will-change-transform ${innerClassName}`}
+        className={`tilt-inner h-full w-full ${innerClassName}`}
         style={{
           transform:
             "rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg)) translateZ(var(--tz, 0px)) scale(var(--s, 1))",

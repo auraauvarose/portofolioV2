@@ -766,15 +766,12 @@ body {
 
 /* Tilt3D parallax layers — children marked .tilt-layer pop out of the card
    plane by their own --tz while the parent tilts (parent keeps preserve-3d).
-   Only render-time static transforms: no transition needed, the damped tilt
-   loop is what animates. Must be disabled wherever 3D itself is disabled. */
+   Touch cards use the same depth stack; the JS gesture decides when to animate. */
+.tilt-inner {
+  position: relative;
+}
 .tilt-layer {
   transform: translateZ(var(--tz, 0px));
-}
-@media (hover: none) {
-  .tilt-layer {
-    transform: none !important;
-  }
 }
 @media (prefers-reduced-motion: reduce) {
   .tilt-layer {
@@ -1090,18 +1087,27 @@ summary {
     transform: none !important;
     will-change: auto;
   }
-  /* Tilt3D never tilts on touch (its own pointer guard is mouse-only), so
-     drop its permanent GPU layers: preserve-3d + will-change keep every
-     tilted card rasterized for the whole session for zero visible motion. */
-  .tilt-inner {
-    transform: none !important;
-    transform-style: flat !important;
-    will-change: auto !important;
-    transition: none !important;
+  /* Touch uses press + drag to explore the card; prevent the browser from
+     interpreting the gesture as an image/link drag while preserving vertical
+     page scrolling until the gesture clearly becomes horizontal. */
+  .tilt-host {
+    touch-action: pan-y;
   }
-  /* The glare sheen is a pointer decoration — never rendered on touch. */
-  .tilt-glare {
-    display: none;
+  .tilt-inner {
+    transform: rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg))
+      translateZ(var(--tz, 0px)) scale(var(--s, 1)) !important;
+    transform-style: preserve-3d !important;
+    will-change: transform;
+  }
+  /* Keep vertical swipes available for page scrolling. Horizontal movement is
+     the depth gesture and is handled by Tilt3D without a scroll lock. */
+  /* Avoid sticky tap-hover in mobile Safari; the active gesture owns glare. */
+  .tilt-host:hover .tilt-glare {
+    opacity: 0;
+  }
+  /* The glare follows touch too, but remains subtle to protect readability. */
+  .tilt-host[data-tilting="true"] .tilt-glare {
+    opacity: 0.75;
   }
 }
 
