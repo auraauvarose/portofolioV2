@@ -295,60 +295,6 @@ html {
     animation-play-state: paused !important;
   }
 
-  /* ── Motion-blur text saat scroll ("efek buram") ──────────────────────
-     Mekanisme: class html.is-scrolling sudah di-toggle SEKALI per gesture
-     (HomeClient), jadi semua di bawah ini adalah perubahan paint-state
-     tunggal per gesture — nol JS per-frame, nol filter: blur(), nol
-     backdrop-filter, nol promosi layer. Browser me-render text-shadow di
-     jalur rasterisasi tile yang sama dengan teks biasa, jadi biayanya
-     hanya sedikit kerja raster di tile yang baru masuk viewport — bukan
-     kerja compositor di setiap frame saat jari bergerak.
-
-     Dua tingkat: teks kecil dapat halo tipis; heading besar dapat halo
-     lebih lebar (buram baru terasa pada huruf besar). Warna ikut
-     currentColor lewat color-mix (didukung Tailwind v4 baseline), dan
-     teks transparan (marquee .text-outline, watermark gradient) otomatis
-     tidak terpengaruh karena shadownya juga transparan.
-
-     Snap ON: saat gesture mulai, blur langsung penuh. Fade OFF: transisi
-     hidup di keadaan normal, jadi blur melebur tajam kembali saat
-     is-scrolling dilepas — tepat ketika frame budget sudah kosong kembali.
-
-     PENTING: transisi HARUS dimatikan selama gesture (transition: none di
-     bawah). Kalau transisi hidup dua arah, browser menganimasikan
-     text-shadow selama ~0.2s sambil jari masih bergerak — itu repaint
-     teks di SETIAP frame dan justru menjadi sumber lag-nya (terukur:
-     11 frame >25ms vs 0 frame saat efek dimatikan). Dengan
-     transition: none, halo dipaint SEKALI di awal gesture, lalu frame
-     berikutnya hanya menggeser tile yang sudah jadi. */
-  html main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
-    transition: text-shadow 0.22s ease-out;
-  }
-  html.is-scrolling main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
-    transition: none;
-    text-shadow:
-      0 0 1px currentColor,
-      0 0 3px color-mix(in srgb, currentColor 42%, transparent),
-      0 0 6px color-mix(in srgb, currentColor 20%, transparent);
-  }
-  /* Heading besar: blur hanya terbaca di huruf besar, jadi halo-nya lebih
-     lebar dan lebih jelas. */
-  html.is-scrolling main :is(h1, h2, h3) {
-    text-shadow:
-      0 0 1px currentColor,
-      0 0 4px color-mix(in srgb, currentColor 55%, transparent),
-      0 0 10px color-mix(in srgb, currentColor 26%, transparent);
-  }
-}
-
-/* Reduced motion: teks selalu tajam, tanpa halo scroll apa pun. */
-@media (prefers-reduced-motion: reduce) {
-  html.is-scrolling main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
-    text-shadow: none !important;
-  }
-  html main :is(h1, h2, h3, h4, h5, h6, p, a, button, label, li, figcaption, small, summary, dt, dd) {
-    transition: none !important;
-  }
 }
 
 /* Borders: white-tinted → dark-tinted */
