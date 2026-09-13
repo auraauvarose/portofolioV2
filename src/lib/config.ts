@@ -1,8 +1,8 @@
 import type { Localized } from "@/types";
 
-export const ADMIN_PASSWORD = (process.env.ADMIN_PASSWORD ?? "aura2007").trim();
-export const ADMIN_COOKIE_SECRET =
-  process.env.ADMIN_COOKIE_SECRET ?? "";
+// NOTE: This module is imported by CLIENT components — never add server-only
+// secrets (passwords, API keys, cookie secrets) here. They would be inlined
+// into the public JS bundle. Server-only config lives in `server-config.ts`.
 
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 

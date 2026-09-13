@@ -1,18 +1,20 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { ADMIN_PASSWORD, ADMIN_COOKIE_SECRET } from "@/lib/config";
-import { ADMIN_COOKIE, computeSessionValue } from "@/lib/admin-cookie";
+import { adminPassword, sessionSecret } from "@/lib/server-config";
+import {
+  ADMIN_COOKIE,
+  SESSION_TTL_SECONDS,
+  createSessionValue,
+  verifySessionValue,
+} from "@/lib/admin-cookie";
 
 export { ADMIN_COOKIE };
 
-function expectedSessionValue(): string {
-  return computeSessionValue(ADMIN_COOKIE_SECRET || ADMIN_PASSWORD);
-}
-
 export function verifyAdminPassword(password: string): boolean {
-  if (!ADMIN_PASSWORD) return false;
+  const b = adminPassword();
+  // Fail-closed: no password configured ⇒ admin login is disabled.
+  if (!b) return false;
   const a = String(password).trim();
-  const b = String(ADMIN_PASSWORD);
   if (a.length !== b.length) return false;
   let diff = 0;
   for (let i = 0; i < a.length; i++) diff |= a.charCodeAt(i) ^ b.charCodeAt(i);
@@ -21,19 +23,26 @@ export function verifyAdminPassword(password: string): boolean {
 
 export async function isAdmin(): Promise<boolean> {
   const store = await cookies();
-  const value = store.get(ADMIN_COOKIE)?.value;
-  if (!value) return false;
-  return value === expectedSessionValue();
+  return verifySessionValue(sessionSecret(), store.get(ADMIN_COOKIE)?.value);
 }
 
-export async function setAdminCookie(): Promise<void> {
+/**
+ * Issue an admin session cookie.
+ * `secure` must be derived from the REQUEST (https), not process.env.NODE_ENV,
+ * which is not guaranteed on the Workers runtime.
+ */
+export async function setAdminCookie(secure: boolean): Promise<void> {
+  const secret = sessionSecret();
+  if (!secret) return; // guarded by login route; belt & suspenders
+  const value = await createSessionValue(secret);
+  if (!value) return;
   const store = await cookies();
-  store.set(ADMIN_COOKIE, expectedSessionValue(), {
+  store.set(ADMIN_COOKIE, value, {
     httpOnly: true,
     sameSite: "lax",
-    secure: process.env.NODE_ENV === "production",
+    secure,
     path: "/",
-    maxAge: 60 * 60 * 24 * 7, // 7 days
+    maxAge: SESSION_TTL_SECONDS,
   });
 }
 

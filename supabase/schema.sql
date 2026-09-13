@@ -53,7 +53,15 @@ create table if not exists public.gallery_photos (
 
 -- ============================================================================
 -- Row Level Security
--- Public (anon) can READ; only authenticated users (the admin) can WRITE.
+-- Public (anon) can READ. All WRITES go through the server-side API routes
+-- using the service_role key, which BYPASSES RLS — so there is intentionally
+-- no write policy for anon/authenticated.
+--
+-- SECURITY: do NOT add `for all to authenticated` policies. The app does not
+-- use Supabase Auth; anyone able to self-signup through the public GoTrue
+-- endpoint would get full write access (and read of private columns) with
+-- such policies. Keep signup disabled in Dashboard → Authentication →
+-- Sign Up / Providers → disable, and run the revokes below on old databases.
 -- ============================================================================
 alter table public.projects         enable row level security;
 alter table public.certifications   enable row level security;
@@ -61,19 +69,23 @@ alter table public.gallery_photos   enable row level security;
 
 -- Public read
 create policy "projects_public_read" on public.projects
-  for select using (true);
+  for select to anon, authenticated using (true);
 create policy "certifications_public_read" on public.certifications
-  for select using (true);
+  for select to anon, authenticated using (true);
 create policy "gallery_public_read" on public.gallery_photos
-  for select using (true);
+  for select to anon, authenticated using (true);
 
--- Admin write (insert / update / delete) for any signed-in user
-create policy "projects_admin_write" on public.projects
-  for all to authenticated using (true) with check (true);
-create policy "certifications_admin_write" on public.certifications
-  for all to authenticated using (true) with check (true);
-create policy "gallery_admin_write" on public.gallery_photos
-  for all to authenticated using (true) with check (true);
+-- Table privileges: SELECT only for anon/authenticated; no write grants.
+grant  select on public.projects, public.certifications, public.gallery_photos
+  to anon, authenticated;
+revoke insert, update, delete, truncate, references, trigger
+  on public.projects, public.certifications, public.gallery_photos
+  from anon, authenticated;
+
+-- Drop the legacy permissive write policies if they exist (idempotent).
+drop policy if exists "projects_admin_write"       on public.projects;
+drop policy if exists "certifications_admin_write" on public.certifications;
+drop policy if exists "gallery_admin_write"        on public.gallery_photos;
 
 -- ============================================================================
 -- Optional: seed data (safe to run — only inserts if tables are empty)

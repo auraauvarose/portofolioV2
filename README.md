@@ -49,7 +49,8 @@ photo gallery**. Bilingual **EN / ID** with a language toggle.
   `/loading` route
 
 **Admin panel** (`/admin`, accessed directly by URL — no button on the public
-site; password-only login, default `aura2007`)
+site; password-only login; the password comes from the `ADMIN_PASSWORD`
+secret — **no default**, admin login is disabled until it is configured)
 
 - **Projects** — title (EN+ID), description, tech stack, category, year, link,
   image, featured
@@ -120,8 +121,8 @@ Open <http://localhost:3000>. Admin panel: <http://localhost:3000/admin>.
 | `NEXT_PUBLIC_SUPABASE_URL` | Supabase project URL |
 | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase anon (public) key |
 | `SUPABASE_SERVICE_ROLE_KEY` | service_role key — server-side writes only |
-| `ADMIN_PASSWORD` | Admin panel password (default `aura2007`) |
-| `ADMIN_COOKIE_SECRET` | Optional extra secret for the admin session cookie |
+| `ADMIN_PASSWORD` | Admin panel password — **required** (no default; unset ⇒ admin login disabled) |
+| `ADMIN_COOKIE_SECRET` | Strong secret for signing the admin session token (HMAC). Recommended; rotating it revokes all sessions |
 | `R2_ACCOUNT_ID` | Cloudflare account ID |
 | `R2_ACCESS_KEY_ID` | R2 API token access key |
 | `R2_SECRET_ACCESS_KEY` | R2 API token secret |
@@ -140,7 +141,8 @@ secrets for production (see [Deploy](#3-deploy-to-cloudflare-workers)).
 2. **SQL Editor → New query** → paste the entire contents of
    [`supabase/schema.sql`](supabase/schema.sql) → **Run**. This creates the
    `projects`, `certifications`, and `gallery_photos` tables with RLS and seed
-   data.
+   data. Then run [`supabase/comments.sql`](supabase/comments.sql) too (guestbook
+   table — required by `/api/comments`).
 3. Copy credentials from **Project Settings → API**:
    - `Project URL` → `NEXT_PUBLIC_SUPABASE_URL`
    - `anon` `public` key → `NEXT_PUBLIC_SUPABASE_ANON_KEY`
@@ -148,9 +150,11 @@ secrets for production (see [Deploy](#3-deploy-to-cloudflare-workers)).
      expose it to the browser or commit it)
 
 > **Security model:** RLS allows public **reads**; **writes** go through the
-> server-side admin API routes, protected by the admin password cookie
-> (`/admin/login`). Default password `aura2007` — override with
-> `ADMIN_PASSWORD` in `.env.local`.
+> server-side admin API routes via the service_role key (which bypasses RLS —
+> there are intentionally no write policies for anon/authenticated, and
+> Supabase **self-signup should stay disabled**). Admin session cookies are
+> HMAC-SHA256-signed tokens with 7-day expiry, keyed by `ADMIN_COOKIE_SECRET`.
+> Set `ADMIN_PASSWORD` to a long random value — there is no default password.
 
 ---
 
@@ -219,6 +223,12 @@ pnpm wrangler secret put ADMIN_COOKIE_SECRET
 ```
 
 ### Build + deploy
+
+> ⚠️ **Build from CI, not your laptop.** `pnpm cf:build` bakes every variable
+> found in `.env.local` into `.open-next/cloudflare/next-env.mjs`, which ships
+> inside the Worker — including `SUPABASE_SERVICE_ROLE_KEY`. The GitHub Action
+> is safe (it exports only `NEXT_PUBLIC_*`), so push and let it deploy, or
+> verify `next-env.mjs` contains no server secrets before `cf:deploy`.
 
 ```bash
 pnpm cf:build      # next build, then bundle the Worker

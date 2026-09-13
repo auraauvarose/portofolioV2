@@ -31,7 +31,10 @@ function LoginForm() {
       return;
     }
 
-    const next = searchParams.get("next") ?? "/admin";
+    // Only allow same-origin relative paths — blocks open redirect via ?next=
+    const rawNext = searchParams.get("next") ?? "/admin";
+    const next =
+      rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/admin";
     router.push(next);
     router.refresh();
   }
