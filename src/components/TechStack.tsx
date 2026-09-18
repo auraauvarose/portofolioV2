@@ -3,6 +3,7 @@
 import {
   useCallback,
   useEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
@@ -13,7 +14,8 @@ import type {
 } from "react";
 import SectionHeading from "@/components/SectionHeading";
 import { useLanguage } from "@/components/providers";
-import { techStack, techDescriptions, techLinks } from "@/lib/config";
+import { techDescriptions, techLinks } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 import { techIcon } from "@/components/tech-icons";
 import type { Localized } from "@/types";
 
@@ -65,8 +67,10 @@ function clamp(v: number, min: number, max: number) {
   return Math.min(max, Math.max(min, v));
 }
 
-function buildLayout(): CategoryNode[] {
-  return techStack.categories.map((cat, i) => {
+type TechCategory = { title: { en: string; id: string }; items: readonly string[] };
+
+function buildLayout(categories: readonly TechCategory[]): CategoryNode[] {
+  return categories.map((cat, i) => {
     const angle = CAT_ANGLES[i % CAT_ANGLES.length];
     const a = (angle * Math.PI) / 180;
     const ux = Math.cos(a);
@@ -116,8 +120,8 @@ function getMapSize(layout: CategoryNode[]) {
   return { w: maxX - minX, h: maxY - minY };
 }
 
-const LAYOUT = buildLayout();
-const MAP_SIZE = getMapSize(LAYOUT);
+// LAYOUT dihitung di dalam komponen (bergantung konten dari DB) dan di-memo
+// supaya tidak dihitung ulang setiap render.
 
 function makePath(a: Vec, b: Vec, bow = 0.14) {
   const mx = (a.x + b.x) / 2;
@@ -349,6 +353,9 @@ function TechStackMindMap() {
       setDefaultZoom(z);
     };
     fit();
+    // `fit` sengaja tidak masuk daftar: ia fungsi murni ukuran canvas dan
+    // hanya perlu dijalankan ulang saat skala paint berubah.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paint]);
 
   // Smooth zoom: wheel nudges the TARGET; the RAF loop glides there.
@@ -552,6 +559,11 @@ function TechStackMindMap() {
     scheduleWorldTransform();
   }, [defaultZoom, scheduleWorldTransform]);
 
+  /* Cleanup sekali saat unmount. Nilai .current SENGAJA dibaca saat cleanup
+     berjalan — kita ingin membatalkan timer/RAF yang masih pending pada saat
+     itu. Aturan exhaustive-deps menganggap ini berbahaya, padahal justru itu
+     perilaku yang diinginkan, jadi aturannya dimatikan untuk effect ini saja. */
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     return () => {
       if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
@@ -559,6 +571,14 @@ function TechStackMindMap() {
       if (worldRaf.current) cancelAnimationFrame(worldRaf.current);
     };
   }, []);
+  /* eslint-enable react-hooks/exhaustive-deps */
+
+  const { techStack } = useSiteContent();
+  const LAYOUT = useMemo(
+    () => buildLayout(techStack.categories as readonly TechCategory[]),
+    [techStack.categories],
+  );
+  const MAP_SIZE = useMemo(() => getMapSize(LAYOUT), [LAYOUT]);
 
   const headingWords = t(techStack.heading).split(" ");
 
@@ -856,6 +876,7 @@ function TechStackMindMap() {
 
 function TechStackMobile() {
   const { t } = useLanguage();
+  const { techStack } = useSiteContent();
 
   return (
     <section className="px-6 py-20 md:hidden">

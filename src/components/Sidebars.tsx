@@ -1,7 +1,7 @@
 "use client";
 
 import { useLanguage } from "@/components/providers";
-import { profile } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 import { socialIcon } from "@/components/social-icons";
 import MusicPlayer from "@/components/MusicPlayer";
 
@@ -44,8 +44,11 @@ function MoonIcon({ className }: { className?: string }) {
   );
 }
 
-function hrefFor(social: Social): string {
-  const found = profile.socials.find(
+type SocialLink = { label: string; href: string };
+
+/** Ambil URL asli dari konten situs; fallback ke href bawaan ikon. */
+function hrefFor(social: Social, socials: readonly SocialLink[]): string {
+  const found = socials.find(
     (s) => s.label.toLowerCase() === social.label.toLowerCase(),
   );
   return found?.href ?? social.href;
@@ -65,6 +68,7 @@ function leftIcon(label: string, className?: string) {
 
 export default function Sidebars() {
   const { lang, setLang, theme, toggleTheme } = useLanguage();
+  const { profile } = useSiteContent();
 
   return (
     <>
@@ -74,7 +78,7 @@ export default function Sidebars() {
           {LEFT_SOCIALS.map((s) => (
             <a
               key={s.label}
-              href={hrefFor(s)}
+              href={hrefFor(s, profile.socials)}
               target="_blank"
               rel="noreferrer"
               aria-label={s.label}

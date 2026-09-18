@@ -4,10 +4,11 @@ import { useEffect, useState } from "react";
 import Reveal from "@/components/Reveal";
 import ScrollWordReveal from "@/components/ScrollWordReveal";
 import { useLanguage } from "@/components/providers";
-import { whatIDo } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 
 export default function WhatIDo() {
   const { t, lang, theme } = useLanguage();
+  const { whatIDo } = useSiteContent();
   const [active, setActive] = useState<number | null>(null);
   const [touch, setTouch] = useState(false);
 

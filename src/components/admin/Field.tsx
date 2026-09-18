@@ -7,6 +7,8 @@ type FieldProps = {
   placeholder?: string;
   textarea?: boolean;
   required?: boolean;
+  /** id <datalist> untuk memberi saran nilai (tetap bisa ketik bebas). */
+  list?: string;
 };
 
 export default function Field({
@@ -16,6 +18,7 @@ export default function Field({
   placeholder,
   textarea,
   required,
+  list,
 }: FieldProps) {
   const base =
     "w-full rounded-md border border-white/10 bg-transparent px-3 py-2.5 text-sm text-white outline-none transition-colors duration-300 placeholder:text-gray-600 hover:border-white/30 focus:border-accent";
@@ -39,6 +42,7 @@ export default function Field({
           value={value}
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
+          list={list}
           className={base}
         />
       )}

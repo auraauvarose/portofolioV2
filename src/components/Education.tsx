@@ -12,9 +12,10 @@ import Reveal from "@/components/Reveal";
 import ScrollWordReveal from "@/components/ScrollWordReveal";
 import Spotlight from "@/components/Spotlight";
 import { useLanguage } from "@/components/providers";
-import { education } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 
 export default function Education() {
+  const { education } = useSiteContent();
   const { t } = useLanguage();
   const sectionRef = useRef<HTMLElement | null>(null);
   const reduceMotion = useReducedMotion();
@@ -77,7 +78,15 @@ export default function Education() {
   );
 }
 
-type EducationItem = (typeof education.items)[number];
+/** Bentuk satu entri pendidikan. Struktur sama dengan config.ts. */
+type EducationItem = {
+  period: string;
+  school: string;
+  degree: { en: string; id: string };
+  detail: { en: string; id: string };
+  location: { en: string; id: string };
+  description: { en: string; id: string };
+};
 
 type Translate = ReturnType<typeof useLanguage>["t"];
 

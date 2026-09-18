@@ -20,7 +20,15 @@ import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
 import ScrollProgress from "@/components/ScrollProgress";
 import Magnetic from "@/components/Magnetic";
-import type { Project, Certification, GalleryPhoto } from "@/types";
+import ExperienceTimeline from "@/components/ExperienceTimeline";
+import Testimonials from "@/components/Testimonials";
+import type {
+  Project,
+  Certification,
+  GalleryPhoto,
+  Experience,
+  Testimonial,
+} from "@/types";
 
 const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
 const GREET_MS = 320;
@@ -78,10 +86,14 @@ export default function HomeClient({
   projects,
   certifications,
   gallery,
+  experience,
+  testimonials,
 }: {
   projects: Project[];
   certifications: Certification[];
   gallery: GalleryPhoto[];
+  experience: Experience[];
+  testimonials: Testimonial[];
 }) {
   const [phase, setPhase] = useState<Phase>("enter");
   const [atTop, setAtTop] = useState(true);
@@ -216,10 +228,11 @@ export default function HomeClient({
       <div className="relative z-[10] bg-ink">
         <Marquee label="AURA AUVAROSE" />
 
-        <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)] dark:shadow-[0_-40px_80px_rgba(0,0,0,0.5)] [clip-path:inset(-130px_0_0_0)]">
+        <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)] dark:shadow-[0_-40px_80px_rgba(255,255,255,0.5)] [clip-path:inset(-130px_0_0_0)]">
           <About />
           <WhatIDo />
           <Education />
+          <ExperienceTimeline items={experience} />
         </div>
 
         <Marquee label="FULLSTACK DEVELOPER" reverse />
@@ -230,6 +243,7 @@ export default function HomeClient({
         <Marquee label="SOFTWARE ENGINEER" />
 
         <Showcase projects={projects} gallery={gallery} />
+        <Testimonials items={testimonials} />
         <Contact />
         <Footer />
       </div>

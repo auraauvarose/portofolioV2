@@ -1,33 +1,58 @@
 "use client";
 
+import Link from "next/link";
 import { useState, type ComponentType } from "react";
 import { useRouter } from "next/navigation";
 import ProjectsManager from "@/components/admin/ProjectsManager";
 import CertificationsManager from "@/components/admin/CertificationsManager";
 import GalleryManager from "@/components/admin/GalleryManager";
 import CommentsManager from "@/components/admin/CommentsManager";
+import MessagesManager from "@/components/admin/MessagesManager";
+import SiteContentManager from "@/components/admin/SiteContentManager";
+import ExperienceManager from "@/components/admin/ExperienceManager";
+import TestimonialsManager from "@/components/admin/TestimonialsManager";
+import AnalyticsPanel from "@/components/admin/AnalyticsPanel";
 import {
   ProjectIcon,
   BadgeIcon,
   ImageIcon,
   ChatIcon,
+  InboxIcon,
+  LayoutIcon,
+  ChartIcon,
+  BriefcaseIcon,
+  QuoteIcon,
   ExternalIcon,
   SignOutIcon,
   LockIcon,
 } from "@/components/admin/icons";
 
 const TABS: { key: TabKey; label: string; Icon: ComponentType<{ className?: string }> }[] = [
+  { key: "messages", label: "Inbox", Icon: InboxIcon },
+  { key: "analytics", label: "Stats", Icon: ChartIcon },
+  { key: "site", label: "Site", Icon: LayoutIcon },
+  { key: "experience", label: "Experience", Icon: BriefcaseIcon },
+  { key: "testimonials", label: "Testimonials", Icon: QuoteIcon },
   { key: "projects", label: "Projects", Icon: ProjectIcon },
   { key: "certifications", label: "Certs", Icon: BadgeIcon },
   { key: "gallery", label: "Gallery", Icon: ImageIcon },
   { key: "comments", label: "Comments", Icon: ChatIcon },
 ];
 
-type TabKey = "projects" | "certifications" | "gallery" | "comments";
+type TabKey =
+  | "messages"
+  | "analytics"
+  | "site"
+  | "experience"
+  | "testimonials"
+  | "projects"
+  | "certifications"
+  | "gallery"
+  | "comments";
 
 export default function AdminDashboard() {
   const router = useRouter();
-  const [tab, setTab] = useState<TabKey>("projects");
+  const [tab, setTab] = useState<TabKey>("messages");
 
   const configured = Boolean(
     process.env.NEXT_PUBLIC_SUPABASE_URL &&
@@ -57,12 +82,12 @@ export default function AdminDashboard() {
               <code className="text-accent">.env.local</code>, rebuild, then try
               again.
             </p>
-            <a
+            <Link
               href="/"
               className="text-sm text-gray-500 transition-colors hover:text-accent"
             >
               ← Back to site
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -73,12 +98,12 @@ export default function AdminDashboard() {
     <div className="min-h-[100dvh] overflow-x-clip bg-ink text-ecru">
       <header className="border-b border-white/10">
         <div className="mx-auto flex max-w-6xl flex-wrap items-center justify-between gap-4 px-6 py-5 md:px-10">
-          <a
+          <Link
             href="/"
             className="text-display text-sm uppercase tracking-[0.14em] text-white transition-colors hover:text-accent"
           >
             Aura <span className="text-accent">Auvarose</span>
-          </a>
+          </Link>
           <div className="flex items-center gap-2">
             <span className="mr-2 hidden text-[10px] uppercase tracking-[0.24em] text-gray-400 sm:inline">
               Admin workspace
@@ -142,6 +167,11 @@ export default function AdminDashboard() {
         </nav>
 
         <div key={tab} className="admin-fade-up">
+          {tab === "messages" && <MessagesManager />}
+          {tab === "analytics" && <AnalyticsPanel />}
+          {tab === "site" && <SiteContentManager />}
+          {tab === "experience" && <ExperienceManager />}
+          {tab === "testimonials" && <TestimonialsManager />}
           {tab === "projects" && <ProjectsManager />}
           {tab === "certifications" && <CertificationsManager />}
           {tab === "gallery" && <GalleryManager />}

@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from "react";
 import { motion, useReducedMotion } from "motion/react";
-import { profile } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 
 export default function Footer() {
+  const { profile } = useSiteContent();
   const markRef = useRef<HTMLHeadingElement>(null);
   const reduceMotion = useReducedMotion();
 

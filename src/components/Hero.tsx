@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { profile } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 import { useLanguage } from "@/components/providers";
 import Tilt3D from "@/components/Tilt3D";
 
@@ -10,8 +10,13 @@ const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
 
 export default function Hero() {
+  const { profile, hero } = useSiteContent();
+  const { theme, t } = useLanguage();
   const eyebrow = `${profile.name}`.toUpperCase();
-  const { theme } = useLanguage();
+  const title1 = t(hero.titleLine1);
+  const title2 = t(hero.titleLine2);
+  const lens1 = t(hero.lensLine1);
+  const lens2 = t(hero.lensLine2);
   const [active, setActive] = useState(false);
   const [backgroundHovered, setBackgroundHovered] = useState(false);
   const scrollRAF = useRef(0);
@@ -193,14 +198,14 @@ export default function Hero() {
               className="hero-title-3d__depth text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]"
               aria-hidden="true"
             >
-              <span className="hero-title-3d__line">FULLSTACK</span>
+              <span className="hero-title-3d__line">{title1}</span>
               <br />
-              <span className="hero-title-3d__line">DEVELOPER</span>
+              <span className="hero-title-3d__line">{title2}</span>
             </div>
             <h1 className="hero-title-3d__heading text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
-              <span>FULLSTACK</span>
+              <span>{title1}</span>
               <br />
-              <span>DEVELOPER</span>
+              <span>{title2}</span>
             </h1>
           </div>
         </div>
@@ -240,9 +245,9 @@ export default function Hero() {
               {eyebrow}
             </p>
             <h1 className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-black sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
-              SOFTWARE
+              {lens1}
               <br />
-              ENGINEER
+              {lens2}
             </h1>
           </div>
         </div>

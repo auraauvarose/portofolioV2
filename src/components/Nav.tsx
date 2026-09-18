@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLanguage } from "@/components/providers";
-import { nav, profile } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 import { socialIcon } from "@/components/social-icons";
 import MusicPlayer from "@/components/MusicPlayer";
 
@@ -12,6 +12,7 @@ const PROFILE_IMG = "/profile.webp";
 
 export default function Nav() {
   const { t, lang, setLang, theme, toggleTheme } = useLanguage();
+  const { nav, profile } = useSiteContent();
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
 
@@ -43,7 +44,7 @@ export default function Nav() {
           aria-label="View profile photo"
           className="pointer-events-auto group relative h-10 w-10 overflow-hidden rounded-full border border-white/15 bg-ink shadow-lg transition-transform hover:scale-105 md:h-14 md:w-14"
         >
-          {/* eslint-disable-next-line @next/next/no-img-element */}
+          { }
           <img
             src={PROFILE_IMG}
             alt={profile.name}
@@ -204,7 +205,7 @@ export default function Nav() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid aspect-square w-full place-items-center overflow-hidden bg-black/30">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img
                 src={PROFILE_IMG}
                 alt={profile.name}

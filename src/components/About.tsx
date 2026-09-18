@@ -3,10 +3,11 @@
 import Reveal from "@/components/Reveal";
 import ScrollWordReveal from "@/components/ScrollWordReveal";
 import { useLanguage } from "@/components/providers";
-import { about, profile } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 
 export default function About() {
   const { t, lang } = useLanguage();
+  const { about, profile } = useSiteContent();
 
   return (
     <section id="about" className="px-6 py-16 md:px-10 md:py-32">
