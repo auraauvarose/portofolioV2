@@ -2,16 +2,27 @@
 // Situs — base URL & helper metadata.
 //
 // Sumber URL, berurutan:
-//   1. NEXT_PUBLIC_SITE_URL  (set di .env.local / Worker build env)
+//   1. NEXT_PUBLIC_SITE_URL  (set di .env.local / Worker build env) ← utama
 //   2. CF_PAGES_URL / VERCEL_URL  (kalau suatu saat pindah host)
-//   3. fallback workers.dev
+//   3. DEFAULT_SITE_URL  (fallback terakhir)
 //
 // Nilai ini dipakai untuk metadataBase, canonical, sitemap, robots, dan
-// URL absolut di Open Graph.
+// URL absolut di Open Graph. Kalau salah, robots.txt & sitemap menunjuk ke
+// host yang tidak ada — jadi penting untuk diset eksplisit di CI.
 // ============================================================================
 
-/** Domain default — ganti lewat NEXT_PUBLIC_SITE_URL setelah punya custom domain. */
-export const DEFAULT_SITE_URL = "https://portofolio.auraauvarose.workers.dev";
+/**
+ * Fallback terakhir bila NEXT_PUBLIC_SITE_URL tidak diset.
+ *
+ * PENTING: ini harus hostname Worker yang BENAR. Subdomain workers.dev
+ * dibentuk dari nama akun Cloudflare, bukan nama Worker — di sini akunnya
+ * `auraauvaroseendica` sementara nama Worker-nya `portofolio`.
+ *
+ * Tetap disarankan mengisi NEXT_PUBLIC_SITE_URL di CI (lihat README) supaya
+ * nilai ini tidak pernah dipakai.
+ */
+export const DEFAULT_SITE_URL =
+  "https://portofolio.auraauvaroseendica.workers.dev";
 
 export function siteUrl(): string {
   const raw =

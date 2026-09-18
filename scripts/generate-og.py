@@ -230,7 +230,7 @@ def main() -> None:
     foot_font = ImageFont.truetype(str(switzer_400), 23)
     foot_bold = ImageFont.truetype(str(switzer_600), 23)
     draw_tracked(
-        draw, (MARGIN, FOOTER_Y + 22), "portofolio.auraauvarose.workers.dev", foot_font, GRAY_DIM
+        draw, (MARGIN, FOOTER_Y + 22), "portofolio.auraauvaroseendica.workers.dev", foot_font, GRAY_DIM
     )
 
     tag = "Available for projects"
