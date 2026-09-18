@@ -403,7 +403,7 @@ export const commentsPage = {
 export const contactForm = {
   openLabel: { en: "Send a Message", id: "Kirim Pesan" },
   closeLabel: { en: "Close", id: "Tutup" },
-  heading: { en: "Start a Project", id: "Mulai Proyek" },
+  heading: { en: "Contact Privately", id: "Hubungi secara pribadi" },
   description: {
     en: "Tell me what you're building. I read every message and usually reply within 1–2 days.",
     id: "Ceritakan apa yang sedang kamu bangun. Saya membaca setiap pesan dan biasanya membalas dalam 1–2 hari.",
@@ -417,15 +417,6 @@ export const contactForm = {
     en: "Website, app, collaboration…",
     id: "Website, aplikasi, kolaborasi…",
   },
-  budgetLabel: { en: "Budget (optional)", id: "Anggaran (opsional)" },
-  budgetPlaceholder: { en: "Select a range", id: "Pilih rentang" },
-  budgetOptions: [
-    { en: "Not sure yet", id: "Belum tahu" },
-    { en: "Under $500", id: "Di bawah Rp 8 juta" },
-    { en: "$500 – $1,500", id: "Rp 8 – 25 juta" },
-    { en: "$1,500 – $5,000", id: "Rp 25 – 80 juta" },
-    { en: "$5,000+", id: "Di atas Rp 80 juta" },
-  ],
   messageLabel: { en: "Message", id: "Pesan" },
   messagePlaceholder: {
     en: "What do you need built? Any deadline or context helps.",

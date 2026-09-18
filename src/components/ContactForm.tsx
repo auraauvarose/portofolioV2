@@ -18,7 +18,6 @@ export default function ContactForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
-  const [budget, setBudget] = useState("");
   const [message, setMessage] = useState("");
   // Honeypot — dibiarkan kosong oleh manusia, diisi oleh bot.
   const [website, setWebsite] = useState("");
@@ -37,7 +36,7 @@ export default function ContactForm() {
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, subject, budget, message, website }),
+        body: JSON.stringify({ name, email, subject, message, website }),
       });
 
       if (!res.ok) {
@@ -51,7 +50,6 @@ export default function ContactForm() {
       setName("");
       setEmail("");
       setSubject("");
-      setBudget("");
       setMessage("");
     } catch {
       setError(t(contactForm.errors.generic));
@@ -153,29 +151,6 @@ export default function ContactForm() {
             placeholder={t(contactForm.subjectPlaceholder)}
             className={inputBase}
           />
-        </label>
-
-        <label className="block">
-          <span className={labelBase}>{t(contactForm.budgetLabel)}</span>
-          <select
-            name="budget"
-            value={budget}
-            onChange={(e) => setBudget(e.target.value)}
-            className={`${inputBase} appearance-none bg-[length:12px] bg-[right_0.9rem_center] bg-no-repeat pr-10`}
-            style={{
-              backgroundImage:
-                "url(\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23888' stroke-width='2.4' stroke-linecap='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E\")",
-            }}
-          >
-            <option value="" className="bg-black">
-              {t(contactForm.budgetPlaceholder)}
-            </option>
-            {contactForm.budgetOptions.map((opt) => (
-              <option key={opt.en} value={opt.en} className="bg-black">
-                {t(opt)}
-              </option>
-            ))}
-          </select>
         </label>
       </div>
 
