@@ -20,17 +20,24 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: pnpm/action-setup@v4
-        with:
-          version: 11
-
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-          cache: pnpm
+          cache: npm
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: npm ci
+
+      # Gate kualitas: jalankan sebelum build supaya kode bermasalah tidak
+      # sampai ter-deploy. Keduanya cepat (beberapa detik).
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Test
+        run: npm test
 
       # NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so
       # they must be present as env vars during the OpenNext/Next build.
@@ -39,11 +46,15 @@ jobs:
           NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
           NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
           NEXT_PUBLIC_R2_PUBLIC_URL: ${{ secrets.NEXT_PUBLIC_R2_PUBLIC_URL }}
-        run: pnpm cf:build
+          # Bila secret ini belum dibuat, fallback di src/lib/site.ts dipakai
+          # (workers.dev) sehingga build tidak gagal.
+          NEXT_PUBLIC_SITE_URL: ${{ secrets.NEXT_PUBLIC_SITE_URL }}
+          NEXT_PUBLIC_ANALYTICS_ENABLED: ${{ vars.NEXT_PUBLIC_ANALYTICS_ENABLED }}
+        run: npm run cf:build
 
       # Deploy first so the Worker exists, then attach the server-only secrets.
       - name: Deploy
-        run: pnpm exec wrangler deploy
+        run: npx wrangler deploy
 
       # Server-only runtime vars are needed by the Worker, so sync them as
       # Cloudflare secrets after the Worker has been created. Build the JSON
@@ -67,4 +78,4 @@ jobs:
               ADMIN_PASSWORD: env.ADMIN_PASSWORD,
               ADMIN_COOKIE_SECRET: env.ADMIN_COOKIE_SECRET}' \
             > /tmp/secrets.json
-          pnpm exec wrangler secret bulk /tmp/secrets.json
+          npx wrangler secret bulk /tmp/secrets.json

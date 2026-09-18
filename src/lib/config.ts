@@ -30,15 +30,13 @@ export const nav: { en: string; id: string }[] = [
 ];
 
 export const hero = {
-  role: { en: "Fullstack Developer", id: "Fullstack Developer" },
-  tagline: {
-    en: "Available For Projects Freelance",
-    id: "Tersedia Untuk Proyek Freelance",
-  },
-  locationPrefix: { en: "Located in", id: "Berlokasi di" },
-  line1: "AURA",
-  line2: "AUVAROSE",
-  line3: "",
+  // Judul besar di hero — dua baris. Dipakai di Hero.tsx untuk tampilan
+  // utama (judul 3D) dan tampilan lensa (mode hover).
+  titleLine1: { en: "FULLSTACK", id: "FULLSTACK" },
+  titleLine2: { en: "DEVELOPER", id: "DEVELOPER" },
+  // Judul pada tampilan lensa
+  lensLine1: { en: "SOFTWARE", id: "SOFTWARE" },
+  lensLine2: { en: "ENGINEER", id: "ENGINEER" },
 } as const;
 
 export const about = {
@@ -307,7 +305,6 @@ export const work = {
   heading: { en: "Projects", id: "Proyek" },
   allLabel: { en: "All", id: "Semua" },
   professionalLabel: { en: "Professional Work", id: "Karya Profesional" },
-  viewCaseStudy: { en: "View Case Study", id: "Lihat Studi Kasus" },
   clickToExpand: { en: "Click to expand", id: "Klik untuk memperbesar" },
 } as const;
 
@@ -318,6 +315,20 @@ export const gallery = {
     en: "Moments, events, and behind-the-scenes snapshots.",
     id: "Momen, acara, dan cuplikan di balik layar.",
   },
+  allLabel: { en: "All", id: "Semua" },
+  emptyFiltered: {
+    en: "No photos in this category yet.",
+    id: "Belum ada foto di kategori ini.",
+  },
+  // Label ramah untuk kategori galeri. Kategori yang tidak terdaftar di sini
+  // tetap ditampilkan apa adanya, jadi admin bebas menambah nilai baru.
+  categoryLabels: {
+    general: { en: "General", id: "Umum" },
+    event: { en: "Events", id: "Acara" },
+    campus: { en: "Campus", id: "Kampus" },
+    work: { en: "Work", id: "Kerja" },
+    personal: { en: "Personal", id: "Pribadi" },
+  } as Record<string, Localized>,
 } as const;
 
 export const showcase = {
@@ -365,7 +376,10 @@ export const comments = {
   ratingLabel: { en: "Rating (optional)", id: "Rating (opsional)" },
   submit: { en: "Send Comment", id: "Kirim Komentar" },
   sending: { en: "Sending…", id: "Mengirim…" },
-  success: { en: "Comment posted. Thank you!", id: "Komentar terkirim. Terima kasih!" },
+  success: {
+    en: "Thanks! Your comment was sent and will appear after review.",
+    id: "Terima kasih! Komentarmu terkirim dan akan tampil setelah ditinjau.",
+  },
   errorGeneric: {
     en: "Something went wrong. Please try again.",
     id: "Terjadi kesalahan. Silakan coba lagi.",
@@ -376,10 +390,149 @@ export const comments = {
   },
   count: { en: "comments", id: "komentar" },
   backHome: { en: "Back to Home", id: "Kembali ke Beranda" },
-  replyHint: { en: "Reply", id: "Balas" },
   justNow: { en: "just now", id: "baru saja" },
 } as const;
 
 export const commentsPage = {
   cta: { en: "Leave a Comment", id: "Tulis Komentar" },
+} as const;
+
+// ============================================================================
+// Contact form — dikirim ke tabel contact_messages, dibaca di /admin → Inbox.
+// ============================================================================
+export const contactForm = {
+  openLabel: { en: "Send a Message", id: "Kirim Pesan" },
+  closeLabel: { en: "Close", id: "Tutup" },
+  heading: { en: "Start a Project", id: "Mulai Proyek" },
+  description: {
+    en: "Tell me what you're building. I read every message and usually reply within 1–2 days.",
+    id: "Ceritakan apa yang sedang kamu bangun. Saya membaca setiap pesan dan biasanya membalas dalam 1–2 hari.",
+  },
+  nameLabel: { en: "Name", id: "Nama" },
+  namePlaceholder: { en: "Your name", id: "Namamu" },
+  emailLabel: { en: "Email", id: "Email" },
+  emailPlaceholder: { en: "you@example.com", id: "kamu@contoh.com" },
+  subjectLabel: { en: "Subject", id: "Subjek" },
+  subjectPlaceholder: {
+    en: "Website, app, collaboration…",
+    id: "Website, aplikasi, kolaborasi…",
+  },
+  budgetLabel: { en: "Budget (optional)", id: "Anggaran (opsional)" },
+  budgetPlaceholder: { en: "Select a range", id: "Pilih rentang" },
+  budgetOptions: [
+    { en: "Not sure yet", id: "Belum tahu" },
+    { en: "Under $500", id: "Di bawah Rp 8 juta" },
+    { en: "$500 – $1,500", id: "Rp 8 – 25 juta" },
+    { en: "$1,500 – $5,000", id: "Rp 25 – 80 juta" },
+    { en: "$5,000+", id: "Di atas Rp 80 juta" },
+  ],
+  messageLabel: { en: "Message", id: "Pesan" },
+  messagePlaceholder: {
+    en: "What do you need built? Any deadline or context helps.",
+    id: "Apa yang ingin kamu bangun? Sertakan tenggat atau konteksnya bila ada.",
+  },
+  submit: { en: "Send Message", id: "Kirim Pesan" },
+  sending: { en: "Sending…", id: "Mengirim…" },
+  success: {
+    en: "Message sent. Thank you — I'll get back to you soon!",
+    id: "Pesan terkirim. Terima kasih — saya akan segera membalas!",
+  },
+  errors: {
+    name: {
+      en: "Please enter your name (min. 2 characters).",
+      id: "Mohon isi nama (min. 2 karakter).",
+    },
+    email: {
+      en: "Please enter a valid email address.",
+      id: "Mohon isi alamat email yang valid.",
+    },
+    message: {
+      en: "Please write a message of at least 10 characters.",
+      id: "Mohon tulis pesan minimal 10 karakter.",
+    },
+    rateLimited: {
+      en: "You just sent a message. Please wait a moment before sending another.",
+      id: "Kamu baru saja mengirim pesan. Tunggu sebentar sebelum mengirim lagi.",
+    },
+    generic: {
+      en: "Something went wrong. Please try again or email me directly.",
+      id: "Terjadi kesalahan. Coba lagi atau email saya langsung.",
+    },
+  },
+} as const;
+
+// ============================================================================
+// Halaman case study /work/<slug>
+// ============================================================================
+export const caseStudy = {
+  back: { en: "All projects", id: "Semua proyek" },
+  overview: { en: "Overview", id: "Ringkasan" },
+  techStack: { en: "Tech Stack", id: "Teknologi" },
+  links: { en: "Links", id: "Tautan" },
+  liveDemo: { en: "Live Demo", id: "Demo Langsung" },
+  sourceCode: { en: "Source Code", id: "Kode Sumber" },
+  yearLabel: { en: "Year", id: "Tahun" },
+  categoryLabel: { en: "Category", id: "Kategori" },
+  readCaseStudy: { en: "Read case study", id: "Baca studi kasus" },
+  notFoundTitle: { en: "Project not found", id: "Proyek tidak ditemukan" },
+  notFoundBody: {
+    en: "That project doesn't exist or hasn't been published yet.",
+    id: "Proyek itu tidak ada atau belum dipublikasikan.",
+  },
+  otherProjects: { en: "Other projects", id: "Proyek lainnya" },
+} as const;
+
+// ============================================================================
+// Halaman error & 404
+// ============================================================================
+export const notFoundPage = {
+  kicker: { en: "Error 404", id: "Error 404" },
+  heading: { en: "Page not found", id: "Halaman tidak ditemukan" },
+  body: {
+    en: "The page you're looking for doesn't exist, or it may have moved.",
+    id: "Halaman yang kamu cari tidak ada, atau mungkin sudah dipindahkan.",
+  },
+  home: { en: "Back to home", id: "Kembali ke beranda" },
+  work: { en: "See my work", id: "Lihat karya saya" },
+} as const;
+
+export const errorPage = {
+  kicker: { en: "Error", id: "Error" },
+  heading: { en: "Something broke", id: "Terjadi kesalahan" },
+  body: {
+    en: "An unexpected error occurred. Try again — if it keeps happening, let me know.",
+    id: "Terjadi kesalahan tak terduga. Coba lagi — kalau terus berulang, kabari saya.",
+  },
+  retry: { en: "Try again", id: "Coba lagi" },
+  home: { en: "Back to home", id: "Kembali ke beranda" },
+} as const;
+
+// ============================================================================
+// Experience & Testimonials (Tahap 3)
+// ============================================================================
+export const experienceSection = {
+  kicker: { en: "Experience", id: "Pengalaman" },
+  heading: { en: "Where I've Worked", id: "Riwayat Kerja" },
+  description: {
+    en: "Roles, collaborations, and the work behind them.",
+    id: "Peran, kolaborasi, dan pekerjaan di baliknya.",
+  },
+  present: { en: "Present", id: "Sekarang" },
+  empty: {
+    en: "Experience entries will appear here.",
+    id: "Riwayat pengalaman akan tampil di sini.",
+  },
+} as const;
+
+export const testimonialsSection = {
+  kicker: { en: "Testimonials", id: "Testimoni" },
+  heading: { en: "What People Say", id: "Kata Mereka" },
+  description: {
+    en: "Feedback from people I've built things with.",
+    id: "Masukan dari orang-orang yang pernah bekerja sama dengan saya.",
+  },
+  empty: {
+    en: "Testimonials will appear here.",
+    id: "Testimoni akan tampil di sini.",
+  },
 } as const;

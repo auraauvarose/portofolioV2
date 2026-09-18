@@ -3,8 +3,10 @@
 import { useEffect, useRef, useState } from "react";
 import Reveal from "@/components/Reveal";
 import Magnetic from "@/components/Magnetic";
+import ContactForm from "@/components/ContactForm";
 import { useLanguage } from "@/components/providers";
-import { contact, commentsPage, profile } from "@/lib/config";
+import { contact, commentsPage } from "@/lib/config";
+import { useSiteContent } from "@/components/site-content-provider";
 
 function useLocalTime() {
   const [time, setTime] = useState("--:--");
@@ -49,6 +51,7 @@ function useLocalTime() {
 
 export default function Contact() {
   const { t } = useLanguage();
+  const { profile } = useSiteContent();
   const time = useLocalTime();
   const sectionRef = useRef<HTMLElement | null>(null);
 
@@ -107,80 +110,91 @@ export default function Contact() {
           </h2>
         </Reveal>
 
-        <div className="mt-16 grid gap-8 md:grid-cols-4">
+        <div className="mt-14 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
+          {/* Form kontak — jalur konversi utama */}
           <Reveal variant="left">
-            <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
-              {t(contact.emailLabel)}
-            </p>
-            <a
-              href={`mailto:${profile.email}`}
-              className="break-all text-lg font-medium text-white transition-colors hover:text-accent"
-            >
-              {profile.email}
-            </a>
-            {/* Tombol pindah ke halaman komentar — tepat di bawah email */}
-            <div className="mt-4">
-              <Magnetic strength={0.25}>
-                <a
-                  href="/komentar"
-                  className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-accent transition-all duration-300 hover:bg-accent hover:text-black"
-                >
-                  <svg
-                    width="14"
-                    height="14"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="transition-transform duration-300 group-hover:scale-110"
-                    aria-hidden="true"
+            <div className="border border-white/10 bg-white/[0.015] p-6 sm:p-8">
+              <ContactForm />
+            </div>
+          </Reveal>
+
+          <div className="grid gap-8 sm:grid-cols-2 lg:content-start">
+            {/* Email + CTA guestbook: melebar penuh agar alamat email tidak
+                terpotong di tengah kata pada kolom sempit. */}
+            <Reveal variant="right" className="sm:col-span-2">
+              <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
+                {t(contact.emailLabel)}
+              </p>
+              <a
+                href={`mailto:${profile.email}`}
+                className="break-words text-base font-medium text-white transition-colors hover:text-accent sm:text-lg"
+              >
+                {profile.email}
+              </a>
+              {/* Tombol pindah ke halaman komentar — tepat di bawah email */}
+              <div className="mt-4">
+                <Magnetic strength={0.25}>
+                  <a
+                    href="/komentar"
+                    className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-accent transition-all duration-300 hover:bg-accent hover:text-black"
                   >
-                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
-                  </svg>
-                  {t(commentsPage.cta)}
-                </a>
-              </Magnetic>
-            </div>
-          </Reveal>
-          <Reveal delay={80}>
-            <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
-              {t(contact.locationLabel)}
-            </p>
-            <p className="text-lg text-white">{t(profile.location)}</p>
-          </Reveal>
-          <Reveal delay={160}>
-            <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
-              {t(contact.timeLabel)}
-            </p>
-            <p className="text-lg text-white">
-              {time} <span className="text-gray-500">{contact.timezone}</span>
-            </p>
-          </Reveal>
-          <Reveal delay={240} variant="right">
-            <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
-              {t(contact.socialsLabel)}
-            </p>
-            <div className="flex flex-col gap-2">
-              {profile.socials.map((s) => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="group relative inline-block overflow-hidden text-lg text-white transition-colors hover:text-accent"
-                >
-                  <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-[110%]">
-                    {s.label}
-                  </span>
-                  <span className="absolute left-0 top-0 inline-block translate-y-[110%] text-serif-accent text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0">
-                    {s.label}
-                  </span>
-                </a>
-              ))}
-            </div>
-          </Reveal>
+                    <svg
+                      width="14"
+                      height="14"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      stroke="currentColor"
+                      strokeWidth="2"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      className="transition-transform duration-300 group-hover:scale-110"
+                      aria-hidden="true"
+                    >
+                      <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                    </svg>
+                    {t(commentsPage.cta)}
+                  </a>
+                </Magnetic>
+              </div>
+            </Reveal>
+            <Reveal delay={80} variant="right">
+              <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
+                {t(contact.locationLabel)}
+              </p>
+              <p className="text-lg text-white">{t(profile.location)}</p>
+            </Reveal>
+            <Reveal delay={160} variant="right">
+              <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
+                {t(contact.timeLabel)}
+              </p>
+              <p className="text-lg text-white">
+                {time} <span className="text-gray-500">{contact.timezone}</span>
+              </p>
+            </Reveal>
+            <Reveal delay={240} variant="right">
+              <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
+                {t(contact.socialsLabel)}
+              </p>
+              <div className="flex flex-col gap-2">
+                {profile.socials.map((s) => (
+                  <a
+                    key={s.label}
+                    href={s.href}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="group relative inline-block overflow-hidden text-lg text-white transition-colors hover:text-accent"
+                  >
+                    <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-[110%]">
+                      {s.label}
+                    </span>
+                    <span className="absolute left-0 top-0 inline-block translate-y-[110%] text-serif-accent text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0">
+                      {s.label}
+                    </span>
+                  </a>
+                ))}
+              </div>
+            </Reveal>
+          </div>
         </div>
       </div>
     </section>

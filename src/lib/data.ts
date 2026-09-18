@@ -1,10 +1,20 @@
-import { createSupabaseServer } from "@/lib/supabase/server";
-import type { Project, Certification, GalleryPhoto, GuestComment } from "@/types";
+import { CACHE_TAGS, createSupabasePublic } from "@/lib/supabase/public";
+import type {
+  Project,
+  Certification,
+  GalleryPhoto,
+  GuestComment,
+  Experience,
+  Testimonial,
+} from "@/types";
 
 function isConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
+// Data contoh yang tampil saat Supabase belum diisi/kosong.
+// `slug` sengaja null: halaman case study hanya boleh ditautkan bila barisnya
+// benar-benar ada di database, supaya tidak ada tautan /work/<slug> yang 404.
 const DEMO_PROJECTS: Project[] = [
   {
     id: "demo-portfolio",
@@ -18,6 +28,11 @@ const DEMO_PROJECTS: Project[] = [
     year: "2025",
     image_url: null,
     link: null,
+    repo_url: null,
+    alt_text: null,
+    slug: null,
+    content_en: null,
+    content_id: null,
     tech_stack: ["Next.js", "React", "Supabase", "Tailwind"],
     sort_order: 1,
     featured: true,
@@ -35,6 +50,11 @@ const DEMO_PROJECTS: Project[] = [
     year: "2025",
     image_url: null,
     link: null,
+    repo_url: null,
+    alt_text: null,
+    slug: null,
+    content_en: null,
+    content_id: null,
     tech_stack: ["React", "JavaScript", "LocalStorage"],
     sort_order: 2,
     featured: true,
@@ -55,6 +75,8 @@ const DEMO_CERTIFICATIONS: Certification[] = [
     description_id:
       "Bersertifikat dalam pengembangan web frontend modern termasuk HTML, CSS, JavaScript, React.js, dan praktik terbaik desain responsif.",
     image_url: null,
+    alt_text: null,
+    credential_url: null,
     sort_order: 1,
     created_at: new Date().toISOString(),
   },
@@ -70,6 +92,8 @@ const DEMO_CERTIFICATIONS: Certification[] = [
     description_id:
       "Bersertifikat dalam manajemen sistem basis data dan administrasi sistem Linux, mencakup PostgreSQL, SQL, dan administrasi server.",
     image_url: null,
+    alt_text: null,
+    credential_url: null,
     sort_order: 2,
     created_at: new Date().toISOString(),
   },
@@ -80,7 +104,7 @@ const DEMO_GALLERY: GalleryPhoto[] = [];
 export async function getProjects(): Promise<Project[]> {
   if (!isConfigured()) return DEMO_PROJECTS;
   try {
-    const supabase = await createSupabaseServer();
+    const supabase = createSupabasePublic(CACHE_TAGS.projects);
     const { data, error } = await supabase
       .from("projects")
       .select("*")
@@ -101,7 +125,7 @@ export async function getProjects(): Promise<Project[]> {
 export async function getCertifications(): Promise<Certification[]> {
   if (!isConfigured()) return DEMO_CERTIFICATIONS;
   try {
-    const supabase = await createSupabaseServer();
+    const supabase = createSupabasePublic(CACHE_TAGS.certifications);
     const { data, error } = await supabase
       .from("certifications")
       .select("*")
@@ -121,7 +145,7 @@ export async function getCertifications(): Promise<Certification[]> {
 export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
   if (!isConfigured()) return DEMO_GALLERY;
   try {
-    const supabase = await createSupabaseServer();
+    const supabase = createSupabasePublic(CACHE_TAGS.gallery);
     const { data, error } = await supabase
       .from("gallery_photos")
       .select("*")
@@ -142,7 +166,7 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
 export async function getComments(): Promise<GuestComment[]> {
   if (!isConfigured()) return [];
   try {
-    const supabase = await createSupabaseServer();
+    const supabase = createSupabasePublic(CACHE_TAGS.comments);
     // Email sengaja tidak diseleksikan — kolom itu hanya untuk admin.
     const { data, error } = await supabase
       .from("comments")
@@ -157,6 +181,104 @@ export async function getComments(): Promise<GuestComment[]> {
     return (data as GuestComment[]) ?? [];
   } catch (err) {
     console.error("getComments failed:", err);
+    return [];
+  }
+}
+
+// ============================================================================
+// Case study — halaman /work/<slug>
+// ============================================================================
+
+/** Satu project berdasarkan slug, atau null kalau tidak ada. */
+export async function getProjectBySlug(slug: string): Promise<Project | null> {
+  if (!isConfigured()) {
+    return DEMO_PROJECTS.find((p) => p.slug === slug) ?? null;
+  }
+  try {
+    // Klien publik: dipanggil juga saat build (generateStaticParams), di mana
+    // `cookies()` belum tersedia.
+    const supabase = createSupabasePublic(CACHE_TAGS.projects);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("*")
+      .eq("slug", slug)
+      .maybeSingle();
+    if (error) {
+      console.error("getProjectBySlug error:", error.message);
+      return null;
+    }
+    return (data as Project) ?? null;
+  } catch (err) {
+    console.error("getProjectBySlug failed:", err);
+    return null;
+  }
+}
+
+/** Semua slug project — dipakai sitemap dan daftar tautan internal. */
+export async function getProjectSlugs(): Promise<string[]> {
+  if (!isConfigured()) {
+    return DEMO_PROJECTS.map((p) => p.slug).filter((s): s is string => Boolean(s));
+  }
+  try {
+    const supabase = createSupabasePublic(CACHE_TAGS.projects);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("slug")
+      .not("slug", "is", null);
+    if (error) {
+      console.error("getProjectSlugs error:", error.message);
+      return [];
+    }
+    return (data ?? [])
+      .map((row) => (row as { slug: string | null }).slug)
+      .filter((s): s is string => Boolean(s));
+  } catch (err) {
+    console.error("getProjectSlugs failed:", err);
+    return [];
+  }
+}
+
+// ============================================================================
+// Experience & testimonials — dibaca lewat klien publik (tanpa cookies) agar
+// bisa dirender saat build maupun di request.
+// ============================================================================
+
+export async function getExperience(): Promise<Experience[]> {
+  if (!isConfigured()) return [];
+  try {
+    const supabase = createSupabasePublic(CACHE_TAGS.experience);
+    const { data, error } = await supabase
+      .from("experience")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.warn("getExperience:", error.message);
+      return [];
+    }
+    return (data as Experience[]) ?? [];
+  } catch (err) {
+    console.warn("getExperience failed:", err);
+    return [];
+  }
+}
+
+export async function getTestimonials(): Promise<Testimonial[]> {
+  if (!isConfigured()) return [];
+  try {
+    const supabase = createSupabasePublic(CACHE_TAGS.testimonials);
+    const { data, error } = await supabase
+      .from("testimonials")
+      .select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: true });
+    if (error) {
+      console.warn("getTestimonials:", error.message);
+      return [];
+    }
+    return (data as Testimonial[]) ?? [];
+  } catch (err) {
+    console.warn("getTestimonials failed:", err);
     return [];
   }
 }

@@ -8,7 +8,7 @@ import Tilt3D from "@/components/Tilt3D";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
 import { useIsDesktop } from "@/lib/use-media-query";
-import { work } from "@/lib/config";
+import { caseStudy, work } from "@/lib/config";
 import type { Project } from "@/types";
 
 export default function Projects({
@@ -69,10 +69,10 @@ export default function Projects({
             style={{ "--tz": "34px" } as React.CSSProperties}
           >
             {project.image_url ? (
-              // eslint-disable-next-line @next/next/no-img-element
+               
               <img
                 src={project.image_url}
-                alt={title}
+                alt={project.alt_text || title}
                 className="h-full w-full object-cover"
                 loading="lazy"
                 decoding="async"
@@ -125,24 +125,38 @@ export default function Projects({
               </div>
             )}
 
-            <div className="mt-4 flex items-center justify-between md:mt-5">
-              {project.link ? (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent hover:underline md:text-sm"
-                >
-                  {t(work.viewCaseStudy)}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17L17 7M9 7h8v8" />
-                  </svg>
-                </a>
-              ) : (
-                <span />
-              )}
-              <span className="hidden text-xs text-gray-500 sm:block">
+            <div className="mt-4 flex items-center justify-between gap-3 md:mt-5">
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
+                {/* Halaman case study internal — hanya bila project punya slug */}
+                {project.slug && (
+                  <a
+                    href={`/work/${project.slug}`}
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent hover:underline md:text-sm"
+                  >
+                    {t(caseStudy.readCaseStudy)}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </a>
+                )}
+                {project.link && (
+                  <a
+                    href={project.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-gray-400 transition-colors hover:text-accent md:text-sm"
+                  >
+                    {t(caseStudy.liveDemo)}
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M7 17L17 7M9 7h8v8" />
+                    </svg>
+                  </a>
+                )}
+                {!project.slug && !project.link && <span />}
+              </div>
+              <span className="hidden shrink-0 text-xs text-gray-500 sm:block">
                 {t(work.clickToExpand)}
               </span>
             </div>
@@ -261,10 +275,10 @@ export default function Projects({
           >
             {selected.image_url ? (
               <div className="relative aspect-[16/10] w-full bg-black/40">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                { }
                 <img
                   src={selected.image_url}
-                  alt={lang === "en" ? selected.title_en : selected.title_id}
+                  alt={selected.alt_text || (lang === "en" ? selected.title_en : selected.title_id)}
                   className="h-full w-full object-cover"
                   decoding="async"
                 />
@@ -309,20 +323,33 @@ export default function Projects({
                 </div>
               )}
 
-              {selected.link && (
-                <a
-                  href={selected.link}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={(e) => e.stopPropagation()}
-                  className="mt-6 inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-accent hover:underline"
-                >
-                  {t(work.viewCaseStudy)}
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                    <path d="M7 17L17 7M9 7h8v8" />
-                  </svg>
-                </a>
-              )}
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                {selected.slug && (
+                  <a
+                    href={`/work/${selected.slug}`}
+                    className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors hover:bg-accent-soft"
+                  >
+                    {t(caseStudy.readCaseStudy)}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M5 12h14M13 6l6 6-6 6" />
+                    </svg>
+                  </a>
+                )}
+                {selected.link && (
+                  <a
+                    href={selected.link}
+                    target="_blank"
+                    rel="noreferrer"
+                    onClick={(e) => e.stopPropagation()}
+                    className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-accent hover:underline"
+                  >
+                    {t(caseStudy.liveDemo)}
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M7 17L17 7M9 7h8v8" />
+                    </svg>
+                  </a>
+                )}
+              </div>
             </div>
           </div>
           </div>

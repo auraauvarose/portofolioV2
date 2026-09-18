@@ -57,10 +57,10 @@ export default function Certifications({
             className="tilt-layer relative aspect-[4/3] self-stretch overflow-hidden rounded-t-2xl bg-black/40"
             style={{ "--tz": "34px" } as React.CSSProperties}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img
               src={cert.image_url}
-              alt={cert.title_en}
+              alt={cert.alt_text || cert.title_en}
               className="h-full w-full object-cover"
               loading="lazy"
               decoding="async"
@@ -231,10 +231,10 @@ export default function Certifications({
           >
             {selected.image_url ? (
               <div className="flex w-full items-center justify-center bg-black/40">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
+                { }
                 <img
                   src={selected.image_url}
-                  alt={selected.title_en ?? "Certification"}
+                  alt={selected.alt_text || selected.title_en || "Certification"}
                   className="max-h-[58vh] w-auto max-w-full object-contain"
                   decoding="async"
                 />

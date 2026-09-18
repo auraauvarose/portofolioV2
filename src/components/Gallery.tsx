@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -24,10 +24,51 @@ export default function Gallery({
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
   const [isLandscape, setIsLandscape] = useState(false);
+  const [active, setActive] = useState<string>("all");
 
+  // Kategori yang benar-benar dipakai data — bukan daftar statis.
+  const categories = useMemo(() => {
+    const set = new Set(items.map((p) => p.category).filter(Boolean));
+    return [...set];
+  }, [items]);
+
+  const filtered = useMemo(
+    () => (active === "all" ? items : items.filter((p) => p.category === active)),
+    [items, active],
+  );
+
+  // Dibaca oleh handler keyboard tanpa ikut jadi dependency effect.
+  const filteredRef = useRef(filtered);
+  useEffect(() => {
+    filteredRef.current = filtered;
+  }, [filtered]);
+
+  // Kategori bisa hilang setelah admin menghapus foto — kembalikan ke "all"
+  // supaya daftar tidak diam-diam kosong.
+  useEffect(() => {
+    if (active !== "all" && !categories.includes(active)) setActive("all");
+  }, [active, categories]);
+
+  // Navigasi lightbox: Escape menutup, panah kiri/kanan berpindah foto.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeLightbox();
+      if (lightbox === null) return;
+
+      if (e.key === "Escape") {
+        closeLightbox();
+        return;
+      }
+      if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
+        e.preventDefault();
+        const step = e.key === "ArrowLeft" ? -1 : 1;
+        setLightbox((cur) => {
+          if (cur === null) return cur;
+          const total = filteredRef.current.length;
+          if (total === 0) return cur;
+          // Memutar (wrap) supaya tidak pernah mentok di ujung.
+          return (cur + step + total) % total;
+        });
+      }
     };
     window.addEventListener("keydown", onKey);
     document.body.style.overflow = lightbox !== null ? "hidden" : "";
@@ -36,6 +77,14 @@ export default function Gallery({
       document.body.style.overflow = "";
     };
   }, [lightbox]);
+
+  useEffect(() => {
+    setSlide(0);
+    setDeskPage(0);
+    // Indeks lightbox mengacu ke daftar hasil filter, jadi harus ditutup
+    // saat filter berubah agar tidak menampilkan foto yang berbeda.
+    setLightbox(null);
+  }, [active]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -96,10 +145,10 @@ export default function Gallery({
             className="tilt-layer relative h-full w-full"
             style={{ "--tz": "40px" } as React.CSSProperties}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
+            { }
             <img
               src={photo.image_url}
-              alt={title || `Photo ${i + 1}`}
+              alt={photo.alt_text || title || `Photo ${i + 1}`}
               className="h-full w-full object-cover transition-transform duration-700 ease-out group-hover:scale-[1.06]"
               loading="lazy"
               decoding="async"
@@ -126,13 +175,42 @@ export default function Gallery({
         {t(gallery.description)}
       </Reveal>
 
-        {items.length === 0 ? (
+        {/* Filter kategori — hanya muncul kalau ada lebih dari satu kategori */}
+        {categories.length > 1 && (
+          <Reveal className="mb-8 flex flex-wrap items-center gap-2">
+            {["all", ...categories].map((cat) => {
+              const isActive = active === cat;
+              const label =
+                cat === "all"
+                  ? t(gallery.allLabel)
+                  : t(gallery.categoryLabels[cat]) || cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActive(cat)}
+                  aria-pressed={isActive}
+                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-widest transition-colors duration-300 ${
+                    isActive
+                      ? "bg-accent text-black"
+                      : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
+                  }`}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </Reveal>
+        )}
+
+        {filtered.length === 0 ? (
           <Reveal>
             <p className="rounded-2xl border border-white/10 bg-panel p-10 text-center text-gray-500">
-              {t({
-                en: "No photos yet — check back soon.",
-                id: "Belum ada foto — nantikan segera.",
-              })}
+              {active === "all"
+                ? t({
+                    en: "No photos yet — check back soon.",
+                    id: "Belum ada foto — nantikan segera.",
+                  })
+                : t(gallery.emptyFiltered)}
             </p>
           </Reveal>
         ) : (
@@ -141,7 +219,7 @@ export default function Gallery({
             {isDesktop ? (
               <div className="hidden md:block">
                 {(() => {
-                  const pages = chunk(items, 3);
+                  const pages = chunk(filtered, 3);
                   const idx = Math.min(deskPage, pages.length - 1);
                   const start = idx * 3;
                   return (
@@ -165,8 +243,8 @@ export default function Gallery({
             ) : (
               <div className="md:hidden">
                 {(() => {
-                  const idx = Math.min(slide, items.length - 1);
-                  const total = items.length;
+                  const idx = Math.min(slide, filtered.length - 1);
+                  const total = filtered.length;
                   return (
                     <MobileCarousel
                       total={total}
@@ -174,7 +252,7 @@ export default function Gallery({
                       onSlide={setSlide}
                       revealClassName="aspect-[4/3] w-full"
                     >
-                      {photoCard(items[idx], idx)}
+                      {photoCard(filtered[idx], idx)}
                     </MobileCarousel>
                   );
                 })()}
@@ -187,7 +265,7 @@ export default function Gallery({
 
   const modal =
     lightbox !== null &&
-    items[lightbox] &&
+    filtered[lightbox] &&
     createPortal(
           <div
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
@@ -226,15 +304,70 @@ export default function Gallery({
               </button>
             )}
 
+            {/* Panah navigasi — hanya bila ada lebih dari satu foto */}
+            {filtered.length > 1 && (
+              <>
+                <button
+                  className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:left-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightbox((cur) =>
+                      cur === null
+                        ? cur
+                        : (cur - 1 + filtered.length) % filtered.length,
+                    );
+                  }}
+                  aria-label="Foto sebelumnya"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m15 18-6-6 6-6" />
+                  </svg>
+                </button>
+                <button
+                  className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setLightbox((cur) =>
+                      cur === null ? cur : (cur + 1) % filtered.length,
+                    );
+                  }}
+                  aria-label="Foto berikutnya"
+                >
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="m9 18 6-6-6-6" />
+                  </svg>
+                </button>
+              </>
+            )}
+
             <div className="flex flex-col items-center gap-4">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
+              { }
               <img
-                src={items[lightbox].image_url}
-                alt={items[lightbox].title_en ?? "Photo"}
+                src={filtered[lightbox].image_url}
+                alt={
+                  filtered[lightbox].alt_text ||
+                  filtered[lightbox].title_en ||
+                  "Photo"
+                }
                 className="max-h-[85vh] max-w-full rounded-xl object-contain"
                 decoding="async"
                 onClick={(e) => e.stopPropagation()}
               />
+
+              {/* Penghitung posisi + petunjuk navigasi keyboard */}
+              <div
+                className="flex items-center gap-3 text-xs text-[#ffffff]/70"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <span className="rounded-full border border-[#ffffff]/20 bg-black/50 px-3 py-1 backdrop-blur-sm">
+                  {lightbox + 1} / {filtered.length}
+                </span>
+                {filtered.length > 1 && (
+                  <span className="hidden sm:inline">
+                    ← → untuk berpindah · Esc untuk menutup
+                  </span>
+                )}
+              </div>
 
               <button
                 className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
