@@ -24,6 +24,10 @@ WANT = {
     "Chillax":     [(600, False)],
     "Bevellier":   [(600, False), (700, False)],
     "Zodiak":      [(700, True)],  # Bold Italic (Fontshare internal 701 -> CSS 700)
+    # Dipakai oleh src/app/layout.tsx (--font-array) untuk watermark footer.
+    # Tanpa entri ini, setup baru menghasilkan build gagal karena file
+    # Array-600.woff2 tidak pernah diunduh.
+    "Array":       [(600, False)],
 }
 
 # File-name override: fonts that ship under a single style use the style name

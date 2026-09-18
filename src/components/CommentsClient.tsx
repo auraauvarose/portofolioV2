@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -125,7 +126,9 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
   const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  const [items, setItems] = useState<GuestComment[]>(initial);
+  // Daftar komentar tidak pernah diubah di klien: komentar baru berstatus
+  // pending (menunggu moderasi) sehingga tidak langsung ditambahkan.
+  const items = initial;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
@@ -166,10 +169,9 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         setStatus("error");
         return;
       }
-      if (data?.id) {
-        // Optimistic prepend; server mengembalikan baris lengkap.
-        setItems((prev) => [data as GuestComment, ...prev]);
-      }
+      // Komentar baru berstatus pending (belum tayang), jadi JANGAN
+      // ditambahkan ke daftar publik — kalau ditambahkan, pengunjung melihat
+      // komentarnya sendiri seolah sudah tayang padahal masih moderasi.
       setStatus("ok");
       setName("");
       setEmail("");
@@ -400,7 +402,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
 
             {/* ── Tombol kembali ke beranda ── */}
             <Reveal className="mt-20 flex justify-center">
-              <a
+              <Link
                 href="/"
                 className="group relative inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors duration-300 hover:border-accent hover:text-accent"
               >
@@ -417,7 +419,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                   <path d="M19 12H5M11 18l-6-6 6-6" />
                 </svg>
                 {t(comments.backHome)}
-              </a>
+              </Link>
             </Reveal>
           </div>
         </section>

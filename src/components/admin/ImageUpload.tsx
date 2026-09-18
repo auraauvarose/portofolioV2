@@ -60,7 +60,8 @@ export default function ImageUpload({
           headers: { "Content-Type": file.type },
           body: file,
         });
-      } catch (fetchErr) {
+      } catch {
+        // `fetch` melempar (bukan respons non-OK) → hampir selalu CORS.
         throw new Error(
           "Upload terputus oleh browser (CORS). Pastikan bucket R2 sudah punya konfigurasi CORS yang mengizinkan PUT dari domain ini (lihat README).",
         );
@@ -113,7 +114,7 @@ export default function ImageUpload({
                 </span>
               </a>
             ) : (
-              // eslint-disable-next-line @next/next/no-img-element
+               
               <img src={value} alt="" className="h-full w-full object-cover" />
             )
           ) : (

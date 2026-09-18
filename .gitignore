@@ -54,3 +54,13 @@ ANALISIS-WEBSITE.md
 .chrome.log
 .design/
 .dsh-vision-router/
+
+# scratch dir for scripts/generate-og.py (decompressed fonts)
+.ogtmp/
+
+# git worktree dari tool lain (duplikat proyek) — jangan pernah di-commit
+.kilo/
+
+# hasil audit/lint sementara
+.lint*.json
+*.tsbuildinfo

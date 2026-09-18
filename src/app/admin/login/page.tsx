@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
@@ -42,12 +43,12 @@ function LoginForm() {
   return (
     <div className="min-h-[100dvh] bg-ink text-ecru">
       <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10">
-        <a
+        <Link
           href="/"
           className="text-display text-sm uppercase tracking-[0.14em] text-white transition-colors hover:text-accent"
         >
           Aura <span className="text-accent">Auvarose</span>
-        </a>
+        </Link>
         <span className="text-[10px] uppercase tracking-[0.24em] text-gray-500">
           Admin access
         </span>
@@ -119,12 +120,12 @@ function LoginForm() {
               </button>
             </form>
 
-            <a
+            <Link
               href="/"
               className="mt-7 inline-block text-xs text-gray-500 transition-colors hover:text-accent"
             >
               ← Back to site
-            </a>
+            </Link>
           </div>
         </section>
       </main>

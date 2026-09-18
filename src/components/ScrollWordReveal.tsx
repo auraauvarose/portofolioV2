@@ -148,6 +148,9 @@ export default function ScrollWordReveal({
     );
     observer.observe(node);
     return () => observer.disconnect();
+    // Sengaja sekali jalan: IntersectionObserver mengikat elemen yang sama
+    // seumur komponen, jadi memasang ulang tidak ada gunanya.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Touch scrolling can move the page faster than a per-word cascade can

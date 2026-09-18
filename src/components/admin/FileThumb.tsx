@@ -36,7 +36,7 @@ export default function FileThumb({ url }: { url: string | null }) {
             </svg>
           </a>
         ) : (
-          // eslint-disable-next-line @next/next/no-img-element
+           
           <img src={url} alt="" className="h-full w-full object-cover" />
         )
       ) : null}

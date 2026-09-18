@@ -1,4 +1,45 @@
 # Audit Gabungan — portofolioV2
+
+> ## ⚠️ DOKUMEN HISTORIS
+>
+> Ini adalah catatan audit **lama** (sebelum 4 tahap perbaikan). Sebagian besar
+> temuan di bawah **sudah diperbaiki** — lihat tabel status di bawah.
+>
+> Dokumen ini disimpan sebagai jejak keputusan teknis, bukan sebagai daftar
+> tugas. Jangan pakai sebagai acuan status keamanan saat ini.
+>
+> ### Status terkini (per perbaikan terakhir)
+>
+> | Temuan | Status |
+> | --- | --- |
+> | S1 route diagnose tanpa auth | ✅ dihapus |
+> | S2 password default hardcoded | ✅ dihapus (fail-closed) |
+> | S3 cookie sesi lemah | ✅ HMAC-SHA256 + expiry |
+> | S4 login tanpa rate-limit | ✅ **rate-limit + lockout progresif** |
+> | S5 RLS terlalu permisif | ✅ diperketat (revoke anon/authenticated) |
+> | S6 build lokal membakar secret | ✅ deploy via CI saja |
+> | S7 presign tanpa allowlist | ✅ **allowlist tipe + folder + size wajib** |
+> | S8 komentar auto-approve | ✅ moderasi (pending) + `cf.clientIp` |
+> | S9 security headers | ⚠️ sebagian (robots.txt ada; header belum) |
+> | S10 pesan error internal bocor | ✅ dinormalisasi |
+> | S11–S15 | ✅ sebagian / tidak lagi relevan |
+> | B1 manager tanpa try/catch | ✅ ditangani |
+> | B2 data demo menutupi DB kosong | ✅ hanya saat belum dikonfigurasi |
+> | B3 force-dynamic tanpa cache | ✅ ISR + cache tag + invalidasi |
+> | B4 sort_order selalu 0 | ✅ drag-drop + endpoint reorder |
+> | B5 `lang` statis | ⚠️ belum (butuh routing per bahasa) |
+> | B7 PUT parsial menimpa kolom | ✅ validasi bentuk di server |
+> | B10 objek R2 yatim | ✅ pembersihan otomatis + pengaman |
+> | B13 lint mati & 2 lockfile | ✅ ESLint aktif, satu lockfile (npm) |
+> | Test | ✅ 52 test + gate CI |
+>
+> **Belum dikerjakan** (bukan prioritas saat ini): security headers (S9),
+> `lang` dinamis (B5), `next/image` (sengaja `unoptimized` — lihat README).
+>
+> Untuk konfigurasi keamanan yang berlaku sekarang, lihat README → Security.
+
+---
+
 *Dihasilkan dari 2 agent paralel (security audit + code-quality/bug audit), dengan verifikasi silang manual terhadap sumber dan artefak build. Tidak ada file yang dimodifikasi saat audit.*
 
 > **STATUS P0 — SELESAI & TERVERIFIKASI (build + smoke test runtime):**
