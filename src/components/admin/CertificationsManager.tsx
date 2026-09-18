@@ -5,6 +5,8 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
 import FileThumb from "@/components/admin/FileThumb";
+import ReorderableRow from "@/components/admin/ReorderableRow";
+import { useReorder } from "@/lib/use-reorder";
 import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
 import type { Certification } from "@/types";
 
@@ -18,6 +20,8 @@ const EMPTY = {
   date: "",
   description_en: "",
   description_id: "",
+  credential_url: "",
+  alt_text: "",
   sort_order: "0",
   image_url: "",
 };
@@ -32,11 +36,15 @@ export default function CertificationsManager() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const { dragHandlers, dragId, overId, saving: reordering, error: reorderError, moveBy } =
+    useReorder<Certification>("certifications", items, setItems);
+
   async function load() {
     const { data } = await supabase
       .from("certifications")
       .select("*")
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
     setItems((data as Certification[]) ?? []);
     setLoading(false);
   }
@@ -63,6 +71,8 @@ export default function CertificationsManager() {
       date: c.date ?? "",
       description_en: c.description_en ?? "",
       description_id: c.description_id ?? "",
+      credential_url: c.credential_url ?? "",
+      alt_text: c.alt_text ?? "",
       sort_order: String(c.sort_order),
       image_url: c.image_url ?? "",
     });
@@ -83,6 +93,8 @@ export default function CertificationsManager() {
       date: form.date || null,
       description_en: form.description_en || null,
       description_id: form.description_id || null,
+      credential_url: form.credential_url || null,
+      alt_text: form.alt_text || null,
       image_url: form.image_url || null,
       sort_order: Number(form.sort_order) || 0,
     };
@@ -142,6 +154,12 @@ export default function CertificationsManager() {
         </p>
       )}
 
+      {reorderError && (
+        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
+          {reorderError}
+        </p>
+      )}
+
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
@@ -151,10 +169,17 @@ export default function CertificationsManager() {
         </div>
       ) : (
         <div className="admin-list mb-8 space-y-0">
-          {items.map((c) => (
-            <div
+          {items.map((c, i) => (
+            <ReorderableRow
               key={c.id}
-              className="flex flex-wrap items-center gap-4 border-b border-white/10 py-4 transition-colors duration-300 hover:border-accent/40"
+              index={i}
+              total={items.length}
+              dragging={dragId === c.id}
+              dropTarget={overId === c.id && dragId !== c.id}
+              saving={reordering}
+              dragProps={dragHandlers(i)}
+              onMoveUp={() => moveBy(c.id, -1)}
+              onMoveDown={() => moveBy(c.id, 1)}
             >
               <FileThumb url={c.image_url} />
               <div className="min-w-0 flex-1">
@@ -181,7 +206,7 @@ export default function CertificationsManager() {
                   <TrashIcon />
                 </button>
               </div>
-            </div>
+            </ReorderableRow>
           ))}
         </div>
       )}
@@ -211,6 +236,20 @@ export default function CertificationsManager() {
               </select>
             </div>
             <Field label="Sort order" value={form.sort_order} onChange={(v) => setForm({ ...form, sort_order: v })} />
+            <Field
+              label="Credential URL"
+              value={form.credential_url}
+              onChange={(v) => setForm({ ...form, credential_url: v })}
+              placeholder="https://verify.example.com/..."
+            />
+            <div className="md:col-span-2">
+              <Field
+                label="Image alt text"
+                value={form.alt_text}
+                onChange={(v) => setForm({ ...form, alt_text: v })}
+                placeholder="Describe the certificate image"
+              />
+            </div>
             <div className="md:col-span-2">
               <Field label="Description (EN)" textarea value={form.description_en} onChange={(v) => setForm({ ...form, description_en: v })} />
             </div>

@@ -15,11 +15,21 @@ create table if not exists public.projects (
   year          text,
   image_url     text,
   link          text,
+  repo_url      text,
+  alt_text      text,
+  slug          text,
+  content_en    text,
+  content_id    text,
   tech_stack    text[] not null default '{}',
   sort_order    integer not null default 0,
   featured      boolean not null default true,
   created_at    timestamptz not null default now()
 );
+
+-- Slug unik untuk halaman case study /work/<slug>; NULL = belum dipublikasikan
+create unique index if not exists projects_slug_unique
+  on public.projects (slug)
+  where slug is not null;
 
 -- ---------------------------------------------------------------------------
 -- 2. Certifications
@@ -34,6 +44,8 @@ create table if not exists public.certifications (
   description_en text,
   description_id text,
   image_url     text,
+  alt_text      text,
+  credential_url text,
   sort_order    integer not null default 0,
   created_at    timestamptz not null default now()
 );
@@ -46,10 +58,94 @@ create table if not exists public.gallery_photos (
   title_en      text,
   title_id      text,
   image_url     text not null,
+  alt_text      text,
   category      text default 'general',
   sort_order    integer not null default 0,
   created_at    timestamptz not null default now()
 );
+
+-- ---------------------------------------------------------------------------
+-- 4. Contact messages (inbox form kontak)
+-- ---------------------------------------------------------------------------
+create table if not exists public.contact_messages (
+  id         uuid primary key default gen_random_uuid(),
+  name       text not null,
+  email      text not null,
+  subject    text,
+  message    text not null,
+  budget     text,
+  -- new | read | replied | archived
+  status     text not null default 'new'
+             check (status in ('new', 'read', 'replied', 'archived')),
+  ip_hash    text,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists contact_messages_created_at_idx
+  on public.contact_messages (created_at desc);
+create index if not exists contact_messages_status_idx
+  on public.contact_messages (status);
+
+-- ---------------------------------------------------------------------------
+-- 5. Site content (konten situs yang bisa diedit dari admin)
+--    Satu baris per seksi; isinya JSONB dengan bentuk sama seperti config.ts.
+-- ---------------------------------------------------------------------------
+create table if not exists public.site_content (
+  key        text primary key,
+  data       jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+-- ---------------------------------------------------------------------------
+-- 6. Experience
+-- ---------------------------------------------------------------------------
+create table if not exists public.experience (
+  id             uuid primary key default gen_random_uuid(),
+  role_en        text not null,
+  role_id        text not null,
+  company        text not null,
+  location       text,
+  period         text,
+  current        boolean not null default false,
+  description_en text,
+  description_id text,
+  sort_order     integer not null default 0,
+  created_at     timestamptz not null default now()
+);
+
+create index if not exists experience_sort_idx on public.experience (sort_order);
+
+-- ---------------------------------------------------------------------------
+-- 7. Testimonials
+-- ---------------------------------------------------------------------------
+create table if not exists public.testimonials (
+  id         uuid primary key default gen_random_uuid(),
+  quote_en   text not null,
+  quote_id   text,
+  author     text not null,
+  role       text,
+  company    text,
+  avatar_url text,
+  link       text,
+  sort_order integer not null default 0,
+  created_at timestamptz not null default now()
+);
+
+create index if not exists testimonials_sort_idx on public.testimonials (sort_order);
+
+-- ---------------------------------------------------------------------------
+-- 8. Page views (analytics tanpa cookie; TIDAK dibaca publik)
+-- ---------------------------------------------------------------------------
+create table if not exists public.page_views (
+  id           bigint generated always as identity primary key,
+  path         text not null,
+  referrer     text,
+  visitor_hash text,
+  created_at   timestamptz not null default now()
+);
+
+create index if not exists page_views_created_idx on public.page_views (created_at desc);
+create index if not exists page_views_path_idx    on public.page_views (path);
 
 -- ============================================================================
 -- Row Level Security
@@ -66,12 +162,23 @@ create table if not exists public.gallery_photos (
 alter table public.projects         enable row level security;
 alter table public.certifications   enable row level security;
 alter table public.gallery_photos   enable row level security;
+-- contact_messages: RLS aktif TANPA policy apa pun = tertutup total untuk anon.
+-- Isinya email & pesan privat; hanya bisa diakses lewat API route admin.
+alter table public.contact_messages enable row level security;
+-- Tahap 3: konten situs & social proof — publik boleh baca, tulis via admin.
+alter table public.site_content enable row level security;
+alter table public.experience   enable row level security;
+alter table public.testimonials enable row level security;
+alter table public.page_views   enable row level security;
 
 -- Public read
+drop policy if exists "projects_public_read" on public.projects;
 create policy "projects_public_read" on public.projects
   for select to anon, authenticated using (true);
+drop policy if exists "certifications_public_read" on public.certifications;
 create policy "certifications_public_read" on public.certifications
   for select to anon, authenticated using (true);
+drop policy if exists "gallery_public_read" on public.gallery_photos;
 create policy "gallery_public_read" on public.gallery_photos
   for select to anon, authenticated using (true);
 
@@ -80,6 +187,29 @@ grant  select on public.projects, public.certifications, public.gallery_photos
   to anon, authenticated;
 revoke insert, update, delete, truncate, references, trigger
   on public.projects, public.certifications, public.gallery_photos
+  from anon, authenticated;
+
+-- contact_messages: cabut SEMUA akses dari anon/authenticated.
+revoke all on public.contact_messages from anon, authenticated;
+
+-- Tahap 3: baca publik untuk konten situs & social proof.
+drop policy if exists "site_content_public_read" on public.site_content;
+create policy "site_content_public_read" on public.site_content
+  for select to anon, authenticated using (true);
+drop policy if exists "experience_public_read" on public.experience;
+create policy "experience_public_read" on public.experience
+  for select to anon, authenticated using (true);
+drop policy if exists "testimonials_public_read" on public.testimonials;
+create policy "testimonials_public_read" on public.testimonials
+  for select to anon, authenticated using (true);
+
+grant select on public.site_content, public.experience, public.testimonials
+  to anon, authenticated;
+
+-- page_views: tertutup total untuk anon (statistik internal).
+revoke all on public.page_views from anon, authenticated;
+revoke insert, update, delete, truncate, references, trigger
+  on public.site_content, public.experience, public.testimonials
   from anon, authenticated;
 
 -- Drop the legacy permissive write policies if they exist (idempotent).

@@ -6,6 +6,8 @@ import {
   RefreshIcon,
   TrashIcon,
   SpinnerIcon,
+  EyeIcon,
+  EyeOffIcon,
 } from "@/components/admin/icons";
 import type { GuestComment } from "@/types";
 
@@ -55,7 +57,8 @@ export default function CommentsManager() {
   const [items, setItems] = useState<GuestComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [busyId, setBusyId] = useState<string | null>(null);
+  const [filter, setFilter] = useState<"all" | "pending" | "visible">("all");
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -80,9 +83,28 @@ export default function CommentsManager() {
     load();
   }, [load]);
 
+  async function setApproved(c: GuestComment, approved: boolean) {
+    setBusyId(c.id);
+    setError(null);
+    const res = await fetch("/api/comments", {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ id: c.id, approved }),
+    });
+    if (res.ok) {
+      setItems((prev) =>
+        prev.map((x) => (x.id === c.id ? { ...x, approved } : x)),
+      );
+    } else {
+      const data = await res.json().catch(() => ({}));
+      setError(data?.error ?? "Gagal memperbarui komentar");
+    }
+    setBusyId(null);
+  }
+
   async function remove(c: GuestComment) {
     if (!confirm(`Hapus komentar dari "${c.name}"? Tindakan ini permanen.`)) return;
-    setDeletingId(c.id);
+    setBusyId(c.id);
     const res = await fetch(`/api/comments?id=${encodeURIComponent(c.id)}`, {
       method: "DELETE",
     });
@@ -92,8 +114,16 @@ export default function CommentsManager() {
       const data = await res.json().catch(() => ({}));
       setError(data?.error ?? "Gagal menghapus komentar");
     }
-    setDeletingId(null);
+    setBusyId(null);
   }
+
+  const pendingCount = items.filter((c) => !c.approved).length;
+  const visible =
+    filter === "all"
+      ? items
+      : filter === "pending"
+        ? items.filter((c) => !c.approved)
+        : items.filter((c) => c.approved);
 
   return (
     <div>
@@ -107,6 +137,11 @@ export default function CommentsManager() {
             <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-accent">
               {loading ? "…" : items.length}
             </span>
+            {!loading && pendingCount > 0 && (
+              <span className="rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-yellow-400">
+                {pendingCount} menunggu
+              </span>
+            )}
           </h2>
         </div>
         <button
@@ -126,19 +161,52 @@ export default function CommentsManager() {
         </p>
       )}
 
+      {/* Filter moderasi */}
+      <div className="mb-6 flex flex-wrap gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
+        {([
+          { key: "all", label: "Semua", n: items.length },
+          { key: "pending", label: "Menunggu", n: pendingCount },
+          { key: "visible", label: "Tayang", n: items.length - pendingCount },
+        ] as const).map((f) => (
+          <button
+            key={f.key}
+            onClick={() => setFilter(f.key)}
+            aria-pressed={filter === f.key}
+            className={`rounded-md px-3 py-1.5 text-xs uppercase tracking-[0.14em] transition-colors duration-300 ${
+              filter === f.key
+                ? "bg-accent text-black"
+                : "text-gray-400 hover:bg-white/5 hover:text-white"
+            }`}
+          >
+            {f.label}
+            <span className="ml-1.5 opacity-70">{f.n}</span>
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <p className="text-gray-500">Loading…</p>
-      ) : items.length === 0 ? (
+      ) : visible.length === 0 ? (
         <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
           <InboxIcon className="text-gray-600" />
-          <p className="text-sm text-gray-500">Belum ada komentar.</p>
+          <p className="text-sm text-gray-500">
+            {filter === "all"
+              ? "Belum ada komentar."
+              : filter === "pending"
+                ? "Tidak ada komentar yang menunggu moderasi."
+                : "Belum ada komentar yang tayang."}
+          </p>
         </div>
       ) : (
         <div className="admin-list mb-8 flex flex-col gap-4">
-          {items.map((c) => (
+          {visible.map((c) => (
             <article
               key={c.id}
-              className="border border-white/10 p-4 transition-colors duration-300 hover:border-accent/40 sm:p-5"
+              className={`border p-4 transition-colors duration-300 sm:p-5 ${
+                c.approved
+                  ? "border-white/10 hover:border-accent/40"
+                  : "border-yellow-500/30 bg-yellow-500/[0.03] hover:border-yellow-500/50"
+              }`}
             >
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div className="flex min-w-0 items-start gap-3">
@@ -156,7 +224,7 @@ export default function CommentsManager() {
                       <Stars value={c.rating} />
                       {!c.approved && (
                         <span className="rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-yellow-400">
-                          Hidden
+                          Menunggu
                         </span>
                       )}
                     </div>
@@ -177,15 +245,36 @@ export default function CommentsManager() {
                     </a>
                   </div>
                 </div>
-                <button
-                  onClick={() => remove(c)}
-                  disabled={deletingId === c.id}
-                  aria-label={`Hapus komentar dari ${c.name}`}
-                  title="Hapus komentar"
-                  className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  {deletingId === c.id ? <SpinnerIcon /> : <TrashIcon />}
-                </button>
+                <div className="flex shrink-0 items-center gap-2">
+                  {/* Setujui / sembunyikan — inti moderasi */}
+                  <button
+                    onClick={() => setApproved(c, !c.approved)}
+                    disabled={busyId === c.id}
+                    aria-label={
+                      c.approved
+                        ? `Sembunyikan komentar dari ${c.name}`
+                        : `Tampilkan komentar dari ${c.name}`
+                    }
+                    title={c.approved ? "Sembunyikan dari publik" : "Tampilkan ke publik"}
+                    className={`flex h-9 items-center gap-2 rounded-md border px-3 text-[10px] uppercase tracking-widest transition-colors duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
+                      c.approved
+                        ? "border-white/15 text-gray-400 hover:border-yellow-500/60 hover:text-yellow-400"
+                        : "border-[#22c55e]/40 bg-[#22c55e]/10 text-[#22c55e] hover:bg-[#22c55e]/20"
+                    }`}
+                  >
+                    {c.approved ? <EyeOffIcon /> : <EyeIcon />}
+                    {c.approved ? "Sembunyikan" : "Tampilkan"}
+                  </button>
+                  <button
+                    onClick={() => remove(c)}
+                    disabled={busyId === c.id}
+                    aria-label={`Hapus komentar dari ${c.name}`}
+                    title="Hapus komentar"
+                    className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    {busyId === c.id ? <SpinnerIcon /> : <TrashIcon />}
+                  </button>
+                </div>
               </div>
               <p className="mt-3 whitespace-pre-wrap break-words border-t border-white/5 pt-3 text-sm leading-relaxed text-ecru">
                 {c.message}

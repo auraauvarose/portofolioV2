@@ -5,6 +5,8 @@ import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
 import FileThumb from "@/components/admin/FileThumb";
+import ReorderableRow from "@/components/admin/ReorderableRow";
+import { useReorder } from "@/lib/use-reorder";
 import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
 import type { Project } from "@/types";
 
@@ -16,6 +18,11 @@ const EMPTY = {
   category: "professional",
   year: "",
   link: "",
+  repo_url: "",
+  alt_text: "",
+  slug: "",
+  content_en: "",
+  content_id: "",
   tech_stack: "",
   sort_order: "0",
   featured: true,
@@ -32,11 +39,17 @@ export default function ProjectsManager() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const { dragHandlers, dragId, overId, saving: reordering, error: reorderError, moveBy } =
+    useReorder<Project>("projects", items, setItems);
+
   async function load() {
     const { data } = await supabase
       .from("projects")
       .select("*")
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      // Tiebreaker sama dengan urutan publik (src/lib/data.ts) supaya daftar
+      // di admin persis mencerminkan yang dilihat pengunjung.
+      .order("created_at", { ascending: false });
     setItems((data as Project[]) ?? []);
     setLoading(false);
   }
@@ -63,6 +76,11 @@ export default function ProjectsManager() {
       category: p.category,
       year: p.year ?? "",
       link: p.link ?? "",
+      repo_url: p.repo_url ?? "",
+      alt_text: p.alt_text ?? "",
+      slug: p.slug ?? "",
+      content_en: p.content_en ?? "",
+      content_id: p.content_id ?? "",
       tech_stack: p.tech_stack.join(", "),
       sort_order: String(p.sort_order),
       featured: p.featured,
@@ -85,6 +103,11 @@ export default function ProjectsManager() {
       category: form.category,
       year: form.year || null,
       link: form.link || null,
+      repo_url: form.repo_url || null,
+      alt_text: form.alt_text || null,
+      slug: form.slug || null,
+      content_en: form.content_en || null,
+      content_id: form.content_id || null,
       image_url: form.image_url || null,
       tech_stack: form.tech_stack
         .split(",")
@@ -149,6 +172,12 @@ export default function ProjectsManager() {
         </p>
       )}
 
+      {reorderError && (
+        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
+          {reorderError}
+        </p>
+      )}
+
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
@@ -158,10 +187,17 @@ export default function ProjectsManager() {
         </div>
       ) : (
         <div className="admin-list mb-8 space-y-0">
-          {items.map((p) => (
-            <div
+          {items.map((p, i) => (
+            <ReorderableRow
               key={p.id}
-              className="flex flex-wrap items-center gap-4 border-b border-white/10 py-4 transition-colors duration-300 hover:border-accent/40"
+              index={i}
+              total={items.length}
+              dragging={dragId === p.id}
+              dropTarget={overId === p.id && dragId !== p.id}
+              saving={reordering}
+              dragProps={dragHandlers(i)}
+              onMoveUp={() => moveBy(p.id, -1)}
+              onMoveDown={() => moveBy(p.id, 1)}
             >
               <FileThumb url={p.image_url} />
               <div className="min-w-0 flex-1">
@@ -188,7 +224,7 @@ export default function ProjectsManager() {
                   <TrashIcon />
                 </button>
               </div>
-            </div>
+            </ReorderableRow>
           ))}
         </div>
       )}
@@ -207,12 +243,57 @@ export default function ProjectsManager() {
             <Field label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
             <Field label="Year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} />
             <Field label="Link (URL)" value={form.link} onChange={(v) => setForm({ ...form, link: v })} />
+            <Field label="Repository (URL)" value={form.repo_url} onChange={(v) => setForm({ ...form, repo_url: v })} />
             <Field label="Tech stack (comma separated)" value={form.tech_stack} onChange={(v) => setForm({ ...form, tech_stack: v })} />
+            <div>
+              <Field
+                label="Slug (case study URL)"
+                value={form.slug}
+                onChange={(v) => setForm({ ...form, slug: v })}
+                placeholder="my-project-name"
+              />
+              <p className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
+                Huruf kecil, angka, dan tanda hubung. Kosongkan bila belum ingin
+                halaman case study. URL:{" "}
+                <code className="text-accent">
+                  /work/{form.slug || "slug-kamu"}
+                </code>
+              </p>
+            </div>
             <div className="md:col-span-2">
               <Field label="Description (EN)" textarea value={form.description_en} onChange={(v) => setForm({ ...form, description_en: v })} />
             </div>
             <div className="md:col-span-2">
               <Field label="Description (ID)" textarea value={form.description_id} onChange={(v) => setForm({ ...form, description_id: v })} />
+            </div>
+            <div className="md:col-span-2">
+              <Field
+                label="Case study content (EN)"
+                textarea
+                value={form.content_en}
+                onChange={(v) => setForm({ ...form, content_en: v })}
+              />
+              <p className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
+                Isi halaman <code className="text-accent">/work/{form.slug || "slug"}</code>.
+                Pisahkan paragraf dengan satu baris kosong. Kosongkan untuk
+                memakai Description (EN).
+              </p>
+            </div>
+            <div className="md:col-span-2">
+              <Field
+                label="Case study content (ID)"
+                textarea
+                value={form.content_id}
+                onChange={(v) => setForm({ ...form, content_id: v })}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Field
+                label="Image alt text"
+                value={form.alt_text}
+                onChange={(v) => setForm({ ...form, alt_text: v })}
+                placeholder="Describe the image for screen readers"
+              />
             </div>
             <div className="md:col-span-2">
               <ImageUpload

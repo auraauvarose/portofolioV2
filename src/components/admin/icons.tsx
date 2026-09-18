@@ -150,3 +150,91 @@ export function SpinnerIcon({ className }: IconProps) {
     </svg>
   );
 }
+
+export function EyeIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7-10-7-10-7z" />
+      <circle cx="12" cy="12" r="3" />
+    </svg>
+  );
+}
+
+export function EyeOffIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M10.7 5.1A10.9 10.9 0 0 1 12 5c6.4 0 10 7 10 7a17.6 17.6 0 0 1-3.2 4.1" />
+      <path d="M6.2 6.2A17.7 17.7 0 0 0 2 12s3.6 7 10 7a10.6 10.6 0 0 0 5-1.2" />
+      <path d="M9.9 9.9a3 3 0 0 0 4.2 4.2" />
+      <path d="m2 2 20 20" />
+    </svg>
+  );
+}
+
+export function GripIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <circle cx="9" cy="6" r="1.3" />
+      <circle cx="15" cy="6" r="1.3" />
+      <circle cx="9" cy="12" r="1.3" />
+      <circle cx="15" cy="12" r="1.3" />
+      <circle cx="9" cy="18" r="1.3" />
+      <circle cx="15" cy="18" r="1.3" />
+    </svg>
+  );
+}
+
+export function ChevronUpIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="m6 15 6-6 6 6" />
+    </svg>
+  );
+}
+
+export function ChevronDownIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="m6 9 6 6 6-6" />
+    </svg>
+  );
+}
+
+export function LayoutIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <rect x="3" y="4" width="18" height="16" rx="2" />
+      <path d="M3 10h18M9 10v10" />
+    </svg>
+  );
+}
+
+export function BriefcaseIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <rect x="2" y="7" width="20" height="13" rx="2" />
+      <path d="M9 7V5a2 2 0 0 1 2-2h2a2 2 0 0 1 2 2v2" />
+      <path d="M2 12h20" />
+    </svg>
+  );
+}
+
+export function QuoteIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M8 11H4.5A2.5 2.5 0 0 1 2 8.5v0A2.5 2.5 0 0 1 4.5 6h1A2.5 2.5 0 0 1 8 8.5V16a2 2 0 0 1-2 2H5" />
+      <path d="M19 11h-3.5A2.5 2.5 0 0 1 13 8.5v0A2.5 2.5 0 0 1 15.5 6h1A2.5 2.5 0 0 1 19 8.5V16a2 2 0 0 1-2 2h-1" />
+    </svg>
+  );
+}
+
+export function ChartIcon({ className }: IconProps) {
+  return (
+    <svg {...base(className)}>
+      <path d="M3 20h18" />
+      <rect x="5" y="11" width="3.5" height="6" rx="1" />
+      <rect x="10.5" y="7" width="3.5" height="10" rx="1" />
+      <rect x="16" y="13" width="3.5" height="4" rx="1" />
+    </svg>
+  );
+}

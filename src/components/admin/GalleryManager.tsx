@@ -4,7 +4,16 @@ import { useEffect, useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
-import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  InboxIcon,
+  GripIcon,
+  ChevronUpIcon,
+  ChevronDownIcon,
+} from "@/components/admin/icons";
+import { useReorder } from "@/lib/use-reorder";
 import type { GalleryPhoto } from "@/types";
 
 const isPdf = (url: string) => {
@@ -15,6 +24,7 @@ const isPdf = (url: string) => {
 const EMPTY = {
   title_en: "",
   title_id: "",
+  alt_text: "",
   category: "general",
   sort_order: "0",
   image_url: "",
@@ -30,11 +40,15 @@ export default function GalleryManager() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
+  const { dragHandlers, dragId, overId, saving: reordering, error: reorderError, moveBy } =
+    useReorder<GalleryPhoto>("gallery_photos", items, setItems);
+
   async function load() {
     const { data } = await supabase
       .from("gallery_photos")
       .select("*")
-      .order("sort_order", { ascending: true });
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
     setItems((data as GalleryPhoto[]) ?? []);
     setLoading(false);
   }
@@ -56,6 +70,7 @@ export default function GalleryManager() {
     setForm({
       title_en: g.title_en ?? "",
       title_id: g.title_id ?? "",
+      alt_text: g.alt_text ?? "",
       category: g.category,
       sort_order: String(g.sort_order),
       image_url: g.image_url,
@@ -78,6 +93,7 @@ export default function GalleryManager() {
     const payload = {
       title_en: form.title_en || null,
       title_id: form.title_id || null,
+      alt_text: form.alt_text || null,
       category: form.category || "general",
       image_url: form.image_url,
       sort_order: Number(form.sort_order) || 0,
@@ -138,6 +154,12 @@ export default function GalleryManager() {
         </p>
       )}
 
+      {reorderError && (
+        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
+          {reorderError}
+        </p>
+      )}
+
       {loading ? (
         <p className="text-gray-500">Loading…</p>
       ) : items.length === 0 ? (
@@ -147,11 +169,52 @@ export default function GalleryManager() {
         </div>
       ) : (
         <div className="admin-list mb-8 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {items.map((g) => (
+          {items.map((g, i) => (
             <div
               key={g.id}
-              className="overflow-hidden border border-white/10 transition-colors duration-300 hover:border-accent/40"
+              {...dragHandlers(i)}
+              className={`relative overflow-hidden border transition-colors duration-300 ${
+                dragId === g.id
+                  ? "border-accent/60 opacity-50"
+                  : overId === g.id && dragId !== g.id
+                    ? "border-accent bg-accent/[0.04]"
+                    : "border-white/10 hover:border-accent/40"
+              }`}
             >
+              {/* Handle geser — kartu galeri tidak punya baris, jadi handle
+                  ditempel di pojok atas gambar. */}
+              <span
+                aria-hidden="true"
+                title="Geser untuk mengubah urutan"
+                className="absolute left-2 top-2 z-10 flex h-8 w-8 cursor-grab items-center justify-center rounded-md border border-white/20 bg-black/60 text-gray-300 backdrop-blur-sm transition-colors hover:border-accent hover:text-accent active:cursor-grabbing"
+              >
+                <GripIcon />
+              </span>
+
+              {/* Kontrol keyboard / sentuh, sejajar handle */}
+              <div className="absolute right-2 top-2 z-10 flex gap-1">
+                <button
+                  type="button"
+                  onClick={() => moveBy(g.id, -1)}
+                  disabled={i === 0 || reordering}
+                  aria-label={`Pindahkan ke atas (posisi ${i + 1} dari ${items.length})`}
+                  title="Naik"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/20 bg-black/60 text-gray-300 backdrop-blur-sm transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronUpIcon className="h-3.5 w-3.5" />
+                </button>
+                <button
+                  type="button"
+                  onClick={() => moveBy(g.id, 1)}
+                  disabled={i === items.length - 1 || reordering}
+                  aria-label={`Pindahkan ke bawah (posisi ${i + 1} dari ${items.length})`}
+                  title="Turun"
+                  className="flex h-8 w-8 items-center justify-center rounded-md border border-white/20 bg-black/60 text-gray-300 backdrop-blur-sm transition-colors hover:border-accent hover:text-accent disabled:cursor-not-allowed disabled:opacity-30"
+                >
+                  <ChevronDownIcon className="h-3.5 w-3.5" />
+                </button>
+              </div>
+
               <div className="aspect-[4/3] w-full overflow-hidden bg-black/40">
                 {isPdf(g.image_url) ? (
                   <a
@@ -180,7 +243,7 @@ export default function GalleryManager() {
                     </span>
                   </a>
                 ) : (
-                  // eslint-disable-next-line @next/next/no-img-element
+                   
                   <img src={g.image_url} alt="" className="h-full w-full object-cover" />
                 )}
               </div>
@@ -229,7 +292,34 @@ export default function GalleryManager() {
             </div>
             <Field label="Title (EN)" value={form.title_en} onChange={(v) => setForm({ ...form, title_en: v })} />
             <Field label="Title (ID)" value={form.title_id} onChange={(v) => setForm({ ...form, title_id: v })} />
-            <Field label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
+            <div className="md:col-span-2">
+              <Field
+                label="Image alt text"
+                value={form.alt_text}
+                onChange={(v) => setForm({ ...form, alt_text: v })}
+                placeholder="Describe the photo for screen readers"
+              />
+            </div>
+            <div>
+              <Field
+                label="Category"
+                value={form.category}
+                onChange={(v) => setForm({ ...form, category: v })}
+                list="gallery-categories"
+              />
+              {/* Saran nilai; admin tetap bisa mengetik kategori baru.
+                  Kategori yang belum terdaftar tampil apa adanya di publik. */}
+              <datalist id="gallery-categories">
+                <option value="general" />
+                <option value="event" />
+                <option value="campus" />
+                <option value="work" />
+                <option value="personal" />
+              </datalist>
+              <p className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
+                Dipakai untuk filter kategori di halaman galeri publik.
+              </p>
+            </div>
             <Field label="Sort order" value={form.sort_order} onChange={(v) => setForm({ ...form, sort_order: v })} />
           </div>
           <div className="mt-6 flex gap-3">

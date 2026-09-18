@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
+import { invalidate } from "@/lib/revalidate-content";
+import { CACHE_TAGS } from "@/lib/supabase/public";
 
 export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const { error: authError } = await requireUser();
@@ -20,6 +22,11 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
       year: body.year ?? null,
       image_url: body.image_url ?? null,
       link: body.link ?? null,
+      repo_url: body.repo_url ?? null,
+      alt_text: body.alt_text ?? null,
+      slug: body.slug ?? null,
+      content_en: body.content_en ?? null,
+      content_id: body.content_id ?? null,
       tech_stack: body.tech_stack ?? [],
       sort_order: body.sort_order ?? 0,
       featured: body.featured ?? true,
@@ -30,5 +37,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 400 });
   }
+  invalidate(CACHE_TAGS.projects);
   return NextResponse.json(data, { status: 201 });
 });
