@@ -1,13 +1,30 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createSupabaseBrowser } from "@/lib/supabase/client";
 import ImageUpload from "@/components/admin/ImageUpload";
 import Field from "@/components/admin/Field";
 import FileThumb from "@/components/admin/FileThumb";
 import ReorderableRow from "@/components/admin/ReorderableRow";
+import {
+  Button,
+  Chip,
+  EmptyState,
+  FormActions,
+  IconButton,
+  ListSkeleton,
+  Notice,
+  PanelHeader,
+} from "@/components/admin/ui";
 import { useReorder } from "@/lib/use-reorder";
-import { PlusIcon, PencilIcon, TrashIcon, InboxIcon } from "@/components/admin/icons";
+import {
+  PlusIcon,
+  PencilIcon,
+  TrashIcon,
+  ProjectIcon,
+  SearchIcon,
+  StarIcon,
+} from "@/components/admin/icons";
 import type { Project } from "@/types";
 
 const EMPTY = {
@@ -29,6 +46,19 @@ const EMPTY = {
   image_url: "",
 };
 
+/**
+ * Kekurangan yang bisa dilihat pengunjung. Ditampilkan sebagai chip di baris
+ * supaya isian yang belum lengkap ketemu tanpa membuka form satu per satu.
+ */
+function gaps(p: Project): string[] {
+  const out: string[] = [];
+  if (!p.image_url) out.push("tanpa gambar");
+  if (!p.description_en && !p.description_id) out.push("tanpa deskripsi");
+  if (!p.link && !p.repo_url) out.push("tanpa tautan");
+  if (!p.slug) out.push("tanpa slug");
+  return out;
+}
+
 export default function ProjectsManager() {
   const supabase = createSupabaseBrowser();
   const [items, setItems] = useState<Project[]>([]);
@@ -38,9 +68,16 @@ export default function ProjectsManager() {
   const [form, setForm] = useState({ ...EMPTY });
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
+  const [query, setQuery] = useState("");
 
-  const { dragHandlers, dragId, overId, saving: reordering, error: reorderError, moveBy } =
-    useReorder<Project>("projects", items, setItems);
+  const {
+    dragHandlers,
+    dragId,
+    overId,
+    saving: reordering,
+    error: reorderError,
+    moveBy,
+  } = useReorder<Project>("projects", items, setItems);
 
   async function load() {
     const { data } = await supabase
@@ -59,11 +96,27 @@ export default function ProjectsManager() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter((p) =>
+      [p.title_en, p.title_id, p.category, p.year ?? "", p.slug ?? ""]
+        .join(" ")
+        .toLowerCase()
+        .includes(q),
+    );
+  }, [items, query]);
+
   function openNew() {
     setEditing(null);
     setForm({ ...EMPTY });
     setMessage(null);
     setShowForm(true);
+    requestAnimationFrame(() => {
+      document
+        .getElementById("project-form")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   function openEdit(p: Project) {
@@ -88,6 +141,11 @@ export default function ProjectsManager() {
     });
     setMessage(null);
     setShowForm(true);
+    requestAnimationFrame(() => {
+      document
+        .getElementById("project-form")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
   }
 
   async function save(e: React.FormEvent) {
@@ -134,9 +192,9 @@ export default function ProjectsManager() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setMessage(`Error: ${data.error ?? "Gagal menyimpan"}`);
+      setMessage(`Gagal menyimpan: ${data.error ?? "terjadi kesalahan"}`);
     } else {
-      setMessage(editing ? "Project updated ✓" : "Project created ✓");
+      setMessage(editing ? "Proyek diperbarui." : "Proyek ditambahkan.");
       setEditing(null);
       setShowForm(false);
       await load();
@@ -145,193 +203,355 @@ export default function ProjectsManager() {
   }
 
   async function remove(p: Project) {
-    if (!confirm(`Delete "${p.title_en}"?`)) return;
+    if (!confirm(`Hapus proyek "${p.title_en}"? Tindakan ini permanen.`)) return;
     const res = await fetch(`/api/projects/${p.id}`, { method: "DELETE" });
     if (res.ok) await load();
+    else setMessage("Gagal menghapus proyek.");
   }
+
+  const featuredCount = items.filter((p) => p.featured).length;
+  const incomplete = items.filter((p) => gaps(p).length > 0).length;
 
   return (
     <div>
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
-        <div>
-          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">Library</p>
-          <h2 className="text-display text-2xl uppercase text-white">Projects</h2>
-        </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
-        >
-          <PlusIcon />
-          Add project
-        </button>
-      </div>
+      <PanelHeader
+        title="Proyek"
+        description="Muncul di seksi Work halaman utama. Urutan di sini menentukan urutan tampil di situs."
+        meta={
+          !loading && (
+            <>
+              <Chip tone="neutral">{items.length} total</Chip>
+              <Chip tone="accent">{featuredCount} unggulan</Chip>
+              {incomplete > 0 && <Chip tone="warn">{incomplete} belum lengkap</Chip>}
+            </>
+          )
+        }
+        actions={
+          <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+            Proyek baru
+          </Button>
+        }
+      />
 
       {message && (
-        <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-gray-300">
+        <Notice
+          tone={message.startsWith("Gagal") ? "error" : "ok"}
+          onDismiss={() => setMessage(null)}
+        >
           {message}
-        </p>
+        </Notice>
       )}
+      {reorderError && <Notice tone="error">{reorderError}</Notice>}
 
-      {reorderError && (
-        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
-          {reorderError}
-        </p>
+      {/* Pencarian hanya muncul kalau daftarnya sudah cukup panjang untuk
+          membuat penggulungan jadi lambat. */}
+      {!loading && items.length > 6 && (
+        <div className="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-3">
+          <SearchIcon className="h-4 w-4 shrink-0 text-[var(--color-a-faint)]" />
+          <input
+            type="search"
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Cari judul, kategori, atau slug…"
+            aria-label="Cari proyek"
+            className="w-full bg-transparent py-2.5 text-sm text-[var(--color-a-text)] outline-none placeholder:text-[var(--color-a-faint)]"
+          />
+          {query && (
+            <span className="a-data shrink-0 a-meta text-[var(--color-a-faint)]">
+              {visible.length}/{items.length}
+            </span>
+          )}
+        </div>
       )}
 
       {loading ? (
-        <p className="text-gray-500">Loading…</p>
+        <ListSkeleton />
       ) : items.length === 0 ? (
-        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
-          <InboxIcon className="text-gray-600" />
-          <p className="text-sm text-gray-500">No projects yet.</p>
-        </div>
+        <EmptyState
+          icon={ProjectIcon}
+          title="Belum ada proyek"
+          hint="Proyek pertama akan muncul di seksi Work halaman utama. Tambahkan satu untuk mulai."
+          action={
+            <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+              Proyek baru
+            </Button>
+          }
+        />
+      ) : visible.length === 0 ? (
+        <EmptyState
+          icon={SearchIcon}
+          title={`Tidak ada yang cocok dengan “${query}”`}
+          action={
+            <Button variant="ghost" onClick={() => setQuery("")}>
+              Hapus pencarian
+            </Button>
+          }
+        />
       ) : (
-        <div className="admin-list mb-8 space-y-0">
-          {items.map((p, i) => (
-            <ReorderableRow
-              key={p.id}
-              index={i}
-              total={items.length}
-              dragging={dragId === p.id}
-              dropTarget={overId === p.id && dragId !== p.id}
-              saving={reordering}
-              dragProps={dragHandlers(i)}
-              onMoveUp={() => moveBy(p.id, -1)}
-              onMoveDown={() => moveBy(p.id, 1)}
-            >
-              <FileThumb url={p.image_url} />
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium text-white">{p.title_en}</p>
-                <p className="truncate text-xs text-gray-500">
-                  {p.category} · {p.year}
-                </p>
-              </div>
-              <div className="flex shrink-0 gap-2">
-                <button
-                  onClick={() => openEdit(p)}
-                  aria-label={`Edit ${p.title_en}`}
-                  title="Edit"
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
-                >
-                  <PencilIcon />
-                </button>
-                <button
-                  onClick={() => remove(p)}
-                  aria-label={`Delete ${p.title_en}`}
-                  title="Delete"
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98]"
-                >
-                  <TrashIcon />
-                </button>
-              </div>
-            </ReorderableRow>
-          ))}
+        <div className="mb-8">
+          {visible.map((p) => {
+            const missing = gaps(p);
+            // Indeks asli dipakai untuk drag supaya urutan tetap benar walau
+            // daftar sedang difilter.
+            const realIndex = items.findIndex((x) => x.id === p.id);
+            return (
+              <ReorderableRow
+                key={p.id}
+                index={realIndex}
+                total={items.length}
+                dragging={dragId === p.id}
+                dropTarget={overId === p.id && dragId !== p.id}
+                saving={reordering}
+                dragProps={dragHandlers(realIndex)}
+                onMoveUp={() => moveBy(p.id, -1)}
+                onMoveDown={() => moveBy(p.id, 1)}
+              >
+                <FileThumb url={p.image_url} />
+                <div className="min-w-0 flex-1">
+                  <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
+                    {/* Judul kosong harus terlihat sebagai masalah, bukan
+                        baris yang tampak seperti judul aneh. */}
+                    {p.title_en ? (
+                      <p className="truncate text-sm font-medium text-[var(--color-a-text)]">
+                        {p.title_en}
+                      </p>
+                    ) : (
+                      <p className="truncate text-sm font-medium italic text-[var(--color-a-warn)]">
+                        Tanpa judul
+                      </p>
+                    )}
+                    {p.featured && (
+                      <span
+                        title="Ditandai unggulan"
+                        className="inline-flex items-center gap-1 text-[var(--color-a-accent)]"
+                      >
+                        <StarIcon filled className="h-3 w-3" />
+                        <span className="sr-only">Unggulan</span>
+                      </span>
+                    )}
+                  </div>
+                  <p className="a-data mt-0.5 truncate a-meta text-[var(--color-a-faint)]">
+                    {p.category}
+                    {p.year ? ` · ${p.year}` : ""}
+                    {p.slug ? ` · /work/${p.slug}` : ""}
+                  </p>
+                  {/* Satu chip untuk semua kekurangan, bukan satu chip per
+                      masalah — tiga pil sekaligus membuat baris jadi ramai
+                      dan justru menyulitkan pemindaian. */}
+                  {missing.length > 0 && (
+                    <p className="mt-1.5 a-meta text-[var(--color-a-warn)]">
+                      Belum lengkap: {missing.join(", ")}
+                    </p>
+                  )}
+                </div>
+                <div className="flex shrink-0 gap-1.5">
+                  <IconButton
+                    icon={PencilIcon}
+                    label={`Edit ${p.title_en}`}
+                    onClick={() => openEdit(p)}
+                  />
+                  <IconButton
+                    icon={TrashIcon}
+                    label={`Hapus ${p.title_en}`}
+                    danger
+                    onClick={() => remove(p)}
+                  />
+                </div>
+              </ReorderableRow>
+            );
+          })}
         </div>
       )}
 
       {showForm && (
         <form
+          id="project-form"
           onSubmit={save}
-          className="admin-fade-up border-y border-white/10 py-7"
+          className="admin-fade-up a-panel scroll-mt-24 p-5 sm:p-6"
         >
-          <h3 className="mb-5 text-lg font-semibold text-white">
-            {editing ? "Edit project" : "New project"}
-          </h3>
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-a-line)] pb-4">
+            <h3 className="text-display text-lg uppercase text-[var(--color-a-text)]">
+              {editing ? "Edit proyek" : "Proyek baru"}
+            </h3>
+            {editing && (
+              <span className="a-data a-meta text-[var(--color-a-faint)]">
+                {editing.id.slice(0, 8)}
+              </span>
+            )}
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
-            <Field label="Title (EN)" required value={form.title_en} onChange={(v) => setForm({ ...form, title_en: v })} />
-            <Field label="Title (ID)" value={form.title_id} onChange={(v) => setForm({ ...form, title_id: v })} />
-            <Field label="Category" value={form.category} onChange={(v) => setForm({ ...form, category: v })} />
-            <Field label="Year" value={form.year} onChange={(v) => setForm({ ...form, year: v })} />
-            <Field label="Link (URL)" value={form.link} onChange={(v) => setForm({ ...form, link: v })} />
-            <Field label="Repository (URL)" value={form.repo_url} onChange={(v) => setForm({ ...form, repo_url: v })} />
-            <Field label="Tech stack (comma separated)" value={form.tech_stack} onChange={(v) => setForm({ ...form, tech_stack: v })} />
-            <div>
+            <Field
+              label="Judul (EN)"
+              required
+              value={form.title_en}
+              onChange={(v) => setForm({ ...form, title_en: v })}
+            />
+            <Field
+              label="Judul (ID)"
+              value={form.title_id}
+              onChange={(v) => setForm({ ...form, title_id: v })}
+              hint="Kosongkan untuk memakai judul versi Inggris."
+            />
+            <Field
+              label="Kategori"
+              value={form.category}
+              onChange={(v) => setForm({ ...form, category: v })}
+              list="project-categories"
+              hint="Dipakai sebagai label filter di situs publik."
+            />
+            <datalist id="project-categories">
+              <option value="professional" />
+              <option value="personal" />
+              <option value="academic" />
+              <option value="opensource" />
+            </datalist>
+            <Field
+              label="Tahun"
+              value={form.year}
+              onChange={(v) => setForm({ ...form, year: v })}
+              placeholder="2025"
+            />
+            <Field
+              label="Tautan demo"
+              type="url"
+              value={form.link}
+              onChange={(v) => setForm({ ...form, link: v })}
+              placeholder="https://…"
+            />
+            <Field
+              label="Repositori"
+              type="url"
+              value={form.repo_url}
+              onChange={(v) => setForm({ ...form, repo_url: v })}
+              placeholder="https://github.com/…"
+            />
+            <Field
+              label="Tech stack"
+              value={form.tech_stack}
+              onChange={(v) => setForm({ ...form, tech_stack: v })}
+              placeholder="Next.js, TypeScript, Postgres"
+              hint="Pisahkan dengan koma."
+            />
+            <Field
+              label="Slug halaman studi kasus"
+              value={form.slug}
+              onChange={(v) => setForm({ ...form, slug: v })}
+              placeholder="nama-proyek"
+              hint={
+                <>
+                  Huruf kecil, angka, dan tanda hubung. Kosongkan bila belum
+                  ingin halaman studi kasus. URL:{" "}
+                  <code className="a-data text-[var(--color-a-accent)]">
+                    /work/{form.slug || "slug-kamu"}
+                  </code>
+                </>
+              }
+            />
+
+            <div className="md:col-span-2">
               <Field
-                label="Slug (case study URL)"
-                value={form.slug}
-                onChange={(v) => setForm({ ...form, slug: v })}
-                placeholder="my-project-name"
-              />
-              <p className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
-                Huruf kecil, angka, dan tanda hubung. Kosongkan bila belum ingin
-                halaman case study. URL:{" "}
-                <code className="text-accent">
-                  /work/{form.slug || "slug-kamu"}
-                </code>
-              </p>
-            </div>
-            <div className="md:col-span-2">
-              <Field label="Description (EN)" textarea value={form.description_en} onChange={(v) => setForm({ ...form, description_en: v })} />
-            </div>
-            <div className="md:col-span-2">
-              <Field label="Description (ID)" textarea value={form.description_id} onChange={(v) => setForm({ ...form, description_id: v })} />
-            </div>
-            <div className="md:col-span-2">
-              <Field
-                label="Case study content (EN)"
+                label="Deskripsi (EN)"
                 textarea
+                value={form.description_en}
+                onChange={(v) => setForm({ ...form, description_en: v })}
+              />
+            </div>
+            <div className="md:col-span-2">
+              <Field
+                label="Deskripsi (ID)"
+                textarea
+                value={form.description_id}
+                onChange={(v) => setForm({ ...form, description_id: v })}
+              />
+            </div>
+
+            <div className="md:col-span-2">
+              <Field
+                label="Isi studi kasus (EN)"
+                textarea
+                rows={6}
                 value={form.content_en}
                 onChange={(v) => setForm({ ...form, content_en: v })}
+                hint={
+                  <>
+                    Mengisi halaman{" "}
+                    <code className="a-data text-[var(--color-a-accent)]">
+                      /work/{form.slug || "slug"}
+                    </code>
+                    . Pisahkan paragraf dengan satu baris kosong. Kosongkan untuk
+                    memakai Deskripsi (EN).
+                  </>
+                }
               />
-              <p className="mt-1.5 text-[11px] leading-relaxed text-gray-500">
-                Isi halaman <code className="text-accent">/work/{form.slug || "slug"}</code>.
-                Pisahkan paragraf dengan satu baris kosong. Kosongkan untuk
-                memakai Description (EN).
-              </p>
             </div>
             <div className="md:col-span-2">
               <Field
-                label="Case study content (ID)"
+                label="Isi studi kasus (ID)"
                 textarea
+                rows={6}
                 value={form.content_id}
                 onChange={(v) => setForm({ ...form, content_id: v })}
               />
             </div>
+
             <div className="md:col-span-2">
               <Field
-                label="Image alt text"
+                label="Teks alternatif gambar"
                 value={form.alt_text}
                 onChange={(v) => setForm({ ...form, alt_text: v })}
-                placeholder="Describe the image for screen readers"
+                placeholder="Jelaskan isi gambar untuk pembaca layar"
+                hint="Dibacakan pembaca layar dan dipakai mesin pencari. Sebutkan isi gambarnya, bukan nama berkas."
               />
             </div>
+
             <div className="md:col-span-2">
               <ImageUpload
                 folder="projects"
                 value={form.image_url || null}
                 onChange={(url) => setForm({ ...form, image_url: url })}
-                label="Project image"
+                label="Gambar proyek"
               />
             </div>
-            <div className="flex items-center gap-6">
-              <label className="flex items-center gap-2 text-sm text-gray-300">
+
+            <div className="flex flex-wrap items-center gap-6 md:col-span-2">
+              <label className="flex cursor-pointer items-center gap-2.5 text-sm text-[var(--color-a-text)]">
                 <input
                   type="checkbox"
                   checked={form.featured}
-                  onChange={(e) => setForm({ ...form, featured: e.target.checked })}
-                  className="accent-accent"
+                  onChange={(e) =>
+                    setForm({ ...form, featured: e.target.checked })
+                  }
+                  className="h-4 w-4 accent-[var(--color-a-accent)]"
                 />
-                Featured
+                Tandai sebagai unggulan
               </label>
-              <Field label="Sort order" value={form.sort_order} onChange={(v) => setForm({ ...form, sort_order: v })} />
+              <div className="w-32">
+                <Field
+                  label="Urutan"
+                  type="number"
+                  value={form.sort_order}
+                  onChange={(v) => setForm({ ...form, sort_order: v })}
+                  hint="Angka kecil tampil lebih dulu."
+                />
+              </div>
             </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md bg-accent px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+
+          <FormActions>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? "Menyimpan…" : "Simpan proyek"}
+            </Button>
+            <Button
+              variant="quiet"
+              onClick={() => {
+                setShowForm(false);
+                setEditing(null);
+              }}
             >
-              {saving ? "Saving…" : "Save"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="rounded-md border border-white/15 px-6 py-2.5 text-xs text-gray-300 transition-colors duration-300 hover:border-white/30 hover:text-white active:scale-[0.98]"
-            >
-              Cancel
-            </button>
-          </div>
+              Batal
+            </Button>
+          </FormActions>
         </form>
       )}
     </div>

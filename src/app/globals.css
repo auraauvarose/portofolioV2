@@ -18,6 +18,36 @@
   --color-fg: #ffffff;
   --color-muted: #9ca3af;
 
+  /* ── Admin workbench tokens ───────────────────────────────────────────────
+     Panel admin adalah alat kerja, bukan halaman pemasaran. Token semantik
+     ini menggantikan utility putih-transparan supaya kontrasnya terkendali
+     penuh di kedua tema (nilai light-mode di-override di blok admin bawah).
+     Nilai di sini = tema gelap. */
+  --color-a-canvas: #0b0c11; /* kanvas halaman */
+  --color-a-surface: #12141b; /* permukaan terangkat (baris, kartu) */
+  --color-a-surface-2: #191c25; /* permukaan terangkat saat hover/aktif */
+  --color-a-line: rgba(255, 255, 255, 0.09); /* hairline pemisah */
+  --color-a-line-2: rgba(255, 255, 255, 0.17); /* hairline kontrol */
+  --color-a-text: #ece8e0; /* teks utama */
+  --color-a-dim: #9aa1af; /* teks sekunder */
+  --color-a-faint: #7c8494; /* teks tersier / meta — tetap ≥4.5:1 */
+  --color-a-accent: #eb5939; /* aksen tunggal (terracotta) */
+  /* Warna aksen saat hover. Dipisah per tema karena arah hover-nya berbeda:
+     di tema gelap aksen menggelap sedikit, di tema terang harus lebih gelap
+     lagi supaya teks di atasnya tetap lolos kontras. */
+  --color-a-accent-hover: #d5542f;
+  /* Teks di atas bidang aksen. Tinta gelap di atas terracotta terang —
+     pola yang sama dengan situs publik, dan lolos kontras (5.5:1). */
+  --color-a-on-accent: #0d0e13;
+  --color-a-ok: #3fb950;
+  --color-a-warn: #d29922;
+  --color-a-danger: #f85149;
+
+  /* Wajah utilitas untuk data: indeks frame, angka, slug, path. Mono sistem
+     (tanpa unduhan font tambahan) — dipakai dengan tabular-nums. */
+  --font-data: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
   --animate-marquee: marquee 30s linear infinite;
   --animate-marquee-reverse: marquee-reverse 30s linear infinite;
   --animate-spin-slow: spin 6s linear infinite;
@@ -173,6 +203,30 @@ html {
   --color-khaki: #6b6b6b;
   --color-fg: #0d0e13;
   --color-muted: #1c1c1e; /* nav links — keep clearly readable on light bg */
+
+  /* Admin tokens — light. Permukaan naik jadi putih, teks turun ke hampir
+     hitam. Semua nilai di bawah sudah dihitung agar lolos WCAG AA (≥4.5:1)
+     di atas kanvas #f2f1ee maupun permukaan putih — termasuk teks meta
+     terkecil, karena banyak label di panel admin berukuran 11px. */
+  --color-a-canvas: #f2f1ee;
+  --color-a-surface: #ffffff;
+  --color-a-surface-2: #eceae5;
+  --color-a-line: rgba(13, 14, 19, 0.11);
+  --color-a-line-2: rgba(13, 14, 19, 0.2);
+  --color-a-text: #16171c;
+  --color-a-dim: #565d69;
+  /* Nilai terkecil yang masih lolos 4.5:1 di ketiga permukaan tema terang
+     (kanvas, putih, dan permukaan terangkat) — termasuk teks 11px. */
+  --color-a-faint: #616873;
+  --color-a-accent: #b03a0d;
+  --color-a-accent-hover: #8f2f0a;
+  /* Aksen light sudah cukup gelap, jadi teks di atasnya harus terang. */
+  --color-a-on-accent: #ffffff;
+  --color-a-ok: #156b2e;
+  --color-a-warn: #7d5100;
+  /* Lebih gelap dari merah "standar" karena teks galat tampil di atas
+     bidang bertint merah muda, bukan langsung di atas kanvas. */
+  --color-a-danger: #b81c26;
 }
 /* ===========================================================================
    LIGHT MODE — comprehensive overrides so the whole site stays readable when
@@ -1399,6 +1453,419 @@ summary {
 .admin-list > *:nth-child(4) { animation-delay: 0.16s; }
 .admin-list > *:nth-child(5) { animation-delay: 0.2s; }
 .admin-list > *:nth-child(6) { animation-delay: 0.24s; }
+
+@layer components {
+  /* ═══════════════════════════════════════════════════════════════════════════
+     ADMIN WORKBENCH
+     Panel admin dibaca sebagai alat kerja: rapat, tenang, dan setiap penanda
+     membawa informasi. Aksen terracotta dipakai hemat — hanya untuk keadaan
+     aktif dan satu tindakan utama per layar.
+     ═══════════════════════════════════════════════════════════════════════════ */
+
+  /* Angka & identifier: mono + tabular supaya kolom angka tidak bergoyang dan
+     slug/path mudah dibedakan dari teks prosa. */
+  .a-data {
+    font-family: var(--font-data);
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum";
+  }
+
+  /* Satu cincin fokus untuk seluruh admin. `outline` (bukan box-shadow) supaya
+     tidak terpotong oleh container ber-overflow dan tetap terlihat di tema
+     terang maupun gelap. */
+  .a-focus:focus-visible,
+  .a-rail-link:focus-visible,
+  .a-btn:focus-visible,
+  .a-icon-btn:focus-visible,
+  .a-tab:focus-visible {
+    outline: 2px solid var(--color-a-accent);
+    outline-offset: 2px;
+    border-radius: 0.375rem;
+  }
+
+  /* ── Skala teks admin ───────────────────────────────────────────────────── */
+
+  /* Dua ukuran teks kecil sebagai utility bernama, bukan nilai px tetap.
+     Alasannya: pada layar ≥lg seluruh ramp huruf panel admin dinaikkan
+     (lihat blok "Skala desktop" di akhir), dan nilai px tetap tidak bisa
+     ikut naik. */
+  .a-meta {
+    font-size: 0.6875rem; /* 11px — metadata, catatan bantuan */
+  }
+  .a-micro {
+    font-size: 0.625rem; /* 10px — label terkecil (badge, chip) */
+  }
+
+  /* ── Rail navigasi ──────────────────────────────────────────────────────── */
+
+  .a-rail-link {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 0.65rem;
+    width: 100%;
+    padding: 0.5rem 0.6rem 0.5rem 0.7rem;
+    border-radius: 0.5rem;
+    font-size: 0.8125rem;
+    color: var(--color-a-dim);
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .a-rail-link:hover {
+    background-color: var(--color-a-surface-2);
+    color: var(--color-a-text);
+  }
+  /* Penanda aktif: spine terracotta, bukan blok warna penuh. Blok penuh di
+     9 baris nav membuat rail jadi pusat perhatian, padahal yang utama adalah
+     isi panel. */
+  .a-rail-link[aria-current="page"] {
+    background-color: var(--color-a-surface-2);
+    color: var(--color-a-text);
+    font-weight: 600;
+  }
+  .a-rail-link[aria-current="page"]::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 20%;
+    bottom: 20%;
+    width: 2px;
+    border-radius: 2px;
+    background-color: var(--color-a-accent);
+  }
+
+  /* ── Kontrol ────────────────────────────────────────────────────────────── */
+
+  .a-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 0.5rem 0.9rem;
+    white-space: nowrap;
+    transition:
+      background-color 0.18s ease,
+      border-color 0.18s ease,
+      color 0.18s ease,
+      transform 0.12s ease;
+  }
+  .a-btn:active:not(:disabled) {
+    transform: translateY(1px);
+  }
+  .a-btn:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+  }
+  /* Satu tindakan utama per layar. */
+  .a-btn-primary {
+    background-color: var(--color-a-accent);
+    color: var(--color-a-on-accent);
+  }
+  .a-btn-primary:hover:not(:disabled) {
+    background-color: var(--color-a-accent-hover);
+  }
+  /* Aksi sekunder: hairline, tanpa isian. */
+  .a-btn-ghost {
+    border: 1px solid var(--color-a-line-2);
+    color: var(--color-a-text);
+  }
+  .a-btn-ghost:hover:not(:disabled) {
+    border-color: var(--color-a-accent);
+    color: var(--color-a-accent);
+  }
+  .a-btn-quiet {
+    color: var(--color-a-dim);
+  }
+  .a-btn-quiet:hover:not(:disabled) {
+    color: var(--color-a-text);
+  }
+  .a-btn-danger:hover:not(:disabled) {
+    border-color: var(--color-a-danger);
+    color: var(--color-a-danger);
+  }
+
+  /* Tombol ikon: kotak 36px — target sentuh aman, tetap rapat secara visual. */
+  .a-icon-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    height: 2.25rem;
+    width: 2.25rem;
+    flex-shrink: 0;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-a-line-2);
+    color: var(--color-a-dim);
+    transition:
+      border-color 0.18s ease,
+      color 0.18s ease,
+      background-color 0.18s ease;
+  }
+  .a-icon-btn:hover:not(:disabled) {
+    border-color: var(--color-a-accent);
+    color: var(--color-a-accent);
+  }
+  .a-icon-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+  .a-icon-btn-danger:hover:not(:disabled) {
+    border-color: var(--color-a-danger);
+    color: var(--color-a-danger);
+  }
+
+  /* Segmented control (filter status, rentang tanggal) */
+  /* Segmented control (filter status, rentang tanggal).
+     `display` sengaja TIDAK diatur di sini: aturan ini tidak berada di dalam
+     @layer, sehingga akan mengalahkan utility Tailwind seperti `hidden` —
+     itulah yang dulu membuat tab desktop ikut tampil di layar ponsel.
+     Bentuk tampilannya diatur lewat utility di komponen. */
+  .a-seg {
+    gap: 2px;
+    padding: 3px;
+    border-radius: 0.625rem;
+    border: 1px solid var(--color-a-line);
+    background-color: var(--color-a-surface);
+    /* Jaring pengaman: di jendela desktop yang sangat sempit, deretan tab
+       boleh digeser mendatar alih-alih meluber keluar panel. */
+    max-width: 100%;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .a-seg::-webkit-scrollbar {
+    display: none;
+  }
+  .a-tab {
+    border-radius: 0.4rem;
+    padding: 0.3rem 0.7rem;
+    font-size: 0.6875rem;
+    white-space: nowrap;
+    flex-shrink: 0;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--color-a-dim);
+    transition:
+      background-color 0.18s ease,
+      color 0.18s ease;
+  }
+  .a-tab:hover {
+    color: var(--color-a-text);
+  }
+  .a-tab[aria-pressed="true"],
+  .a-tab[data-active="true"] {
+    background-color: var(--color-a-accent);
+    color: var(--color-a-on-accent);
+  }
+
+  /* ── Permukaan ──────────────────────────────────────────────────────────── */
+
+  /* Baris daftar. Hairline hanya di bawah — bukan kotak penuh per item —
+     supaya daftar panjang terbaca sebagai satu tabel, bukan tumpukan kartu. */
+  .a-row {
+    border-bottom: 1px solid var(--color-a-line);
+    transition: background-color 0.18s ease;
+  }
+  .a-row:hover {
+    background-color: var(--color-a-surface);
+  }
+
+  .a-panel {
+    border: 1px solid var(--color-a-line);
+    border-radius: 0.75rem;
+    background-color: var(--color-a-surface);
+  }
+
+  /* Chip status: satu bentuk, warna dari token semantik. */
+  .a-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    border-radius: 999px;
+    border: 1px solid;
+    padding: 0.1rem 0.5rem;
+    font-size: 0.625rem;
+    font-weight: 600;
+    letter-spacing: 0.09em;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+  .a-chip-neutral {
+    border-color: var(--color-a-line-2);
+    color: var(--color-a-dim);
+  }
+  .a-chip-accent {
+    border-color: color-mix(in srgb, var(--color-a-accent) 45%, transparent);
+    background-color: color-mix(in srgb, var(--color-a-accent) 12%, transparent);
+    color: var(--color-a-accent);
+  }
+  .a-chip-ok {
+    border-color: color-mix(in srgb, var(--color-a-ok) 45%, transparent);
+    background-color: color-mix(in srgb, var(--color-a-ok) 12%, transparent);
+    color: var(--color-a-ok);
+  }
+  .a-chip-warn {
+    border-color: color-mix(in srgb, var(--color-a-warn) 45%, transparent);
+    background-color: color-mix(in srgb, var(--color-a-warn) 12%, transparent);
+    color: var(--color-a-warn);
+  }
+
+  /* ── Loading skeleton ───────────────────────────────────────────────────── */
+
+  /* Placeholder berbentuk konten, bukan spinner generik: mata sudah tahu
+     tata letak akhirnya sebelum data tiba. */
+  .a-skel {
+    border-radius: 0.375rem;
+    background-image: linear-gradient(
+      90deg,
+      var(--color-a-surface) 0%,
+      var(--color-a-surface-2) 50%,
+      var(--color-a-surface) 100%
+    );
+    background-size: 200% 100%;
+    animation: a-skel-sweep 1.4s ease-in-out infinite;
+  }
+  @keyframes a-skel-sweep {
+    from {
+      background-position: 200% 0;
+    }
+    to {
+      background-position: -200% 0;
+    }
+  }
+
+  /* Drawer rail masuk dari kiri. Transform-only → GPU-composited. */
+  @keyframes admin-rail-in {
+    from {
+      transform: translateX(-100%);
+    }
+    to {
+      transform: none;
+    }
+  }
+
+  /* ── Baris judul seksi (ledger rule) ────────────────────────────────────── */
+
+  /* Kunci seksi ditulis mono + uppercase seperti label indeks arsip: memberi
+     jangkar visual yang sama di setiap panel tanpa hiasan tambahan. */
+  .a-key {
+    font-family: var(--font-data);
+    font-size: 0.6875rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--color-a-faint);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .a-skel {
+      animation: none;
+    }
+    .a-rail-link,
+    .a-btn,
+    .a-icon-btn,
+    .a-tab,
+    .a-row {
+      transition: none;
+    }
+    .a-btn:active:not(:disabled) {
+      transform: none;
+    }
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SKALA DESKTOP — panel admin
+   ═══════════════════════════════════════════════════════════════════════════
+
+   Di layar besar, panel admin sebelumnya terasa kecil: teks 14px dan kontrol
+   36px dirancang untuk layar sentuh, lalu dipakai apa adanya di monitor
+   desktop yang jaraknya lebih jauh dari mata.
+
+   Menyalakan ulang ramp huruf lewat variabel tema Tailwind (`--text-*`)
+   membuat SEMUA utility `text-sm`/`text-xs`/… di dalam admin ikut naik tanpa
+   menyentuh satu pun komponen. Hanya aktif mulai `lg` supaya tata letak
+   ponsel tetap rapat dan hemat ruang.
+
+   Nilai rem dipakai (bukan px) agar ikut menghormati preferensi ukuran huruf
+   peramban pengguna. */
+
+@media (min-width: 64rem) {
+  .admin-scale {
+    /* Dua langkah di atas skala bawaan Tailwind — panel admin dibaca dari
+       jarak monitor, bukan dari telapak tangan:
+       xs 12→14 · sm 14→16 · base 16→18 · lg 18→20 · xl 20→24 · 2xl 24→28 */
+    --text-xs: 0.875rem;
+    --text-xs--line-height: calc(1.25 / 0.875);
+    --text-sm: 1rem;
+    --text-sm--line-height: calc(1.5 / 1);
+    --text-base: 1.125rem;
+    --text-base--line-height: calc(1.75 / 1.125);
+    --text-lg: 1.25rem;
+    --text-lg--line-height: calc(1.875 / 1.25);
+    --text-xl: 1.5rem;
+    --text-xl--line-height: calc(2.125 / 1.5);
+    --text-2xl: 1.75rem;
+    --text-2xl--line-height: calc(2.25 / 1.75);
+    --text-3xl: 2.25rem;
+    --text-3xl--line-height: calc(2.625 / 2.25);
+
+    /* Ritme ruang ikut naik. Padding, gap, tinggi kontrol, dan inset semua
+       dihitung dari --spacing, jadi satu nilai ini memperbesar seluruh panel
+       tanpa menyentuh satu pun komponen. 0.29rem = 4.64px, 16% di atas
+       bawaan 4px — cukup terasa tanpa membuat tata letak terasa longgar. */
+    --spacing: 0.29rem;
+  }
+
+  /* Ukuran teks bernama di komponen ikut naik. Yang terkecil dinaikkan paling
+     agresif secara relatif, karena di situlah "terasa kecil" berasal. */
+  .admin-scale .a-meta {
+    font-size: 0.875rem; /* 14px */
+  }
+  .admin-scale .a-micro {
+    font-size: 0.8125rem; /* 13px */
+  }
+  .admin-scale .a-rail-link {
+    font-size: 1rem; /* 16px */
+  }
+  .admin-scale .a-btn {
+    font-size: 0.875rem; /* 14px */
+    padding: 0.625rem 1.25rem;
+  }
+  /* Tombol selebar panel (login). Satu-satunya kontrol yang boleh setinggi
+     ini — tombol lain tetap rapat supaya toolbar tidak terasa berat.
+     Diletakkan setelah .a-btn karena specificity-nya sama; yang menang
+     adalah yang terakhir dibaca. */
+  .admin-scale .a-btn-lg {
+    font-size: 1rem; /* 16px */
+    padding: 0.9rem 1.5rem;
+  }
+  .admin-scale .a-tab {
+    font-size: 0.8125rem; /* 13px */
+    padding: 0.4375rem 0.95rem;
+  }
+  .admin-scale .a-chip {
+    font-size: 0.75rem; /* 12px */
+    padding: 0.2rem 0.7rem;
+  }
+  .admin-scale .a-key {
+    font-size: 0.8125rem; /* 13px */
+  }
+
+  /* Target klik membesar seiring teks — jari bukan lagi alat input utama,
+     presisi kursor memungkinkan kontrol lebih besar tanpa terasa berat. */
+  .admin-scale .a-icon-btn {
+    height: 2.75rem;
+    width: 2.75rem;
+  }
+  .admin-scale .a-rail-link {
+    padding: 0.7rem 0.8rem 0.7rem 0.9rem;
+  }
+}
 
 /* ── Guestbook stage (minimalis) ─────────────────────────────────────────────
    Performance-first: satu warna flat + hairline saja. Tanpa grid overlay,

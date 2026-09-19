@@ -64,3 +64,6 @@ ANALISIS-WEBSITE.md
 # hasil audit/lint sementara
 .lint*.json
 *.tsbuildinfo
+
+# skrip & screenshot verifikasi (profil Chrome di dalamnya bisa ratusan MB)
+.verify/

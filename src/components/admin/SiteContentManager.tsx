@@ -1,12 +1,23 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import Field from "@/components/admin/Field";
 import {
+  Button,
+  Chip,
+  EmptyState,
+  FormActions,
+  IconButton,
+  ListSkeleton,
+  Notice,
+  PanelHeader,
+} from "@/components/admin/ui";
+import {
   RefreshIcon,
-  SpinnerIcon,
   LockIcon,
-  InboxIcon,
+  LayoutIcon,
+  CheckIcon,
+  AlertIcon,
 } from "@/components/admin/icons";
 
 // ============================================================================
@@ -57,6 +68,18 @@ function pretty(v: unknown): string {
   }
 }
 
+/** Satu baris ringkas untuk pratinjau isi seksi di keadaan tertutup. */
+function summarize(v: unknown): string {
+  if (Array.isArray(v)) return `${v.length} item`;
+  if (v && typeof v === "object") {
+    const keys = Object.keys(v);
+    return `${keys.length} field · ${keys.slice(0, 4).join(", ")}${
+      keys.length > 4 ? "…" : ""
+    }`;
+  }
+  return typeof v;
+}
+
 export default function SiteContentManager() {
   const [sections, setSections] = useState<Section[]>([]);
   const [loading, setLoading] = useState(true);
@@ -94,18 +117,38 @@ export default function SiteContentManager() {
     load();
   }, [load]);
 
+  // ── Validasi JSON langsung saat mengetik ──
+  // Sebelumnya galat baru muncul setelah tombol Simpan ditekan. Sekarang
+  // pengguna tahu ada salah ketik pada baris mana sebelum mencoba menyimpan.
+  const parsed = useMemo(() => {
+    if (!openKey) return { ok: true as const, value: undefined };
+    try {
+      return { ok: true as const, value: JSON.parse(draft) };
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "JSON tidak valid";
+      return { ok: false as const, error: msg };
+    }
+  }, [draft, openKey]);
+
+  const active = sections.find((s) => s.key === openKey) ?? null;
+  const dirty =
+    active !== null &&
+    parsed.ok &&
+    pretty(parsed.value) !== pretty(active.data);
+
   function open(s: Section) {
-    setOpenKey(openKey === s.key ? null : s.key);
+    if (openKey === s.key) {
+      setOpenKey(null);
+      return;
+    }
+    setOpenKey(s.key);
     setDraft(pretty(s.data));
     setMessage(null);
   }
 
   async function save(key: string) {
-    let parsed: unknown;
-    try {
-      parsed = JSON.parse(draft);
-    } catch {
-      setMessage("JSON tidak valid — periksa tanda kutip dan koma.");
+    if (!parsed.ok) {
+      setMessage("JSON tidak valid — perbaiki dulu sebelum menyimpan.");
       return;
     }
 
@@ -114,13 +157,13 @@ export default function SiteContentManager() {
     const res = await fetch("/api/site-content", {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ key, data: parsed }),
+      body: JSON.stringify({ key, data: parsed.value }),
     });
     const data = await res.json().catch(() => ({}));
     if (!res.ok) {
       setMessage(data?.error ?? "Gagal menyimpan");
     } else {
-      setMessage(`Seksi "${SECTION_LABEL[key] ?? key}" tersimpan ✓`);
+      setMessage(`Seksi "${SECTION_LABEL[key] ?? key}" tersimpan.`);
       await load();
       setOpenKey(null);
     }
@@ -141,7 +184,7 @@ export default function SiteContentManager() {
       method: "DELETE",
     });
     if (res.ok) {
-      setMessage(`"${SECTION_LABEL[key] ?? key}" dikembalikan ke default ✓`);
+      setMessage(`"${SECTION_LABEL[key] ?? key}" dikembalikan ke default.`);
       await load();
       setOpenKey(null);
     } else {
@@ -155,140 +198,175 @@ export default function SiteContentManager() {
 
   return (
     <div>
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
-        <div>
-          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">
-            Konten
-          </p>
-          <h2 className="text-display flex items-center gap-3 text-2xl uppercase text-white">
-            Site Content
-            {overriddenCount > 0 && (
-              <span className="rounded-full border border-accent/40 bg-accent/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-accent">
-                {overriddenCount} diedit
-              </span>
-            )}
-          </h2>
-        </div>
-        <button
-          onClick={load}
-          aria-label="Muat ulang"
-          title="Muat ulang"
-          disabled={loading}
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-300 transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98] disabled:opacity-50"
-        >
-          {loading ? <SpinnerIcon /> : <RefreshIcon />}
-        </button>
-      </div>
+      <PanelHeader
+        title="Konten situs"
+        description="Nilai di sini menimpa default di src/lib/config.ts. Seksi yang belum diedit memakai nilai dari kode, jadi situs tidak pernah kosong. Perubahan tampil setelah situs dimuat ulang."
+        meta={
+          !loading && (
+            <>
+              <Chip tone="neutral">{sections.length} seksi</Chip>
+              {overriddenCount > 0 && (
+                <Chip tone="accent">{overriddenCount} diedit</Chip>
+              )}
+            </>
+          )
+        }
+        actions={
+          <IconButton
+            icon={RefreshIcon}
+            label="Muat ulang"
+            disabled={loading}
+            onClick={load}
+          />
+        }
+      />
 
-      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-gray-500">
-        Nilai di sini <strong className="text-gray-300">menimpa</strong> default
-        di <code className="text-accent">src/lib/config.ts</code>. Seksi yang
-        belum diedit memakai nilai dari kode — jadi situs tidak pernah kosong.
-        Setelah menyimpan, perubahan tampil di situs pada muat ulang berikutnya.
-      </p>
-
-      {error && (
-        <p className="mb-4 border-l-2 border-yellow-500/60 bg-yellow-500/5 px-3 py-2 text-sm text-yellow-300">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="warn">{error}</Notice>}
       {message && (
-        <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-gray-300">
+        <Notice
+          tone={message.startsWith("Gagal") || message.startsWith("JSON") ? "error" : "ok"}
+          onDismiss={() => setMessage(null)}
+        >
           {message}
-        </p>
+        </Notice>
       )}
 
       {loading ? (
-        <p className="text-gray-500">Loading…</p>
+        <ListSkeleton rows={5} />
       ) : sections.length === 0 ? (
-        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
-          <InboxIcon className="text-gray-600" />
-          <p className="text-sm text-gray-500">Tidak ada seksi.</p>
-        </div>
+        <EmptyState
+          icon={LayoutIcon}
+          title="Tidak ada seksi"
+          hint="Jalankan supabase/tahap3.sql di Supabase SQL Editor untuk membuat tabel site_content."
+        />
       ) : (
-        <div className="admin-list mb-8 flex flex-col gap-3">
+        <div className="mb-8 flex flex-col gap-2.5">
           {sections.map((s) => {
             const isOpen = openKey === s.key;
             const busy = busyKey === s.key;
+            const label = SECTION_LABEL[s.key] ?? s.key;
             return (
               <article
                 key={s.key}
-                className={`border p-4 transition-colors duration-300 sm:p-5 ${
-                  isOpen ? "border-accent/40" : "border-white/10 hover:border-accent/40"
+                className={`overflow-hidden rounded-xl border transition-colors ${
+                  isOpen
+                    ? "border-[var(--color-a-accent)]/50"
+                    : "border-[var(--color-a-line)] hover:border-[var(--color-a-line-2)]"
                 }`}
               >
-                <div className="flex flex-wrap items-center justify-between gap-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 p-3.5">
                   <button
                     type="button"
                     onClick={() => open(s)}
                     aria-expanded={isOpen}
                     className="min-w-0 flex-1 text-left"
                   >
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <p className="text-sm font-semibold text-white">
-                        {SECTION_LABEL[s.key] ?? s.key}
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <p className="text-sm font-medium text-[var(--color-a-text)]">
+                        {label}
                       </p>
-                      <code className="text-[11px] text-gray-500">{s.key}</code>
                       {s.overridden ? (
-                        <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-accent">
-                          Diedit
-                        </span>
+                        <Chip tone="accent">diedit</Chip>
                       ) : (
-                        <span className="rounded-full border border-white/15 px-2 py-0.5 text-[10px] uppercase tracking-widest text-gray-500">
-                          Default
-                        </span>
+                        <Chip tone="neutral">default</Chip>
                       )}
                     </div>
-                    <p className="mt-1 text-xs text-gray-500">
-                      {SECTION_HINT[s.key] ?? ""}
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 a-meta text-[var(--color-a-faint)]">
+                      <code className="a-data">{s.key}</code>
+                      <span aria-hidden="true">·</span>
+                      <span className="a-data">{summarize(s.data)}</span>
+                      {SECTION_HINT[s.key] && (
+                        <>
+                          <span aria-hidden="true">·</span>
+                          <span>{SECTION_HINT[s.key]}</span>
+                        </>
+                      )}
                     </p>
                   </button>
 
-                  {s.overridden && (
-                    <button
-                      onClick={() => reset(s.key)}
-                      disabled={busy}
-                      title="Kembalikan ke default kode"
-                      className="shrink-0 rounded-md border border-white/15 px-3 py-1.5 text-[10px] uppercase tracking-widest text-gray-400 transition-colors duration-300 hover:border-yellow-500/60 hover:text-yellow-400 disabled:opacity-50"
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {s.overridden && (
+                      <Button
+                        variant="quiet"
+                        disabled={busy}
+                        onClick={() => reset(s.key)}
+                        title="Kembalikan ke default kode"
+                      >
+                        Reset
+                      </Button>
+                    )}
+                    <Button
+                      variant={isOpen ? "ghost" : "ghost"}
+                      onClick={() => open(s)}
+                      aria-expanded={isOpen}
                     >
-                      Reset
-                    </button>
-                  )}
+                      {isOpen ? "Tutup" : "Edit"}
+                    </Button>
+                  </div>
                 </div>
 
                 {isOpen && (
-                  <div className="mt-4 border-t border-white/5 pt-4">
+                  <div className="border-t border-[var(--color-a-line)] p-4">
                     <Field
                       label="Data (JSON)"
                       textarea
+                      rows={14}
                       value={draft}
                       onChange={setDraft}
+                      hint={
+                        <span className="flex items-start gap-1.5">
+                          <LockIcon className="mt-0.5 h-3.5 w-3.5 shrink-0" />
+                          <span>
+                            Bentuk data divalidasi di server: harus cocok dengan
+                            struktur default (objek tetap objek, array tetap
+                            array). Untuk teks, gunakan pasangan{" "}
+                            <code className="a-data text-[var(--color-a-accent)]">
+                              {`{ "en": "…", "id": "…" }`}
+                            </code>
+                            .
+                          </span>
+                        </span>
+                      }
                     />
-                    <p className="mt-2 flex items-start gap-2 text-[11px] leading-relaxed text-gray-500">
-                      <LockIcon className="mt-0.5 shrink-0" />
-                      <span>
-                        Bentuk data divalidasi di server: harus cocok dengan
-                        struktur default (objek tetap objek, array tetap array).
-                        Untuk teks, gunakan pasangan{" "}
-                        <code className="text-accent">{`{ "en": "…", "id": "…" }`}</code>.
-                      </span>
-                    </p>
 
-                    <div className="mt-4 flex flex-wrap gap-3">
-                      <button
+                    {/* Umpan balik validasi: status, bukan kalimat panjang. */}
+                    <div className="mt-3 flex flex-wrap items-center gap-2 a-meta">
+                      {parsed.ok ? (
+                        <span className="inline-flex items-center gap-1.5 text-[var(--color-a-ok)]">
+                          <CheckIcon className="h-3.5 w-3.5" />
+                          JSON valid
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1.5 text-[var(--color-a-danger)]">
+                          <AlertIcon className="h-3.5 w-3.5" />
+                          {parsed.error}
+                        </span>
+                      )}
+                      {dirty && (
+                        <span className="text-[var(--color-a-warn)]">
+                          · ada perubahan belum disimpan
+                        </span>
+                      )}
+                    </div>
+
+                    <FormActions>
+                      <Button
+                        variant="primary"
+                        disabled={busy || !parsed.ok || !dirty}
                         onClick={() => save(s.key)}
-                        disabled={busy}
-                        className="rounded-md bg-accent px-5 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft disabled:opacity-50"
                       >
                         {busy ? "Menyimpan…" : "Simpan seksi"}
-                      </button>
-                      <button
-                        onClick={() => setOpenKey(null)}
-                        className="rounded-md border border-white/15 px-5 py-2 text-xs uppercase tracking-[0.16em] text-gray-300 transition-colors duration-300 hover:border-white/30 hover:text-white"
+                      </Button>
+                      <Button
+                        variant="quiet"
+                        onClick={() => {
+                          setOpenKey(null);
+                          setMessage(null);
+                        }}
                       >
                         Batal
-                      </button>
-                    </div>
+                      </Button>
+                    </FormActions>
                   </div>
                 )}
               </article>

@@ -4,12 +4,20 @@ import { useCallback, useEffect, useState } from "react";
 import Field from "@/components/admin/Field";
 import ReorderableRow from "@/components/admin/ReorderableRow";
 import {
+  Button,
+  Chip,
+  EmptyState,
+  FormActions,
+  IconButton,
+  ListSkeleton,
+  Notice,
+  PanelHeader,
+} from "@/components/admin/ui";
+import {
   PlusIcon,
   PencilIcon,
   TrashIcon,
-  InboxIcon,
-  RefreshIcon,
-  SpinnerIcon,
+  QuoteIcon,
 } from "@/components/admin/icons";
 import { useReorder } from "@/lib/use-reorder";
 import type { Testimonial } from "@/types";
@@ -42,8 +50,14 @@ export default function TestimonialsManager() {
   const [saving, setSaving] = useState(false);
   const [message, setMessage] = useState<string | null>(null);
 
-  const { dragHandlers, dragId, overId, saving: reordering, moveBy } =
-    useReorder<Testimonial>("testimonials", items, setItems);
+  const {
+    dragHandlers,
+    dragId,
+    overId,
+    saving: reordering,
+    error: reorderError,
+    moveBy,
+  } = useReorder<Testimonial>("testimonials", items, setItems);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -68,11 +82,20 @@ export default function TestimonialsManager() {
     load();
   }, [load]);
 
+  function focusForm() {
+    requestAnimationFrame(() =>
+      document
+        .getElementById("testimonial-form")
+        ?.scrollIntoView({ behavior: "smooth", block: "start" }),
+    );
+  }
+
   function openNew() {
     setEditing(null);
     setForm({ ...EMPTY });
     setMessage(null);
     setShowForm(true);
+    focusForm();
   }
 
   function openEdit(x: Testimonial) {
@@ -89,6 +112,7 @@ export default function TestimonialsManager() {
     });
     setMessage(null);
     setShowForm(true);
+    focusForm();
   }
 
   async function save(e: React.FormEvent) {
@@ -110,9 +134,9 @@ export default function TestimonialsManager() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setMessage(`Error: ${data.error ?? "Gagal menyimpan"}`);
+      setMessage(`Gagal menyimpan: ${data.error ?? "terjadi kesalahan"}`);
     } else {
-      setMessage(editing ? "Testimoni diperbarui ✓" : "Testimoni ditambahkan ✓");
+      setMessage(editing ? "Testimoni diperbarui." : "Testimoni ditambahkan.");
       setEditing(null);
       setShowForm(false);
       await load();
@@ -121,7 +145,8 @@ export default function TestimonialsManager() {
   }
 
   async function remove(x: Testimonial) {
-    if (!confirm(`Hapus testimoni dari "${x.author}"?`)) return;
+    if (!confirm(`Hapus testimoni dari "${x.author}"? Tindakan ini permanen.`))
+      return;
     const res = await fetch(
       `/api/testimonials?id=${encodeURIComponent(x.id)}`,
       { method: "DELETE" },
@@ -130,69 +155,60 @@ export default function TestimonialsManager() {
       setItems((prev) => prev.filter((y) => y.id !== x.id));
     } else {
       const data = await res.json().catch(() => ({}));
-      setError(data?.error ?? "Gagal menghapus");
+      setError(data?.error ?? "Gagal menghapus testimoni");
     }
   }
 
+  const withoutAvatar = items.filter((x) => !x.avatar_url).length;
+
   return (
     <div>
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
-        <div>
-          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">
-            Konten
-          </p>
-          <h2 className="text-display flex items-center gap-3 text-2xl uppercase text-white">
-            Testimonials
-            <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-accent">
-              {loading ? "…" : items.length}
-            </span>
-          </h2>
-        </div>
-        <div className="flex items-center gap-2">
-          <button
-            onClick={load}
-            aria-label="Muat ulang"
-            title="Muat ulang"
-            disabled={loading}
-            className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-300 transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98] disabled:opacity-50"
-          >
-            {loading ? <SpinnerIcon /> : <RefreshIcon />}
-          </button>
-          <button
-            onClick={openNew}
-            className="flex items-center gap-2 rounded-md bg-accent px-4 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98]"
-          >
-            <PlusIcon />
-            Tambah
-          </button>
-        </div>
-      </div>
+      <PanelHeader
+        title="Testimoni"
+        description="Tampil sebagai grid di halaman utama. Selama daftar ini kosong, seksi tersebut tidak dirender di situs publik."
+        meta={
+          !loading && (
+            <>
+              <Chip tone="neutral">{items.length} kutipan</Chip>
+              {withoutAvatar > 0 && (
+                <Chip tone="warn">{withoutAvatar} tanpa foto</Chip>
+              )}
+            </>
+          )
+        }
+        actions={
+          <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+            Testimoni baru
+          </Button>
+        }
+      />
 
-      <p className="mb-6 max-w-2xl text-sm leading-relaxed text-gray-500">
-        Tampil sebagai grid di halaman utama. Kalau kosong, seksi ini tidak
-        dirender sama sekali di situs publik.
-      </p>
-
-      {error && (
-        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
-          {error}
-        </p>
-      )}
+      {error && <Notice tone="error">{error}</Notice>}
       {message && (
-        <p className="mb-4 border-l-2 border-accent px-3 py-2 text-sm text-gray-300">
+        <Notice
+          tone={message.startsWith("Gagal") ? "error" : "ok"}
+          onDismiss={() => setMessage(null)}
+        >
           {message}
-        </p>
+        </Notice>
       )}
+      {reorderError && <Notice tone="error">{reorderError}</Notice>}
 
       {loading ? (
-        <p className="text-gray-500">Loading…</p>
+        <ListSkeleton />
       ) : items.length === 0 ? (
-        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
-          <InboxIcon className="text-gray-600" />
-          <p className="text-sm text-gray-500">Belum ada testimoni.</p>
-        </div>
+        <EmptyState
+          icon={QuoteIcon}
+          title="Belum ada testimoni"
+          hint="Kutipan dari klien, atasan, atau rekan kerja. Sertakan nama dan perannya supaya kredibel."
+          action={
+            <Button variant="primary" icon={PlusIcon} onClick={openNew}>
+              Testimoni baru
+            </Button>
+          }
+        />
       ) : (
-        <div className="admin-list mb-8">
+        <div className="mb-8">
           {items.map((x, i) => (
             <ReorderableRow
               key={x.id}
@@ -206,49 +222,45 @@ export default function TestimonialsManager() {
               onMoveDown={() => moveBy(x.id, 1)}
             >
               {x.avatar_url ? (
-                 
                 <img
                   src={x.avatar_url}
                   alt=""
-                  className="h-11 w-11 shrink-0 rounded-full object-cover"
+                  className="h-10 w-10 shrink-0 rounded-full border border-[var(--color-a-line)] object-cover"
                 />
               ) : (
                 <span
                   aria-hidden="true"
-                  className="text-display flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-accent/20 text-xs text-accent"
+                  className="text-display flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--color-a-line)] bg-[var(--color-a-surface-2)] text-xs text-[var(--color-a-dim)]"
                 >
                   {initialsOf(x.author)}
                 </span>
               )}
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-white">
+                <p className="truncate text-sm font-medium text-[var(--color-a-text)]">
                   {x.author}
                   {(x.role || x.company) && (
-                    <span className="ml-2 text-xs font-normal text-gray-500">
+                    <span className="ml-2 text-xs font-normal text-[var(--color-a-faint)]">
                       {[x.role, x.company].filter(Boolean).join(", ")}
                     </span>
                   )}
                 </p>
-                <p className="truncate text-xs text-gray-500">{x.quote_en}</p>
+                <p className="mt-0.5 truncate text-xs italic text-[var(--color-a-dim)]">
+                  {x.quote_en}
+                </p>
               </div>
-              <div className="flex shrink-0 gap-2">
-                <button
+              <div className="flex shrink-0 gap-1.5">
+                <IconButton
+                  icon={PencilIcon}
+                  label={`Edit testimoni dari ${x.author}`}
                   onClick={() => openEdit(x)}
-                  aria-label={`Edit testimoni dari ${x.author}`}
-                  title="Edit"
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-white transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98]"
-                >
-                  <PencilIcon />
-                </button>
-                <button
-                  onClick={() => remove(x)}
+                />
+                <IconButton
+                  icon={TrashIcon}
+                  label={`Hapus testimoni dari ${x.author}`}
+                  danger
                   disabled={reordering}
-                  aria-label={`Hapus testimoni dari ${x.author}`}
-                  title="Hapus"
-                  className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98] disabled:opacity-50"
-                >
-                  <TrashIcon />
-                </button>
+                  onClick={() => remove(x)}
+                />
               </div>
             </ReorderableRow>
           ))}
@@ -256,46 +268,102 @@ export default function TestimonialsManager() {
       )}
 
       {showForm && (
-        <form onSubmit={save} className="admin-fade-up border-y border-white/10 py-7">
-          <h3 className="mb-5 text-lg font-semibold text-white">
-            {editing ? "Edit testimoni" : "Testimoni baru"}
-          </h3>
+        <form
+          id="testimonial-form"
+          onSubmit={save}
+          className="admin-fade-up a-panel scroll-mt-24 p-5 sm:p-6"
+        >
+          <div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-b border-[var(--color-a-line)] pb-4">
+            <h3 className="text-display text-lg uppercase text-[var(--color-a-text)]">
+              {editing ? "Edit testimoni" : "Testimoni baru"}
+            </h3>
+            {editing && (
+              <span className="a-data a-meta text-[var(--color-a-faint)]">
+                {editing.id.slice(0, 8)}
+              </span>
+            )}
+          </div>
+
           <div className="grid gap-4 md:grid-cols-2">
             <div className="md:col-span-2">
-              <Field label="Quote (EN)" required textarea value={form.quote_en} onChange={(v) => setForm({ ...form, quote_en: v })} />
+              <Field
+                label="Kutipan (EN)"
+                required
+                textarea
+                value={form.quote_en}
+                onChange={(v) => setForm({ ...form, quote_en: v })}
+                hint="Tulis apa adanya. Kutipan panjang lebih baik dipotong daripada diparafrase."
+              />
             </div>
-            <div className="md:col-span-2">
-              <Field label="Quote (ID)" textarea value={form.quote_id} onChange={(v) => setForm({ ...form, quote_id: v })} />
-            </div>
-            <Field label="Author" required value={form.author} onChange={(v) => setForm({ ...form, author: v })} />
-            <Field label="Role" value={form.role} onChange={(v) => setForm({ ...form, role: v })} placeholder="CTO" />
-            <Field label="Company" value={form.company} onChange={(v) => setForm({ ...form, company: v })} />
-            <Field label="Link (URL)" value={form.link} onChange={(v) => setForm({ ...form, link: v })} />
             <div className="md:col-span-2">
               <Field
-                label="Avatar URL"
+                label="Kutipan (ID)"
+                textarea
+                value={form.quote_id}
+                onChange={(v) => setForm({ ...form, quote_id: v })}
+              />
+            </div>
+
+            <Field
+              label="Nama"
+              required
+              value={form.author}
+              onChange={(v) => setForm({ ...form, author: v })}
+            />
+            <Field
+              label="Peran"
+              value={form.role}
+              onChange={(v) => setForm({ ...form, role: v })}
+              placeholder="CTO, Dosen, Manajer Proyek…"
+            />
+            <Field
+              label="Perusahaan / institusi"
+              value={form.company}
+              onChange={(v) => setForm({ ...form, company: v })}
+            />
+            <Field
+              label="Tautan"
+              type="url"
+              value={form.link}
+              onChange={(v) => setForm({ ...form, link: v })}
+              placeholder="https://linkedin.com/in/…"
+              hint="Profil pemberi kutipan — memperkuat kredibilitas."
+            />
+            <div className="md:col-span-2">
+              <Field
+                label="URL foto"
+                type="url"
                 value={form.avatar_url}
                 onChange={(v) => setForm({ ...form, avatar_url: v })}
-                placeholder="https://… (kosong = inisial otomatis)"
+                placeholder="https://…"
+                hint="Kosongkan untuk memakai inisial nama secara otomatis."
+              />
+            </div>
+            <div className="w-32">
+              <Field
+                label="Urutan"
+                type="number"
+                value={form.sort_order}
+                onChange={(v) => setForm({ ...form, sort_order: v })}
+                hint="Angka kecil tampil lebih dulu."
               />
             </div>
           </div>
-          <div className="mt-6 flex gap-3">
-            <button
-              type="submit"
-              disabled={saving}
-              className="rounded-md bg-accent px-6 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-            >
-              {saving ? "Menyimpan…" : "Simpan"}
-            </button>
-            <button
-              type="button"
-              onClick={() => setShowForm(false)}
-              className="rounded-md border border-white/15 px-6 py-2.5 text-xs text-gray-300 transition-colors duration-300 hover:border-white/30 hover:text-white active:scale-[0.98]"
+
+          <FormActions>
+            <Button variant="primary" type="submit" disabled={saving}>
+              {saving ? "Menyimpan…" : "Simpan testimoni"}
+            </Button>
+            <Button
+              variant="quiet"
+              onClick={() => {
+                setShowForm(false);
+                setEditing(null);
+              }}
             >
               Batal
-            </button>
-          </div>
+            </Button>
+          </FormActions>
         </form>
       )}
     </div>

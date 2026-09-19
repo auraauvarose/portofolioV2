@@ -43,7 +43,7 @@
 *Dihasilkan dari 2 agent paralel (security audit + code-quality/bug audit), dengan verifikasi silang manual terhadap sumber dan artefak build. Tidak ada file yang dimodifikasi saat audit.*
 
 > **STATUS P0 — SELESAI & TERVERIFIKASI (build + smoke test runtime):**
-> S1 ✅ (route diagnose dihapus, 404) · S2 ✅ (fallback dihapus; `aura2007` = 0 kemunculan di chunk klien baru) · S3 ✅ (token = `exp.HMAC-SHA256`, expiry 7 hari, `secure` dari protokol request; cookie lama format hash → 401) · S5 ✅ untuk setup baru (`schema.sql`) — **aksi manual masih diperlukan di DB live + matikan signup** · S6 ⚠️ (README diberi peringatan; rotasi secret + deploy CI = aksi user) · S9-S15 sebagian → P1/P2.
+> S1 ✅ (route diagnose dihapus, 404) · S2 ✅ (fallback dihapus; `[REDACTED]` = 0 kemunculan di chunk klien baru) · S3 ✅ (token = `exp.HMAC-SHA256`, expiry 7 hari, `secure` dari protokol request; cookie lama format hash → 401) · S5 ✅ untuk setup baru (`schema.sql`) — **aksi manual masih diperlukan di DB live + matikan signup** · S6 ⚠️ (README diberi peringatan; rotasi secret + deploy CI = aksi user) · S9-S15 sebagian → P1/P2.
 > Bug B-tier, rate-limit login (S4), presign allowlist (S7), dsb. **belum** — lihat §5.
 > Aksi user yang tersisa ada di bagian **"Setelah deploy"** di bawah.
 
@@ -59,7 +59,7 @@ Legenda: 🔴 Kritis · 🟠 Tinggi · 🟡 Sedang · ⚪ Rendah/Ringan
 | # | Sev | Temuan | Lokasi |
 |---|-----|--------|--------|
 | S1 | 🔴 | `/api/admin/diagnose` tanpa auth; membocorkan `activePasswordFingerprint` yang memakai **fungsi hash yang sama** dengan pembuat cookie sesi → siapa pun set `admin_session=admin-<fp>` = **admin penuh**, exfil email via `?scope=admin`, deface konten. (middleware tidak meng-cover `/api/admin/*`) | `src/app/api/admin/diagnose/route.ts:12-24`, `src/lib/admin-cookie.ts:3-10`, `src/middleware.ts:33-39` |
-| S2 | 🔴 | Password default `aura2007` hard-code di source publik + README; fallback aktif diam-diam bila env lupa diset. **Terverifikasi ikut ter-bundle ke chunk klien publik** (`page-*.js`, `admin/page-*.js`) karena 15 komponen klien mengimpor `config.ts` | `src/lib/config.ts:3-5`, `README.md:52,123` |
+| S2 | 🔴 | Password default `[REDACTED]` hard-code di source publik + README; fallback aktif diam-diam bila env lupa diset. **Terverifikasi ikut ter-bundle ke chunk klien publik** (`page-*.js`, `admin/page-*.js`) karena 15 komponen klien mengimpor `config.ts` | `src/lib/config.ts:3-5`, `README.md:52,123` |
 | S3 | 🟠 | Cookie sesi = hash 32-bit statis, tanpa expiry/nonce/HMAC → derivable offline, tak bisa dicabut (logout cuma hapus lokal), semua sesi identik; `secure` flag tergantung `NODE_ENV` yang tak terjamin di Workers | `src/lib/admin-cookie.ts`, `src/lib/admin-auth.ts:22-43` |
 | S4 | 🟠 | `/api/admin/login` tanpa rate-limit/lockout → brute-force tak terbatas | `src/app/api/admin/login/route.ts:4-22` |
 | S5 | 🟠 | RLS `for all to authenticated using(true)` padahal app tak memakai Supabase Auth → orang yang **self-signup via GoTrue** (default aktif) dapat tulis/hapus semua tabel + baca email komentar (revoke hanya untuk `anon`) | `supabase/schema.sql:71-76`, `supabase/comments.sql:27-28,47-48` |
@@ -103,7 +103,7 @@ Legenda: 🔴 Kritis · 🟠 Tinggi · 🟡 Sedang · ⚪ Rendah/Ringan
 
 ## 4. Koreksi Cross-Check
 - ❌ *"Middleware me-redirect API tak ber-auth ke `/admin/login` (307, res.ok=true)"* (laporan bug #5) — **tidak benar**: body `middleware.ts:15` hanya match `path.startsWith("/admin")`; `/api/*` lolos dan route mengembalikan 401 JSON. Masalah sebenarnya = matcher S13 (no-op).
-- ✅ Verifikasi independen: literal `aura2007` ada di 2 chunk klien ter-build; `next-env.mjs` artefak saat ini berisi kunci `ADMIN_PASSWORD`/`SUPABASE_SERVICE_ROLE_KEY`/`R2_SECRET_ACCESS_KEY` (nilai tidak pernah dikutip).
+- ✅ Verifikasi independen: literal `[REDACTED]` ada di 2 chunk klien ter-build; `next-env.mjs` artefak saat ini berisi kunci `ADMIN_PASSWORD`/`SUPABASE_SERVICE_ROLE_KEY`/`R2_SECRET_ACCESS_KEY` (nilai tidak pernah dikutip).
 
 ## 5. Roadmap Perbaikan
 
@@ -117,7 +117,7 @@ Legenda: 🔴 Kritis · 🟠 Tinggi · 🟡 Sedang · ⚪ Rendah/Ringan
 
 **P1 — minggu ini:** login rate-limit (Cloudflare WAF rule paling murah); presign: allowlist folder + size & MIME server-side; `try/catch/finally` + pesan error semua manager admin; `approved:false` default + `cf.clientIp`; security headers + `robots.txt`; normalisasi pesan error; validasi UUID + 404; Origin check.
 
-**P2 — hygiene:** matikan `force-dynamic` → revalidate/tag; satu jalur baca + urutan konsisten; `data.ts` kembalikan `[]`; `sort_order` max+1; optimasi gambar (`next/image` + remotePatterns R2) & hapus 5,9MB aset mati; kurangi font preload; ESLint aktifkan + satu lockfile; `lang` dinamis; a11y kartu (`button`/`role`); `useMemo` context; cleanup listener/AbortController; README: sinkron dengan kode (fitur komentar belum terdokumentasi, klaim "default aura2007" & "max 50MB" & "images unoptimized required" perlu dikoreksi).
+**P2 — hygiene:** matikan `force-dynamic` → revalidate/tag; satu jalur baca + urutan konsisten; `data.ts` kembalikan `[]`; `sort_order` max+1; optimasi gambar (`next/image` + remotePatterns R2) & hapus 5,9MB aset mati; kurangi font preload; ESLint aktifkan + satu lockfile; `lang` dinamis; a11y kartu (`button`/`role`); `useMemo` context; cleanup listener/AbortController; README: sinkron dengan kode (fitur komentar belum terdokumentasi, klaim "default [REDACTED]" & "max 50MB" & "images unoptimized required" perlu dikoreksi).
 
 ---
 

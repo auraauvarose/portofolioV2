@@ -1,14 +1,24 @@
 "use client";
 
 import Link from "next/link";
-import { Suspense, useState } from "react";
+import { Suspense, useId, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
+import { EyeIcon, EyeOffIcon, LockIcon } from "@/components/admin/icons";
+
+// ============================================================================
+// Halaman masuk panel admin.
+//
+// Satu pekerjaan saja: memasukkan kata sandi. Tata letaknya karena itu satu
+// kolom sempit yang tenang — tanpa hero pemasaran yang mengalihkan perhatian.
+// ============================================================================
 
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const passwordId = useId();
 
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [shake, setShake] = useState(0);
@@ -26,7 +36,7 @@ function LoginForm() {
 
     if (!res.ok) {
       const data = await res.json().catch(() => ({}));
-      setError(data.error ?? "Login gagal. Coba lagi.");
+      setError(data.error ?? "Masuk gagal. Coba lagi.");
       setLoading(false);
       setShake((value) => value + 1);
       return;
@@ -41,71 +51,90 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-ink text-ecru">
-      <header className="mx-auto flex max-w-6xl items-center justify-between px-6 py-6 md:px-10">
+    <div className="admin-scale flex min-h-[100dvh] flex-col bg-[var(--color-a-canvas)] text-[var(--color-a-text)]">
+      <header className="mx-auto flex w-full max-w-5xl items-center justify-between px-6 py-6 lg:max-w-6xl lg:py-8">
         <Link
           href="/"
-          className="text-display text-sm uppercase tracking-[0.14em] text-white transition-colors hover:text-accent"
+          className="text-display text-sm uppercase tracking-[0.14em] transition-colors hover:text-[var(--color-a-accent)] lg:text-base"
         >
-          Aura <span className="text-accent">Auvarose</span>
+          Aura <span className="text-[var(--color-a-accent)]">Auvarose</span>
         </Link>
-        <span className="text-[10px] uppercase tracking-[0.24em] text-gray-500">
-          Admin access
-        </span>
+        <span className="a-key">Panel admin</span>
       </header>
 
-      <main className="mx-auto grid min-h-[calc(100dvh-85px)] max-w-6xl items-start gap-14 px-6 pb-16 pt-20 md:px-10 md:pt-24 lg:items-center lg:pt-0 lg:grid-cols-[1fr_360px] lg:gap-24">
-        <section className="admin-fade-up hidden lg:block">
-          <p className="mb-6 text-[10px] uppercase tracking-[0.28em] text-accent">
-            Private workspace
-          </p>
-          <h1 className="text-display max-w-xl text-6xl uppercase leading-[0.9] text-white xl:text-7xl">
-            Keep the work moving<span className="text-accent">.</span>
-          </h1>
-          <p className="mt-8 max-w-sm text-sm leading-7 text-gray-500">
-            Update projects, certifications, and selected work from one quiet place.
-          </p>
-        </section>
-
+      {/* Kartu diletakkan sedikit di atas titik tengah: secara optis terasa
+          lebih seimbang daripada tepat di tengah, karena mata membaca dari
+          atas dan ruang sisa di bawah tidak terasa kosong. */}
+      <main className="flex flex-1 items-start justify-center px-6 pb-24 pt-6 sm:pt-16">
         <section
           key={shake}
-          className={`admin-fade-up w-full ${error ? "admin-shake" : ""}`}
+          className={`w-full max-w-sm lg:max-w-md ${error ? "admin-shake" : "admin-fade-up"}`}
         >
-          <div className="border-y border-white/10 py-8 sm:border sm:px-8">
-            <div className="mb-8">
-              <p className="mb-3 text-[10px] uppercase tracking-[0.28em] text-accent">
-                Welcome back
-              </p>
-              <h1 className="text-display text-3xl uppercase text-white">
-                Sign in<span className="text-accent">.</span>
-              </h1>
-              <p className="mt-3 text-sm leading-6 text-gray-500">
-                Enter your password to continue.
-              </p>
-            </div>
+          <div className="a-panel p-6 sm:p-7 lg:p-9">
+            <span className="mb-5 flex h-10 w-10 items-center justify-center rounded-full border border-[var(--color-a-line)] text-[var(--color-a-accent)] lg:mb-6 lg:h-14 lg:w-14">
+              <LockIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+            </span>
 
-            <form onSubmit={handleSubmit}>
+            <h1 className="text-display text-2xl uppercase lg:text-3xl">Masuk</h1>
+            <p className="mt-2 text-sm leading-relaxed text-[var(--color-a-dim)] lg:mt-3">
+              Masukkan kata sandi admin untuk melanjutkan.
+            </p>
+
+            <form onSubmit={handleSubmit} className="mt-6 lg:mt-8">
               <label
-                htmlFor="admin-password"
-                className="mb-2 block text-[10px] uppercase tracking-[0.22em] text-gray-400"
+                htmlFor={passwordId}
+                className="mb-1.5 block text-xs font-medium text-[var(--color-a-dim)] lg:mb-2"
               >
-                Password
+                Kata sandi
               </label>
-              <input
-                id="admin-password"
-                type="password"
-                required
-                autoFocus
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="mb-5 w-full rounded-md border border-white/15 bg-transparent px-3.5 py-3 text-sm text-white outline-none transition-colors placeholder:text-gray-600 hover:border-white/30 focus:border-accent"
-              />
+
+              <div className="relative">
+                <input
+                  id={passwordId}
+                  type={showPassword ? "text" : "password"}
+                  required
+                  autoFocus
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  aria-describedby={error ? `${passwordId}-error` : undefined}
+                  aria-invalid={error ? true : undefined}
+                  className="w-full rounded-lg border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-3 py-2.5 pr-11 text-sm text-[var(--color-a-text)] outline-none transition-colors placeholder:text-[var(--color-a-faint)] hover:border-[var(--color-a-accent)]/50 focus:border-[var(--color-a-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-a-accent)] lg:px-4 lg:py-3.5 lg:pr-14"
+                />
+                {/* Tombol lihat sandi: mengurangi salah ketik tanpa
+                    mengorbankan privasi di layar bersama. */}
+                <button
+                  type="button"
+                  onClick={() => setShowPassword((v) => !v)}
+                  aria-label={
+                    showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+                  }
+                  title={
+                    showPassword ? "Sembunyikan kata sandi" : "Tampilkan kata sandi"
+                  }
+                  className="absolute right-1 top-1/2 flex h-9 w-9 -translate-y-1/2 items-center justify-center rounded-md text-[var(--color-a-faint)] transition-colors hover:text-[var(--color-a-text)] lg:right-2 lg:h-10 lg:w-10"
+                >
+                  {showPassword ? (
+                    <EyeOffIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+                  ) : (
+                    <EyeIcon className="h-4 w-4 lg:h-5 lg:w-5" />
+                  )}
+                </button>
+              </div>
 
               {error && (
                 <p
+                  id={`${passwordId}-error`}
                   role="alert"
-                  className="mb-5 border-l-2 border-red-400 px-3 py-2 text-sm leading-5 text-red-300"
+                  className="mt-3 rounded-lg border px-3 py-2 text-sm leading-relaxed"
+                  style={{
+                    borderColor:
+                      "color-mix(in srgb, var(--color-a-danger) 38%, transparent)",
+                    backgroundColor:
+                      "color-mix(in srgb, var(--color-a-danger) 8%, transparent)",
+                    color: "var(--color-a-danger)",
+                  }}
                 >
                   {error}
                 </p>
@@ -114,19 +143,19 @@ function LoginForm() {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full rounded-md bg-accent px-4 py-3 text-sm font-semibold uppercase tracking-[0.18em] text-black transition-colors hover:bg-accent-soft active:scale-[0.99] disabled:cursor-not-allowed disabled:opacity-50"
+                className="a-btn a-btn-primary a-btn-lg mt-5 w-full py-3 lg:mt-6"
               >
-                {loading ? "Checking…" : "Continue"}
+                {loading ? "Memeriksa…" : "Masuk"}
               </button>
             </form>
-
-            <Link
-              href="/"
-              className="mt-7 inline-block text-xs text-gray-500 transition-colors hover:text-accent"
-            >
-              ← Back to site
-            </Link>
           </div>
+
+          <Link
+            href="/"
+            className="mt-6 inline-flex items-center gap-1.5 text-xs text-[var(--color-a-faint)] transition-colors hover:text-[var(--color-a-text)] lg:mt-7"
+          >
+            ← Kembali ke situs
+          </Link>
         </section>
       </main>
     </div>

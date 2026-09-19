@@ -1,15 +1,38 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useReportCount } from "@/components/admin/admin-counts";
 import {
-  InboxIcon,
+  Button,
+  Chip,
+  EmptyState,
+  IconButton,
+  ListSkeleton,
+  Notice,
+  PanelHeader,
+  SegmentedFilter,
+} from "@/components/admin/ui";
+import {
+  ChatIcon,
   RefreshIcon,
   TrashIcon,
   SpinnerIcon,
   EyeIcon,
   EyeOffIcon,
+  SearchIcon,
+  StarIcon,
 } from "@/components/admin/icons";
 import type { GuestComment } from "@/types";
+
+// ============================================================================
+// CommentsManager — moderasi buku tamu.
+//
+// Dua pekerjaan yang berbeda: menyetujui yang menunggu (antrean) dan
+// menyembunyikan yang sudah tayang. Filter bawaan karena itu "Menunggu" —
+// bukan "Semua" — supaya tugas utama langsung terlihat.
+// ============================================================================
+
+type Filter = "pending" | "visible" | "all";
 
 function initialsOf(name: string): string {
   const parts = name.trim().split(/\s+/).filter(Boolean);
@@ -18,7 +41,7 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-function formatDate(iso: string): string {
+function formatFull(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
   return d.toLocaleString("id-ID", {
@@ -30,24 +53,24 @@ function formatDate(iso: string): string {
   });
 }
 
+/** Bintang penuh untuk nilai rating; hanya dirender bila rating ada. */
 function Stars({ value }: { value: number | null }) {
   if (typeof value !== "number") return null;
   return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`Rating ${value}/5`}>
+    <span
+      className="inline-flex items-center gap-0.5"
+      aria-label={`Rating ${value} dari 5`}
+    >
       {Array.from({ length: 5 }, (_, i) => (
-        <svg
+        <StarIcon
           key={i}
-          width="11"
-          height="11"
-          viewBox="0 0 24 24"
-          fill={i < value ? "currentColor" : "none"}
-          stroke="currentColor"
-          strokeWidth="1.8"
-          className={i < value ? "text-accent" : "text-gray-600"}
-          aria-hidden="true"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
+          filled={i < value}
+          className={`h-3 w-3 ${
+            i < value
+              ? "text-[var(--color-a-accent)]"
+              : "text-[var(--color-a-line-2)]"
+          }`}
+        />
       ))}
     </span>
   );
@@ -58,13 +81,21 @@ export default function CommentsManager() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
-  const [filter, setFilter] = useState<"all" | "pending" | "visible">("all");
+  const [filter, setFilter] = useState<Filter>("pending");
+  // Apakah pengguna sudah memilih filter sendiri. Selama belum, filter
+  // mengikuti keadaan data: antrean moderasi kalau ada yang menunggu —
+  // kalau tidak, langsung tampilkan semua supaya tidak mendarat di layar
+  // kosong padahal ada 11 komentar.
+  const filterTouched = useRef(false);
+  const [query, setQuery] = useState("");
 
   const load = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch("/api/comments?scope=admin", { cache: "no-store" });
+      const res = await fetch("/api/comments?scope=admin", {
+        cache: "no-store",
+      });
       const data = await res.json().catch(() => ({}));
       if (!res.ok) {
         setError(data?.error ?? "Gagal memuat komentar");
@@ -103,7 +134,8 @@ export default function CommentsManager() {
   }
 
   async function remove(c: GuestComment) {
-    if (!confirm(`Hapus komentar dari "${c.name}"? Tindakan ini permanen.`)) return;
+    if (!confirm(`Hapus komentar dari "${c.name}"? Tindakan ini permanen.`))
+      return;
     setBusyId(c.id);
     const res = await fetch(`/api/comments?id=${encodeURIComponent(c.id)}`, {
       method: "DELETE",
@@ -117,170 +149,232 @@ export default function CommentsManager() {
     setBusyId(null);
   }
 
-  const pendingCount = items.filter((c) => !c.approved).length;
-  const visible =
-    filter === "all"
-      ? items
-      : filter === "pending"
-        ? items.filter((c) => !c.approved)
-        : items.filter((c) => c.approved);
+  const pendingCount = useMemo(
+    () => items.filter((c) => !c.approved).length,
+    [items],
+  );
+
+  // Rail memakai angka yang sama — tidak perlu mengambil ulang dari server.
+  useReportCount("comments", pendingCount);
+
+  // Setelah data tiba: kalau tidak ada yang menunggu dan pengguna belum
+  // menyentuh filter, pindah ke "Semua". Tanpa ini, panel terbuka pada
+  // daftar kosong padahal ada puluhan komentar tayang.
+  useEffect(() => {
+    if (loading || filterTouched.current) return;
+    setFilter(pendingCount > 0 ? "pending" : "all");
+  }, [loading, pendingCount]);
+
+  const visible = useMemo(() => {
+    const q = query.trim().toLowerCase();
+    return items.filter((c) => {
+      if (filter === "pending" && c.approved) return false;
+      if (filter === "visible" && !c.approved) return false;
+      if (!q) return true;
+      return [c.name, c.email ?? "", c.message]
+        .join(" ")
+        .toLowerCase()
+        .includes(q);
+    });
+  }, [items, filter, query]);
 
   return (
     <div>
-      <div className="mb-7 flex flex-wrap items-end justify-between gap-4 border-b border-white/10 pb-5">
-        <div>
-          <p className="mb-2 text-[10px] uppercase tracking-[0.24em] text-gray-500">
-            Moderasi
-          </p>
-          <h2 className="text-display flex items-center gap-3 text-2xl uppercase text-white">
-            Comments
-            <span className="rounded-full border border-accent/30 bg-accent/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-accent">
-              {loading ? "…" : items.length}
-            </span>
-            {!loading && pendingCount > 0 && (
-              <span className="rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2.5 py-0.5 text-xs font-normal tracking-normal text-yellow-400">
-                {pendingCount} menunggu
-              </span>
-            )}
-          </h2>
-        </div>
-        <button
-          onClick={load}
-          aria-label="Refresh comments"
-          title="Refresh"
-          disabled={loading}
-          className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-300 transition-colors duration-300 hover:border-accent hover:text-accent active:scale-[0.98] disabled:opacity-50"
-        >
-          {loading ? <SpinnerIcon /> : <RefreshIcon />}
-        </button>
-      </div>
+      <PanelHeader
+        title="Komentar"
+        description="Komentar tamu tampil di situs publik hanya setelah ditampilkan di sini."
+        meta={
+          !loading && (
+            <>
+              <Chip tone="neutral">{items.length} total</Chip>
+              {pendingCount > 0 ? (
+                <Chip tone="warn">{pendingCount} menunggu</Chip>
+              ) : (
+                <Chip tone="ok">semua termoderasi</Chip>
+              )}
+            </>
+          )
+        }
+        actions={
+          <IconButton
+            icon={loading ? SpinnerIcon : RefreshIcon}
+            label="Muat ulang"
+            disabled={loading}
+            onClick={load}
+          />
+        }
+      />
 
       {error && (
-        <p className="mb-4 border-l-2 border-red-500 px-3 py-2 text-sm text-red-300">
+        <Notice tone="error" onDismiss={() => setError(null)}>
           {error}
-        </p>
+        </Notice>
       )}
 
-      {/* Filter moderasi */}
-      <div className="mb-6 flex flex-wrap gap-1 rounded-lg border border-white/10 bg-white/[0.03] p-1">
-        {([
-          { key: "all", label: "Semua", n: items.length },
-          { key: "pending", label: "Menunggu", n: pendingCount },
-          { key: "visible", label: "Tayang", n: items.length - pendingCount },
-        ] as const).map((f) => (
-          <button
-            key={f.key}
-            onClick={() => setFilter(f.key)}
-            aria-pressed={filter === f.key}
-            className={`rounded-md px-3 py-1.5 text-xs uppercase tracking-[0.14em] transition-colors duration-300 ${
-              filter === f.key
-                ? "bg-accent text-black"
-                : "text-gray-400 hover:bg-white/5 hover:text-white"
-            }`}
-          >
-            {f.label}
-            <span className="ml-1.5 opacity-70">{f.n}</span>
-          </button>
-        ))}
-      </div>
+      {!loading && items.length > 0 && (
+        <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
+          <SegmentedFilter
+            label="Filter moderasi"
+            value={filter}
+            onChange={(key) => {
+              // Pilihan manual mengunci filter — efek auto-pilih berhenti.
+              filterTouched.current = true;
+              setFilter(key);
+            }}
+            options={[
+              { key: "pending", label: "Menunggu", count: pendingCount },
+              {
+                key: "visible",
+                label: "Tayang",
+                count: items.length - pendingCount,
+              },
+              { key: "all", label: "Semua", count: items.length },
+            ]}
+          />
+
+          <div className="flex w-full min-w-0 items-center gap-2 rounded-lg border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-3 sm:w-72">
+            <SearchIcon className="h-4 w-4 shrink-0 text-[var(--color-a-faint)]" />
+            <input
+              type="search"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Cari nama, email, atau isi komentar…"
+              aria-label="Cari komentar"
+              className="w-full bg-transparent py-2 text-sm text-[var(--color-a-text)] outline-none placeholder:text-[var(--color-a-faint)]"
+            />
+          </div>
+        </div>
+      )}
 
       {loading ? (
-        <p className="text-gray-500">Loading…</p>
+        <ListSkeleton rows={4} />
+      ) : items.length === 0 ? (
+        <EmptyState
+          icon={ChatIcon}
+          title="Belum ada komentar"
+          hint="Komentar dari buku tamu di halaman utama akan muncul di sini untuk dimoderasi."
+        />
       ) : visible.length === 0 ? (
-        <div className="mb-8 flex flex-col items-center gap-3 border-y border-white/10 py-14 text-center">
-          <InboxIcon className="text-gray-600" />
-          <p className="text-sm text-gray-500">
-            {filter === "all"
-              ? "Belum ada komentar."
+        <EmptyState
+          icon={ChatIcon}
+          title={
+            query
+              ? `Tidak ada yang cocok dengan “${query}”`
               : filter === "pending"
-                ? "Tidak ada komentar yang menunggu moderasi."
-                : "Belum ada komentar yang tayang."}
-          </p>
-        </div>
+                ? "Tidak ada komentar yang menunggu"
+                : "Belum ada komentar yang tayang"
+          }
+          hint={
+            !query && filter === "pending"
+              ? "Semua komentar sudah ditinjau."
+              : undefined
+          }
+          action={
+            query ? (
+              <Button variant="ghost" onClick={() => setQuery("")}>
+                Hapus pencarian
+              </Button>
+            ) : filter === "pending" ? (
+              <Button variant="ghost" onClick={() => setFilter("all")}>
+                Lihat semua komentar
+              </Button>
+            ) : undefined
+          }
+        />
       ) : (
-        <div className="admin-list mb-8 flex flex-col gap-4">
-          {visible.map((c) => (
-            <article
-              key={c.id}
-              className={`border p-4 transition-colors duration-300 sm:p-5 ${
-                c.approved
-                  ? "border-white/10 hover:border-accent/40"
-                  : "border-yellow-500/30 bg-yellow-500/[0.03] hover:border-yellow-500/50"
-              }`}
-            >
-              <div className="flex flex-wrap items-start justify-between gap-4">
-                <div className="flex min-w-0 items-start gap-3">
+        <div className="flex flex-col gap-2.5">
+          {visible.map((c) => {
+            const busy = busyId === c.id;
+            return (
+              <article
+                key={c.id}
+                className={`overflow-hidden rounded-xl border transition-colors ${
+                  c.approved
+                    ? "border-[var(--color-a-line)] hover:border-[var(--color-a-line-2)]"
+                    : "border-[var(--color-a-warn)]/40 bg-[var(--color-a-warn)]/[0.04]"
+                }`}
+              >
+                <div className="flex flex-wrap items-start gap-3 p-3.5">
                   <span
                     aria-hidden="true"
-                    className="text-display flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-accent/20 text-sm text-accent"
+                    className="text-display flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-[var(--color-a-line)] bg-[var(--color-a-surface-2)] a-meta text-[var(--color-a-dim)]"
                   >
                     {initialsOf(c.name)}
                   </span>
-                  <div className="min-w-0">
-                    <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                      <p className="truncate text-sm font-semibold text-white">
+
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-x-2.5 gap-y-1">
+                      <p className="truncate text-sm font-medium text-[var(--color-a-text)]">
                         {c.name}
                       </p>
                       <Stars value={c.rating} />
-                      {!c.approved && (
-                        <span className="rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-yellow-400">
-                          Menunggu
-                        </span>
+                      {c.approved ? (
+                        <Chip tone="ok">tayang</Chip>
+                      ) : (
+                        <Chip tone="warn">menunggu</Chip>
                       )}
                     </div>
-                    <p className="mt-0.5 truncate text-xs text-gray-500">
-                      {formatDate(c.created_at)}
+                    <p className="mt-1 flex flex-wrap items-center gap-x-2 a-meta text-[var(--color-a-faint)]">
+                      {/* Email hanya tampil di admin — tidak pernah di publik. */}
+                      {c.email ? (
+                        <a
+                          href={`mailto:${c.email}`}
+                          className="a-data text-[var(--color-a-accent)] transition-opacity hover:opacity-80"
+                        >
+                          {c.email}
+                        </a>
+                      ) : (
+                        <span className="a-data">tanpa email</span>
+                      )}
+                      <span aria-hidden="true">·</span>
+                      <span className="a-data">{formatFull(c.created_at)}</span>
                     </p>
-                    {/* Email pengirim — hanya tampil di admin */}
-                    <a
-                      href={c.email ? `mailto:${c.email}` : undefined}
-                      className={`mt-1 inline-block max-w-full truncate text-xs transition-colors ${
-                        c.email
-                          ? "text-accent hover:text-accent-soft"
-                          : "cursor-default text-gray-600"
+                    <p className="mt-2.5 whitespace-pre-wrap break-words text-sm leading-relaxed text-[var(--color-a-text)]">
+                      {c.message}
+                    </p>
+                  </div>
+
+                  <div className="flex shrink-0 items-center gap-1.5">
+                    {/* Inti moderasi: satu tombol yang membalik status tayang. */}
+                    <button
+                      type="button"
+                      onClick={() => setApproved(c, !c.approved)}
+                      disabled={busy}
+                      aria-label={
+                        c.approved
+                          ? `Sembunyikan komentar dari ${c.name}`
+                          : `Tampilkan komentar dari ${c.name}`
+                      }
+                      title={
+                        c.approved
+                          ? "Sembunyikan dari publik"
+                          : "Tampilkan ke publik"
+                      }
+                      className={`a-btn ${
+                        c.approved ? "a-btn-ghost" : "a-btn-primary"
                       }`}
-                      title={c.email ?? "Tanpa email"}
                     >
-                      {c.email ?? "— tanpa email —"}
-                    </a>
+                      {busy ? (
+                        <SpinnerIcon className="h-3.5 w-3.5" />
+                      ) : c.approved ? (
+                        <EyeOffIcon className="h-3.5 w-3.5" />
+                      ) : (
+                        <EyeIcon className="h-3.5 w-3.5" />
+                      )}
+                      {c.approved ? "Sembunyikan" : "Tampilkan"}
+                    </button>
+                    <IconButton
+                      icon={TrashIcon}
+                      label={`Hapus komentar dari ${c.name}`}
+                      danger
+                      disabled={busy}
+                      onClick={() => remove(c)}
+                    />
                   </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-2">
-                  {/* Setujui / sembunyikan — inti moderasi */}
-                  <button
-                    onClick={() => setApproved(c, !c.approved)}
-                    disabled={busyId === c.id}
-                    aria-label={
-                      c.approved
-                        ? `Sembunyikan komentar dari ${c.name}`
-                        : `Tampilkan komentar dari ${c.name}`
-                    }
-                    title={c.approved ? "Sembunyikan dari publik" : "Tampilkan ke publik"}
-                    className={`flex h-9 items-center gap-2 rounded-md border px-3 text-[10px] uppercase tracking-widest transition-colors duration-300 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 ${
-                      c.approved
-                        ? "border-white/15 text-gray-400 hover:border-yellow-500/60 hover:text-yellow-400"
-                        : "border-[#22c55e]/40 bg-[#22c55e]/10 text-[#22c55e] hover:bg-[#22c55e]/20"
-                    }`}
-                  >
-                    {c.approved ? <EyeOffIcon /> : <EyeIcon />}
-                    {c.approved ? "Sembunyikan" : "Tampilkan"}
-                  </button>
-                  <button
-                    onClick={() => remove(c)}
-                    disabled={busyId === c.id}
-                    aria-label={`Hapus komentar dari ${c.name}`}
-                    title="Hapus komentar"
-                    className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-400 transition-colors duration-300 hover:border-red-500 hover:text-red-400 active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
-                  >
-                    {busyId === c.id ? <SpinnerIcon /> : <TrashIcon />}
-                  </button>
-                </div>
-              </div>
-              <p className="mt-3 whitespace-pre-wrap break-words border-t border-white/5 pt-3 text-sm leading-relaxed text-ecru">
-                {c.message}
-              </p>
-            </article>
-          ))}
+              </article>
+            );
+          })}
         </div>
       )}
     </div>

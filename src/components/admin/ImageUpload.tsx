@@ -2,7 +2,12 @@
 
 import { useRef, useState } from "react";
 import { MAX_UPLOAD_BYTES } from "@/lib/config";
-import { PlusIcon, TrashIcon, ImageIcon } from "@/components/admin/icons";
+import {
+  PlusIcon,
+  TrashIcon,
+  ImageIcon,
+  SpinnerIcon,
+} from "@/components/admin/icons";
 
 const MAX_MB = MAX_UPLOAD_BYTES / (1024 * 1024);
 
@@ -15,22 +20,34 @@ type ImageUploadProps = {
 
 function isPdfUrl(url: string): boolean {
   const q = url.split("?")[0].toLowerCase();
-  return q.endsWith(".pdf") || url.toLowerCase().startsWith("data:application/pdf");
+  return (
+    q.endsWith(".pdf") || url.toLowerCase().startsWith("data:application/pdf")
+  );
+}
+
+function formatSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${Math.round(bytes / 1024)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 export default function ImageUpload({
   folder,
   value,
   onChange,
-  label = "File",
+  label = "Berkas",
 }: ImageUploadProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [dragOver, setDragOver] = useState(false);
+  const [size, setSize] = useState<number | null>(null);
 
   async function handleFile(file: File) {
     if (file.size > MAX_UPLOAD_BYTES) {
-      setError(`File too large. Maximum allowed is ${MAX_MB} MB.`);
+      setError(
+        `Berkas terlalu besar (${formatSize(file.size)}). Maksimal ${MAX_MB} MB.`,
+      );
       return;
     }
 
@@ -49,7 +66,7 @@ export default function ImageUpload({
       });
       if (!presignRes.ok) {
         const err = await presignRes.json().catch(() => ({}));
-        throw new Error(err.error ?? "Failed to prepare upload");
+        throw new Error(err.error ?? "Gagal menyiapkan unggahan");
       }
       const { url, publicUrl } = await presignRes.json();
 
@@ -63,15 +80,20 @@ export default function ImageUpload({
       } catch {
         // `fetch` melempar (bukan respons non-OK) → hampir selalu CORS.
         throw new Error(
-          "Upload terputus oleh browser (CORS). Pastikan bucket R2 sudah punya konfigurasi CORS yang mengizinkan PUT dari domain ini (lihat README).",
+          "Unggahan terputus oleh browser (CORS). Pastikan bucket R2 sudah punya konfigurasi CORS yang mengizinkan PUT dari domain ini — lihat README.",
         );
       }
-      if (!putRes.ok) throw new Error(`Upload to R2 failed (${putRes.status})`);
+      if (!putRes.ok) throw new Error(`Unggahan ke R2 gagal (${putRes.status})`);
 
+      setSize(file.size);
       onChange(publicUrl);
     } catch (e) {
-      const msg = e instanceof Error ? e.message : "Upload failed";
-      setError(msg.includes("Failed to fetch") ? "Koneksi ke penyimpanan gagal (CORS). Periksa konfigurasi CORS bucket R2." : msg);
+      const msg = e instanceof Error ? e.message : "Unggahan gagal";
+      setError(
+        msg.includes("Failed to fetch")
+          ? "Koneksi ke penyimpanan gagal (CORS). Periksa konfigurasi CORS bucket R2."
+          : msg,
+      );
     } finally {
       setUploading(false);
     }
@@ -81,53 +103,76 @@ export default function ImageUpload({
 
   return (
     <div>
-      <p className="mb-2 text-xs font-medium uppercase tracking-widest text-gray-400">
+      <p className="mb-1.5 text-xs font-medium text-[var(--color-a-dim)]">
         {label}
       </p>
-      <div className="flex items-start gap-4">
-        <div className="flex h-28 w-40 shrink-0 items-center justify-center overflow-hidden border border-white/10 bg-black/20">
+
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          setDragOver(true);
+        }}
+        onDragLeave={() => setDragOver(false)}
+        onDrop={(e) => {
+          e.preventDefault();
+          setDragOver(false);
+          const file = e.dataTransfer.files?.[0];
+          if (file) void handleFile(file);
+        }}
+        className={`flex flex-col gap-4 rounded-lg border border-dashed p-3 transition-colors sm:flex-row sm:items-start ${
+          dragOver
+            ? "border-[var(--color-a-accent)] bg-[var(--color-a-accent)]/[0.06]"
+            : "border-[var(--color-a-line-2)]"
+        }`}
+      >
+        {/* Pratinjau rasio tetap supaya form tidak melompat saat gambar
+            selesai dimuat. */}
+        <div className="flex h-24 w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--color-a-line)] bg-[var(--color-a-surface-2)] sm:w-36">
           {value ? (
             isPdf ? (
               <a
                 href={value}
                 target="_blank"
                 rel="noreferrer"
-                className="flex h-full w-full flex-col items-center justify-center gap-2 text-accent hover:bg-white/5"
+                className="flex h-full w-full flex-col items-center justify-center gap-1.5 text-[var(--color-a-accent)] transition-colors hover:bg-[var(--color-a-surface)]"
               >
                 <svg
-                  width="32"
-                  height="32"
+                  width="26"
+                  height="26"
                   viewBox="0 0 24 24"
                   fill="none"
                   stroke="currentColor"
                   strokeWidth="1.6"
                   strokeLinecap="round"
                   strokeLinejoin="round"
+                  aria-hidden="true"
                 >
                   <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" />
                   <path d="M14 2v6h6" />
                   <path d="M12 18v-6" />
                   <path d="M9 15h6" />
                 </svg>
-                <span className="px-2 text-center text-[10px] uppercase tracking-widest text-gray-300">
-                  PDF
-                </span>
+                <span className="a-key a-micro">PDF</span>
               </a>
             ) : (
-               
-              <img src={value} alt="" className="h-full w-full object-cover" />
+              <img
+                src={value}
+                alt="Pratinjau berkas terunggah"
+                className="h-full w-full object-cover"
+              />
             )
           ) : (
             <span
-              className="flex flex-col items-center justify-center gap-1.5 text-gray-600"
-              title="No file"
+              aria-hidden="true"
+              className="flex flex-col items-center gap-1.5 text-[var(--color-a-faint)]"
             >
-              <ImageIcon />
-              <span className="text-[10px] uppercase tracking-widest">Empty</span>
+              <ImageIcon className="h-5 w-5" />
+              <span className="a-key a-micro">Kosong</span>
             </span>
           )}
         </div>
-        <div className="flex-1">
+
+        <div className="min-w-0 flex-1">
           <input
             ref={inputRef}
             type="file"
@@ -135,44 +180,74 @@ export default function ImageUpload({
             className="hidden"
             onChange={(e) => {
               const file = e.target.files?.[0];
-              if (file) handleFile(file);
+              if (file) void handleFile(file);
               e.target.value = "";
             }}
           />
+
           <div className="flex flex-wrap items-center gap-2">
             <button
               type="button"
               onClick={() => inputRef.current?.click()}
               disabled={uploading}
-              className="flex items-center gap-2 rounded-md border border-white/15 px-4 py-2 text-xs uppercase tracking-[0.14em] text-white transition-colors hover:border-accent hover:text-accent disabled:opacity-50"
+              className="a-btn a-btn-ghost"
             >
-              <PlusIcon />
-              {uploading ? "Uploading…" : value ? "Replace file" : "Upload file"}
+              {uploading ? (
+                <SpinnerIcon className="h-3.5 w-3.5" />
+              ) : (
+                <PlusIcon className="h-3.5 w-3.5" />
+              )}
+              {uploading
+                ? "Mengunggah…"
+                : value
+                  ? "Ganti berkas"
+                  : "Unggah berkas"}
             </button>
-            {value && (
+
+            {value && !uploading && (
               <button
                 type="button"
-                onClick={() => onChange("")}
-                aria-label="Remove file"
-                title="Remove file"
-                className="flex h-9 w-9 items-center justify-center rounded-md border border-white/15 text-gray-500 transition-colors hover:border-red-500 hover:text-red-400"
+                onClick={() => {
+                  onChange("");
+                  setSize(null);
+                  setError(null);
+                }}
+                className="a-btn a-btn-ghost a-btn-danger"
               >
-                <TrashIcon />
+                <TrashIcon className="h-3.5 w-3.5" />
+                Hapus
               </button>
             )}
           </div>
-          {error && <p className="mt-2 text-xs text-red-400">{error}</p>}
-          <p className="mt-2 text-[11px] leading-relaxed text-gray-600">
-            Supports images (JPG, PNG, WebP) and PDF. Max {MAX_MB} MB.
+
+          <p className="mt-2 a-meta leading-relaxed text-[var(--color-a-faint)]">
+            Tarik berkas ke sini, atau pilih manual. JPG, PNG, WebP, atau PDF —
+            maksimal {MAX_MB} MB
+            {size !== null && ` · terunggah ${formatSize(size)}`}.
           </p>
+
+          {error && (
+            <p
+              role="alert"
+              className="mt-2 text-xs leading-relaxed text-[var(--color-a-danger)]"
+            >
+              {error}
+            </p>
+          )}
+
           {value && (
-            <input
-              type="text"
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              className="mt-2 w-full rounded-md border border-white/10 bg-transparent px-3 py-2 text-xs text-gray-400 outline-none transition-colors focus:border-accent"
-              placeholder="File URL"
-            />
+            <details className="mt-2.5">
+              <summary className="cursor-pointer a-meta text-[var(--color-a-faint)] transition-colors hover:text-[var(--color-a-dim)]">
+                URL berkas
+              </summary>
+              <input
+                type="text"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                aria-label="URL berkas"
+                className="a-data mt-1.5 w-full rounded-md border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-2.5 py-1.5 a-meta text-[var(--color-a-dim)] outline-none transition-colors focus:border-[var(--color-a-accent)]"
+              />
+            </details>
           )}
         </div>
       </div>
