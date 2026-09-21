@@ -398,6 +398,18 @@ export const commentsPage = {
 } as const;
 
 // ============================================================================
+// Menu kontrol halaman (tema + musik) — dipakai PageControls.
+// ============================================================================
+export const pageControls = {
+  themeLabel: { en: "Theme", id: "Tema" },
+  themeDark: { en: "Dark", id: "Gelap" },
+  themeLight: { en: "Light", id: "Terang" },
+  musicLabel: { en: "Music", id: "Musik" },
+  playMusic: { en: "Play music", id: "Putar musik" },
+  pauseMusic: { en: "Pause music", id: "Jeda musik" },
+} as const;
+
+// ============================================================================
 // Contact form — dikirim ke tabel contact_messages, dibaca di /admin → Inbox.
 // ============================================================================
 export const contactForm = {

@@ -8,6 +8,7 @@ import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
 import ScrollProgress from "@/components/ScrollProgress";
 import SmoothScroll from "@/components/SmoothScroll";
+import PageControls from "@/components/PageControls";
 import { motion, useReducedMotion } from "motion/react";
 import { EASE_EXPO } from "@/lib/motion";
 import { useLanguage } from "@/components/providers";
@@ -192,6 +193,8 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         <CustomCursor />
         <SpiderWalker />
         <ScrollProgress />
+        {/* Menu kontrol (tema + musik) — fixed di atas, center, sama di mobile. */}
+        <PageControls />
         {/* tv-static (grain full-viewport) sengaja tidak dipakai di halaman
             ini — repaint viewport tiap 0.5s adalah sumber lag di GPU lemah. */}
 

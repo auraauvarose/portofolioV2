@@ -2,17 +2,47 @@
 
 import { useEffect, useState } from "react";
 import { subscribeMusic, toggleMusic } from "@/lib/music";
+import { useLanguage } from "@/components/providers";
+import { pageControls } from "@/lib/config";
 
 export default function MusicPlayer({
   variant = "rail",
 }: {
-  variant?: "rail" | "menu";
+  variant?: "rail" | "menu" | "bar";
 }) {
   const [playing, setPlaying] = useState(false);
+  const { t } = useLanguage();
 
   useEffect(() => {
     return subscribeMusic(setPlaying);
   }, []);
+
+  const label = playing ? t(pageControls.pauseMusic) : t(pageControls.playMusic);
+
+  if (variant === "bar") {
+    // Varian bar: pill ringkas sejajar tema di menu atas halaman.
+    return (
+      <button
+        type="button"
+        onClick={toggleMusic}
+        aria-label={label}
+        aria-pressed={playing}
+        title={label}
+        className={`flex touch-active items-center gap-2 rounded-full border px-4 py-2 text-xs font-bold uppercase tracking-widest transition-colors ${
+          playing
+            ? "border-accent bg-accent/15 text-accent"
+            : "border-white/15 bg-white/5 text-white hover:border-accent hover:text-accent"
+        }`}
+      >
+        {playing ? (
+          <Equalizer className="h-3.5 w-3.5 text-accent" />
+        ) : (
+          <PlayIcon className="h-3.5 w-3.5" />
+        )}
+        {t(pageControls.musicLabel)}
+      </button>
+    );
+  }
 
   if (variant === "menu") {
     return (
@@ -20,7 +50,7 @@ export default function MusicPlayer({
         <button
           type="button"
           onClick={toggleMusic}
-          aria-label={playing ? "Pause music" : "Play music"}
+          aria-label={label}
           aria-pressed={playing}
           className="group flex touch-active items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm text-white transition-colors hover:border-accent hover:text-accent"
         >
@@ -29,7 +59,7 @@ export default function MusicPlayer({
           ) : (
             <PlayIcon className="h-4 w-4" />
           )}
-          {playing ? "Music" : "Play music"}
+          {playing ? t(pageControls.musicLabel) : t(pageControls.playMusic)}
         </button>
       </div>
     );
@@ -39,9 +69,9 @@ export default function MusicPlayer({
     <button
       type="button"
       onClick={toggleMusic}
-      aria-label={playing ? "Pause music" : "Play music"}
+      aria-label={label}
       aria-pressed={playing}
-      title={playing ? "Pause music" : "Play music"}
+      title={label}
       className={`flex h-10 w-10 items-center justify-center rounded-full border shadow-xl transition-all hover:border-accent active:scale-95 ${
         playing
           ? "border-accent bg-accent/90 text-black"
