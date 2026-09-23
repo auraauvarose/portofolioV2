@@ -75,7 +75,7 @@ function Stat({
   return (
     <div className="a-panel p-4">
       <p className="a-key">{label}</p>
-      <p className="a-data mt-2 text-3xl font-semibold leading-none text-[var(--color-a-text)]">
+      <p className="a-stat mt-2 text-3xl font-semibold leading-none text-[var(--color-a-text)]">
         {value.toLocaleString("id-ID")}
       </p>
       {hint && (

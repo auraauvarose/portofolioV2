@@ -1712,6 +1712,24 @@ summary {
     font-feature-settings: "tnum";
   }
 
+  /* Angka statistik besar: wajah display, bukan mono.
+
+     Mono di sini tidak membeli apa pun: setiap kartu statistik hanya memuat
+     SATU angka, jadi tidak ada kolom yang perlu dijajarkan — dan pada ukuran
+     besar mono justru terbaca seperti keluaran terminal, bukan ringkasan.
+     Karena itu .a-data tetap mono (ia masih dipakai untuk path, slug, nama
+     env, dan timestamp yang memang berbaris), dan angka besar pindah ke
+     wajah display.
+
+     Hanya font-family yang diatur di sini — sengaja. Kelas ini hidup di layer
+     `components`, yang kalah dari utility Tailwind, sehingga text-3xl /
+     font-semibold / leading-none di komponen tetap menjadi penentu ukuran.
+     Kalau line-height ikut ditulis di sini, nilainya akan berebut dengan
+     leading-none dan hasilnya bergantung urutan sumber. */
+  .a-stat {
+    font-family: var(--font-bevellier);
+  }
+
   /* Satu cincin fokus untuk seluruh admin. `outline` (bukan box-shadow) supaya
      tidak terpotong oleh container ber-overflow dan tetap terlihat di tema
      terang maupun gelap. */
@@ -1923,7 +1941,11 @@ summary {
     background-color: var(--color-a-surface);
   }
 
-  /* Chip status: satu bentuk, warna dari token semantik. */
+  /* Chip status: satu bentuk, warna dari token semantik.
+
+     Wajahnya Chillax supaya chip berbicara dengan suara yang sama seperti
+     .a-key — keduanya label huruf besar bergaris jarak lebar, dan sebelumnya
+     keduanya justru memakai dua wajah berbeda (mono vs Switzer). */
   .a-chip {
     display: inline-flex;
     align-items: center;
@@ -1931,6 +1953,7 @@ summary {
     border-radius: 999px;
     border: 1px solid;
     padding: 0.1rem 0.5rem;
+    font-family: var(--font-chillax);
     font-size: 0.625rem;
     font-weight: 600;
     letter-spacing: 0.09em;
@@ -1993,10 +2016,21 @@ summary {
 
   /* ── Baris judul seksi (ledger rule) ────────────────────────────────────── */
 
-  /* Kunci seksi ditulis mono + uppercase seperti label indeks arsip: memberi
-     jangkar visual yang sama di setiap panel tanpa hiasan tambahan. */
+  /* Kunci seksi ditulis uppercase bergaris jarak lebar seperti label indeks
+     arsip: memberi jangkar visual yang sama di setiap panel tanpa hiasan
+     tambahan.
+
+     Wajahnya Chillax, bukan mono sistem. Alasannya: mono sistem dirakit dari
+     font yang kebetulan ada di OS pembaca, jadi label yang sama tampil
+     berbeda di Windows, macOS, dan Android — satu-satunya bagian admin yang
+     tampilannya tidak bisa ditentukan perancang. Chillax sudah dimuat di
+     layout.tsx, jadi menggantinya tidak menambah satu pun unduhan baru.
+
+     Bobot 600 ditulis eksplisit karena Chillax di sini hanya punya satu
+     potongan (600); tanpa itu peramban mensintesis bobot palsu. */
   .a-key {
-    font-family: var(--font-data);
+    font-family: var(--font-chillax);
+    font-weight: 600;
     font-size: 0.6875rem;
     letter-spacing: 0.12em;
     text-transform: uppercase;

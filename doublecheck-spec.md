@@ -1,19 +1,19 @@
 # Doublecheck spec
 
 ## Goal
-Di seksi Education, bulatan (node) pada rail timeline otomatis berubah oranye tepat saat garis accent (progress fill) melewatinya, tanpa bergantung pada kartu mana yang sedang di tengah viewport.
+Halaman /admin dan /admin/login memakai tipografi yang lebih bagus dan lebih bervariasi: 4 peran font yang jelas (body, judul, label, angka) menggantikan 2 font + mono sistem yang dipakai sekarang, tanpa file font baru dan tanpa mengubah tata letak.
 
 ## Scope
-In scope: logika pewarnaan node di src/components/Education.tsx, modul murni baru src/lib/spine.ts, dan test tests/education-spine.test.ts. Out of scope: warna/token accent, gaya visual .edu-node di globals.css, rail fill (scaleY), seksi lain, dan markup kartu.
+IN: src/app/globals.css (font-family pada .a-key dan .a-chip, komentar penjelasnya), src/app/admin/login/page.tsx (h1 + label kata sandi), src/components/admin/AnalyticsPanel.tsx (angka statistik besar). Font yang boleh dipakai HANYA 8 font lokal yang sudah dimuat di layout.tsx. OUT: layout.tsx (tidak diubah — semua font sudah dimuat), tata letak/spacing/warna, komponen publik non-admin, .a-data (tetap mono sistem karena dipakai untuk path/slug/env/timestamp yang butuh sejajar), .a-tab dan .a-btn (kontrol, tetap Switzer).
 
 ## Acceptance criteria
-1. Node menyala (is-done) tepat ketika progres garis >= fraksi posisi node terhadap panjang rail. 2. Tidak ada lagi penyalakan paksa `index < 1` dan tidak ada ketergantungan is-done pada `active`. 3. Node tidak pernah kembali abu-abu saat scroll maju (monoton). 4. Terukur di browser: selisih scrollY antara "tepi garis mencapai node" dan "node menyala" = 0 px untuk semua node. 5. `npm test` (76 tes), `tsc --noEmit`, dan `eslint` semuanya lulus.
+1) npm run typecheck keluar 0. 2) npm run lint keluar 0. 3) npm test tetap 140/140 lulus. 4) npm run build keluar 0. 5) Terukur di Chrome headless: getComputedStyle pada label seksi (.a-key) mengembalikan font Chillax, pada chip (.a-chip) Chillax, pada angka stat besar mengembalikan Bevellier, pada h1 login mengembalikan Bevellier, dan .a-data TETAP mono sistem. 6) Tangkapan layar /admin#analytics dan /admin/login sesudah perubahan dirender tanpa teks terpotong dan tanpa font jatuh ke fallback.
 
 ## Failure modes
-Jika rail belum terukur (offsetHeight 0 / ref belum ada), fraksi harus NaN dan node tidak menyala — bukan dianggap 0 (yang akan menyalakan semua node di atas). Jika progres NaN, anggap 0. Jika prefers-reduced-motion atau perangkat touch, semua node menyala statis (tanpa animasi) — perilaku lama dipertahankan. Jika kartu ber-transform saat masuk, pengukuran harus memakai ruang layout (offsetTop), bukan getBoundingClientRect. Bila layout berubah (resize / konten berubah), fraksi harus diukur ulang.
+- Font gagal dimuat → browser jatuh ke fallback: dicegah karena font sudah dimuat layout.tsx dan diverifikasi lewat getComputedStyle + pemeriksaan document.fonts. - Label kecil jadi tidak terbaca: Tanker ditolak untuk ukuran 11-13px (terbukti cramped saat diuji); Chillax dipilih karena terbukti lebih terbuka. - Angka jadi tidak sejajar antar baris: tabular-nums dipertahankan; jika Bevellier tidak punya tabular figure, angka besar tetap satu per baris sehingga tidak ada kolom yang bergoyang. - .a-data berubah jadi proporsional dan merusak path/slug/timestamp: .a-data TIDAK disentuh. - Ada pemakaian .a-key/.a-chip di luar admin yang ikut berubah: diperiksa dengan grep sebelum mengedit.
 
 ## Priorities
-Sinkronisasi garis dan bulatan adalah syarat mutlak. Monotonisitas (tidak balik abu-abu) wajib. Diff minimal dan tanpa perubahan visual lain bersifat opsional. Kompatibilitas reduced-motion/touch wajib dipertahankan.
+1) Keterbacaan di ukuran kecil (label 11-13px) di atas keunikan gaya. 2) Variasi yang punya peran jelas di atas variasi yang banyak. 3) Nol file baru dan nol request font tambahan di atas pilihan gaya yang lebih luas. 4) Perubahan minimal dan mudah dibalik di atas penataan ulang menyeluruh.
 
 ## Non-goals
-Tidak mengubah warna accent atau gaya visual node. Tidak mengubah kecepatan/offset rail fill. Tidak menyentuh seksi lain atau komponen ExperienceTimeline. Tidak menambah dependensi baru.
+- Tidak menambah/mengunduh file font baru (Google Fonts dsb) — user memilih pakai 8 font lokal yang sudah ada. - Tidak mengubah tata letak, jarak, ukuran teks, atau warna. - Tidak menyentuh halaman publik selain memakai ulang utility font yang sudah ada. - Tidak mengubah .a-data, .a-tab, .a-btn. - Tidak membuat file dokumentasi/tes baru yang tidak diminta.

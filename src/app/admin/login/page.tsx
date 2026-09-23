@@ -75,7 +75,7 @@ function LoginForm() {
               <LockIcon className="h-4 w-4 lg:h-5 lg:w-5" />
             </span>
 
-            <h1 className="text-display text-2xl uppercase lg:text-3xl">Masuk</h1>
+            <h1 className="text-bevellier text-2xl uppercase lg:text-3xl">Masuk</h1>
             <p className="mt-2 text-sm leading-relaxed text-[var(--color-a-dim)] lg:mt-3">
               Masukkan kata sandi admin untuk melanjutkan.
             </p>
