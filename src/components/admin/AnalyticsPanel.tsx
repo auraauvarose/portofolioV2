@@ -361,6 +361,69 @@ export default function AnalyticsPanel() {
               )}
             </section>
 
+            {/* Browser */}
+            <section className="a-panel p-4 sm:p-5">
+              <h3 className="a-key mb-4">Browser</h3>
+              {data.byBrowser.length === 0 ? (
+                <p className="text-sm text-[var(--color-a-faint)]">
+                  Belum ada data browser.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3.5">
+                  {data.byBrowser.map((b) => (
+                    <li key={b.label}>
+                      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                        <span className="text-xs text-[var(--color-a-text)]">
+                          {b.label}
+                        </span>
+                        <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                          {b.count.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <Bar
+                        value={b.count}
+                        max={Math.max(1, ...data.byBrowser.map((x) => x.count))}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Merek ponsel — hanya perangkat mobile yang punya merek. */}
+            <section className="a-panel p-4 sm:p-5">
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="a-key">Merek ponsel</h3>
+                <p className="a-meta text-[var(--color-a-faint)]">
+                  Hanya perangkat mobile
+                </p>
+              </div>
+              {data.byPhoneBrand.length === 0 ? (
+                <p className="text-sm text-[var(--color-a-faint)]">
+                  Belum ada data merek ponsel.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3.5">
+                  {data.byPhoneBrand.map((b) => (
+                    <li key={b.label}>
+                      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                        <span className="text-xs text-[var(--color-a-text)]">
+                          {b.label}
+                        </span>
+                        <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                          {b.count.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <Bar
+                        value={b.count}
+                        max={Math.max(1, ...data.byPhoneBrand.map((x) => x.count))}
+                      />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
             {/* Jam kunjungan (WIB) */}
             <section className="a-panel p-4 sm:p-5">
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">

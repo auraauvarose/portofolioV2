@@ -30,6 +30,8 @@ test("field array hilang → jadi array kosong, bukan undefined", () => {
   const s = normalizeSummary({ migrated: true, total: 2 });
   assert.deepEqual(s.byDay, []);
   assert.deepEqual(s.byDevice, []);
+  assert.deepEqual(s.byBrowser, []);
+  assert.deepEqual(s.byPhoneBrand, []);
   assert.deepEqual(s.byHour, []);
   assert.deepEqual(s.topLocations, []);
   assert.deepEqual(s.recentVisits, []);
@@ -39,12 +41,26 @@ test("field array bertipe salah → jadi array kosong", () => {
   const s = normalizeSummary({
     migrated: true,
     byDevice: "bukan-array",
+    byBrowser: "bukan-array",
+    byPhoneBrand: 42,
     byHour: null,
     recentVisits: 42,
   });
   assert.deepEqual(s.byDevice, []);
+  assert.deepEqual(s.byBrowser, []);
+  assert.deepEqual(s.byPhoneBrand, []);
   assert.deepEqual(s.byHour, []);
   assert.deepEqual(s.recentVisits, []);
+});
+
+test("byBrowser & byPhoneBrand → diteruskan sebagai daftar berlabel", () => {
+  const s = normalizeSummary({
+    migrated: true,
+    byBrowser: [{ label: "Chrome", count: 9 }],
+    byPhoneBrand: [{ label: "Samsung", count: 4 }],
+  });
+  assert.deepEqual(s.byBrowser, [{ label: "Chrome", count: 9 }]);
+  assert.deepEqual(s.byPhoneBrand, [{ label: "Samsung", count: 4 }]);
 });
 
 test("angka hilang/NaN → 0, days default 30", () => {

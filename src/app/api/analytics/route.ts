@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
-import { parseDevice } from "@/lib/device";
+import { parseBrowser, parseDevice, parsePhoneBrand } from "@/lib/device";
 import { visitLogEntry } from "@/lib/visit-log";
 import { withFallback } from "@/lib/db-fallback";
 
@@ -12,7 +12,7 @@ export const dynamic = "force-dynamic";
 //
 //   POST  publik   → catat satu pageview
 //   GET   admin    → ringkasan (total, per hari, halaman teratas, referrer,
-//                    perangkat, jam kunjungan, lokasi)
+//                    perangkat, browser, merek ponsel, jam kunjungan, lokasi)
 //
 // Privasi: IP TIDAK disimpan mentah — hanya HMAC-SHA256 dengan salt rahasia,
 // dipotong, dan dipakai semata untuk membedakan kunjungan unik. Tidak ada
@@ -121,20 +121,29 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
 
   const supabase = await createSupabaseAdmin();
   const geo = geoOf(req);
+  const ua = req.headers.get("user-agent");
   const base = {
     path,
     referrer,
     visitor_hash: await visitorHash(req),
   };
 
-  // Payload lengkap dulu; bila kolom device/country/city belum ada (migrasi
-  // tahap4.sql belum dijalankan), mundur ke payload lama supaya pencatatan
-  // tetap jalan alih-alih berhenti total.
+  // Payload terbaru dulu; tiap kolom yang belum ada (migrasi tahap5/tahap4.sql
+  // belum dijalankan) mundur satu tingkat supaya pencatatan tetap jalan
+  // alih-alih berhenti total.
   const { ok, error } = await withFallback(
     [
       {
         ...base,
-        device: parseDevice(req.headers.get("user-agent")),
+        device: parseDevice(ua),
+        browser: parseBrowser(ua),
+        phone_brand: parsePhoneBrand(ua),
+        country: geo.country,
+        city: geo.city,
+      },
+      {
+        ...base,
+        device: parseDevice(ua),
         country: geo.country,
         city: geo.city,
       },
@@ -169,16 +178,19 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     referrer: string | null;
     visitor_hash: string | null;
     device?: string | null;
+    browser?: string | null;
+    phone_brand?: string | null;
     country?: string | null;
     city?: string | null;
     created_at: string;
   };
 
-  // Kolom device/country/city ditambahkan oleh tahap4.sql yang dijalankan
-  // manual. Bila belum, SELECT dengan kolom itu gagal — mundur ke kolom lama
-  // agar data lama tetap tampil (bukan dilaporkan sebagai "tabel belum ada").
+  // Kolom baru ditambahkan lewat migrasi manual (tahap4/tahap5.sql). Bila belum
+  // dijalankan, SELECT dengan kolom itu gagal — mundur ke daftar kolom lama agar
+  // data lama tetap tampil (bukan dilaporkan sebagai "tabel belum ada").
   const { ok, data, error } = await withFallback<string, Row[]>(
     [
+      "path,referrer,visitor_hash,device,browser,phone_brand,country,city,created_at",
       "path,referrer,visitor_hash,device,country,city,created_at",
       "path,referrer,visitor_hash,created_at",
     ],
@@ -204,6 +216,8 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
       topPaths: [],
       topReferrers: [],
       byDevice: [],
+      byBrowser: [],
+      byPhoneBrand: [],
       byHour: [],
       topLocations: [],
       recentVisits: [],
@@ -217,6 +231,8 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const refCount = new Map<string, number>();
   const dayCount = new Map<string, number>();
   const deviceCount = new Map<string, number>();
+  const browserCount = new Map<string, number>();
+  const brandCount = new Map<string, number>();
   const hourCount = new Map<number, number>();
   const locCount = new Map<string, number>();
 
@@ -229,6 +245,12 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
 
     if (r.device) {
       deviceCount.set(r.device, (deviceCount.get(r.device) ?? 0) + 1);
+    }
+    if (r.browser) {
+      browserCount.set(r.browser, (browserCount.get(r.browser) ?? 0) + 1);
+    }
+    if (r.phone_brand) {
+      brandCount.set(r.phone_brand, (brandCount.get(r.phone_brand) ?? 0) + 1);
     }
     // Jam kunjungan dalam zona WIB (UTC+7) — jam 0–23.
     const hour = (new Date(r.created_at).getUTCHours() + 7) % 24;
@@ -257,6 +279,8 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     topPaths: top(pathCount, 8),
     topReferrers: top(refCount, 8),
     byDevice: top(deviceCount, 5),
+    byBrowser: top(browserCount, 6),
+    byPhoneBrand: top(brandCount, 6),
     byHour: [...hourCount.entries()].sort((a, b) => a[0] - b[0])
       .map(([hour, count]) => ({ hour, count })),
     topLocations: top(locCount, 8),

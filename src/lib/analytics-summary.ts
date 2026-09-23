@@ -21,6 +21,8 @@ export type AnalyticsSummary = {
   topPaths: CountedLabel[];
   topReferrers: CountedLabel[];
   byDevice: CountedLabel[];
+  byBrowser: CountedLabel[];
+  byPhoneBrand: CountedLabel[];
   byHour: HourCount[];
   topLocations: CountedLabel[];
   recentVisits: VisitLogEntry[];
@@ -89,6 +91,8 @@ function emptySummary(days: number = DEFAULT_DAYS): AnalyticsSummary {
     topPaths: [],
     topReferrers: [],
     byDevice: [],
+    byBrowser: [],
+    byPhoneBrand: [],
     byHour: [],
     topLocations: [],
     recentVisits: [],
@@ -108,6 +112,8 @@ export function normalizeSummary(input: unknown): AnalyticsSummary {
     topPaths: counted(input.topPaths),
     topReferrers: counted(input.topReferrers),
     byDevice: counted(input.byDevice),
+    byBrowser: counted(input.byBrowser),
+    byPhoneBrand: counted(input.byPhoneBrand),
     byHour: hourCounts(input.byHour),
     topLocations: counted(input.topLocations),
     recentVisits: visitEntries(input.recentVisits),
