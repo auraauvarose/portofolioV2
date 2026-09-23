@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
+import { parseDevice } from "@/lib/device";
+import { visitLogEntry } from "@/lib/visit-log";
+import { withFallback } from "@/lib/db-fallback";
 
 export const dynamic = "force-dynamic";
 
@@ -8,11 +11,14 @@ export const dynamic = "force-dynamic";
 // /api/analytics — pencatatan pageview tanpa cookie & tanpa PII.
 //
 //   POST  publik   → catat satu pageview
-//   GET   admin    → ringkasan (total, per hari, halaman teratas, referrer)
+//   GET   admin    → ringkasan (total, per hari, halaman teratas, referrer,
+//                    perangkat, jam kunjungan, lokasi)
 //
 // Privasi: IP TIDAK disimpan mentah — hanya HMAC-SHA256 dengan salt rahasia,
 // dipotong, dan dipakai semata untuk membedakan kunjungan unik. Tidak ada
-// cookie, tidak ada ID pelacak.
+// cookie, tidak ada ID pelacak. User-agent hanya dipakai untuk mengklasifikasi
+// perangkat lalu dibuang. Lokasi hanya negara/kota kasar dari geolokasi
+// Cloudflare (tanpa koordinat, tanpa alamat).
 // ============================================================================
 
 const MAX_PATH = 200;
@@ -48,6 +54,17 @@ function clientIp(req: NextRequest): string {
     req.headers.get("x-real-ip") ??
     "unknown"
   );
+}
+
+/** Negara & kota kasar dari geolokasi Cloudflare — tanpa koordinat. */
+function geoOf(req: NextRequest): { country: string | null; city: string | null } {
+  const cf = (
+    req as NextRequest & { cf?: { country?: string; city?: string } }
+  ).cf;
+  return {
+    country: cf?.country ? cf.country.slice(0, 2).toUpperCase() : null,
+    city: cf?.city ? cf.city.slice(0, 60) : null,
+  };
 }
 
 /** Hash IP + user-agent dengan salt; tidak bisa dibalik ke orangnya. */
@@ -103,14 +120,31 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const referrer = clean((body as Record<string, unknown>).referrer, MAX_REF);
 
   const supabase = await createSupabaseAdmin();
-  const { error } = await supabase.from("page_views").insert({
+  const geo = geoOf(req);
+  const base = {
     path,
     referrer,
     visitor_hash: await visitorHash(req),
-  });
+  };
+
+  // Payload lengkap dulu; bila kolom device/country/city belum ada (migrasi
+  // tahap4.sql belum dijalankan), mundur ke payload lama supaya pencatatan
+  // tetap jalan alih-alih berhenti total.
+  const { ok, error } = await withFallback(
+    [
+      {
+        ...base,
+        device: parseDevice(req.headers.get("user-agent")),
+        country: geo.country,
+        city: geo.city,
+      },
+      base,
+    ],
+    async (payload) => await supabase.from("page_views").insert(payload),
+  );
 
   // Kegagalan pencatatan tidak boleh terlihat oleh pengunjung.
-  if (error) console.warn("analytics insert:", error.message);
+  if (!ok) console.warn("analytics insert:", error);
   return NextResponse.json({ ok: true });
 });
 
@@ -128,15 +162,40 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const since = new Date(Date.now() - days * 86_400_000).toISOString();
 
   const supabase = await createSupabaseAdmin();
-  const { data, error } = await supabase
-    .from("page_views")
-    .select("path,referrer,visitor_hash,created_at")
-    .gte("created_at", since)
-    .order("created_at", { ascending: false })
-    .limit(20_000);
 
-  if (error) {
-    console.warn("analytics GET:", error.message);
+  /** Baris page_views yang dipakai ringkasan; kolom baru boleh absen. */
+  type Row = {
+    path: string;
+    referrer: string | null;
+    visitor_hash: string | null;
+    device?: string | null;
+    country?: string | null;
+    city?: string | null;
+    created_at: string;
+  };
+
+  // Kolom device/country/city ditambahkan oleh tahap4.sql yang dijalankan
+  // manual. Bila belum, SELECT dengan kolom itu gagal — mundur ke kolom lama
+  // agar data lama tetap tampil (bukan dilaporkan sebagai "tabel belum ada").
+  const { ok, data, error } = await withFallback<string, Row[]>(
+    [
+      "path,referrer,visitor_hash,device,country,city,created_at",
+      "path,referrer,visitor_hash,created_at",
+    ],
+    async (cols) =>
+      (await supabase
+        .from("page_views")
+        .select(cols)
+        .gte("created_at", since)
+        .order("created_at", { ascending: false })
+        .limit(20_000)) as unknown as {
+        error: unknown;
+        data: Row[] | null;
+      },
+  );
+
+  if (!ok) {
+    console.warn("analytics GET:", error);
     return NextResponse.json({
       migrated: false,
       total: 0,
@@ -144,20 +203,22 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
       byDay: [],
       topPaths: [],
       topReferrers: [],
+      byDevice: [],
+      byHour: [],
+      topLocations: [],
+      recentVisits: [],
     });
   }
 
-  const rows = (data ?? []) as {
-    path: string;
-    referrer: string | null;
-    visitor_hash: string | null;
-    created_at: string;
-  }[];
+  const rows = data ?? [];
 
   const uniques = new Set<string>();
   const pathCount = new Map<string, number>();
   const refCount = new Map<string, number>();
   const dayCount = new Map<string, number>();
+  const deviceCount = new Map<string, number>();
+  const hourCount = new Map<number, number>();
+  const locCount = new Map<string, number>();
 
   for (const r of rows) {
     if (r.visitor_hash) uniques.add(r.visitor_hash);
@@ -165,13 +226,25 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     if (r.referrer) refCount.set(r.referrer, (refCount.get(r.referrer) ?? 0) + 1);
     const day = r.created_at.slice(0, 10);
     dayCount.set(day, (dayCount.get(day) ?? 0) + 1);
+
+    if (r.device) {
+      deviceCount.set(r.device, (deviceCount.get(r.device) ?? 0) + 1);
+    }
+    // Jam kunjungan dalam zona WIB (UTC+7) — jam 0–23.
+    const hour = (new Date(r.created_at).getUTCHours() + 7) % 24;
+    hourCount.set(hour, (hourCount.get(hour) ?? 0) + 1);
+    if (r.country || r.city) {
+      const loc =
+        r.city && r.country ? `${r.city}, ${r.country}` : (r.country ?? "");
+      locCount.set(loc, (locCount.get(loc) ?? 0) + 1);
+    }
   }
 
-  const top = (m: Map<string, number>, n: number) =>
+  const top = (m: Map<string | number, number>, n: number) =>
     [...m.entries()]
       .sort((a, b) => b[1] - a[1])
       .slice(0, n)
-      .map(([label, count]) => ({ label, count }));
+      .map(([label, count]) => ({ label: String(label), count }));
 
   return NextResponse.json({
     migrated: true,
@@ -183,5 +256,20 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
       .map(([date, count]) => ({ date, count })),
     topPaths: top(pathCount, 8),
     topReferrers: top(refCount, 8),
+    byDevice: top(deviceCount, 5),
+    byHour: [...hourCount.entries()].sort((a, b) => a[0] - b[0])
+      .map(([hour, count]) => ({ hour, count })),
+    topLocations: top(locCount, 8),
+    // Log kunjungan terakhir: rows sudah urut terbaru dulu (order desc),
+    // jadi cukup potong 20 dan format via lib/visit-log. Tanpa IP/UA.
+    recentVisits: rows.slice(0, 20).map((r) =>
+      visitLogEntry({
+        path: r.path,
+        device: r.device ?? null,
+        country: r.country ?? null,
+        city: r.city ?? null,
+        created_at: r.created_at,
+      }),
+    ),
   });
 });

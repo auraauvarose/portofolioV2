@@ -16,6 +16,11 @@ import {
   ChartIcon,
   InfoIcon,
 } from "@/components/admin/icons";
+import { deviceLabel } from "@/lib/visit-log";
+import {
+  normalizeSummary,
+  type AnalyticsSummary,
+} from "@/lib/analytics-summary";
 
 // ============================================================================
 // AnalyticsPanel — ringkasan kunjungan.
@@ -26,19 +31,17 @@ import {
 // Grafik harian memakai batang berbagi-skala dengan sumbu nol yang jelas,
 // supaya tinggi batang bisa dibandingkan secara langsung. Nilai puncak
 // ditandai agar tidak perlu menebak dari tinggi saja.
+//
+// Respons API selalu lewat normalizeSummary: panel tidak boleh crash hanya
+// karena field baru belum ada di respons (versi lama / cache).
 // ============================================================================
 
-type Summary = {
-  migrated: boolean;
-  days: number;
-  total: number;
-  unique: number;
-  byDay: { date: string; count: number }[];
-  topPaths: { label: string; count: number }[];
-  topReferrers: { label: string; count: number }[];
-};
-
 const RANGES = [7, 30, 90] as const;
+
+/** Label jam: 0 → "00:00" ... 23 → "23:00" (zona WIB). */
+function hourLabel(h: number): string {
+  return `${String(h).padStart(2, "0")}:00`;
+}
 
 /** Format tanggal ringkas untuk label sumbu: "12 Feb". */
 function shortDate(iso: string): string {
@@ -84,7 +87,7 @@ function Stat({
 
 export default function AnalyticsPanel() {
   const [days, setDays] = useState<number>(30);
-  const [data, setData] = useState<Summary | null>(null);
+  const [data, setData] = useState<AnalyticsSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +103,7 @@ export default function AnalyticsPanel() {
         setError(json?.error ?? "Gagal memuat statistik");
         setData(null);
       } else {
-        setData(json as Summary);
+        setData(normalizeSummary(json));
       }
     } catch {
       setError("Gagal memuat statistik");
@@ -116,6 +119,19 @@ export default function AnalyticsPanel() {
   const maxDay = Math.max(1, ...(data?.byDay.map((d) => d.count) ?? [1]));
   const maxPath = Math.max(1, ...(data?.topPaths.map((p) => p.count) ?? [1]));
   const maxRef = Math.max(1, ...(data?.topReferrers.map((r) => r.count) ?? [1]));
+  const maxHour = Math.max(1, ...(data?.byHour.map((h) => h.count) ?? [1]));
+  const maxLoc = Math.max(
+    1,
+    ...(data?.topLocations.map((l) => l.count) ?? [1]),
+  );
+  /** Log kunjungan terakhir — default array kosong bila respons lama tanpa field ini. */
+  const recentVisits = data?.recentVisits ?? [];
+
+  /** Jam tersibuk (WIB) — ditandai di grafik jam. */
+  const peakHour = useMemo(() => {
+    if (!data?.byHour.length) return null;
+    return data.byHour.reduce((a, b) => (b.count > a.count ? b : a)).hour;
+  }, [data]);
 
   /** Hari tersibuk — ditandai di grafik supaya puncak tidak perlu ditebak. */
   const peakDate = useMemo(() => {
@@ -315,6 +331,158 @@ export default function AnalyticsPanel() {
               )}
             </section>
           </div>
+
+          {/* Perangkat · Jam · Lokasi */}
+          {/* Perangkat · Jam · Lokasi */}
+          <div className="grid gap-5 md:grid-cols-2">
+            {/* Perangkat */}
+            <section className="a-panel p-4 sm:p-5">
+              <h3 className="a-key mb-4">Perangkat</h3>
+              {data.byDevice.length === 0 ? (
+                <p className="text-sm text-[var(--color-a-faint)]">
+                  Belum ada data perangkat.
+                </p>
+              ) : (
+                <ul className="flex flex-col gap-3.5">
+                  {data.byDevice.map((d) => (
+                    <li key={d.label}>
+                      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                        <span className="text-xs text-[var(--color-a-text)]">
+                          {deviceLabel(d.label)}
+                        </span>
+                        <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                          {d.count.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <Bar value={d.count} max={Math.max(1, ...data.byDevice.map((x) => x.count))} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+
+            {/* Jam kunjungan (WIB) */}
+            <section className="a-panel p-4 sm:p-5">
+              <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+                <h3 className="a-key">Jam kunjungan (WIB)</h3>
+                {peakHour !== null && (
+                  <p className="a-meta text-[var(--color-a-faint)]">
+                    Tersibuk{" "}
+                    <span className="a-data text-[var(--color-a-dim)]">
+                      {hourLabel(peakHour)}
+                    </span>
+                  </p>
+                )}
+              </div>
+              {data.byHour.length === 0 ? (
+                <p className="text-sm text-[var(--color-a-faint)]">
+                  Belum ada data jam.
+                </p>
+              ) : (
+                <>
+                  {/* Batang per jam 00–23 dalam WIB; tinggi dibagi skala maksimum. */}
+                  <div
+                    className="flex h-28 items-end gap-[2px]"
+                    role="img"
+                    aria-label={`Grafik kunjungan per jam WIB, tersibuk ${peakHour !== null ? hourLabel(peakHour) : "-"}`}
+                  >
+                    {Array.from({ length: 24 }, (_, h) => {
+                      const count = data.byHour.find((x) => x.hour === h)?.count ?? 0;
+                      const isPeak = h === peakHour && count > 0;
+                      return (
+                        <div
+                          key={h}
+                          className="group/hour relative flex-1"
+                          title={`${hourLabel(h)} WIB: ${count} kunjungan`}
+                        >
+                          <div
+                            className={`w-full rounded-t-sm transition-colors ${
+                              isPeak
+                                ? "bg-[var(--color-a-accent)]"
+                                : "bg-[var(--color-a-accent)]/45 group-hover/hour:bg-[var(--color-a-accent)]/80"
+                            }`}
+                            style={{
+                              height: `${Math.max(3, (count / maxHour) * 100)}%`,
+                            }}
+                          />
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="mt-2 flex justify-between a-micro text-[var(--color-a-faint)]">
+                    <span className="a-data">00:00</span>
+                    <span className="a-data">23:00</span>
+                  </div>
+                </>
+              )}
+            </section>
+
+            {/* Lokasi */}
+            <section className="a-panel p-4 sm:p-5 md:col-span-2">
+              <h3 className="a-key mb-4">Lokasi pengunjung</h3>
+              {data.topLocations.length === 0 ? (
+                <p className="text-sm text-[var(--color-a-faint)]">
+                  Belum ada data lokasi.
+                </p>
+              ) : (
+                <ul className="grid gap-3.5 sm:grid-cols-2">
+                  {data.topLocations.map((l) => (
+                    <li key={l.label}>
+                      <div className="mb-1.5 flex items-baseline justify-between gap-3">
+                        <span className="truncate text-xs text-[var(--color-a-text)]">
+                          {l.label}
+                        </span>
+                        <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                          {l.count.toLocaleString("id-ID")}
+                        </span>
+                      </div>
+                      <Bar value={l.count} max={maxLoc} />
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </section>
+          </div>
+
+          {/* Log kunjungan terakhir: device - lokasi - jam WIB */}
+          <section className="a-panel p-4 sm:p-5">
+            <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
+              <h3 className="a-key">Log kunjungan terakhir</h3>
+              {recentVisits.length > 0 && (
+                <p className="a-meta text-[var(--color-a-faint)]">
+                  {recentVisits.length} kunjungan terbaru
+                </p>
+              )}
+            </div>
+            {recentVisits.length === 0 ? (
+              <p className="text-sm text-[var(--color-a-faint)]">
+                Belum ada kunjungan tercatat.
+              </p>
+            ) : (
+              <ul className="flex flex-col divide-y divide-[var(--color-a-line)]">
+                {recentVisits.map((v, i) => (
+                  <li
+                    key={`${v.time}-${i}`}
+                    className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2.5"
+                  >
+                    {/* Urutan sesuai permintaan: device - lokasi - jam. */}
+                    <span className="w-20 shrink-0 text-xs font-medium text-[var(--color-a-text)]">
+                      {v.device}
+                    </span>
+                    <span className="text-xs text-[var(--color-a-faint)]">
+                      {v.location}
+                    </span>
+                    <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                      {v.time}
+                    </span>
+                    <code className="a-data ml-auto truncate text-[11px] text-[var(--color-a-faint)]">
+                      {v.path}
+                    </code>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </section>
         </div>
       ) : null}
     </div>
