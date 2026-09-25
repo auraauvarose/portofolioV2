@@ -1,0 +1,75 @@
+import { test, describe } from "node:test";
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { dirname, resolve } from "node:path";
+
+// ============================================================================
+// Laporan user: "ada bug saat halaman direfresh2 halaman itu fontnya malah
+// blur" — lalu dipertegas "dari awal load website nya buram".
+//
+// Akar masalah: effect IntersectionObserver di ScrollWordReveal berjalan
+// dengan deps `[]`. Pada render klien pertama useFinePointer() masih memakai
+// snapshot server (false), jadi cabang `!fine` yang dirender — dan cabang itu
+// TIDAK memasang ref={rootRef}. Effect mount karena itu berhenti di
+// `if (!node) return` dan tidak pernah dijalankan ulang. Setelah snapshot
+// berubah ke fine=true, kata-kata masuk ke cabang cascade dengan
+// filter: blur(7px) + opacity 0.2 TANPA observer yang bisa menyalakan
+// `hasEntered` -> teks tertahan blur permanen di perangkat fine pointer.
+//
+// Kontrak yang dikunci di sini: effect observer WAJIB jalan ulang saat mode
+// pointer berubah, `fine` wajib sudah terdeklarasi saat itu (kalau tidak:
+// "Cannot access 'fine' before initialization"), dan cabang cascade tetap
+// memasang ref yang diobservasi.
+// ============================================================================
+
+const here = dirname(fileURLToPath(import.meta.url));
+const SWR = readFileSync(
+  resolve(here, "../src/components/ScrollWordReveal.tsx"),
+  "utf8",
+);
+
+describe("ScrollWordReveal — observer cascade ikut mode pointer", () => {
+  test("effect observer bergantung pada `fine`, bukan array kosong", () => {
+    const m = SWR.match(
+      /new IntersectionObserver[\s\S]*?\},\s*\[([^\]]*)\]\s*\);/,
+    );
+    assert.ok(
+      m,
+      "effect IntersectionObserver tidak ditemukan di ScrollWordReveal.tsx",
+    );
+    const deps = m[1]
+      .split(",")
+      .map((d) => d.trim())
+      .filter(Boolean);
+    assert.deepEqual(
+      deps,
+      ["fine"],
+      `deps effect observer harus [fine] (agar re-run saat snapshot pointer berubah), dapat [${deps.join(", ")}]`,
+    );
+  });
+
+  test("`fine` dideklarasikan sebelum effect observer (hindari TDZ)", () => {
+    const decl = SWR.indexOf("const fine = useFinePointer()");
+    const effect = SWR.indexOf("new IntersectionObserver");
+    assert.ok(
+      decl > -1,
+      "deklarasi `const fine = useFinePointer()` tidak ditemukan",
+    );
+    assert.ok(effect > -1, "IntersectionObserver tidak ditemukan");
+    assert.ok(
+      decl < effect,
+      "`fine` dipakai sebagai dependency sebelum dideklarasikan (TDZ)",
+    );
+  });
+
+  test("cabang cascade memasang ref={rootRef} yang diobservasi", () => {
+    const cascade = SWR.slice(SWR.indexOf("const container: Variants"));
+    assert.ok(cascade.length > 0, "blok `const container: Variants` tidak ditemukan");
+    assert.match(
+      cascade,
+      /ref=\{rootRef\}/,
+      "cabang cascade tidak memasang ref={rootRef}, observer tidak akan pernah dibuat",
+    );
+  });
+});

@@ -1,19 +1,19 @@
 # Doublecheck spec
 
 ## Goal
-Beranda auraauvarose.my.id mengirim HTML berisi konten + H1 ke crawler, dan canonical/robots/sitemap menunjuk ke auraauvarose.my.id, tanpa menghilangkan satu pun animasi yang sudah ada.
+Headline hero "FULLSTACK / DEVELOPER" tampil jauh lebih putih di dark mode (dari beige kusam #B7AB98/60 menjadi putih 90%).
 
 ## Scope
-In: src/components/HomeClient.tsx (hapus early-return yang menyembunyikan seluruh halaman saat phase === "enter", ganti dengan overlay penutup) dan src/lib/site.ts (DEFAULT_SITE_URL → https://auraauvarose.my.id). Out: Google Search Console, DNS, redirect workers.dev, .env.local, vercel.app, file lain.
+IN: satu nilai class warna teks dark-mode pada elemen h1 headline hero di src/components/Hero.tsx. OUT: lapisan bayangan oranye (__depth), overlay lensa, pita marquee, mode terang, ukuran/font/layout.
 
 ## Acceptance criteria
-1) `npm run typecheck` lolos. 2) `npm run lint` lolos. 3) `npm test` lolos. 4) `npm run build` (atau cf:build) lolos. 5) HTML hasil build untuk "/" memuat tag <h1> dan teks nyata (bukan 36 karakter), bukan lagi hanya 2 div kosong. 6) canonical/og:url/robots/sitemap pada hasil build menunjuk ke https://auraauvarose.my.id. 7) Curtain loading tetap: greeting cycle, slide-down exit 0,7s, dan urutan visual hitam → greeting → Hero tidak berubah.
+1) Di dark mode h1 headline hero memakai putih 90% (dark:text-white/90), bukan lagi #B7AB98/60. 2) Mode terang tidak berubah (tetap text-[#ffffff]/60). 3) Typecheck/lint proyek lolos tanpa error baru.
 
 ## Failure modes
-Kalau halaman dirender saat "enter", ada risiko: (a) flash konten sebelum curtain tampil — dimitigasi overlay z-[99999] bg-ink; (b) error SSR karena window/document di luar useEffect — sudah diverifikasi nol hit; (c) animasi Hero/Lenis jalan sebelum curtain selesai — Hero memang sudah selalu dirender setelah mount, dan Lenis hanya membaca scroll, jadi tidak ada perubahan perilaku; (d) konten terlihat crawler tapi user melihat layar hitam lebih lama — durasi tidak berubah. Kalau build/typecheck gagal, revert file itu saja.
+(a) Ikut mengubah lapisan __depth oranye -> efek kedalaman 3D hilang (di luar scope). (b) Tidak sengaja mengubah nilai mode terang -> regresi di light mode. (c) Putih 90% membuat bayangan oranye di belakang tak terlihat — ini konsekuensi yang dipilih user, bukan bug. (d) Class Tailwind arbitrary salah tulis sehingga tidak ter-compile.
 
 ## Priorities
-Prioritas: (1) animasi tidak boleh berubah/rusak, (2) HTML berisi konten, (3) canonical benar. Kalau ada konflik antara "HTML penuh" dan "animasi mulus", animasi menang.
+Prioritas: keputihan visual di dark mode > mempertahankan kesan tembus cahaya/blend dengan bayangan oranye. Opsional: penyesuaian mode terang.
 
 ## Non-goals
-Bukan tujuan: peringkat 1 untuk kata "aura" (tidak mungkin untuk situs nol backlink), mendaftarkan Search Console, mengubah desain/tampilan, menambah section, mengubah durasi animasi, menyentuh .env.local atau secrets, redirect workers.dev.
+Tidak mengubah pita marquee, overlay lensa, font/ukuran/letter-spacing, layout, maupun lapisan bayangan oranye.

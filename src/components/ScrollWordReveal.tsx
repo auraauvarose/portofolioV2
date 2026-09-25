@@ -126,6 +126,15 @@ export default function ScrollWordReveal({
   const [hasEntered, setHasEntered] = useState(false);
   const [entryDirection, setEntryDirection] = useState<"from-top" | "from-bottom">("from-bottom");
 
+  // Touch scrolling can move the page faster than a per-word cascade can
+  // settle, and touch GPUs re-raster filtered text every frame. Coarse
+  // pointers therefore collapse the timed cascade to readable,
+  // geometry-stable text and scrub with opacity/color only (no filter, no
+  // spring); fine pointers keep the richer desktop reveal.
+  //
+  // Dideklarasikan sebelum effect observer karena dipakai sebagai dependency.
+  const fine = useFinePointer();
+
   useEffect(() => {
     if (replay) getScrollDirection();
   }, [replay]);
@@ -148,17 +157,14 @@ export default function ScrollWordReveal({
     );
     observer.observe(node);
     return () => observer.disconnect();
-    // Sengaja sekali jalan: IntersectionObserver mengikat elemen yang sama
-    // seumur komponen, jadi memasang ulang tidak ada gunanya.
+    // `fine` wajib jadi dependency: pada render klien pertama cabang `!fine`
+    // dipakai (snapshot server = false) dan cabang itu tidak memasang
+    // rootRef, jadi efek ini berhenti di `if (!node) return` di atas dan
+    // tidak pernah dijalankan ulang. Akibatnya kata-kata masuk ke cabang
+    // cascade dengan filter blur(7px) tanpa observer yang bisa menyalakan
+    // `hasEntered` — teks tertahan blur permanen di perangkat fine pointer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-
-  // Touch scrolling can move the page faster than a per-word cascade can
-  // settle, and touch GPUs re-raster filtered text every frame. Coarse
-  // pointers therefore collapse the timed cascade to readable,
-  // geometry-stable text and scrub with opacity/color only (no filter, no
-  // spring); fine pointers keep the richer desktop reveal.
-  const fine = useFinePointer();
+  }, [fine]);
 
   const words = text.split(/\s+/).filter(Boolean).map((w) => w.trim());
   const norm = (w: string) => w.toLowerCase().replace(/[.,!?;:)]+$/, "");

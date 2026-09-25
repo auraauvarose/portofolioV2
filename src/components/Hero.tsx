@@ -202,7 +202,7 @@ export default function Hero() {
               <br />
               <span className="hero-title-3d__line">{title2}</span>
             </div>
-            <h1 className="hero-title-3d__heading text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#B7AB98]/60 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
+            <h1 className="hero-title-3d__heading text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-[#ffffff]/60 transition-colors duration-300 dark:text-[#ffffff]/90 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
               <span>{title1}</span>
               <br />
               <span>{title2}</span>
