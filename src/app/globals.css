@@ -1504,8 +1504,11 @@ summary {
   pointer-events: none;
   filter: blur(0.2px);
 }
+/* Teks tetap filled putih (utility di Hero.tsx); yang ditambahkan hanya garis
+   tipis hitam di sekeliling huruf supaya kontras di atas artwork hero. */
 .hero-title-3d__heading {
   z-index: 1;
+  -webkit-text-stroke: 1px rgb(13 14 19 / 0.85);
 }
 .hero-title-3d__line {
   display: inline-block;
@@ -1515,9 +1518,6 @@ summary {
 }
 .hero-title-3d:hover .hero-title-3d__heading > span {
   color: rgb(255 255 255 / 1);
-}
-:root:not(.dark) .hero-title-3d:hover .hero-title-3d__heading > span {
-  color: rgb(13 14 19 / 0.78);
 }
 /* Flat hero title only on mobile-sized viewports. The width clause guarantees
    phones see no 3D at all even when the browser reports a fine pointer

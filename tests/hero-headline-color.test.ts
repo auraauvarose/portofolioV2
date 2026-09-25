@@ -45,7 +45,25 @@ function headlineClassName(): string {
   return m![1];
 }
 
-describe("Headline hero — putih di light & dark, bebas dari catch-all", () => {
+/** Pecah globals.css jadi daftar { sel, body } tanpa komentar. */
+function parseRules(css: string): { sel: string; body: string }[] {
+  const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
+  const rules: { sel: string; body: string }[] = [];
+  const re = /([^{}]+)\{([^{}]*)\}/g;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(clean))) {
+    rules.push({ sel: m[1].replace(/\s+/g, " ").trim(), body: m[2] });
+  }
+  return rules;
+}
+
+/** Ambil komponen RGB dari deklarasi -webkit-text-stroke pada sebuah body rule. */
+function strokeRgb(body: string): number[] | null {
+  const m = body.match(/-webkit-text-stroke:[^;]*?rgb\(\s*(\d+)\s+(\d+)\s+(\d+)/);
+  return m ? [Number(m[1]), Number(m[2]), Number(m[3])] : null;
+}
+
+describe("Headline hero — teks putih filled + garis hitam tipis", () => {
   test("atribut class headline tidak mengandung substring 'text-white/'", () => {
     const cls = headlineClassName();
     assert.ok(
@@ -54,22 +72,58 @@ describe("Headline hero — putih di light & dark, bebas dari catch-all", () => 
     );
   });
 
-  test("warna light mode ditulis bracket-form dan bernilai putih", () => {
+  test("warna teks tetap bracket-form putih di kedua mode", () => {
     const cls = headlineClassName();
     const light = cls.match(/(?:^|\s)text-\[#ffffff\]\/(\d+)/);
-    assert.ok(
-      light,
-      "light mode wajib memakai text-[#ffffff]/NN (bracket-form) agar tidak kena catch-all",
+    const dark = cls.match(/(?:^|\s)dark:text-\[#ffffff\]\/(\d+)/);
+    assert.ok(light, "warna teks harus text-[#ffffff]/NN (bracket-form) agar tidak kena catch-all");
+    assert.ok(dark, "warna teks harus dark:text-[#ffffff]/NN (bracket-form)");
+    assert.equal(
+      light![1],
+      dark![1],
+      "light dan dark wajib filled putih dengan opacity sama",
     );
   });
 
-  test("warna dark mode ditulis bracket-form dan bernilai putih", () => {
-    const cls = headlineClassName();
-    const dark = cls.match(/(?:^|\s)dark:text-\[#ffffff\]\/(\d+)/);
+  test("heading tetap filled — garis ditambah, bukan mengganti isi", () => {
+    const rule = parseRules(CSS).find((r) => r.sel === ".hero-title-3d__heading");
+    assert.ok(rule, "rule .hero-title-3d__heading tidak ditemukan");
     assert.ok(
-      dark,
-      "dark mode wajib memakai dark:text-[#ffffff]/NN (bracket-form), bukan dark:text-white/NN",
+      !/color:\s*transparent/.test(rule!.body),
+      "headline harus tetap filled; hanya_border yang ditambahkan",
     );
+  });
+
+  test("garis border hitam tipis ditambahkan pada heading", () => {
+    const rule = parseRules(CSS).find((r) => r.sel === ".hero-title-3d__heading");
+    assert.ok(rule, "rule .hero-title-3d__heading tidak ditemukan");
+    assert.match(rule!.body, /-webkit-text-stroke:\s*1px/, "harus ada garis 1px");
+    const rgb = strokeRgb(rule!.body);
+    assert.ok(rgb, "warna garis tidak terbaca");
+    assert.ok(rgb.every((c) => c < 64), `garis harus hitam, dapat ${rgb.join(",")}`);
+  });
+
+  test("layer depth tetap filled oranye — efek 3D asli tidak hilang", () => {
+    const rule = parseRules(CSS).find((r) => r.sel === ".hero-title-3d__depth");
+    assert.ok(rule, "rule .hero-title-3d__depth tidak ditemukan");
+    assert.match(rule!.body, /color:\s*rgb\(235 89 57/, "layer depth harus oranye solid");
+    assert.ok(
+      !/color:\s*transparent/.test(rule!.body),
+      "layer depth tidak boleh dihollow — menutupi outline depan",
+    );
+  });
+
+  test("hover tidak memaksa warna gelap di light mode", () => {
+    const hover = parseRules(CSS).filter(
+      (r) => r.sel.includes(".hero-title-3d:hover") && r.body.includes("color:"),
+    );
+    for (const r of hover) {
+      assert.match(
+        r.body,
+        /rgb\(255 255 255/,
+        `hover di light mode memaksa warna non-putih: ${r.sel} { ${r.body} }`,
+      );
+    }
   });
 
   test("tidak ada utility text-white/ telanjang di seluruh headline", () => {
