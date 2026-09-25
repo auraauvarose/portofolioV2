@@ -14,15 +14,11 @@
 /**
  * Fallback terakhir bila NEXT_PUBLIC_SITE_URL tidak diset.
  *
- * PENTING: ini harus hostname Worker yang BENAR. Subdomain workers.dev
- * dibentuk dari nama akun Cloudflare, bukan nama Worker — di sini akunnya
- * `auraauvaroseendica` sementara nama Worker-nya `portofolio`.
- *
- * Tetap disarankan mengisi NEXT_PUBLIC_SITE_URL di CI (lihat README) supaya
- * nilai ini tidak pernah dipakai.
+ * Ini domain publik yang sebenarnya, supaya canonical, robots.txt, sitemap,
+ * Open Graph, dan JSON-LD tidak pernah menunjuk ke alamat workers.dev
+ * (yang akan memecah sinyal SEO karena dua host menyajikan isi yang sama).
  */
-export const DEFAULT_SITE_URL =
-  "https://portofolio.auraauvaroseendica.workers.dev";
+export const DEFAULT_SITE_URL = "https://auraauvarose.my.id";
 
 export function siteUrl(): string {
   const raw =

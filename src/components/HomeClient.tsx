@@ -153,13 +153,19 @@ export default function HomeClient({
     return () => cancelAnimationFrame(raf);
   }, []);
 
-  if (phase === "enter") {
-    return <div className="fixed inset-0 bg-ink" aria-hidden="true" />;
-  }
-
   return (
     <SmoothScroll>
       <main className="relative min-h-screen overflow-x-clip bg-ink">
+        {/* "enter" lasts a single frame, but it still needs an opaque cover or
+            the hero would flash before the curtain mounts.
+            The page tree below is deliberately rendered from the very first
+            HTML paint: returning only this cover (as it used to) meant
+            crawlers received an empty document — no headings, no text — while
+            the visitor saw the same animation as now. */}
+        {phase === "enter" && (
+          <div className="fixed inset-0 z-[99999] bg-ink" aria-hidden="true" />
+        )}
+
         {/* Mounted only during "show": flipping to "exit" unmounts the child,
             which is what tells AnimatePresence to play the slide-down exit. */}
         <AnimatePresence>
