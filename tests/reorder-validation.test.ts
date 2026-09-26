@@ -1,18 +1,6 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
-// ============================================================================
-// /api/reorder menerima { table, ids } dan menulis sort_order.
-//
-// Dua hal harus dijamin sebelum menyentuh database:
-//   1. `table` hanya boleh dari daftar putih — kalau tidak, endpoint bisa
-//      diarahkan ke tabel lain (mis. contact_messages),
-//   2. setiap id harus UUID valid — kalau tidak, nilainya masuk ke filter
-//      .eq() dan berpotensi disalahgunakan.
-//
-// Logika di bawah adalah cerminan persis dari src/app/api/reorder/route.ts.
-// ============================================================================
-
 const TABLES = [
   "projects",
   "certifications",
@@ -69,7 +57,6 @@ describe("validasi id", () => {
     assert.ok(!isUuid("bukan-uuid"));
     assert.ok(!isUuid(""));
     assert.ok(!isUuid(VALID_UUID + "x"));
-    // UUID tanpa segmen yang benar
     assert.ok(!isUuid("2cb308a3-1528-43ca-8f16"));
   });
 
@@ -82,7 +69,6 @@ describe("validasi id", () => {
 });
 
 describe("aturan payload (cerminan handler)", () => {
-  /** Cerminan urutan pemeriksaan di POST /api/reorder. */
   function validate(body: unknown): { ok: boolean; error?: string } {
     if (!body || typeof body !== "object") return { ok: false, error: "bentuk" };
     const { table, ids } = body as { table?: unknown; ids?: unknown };

@@ -5,13 +5,6 @@ import { Suspense, useId, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { EyeIcon, EyeOffIcon, LockIcon } from "@/components/admin/icons";
 
-// ============================================================================
-// Halaman masuk panel admin.
-//
-// Satu pekerjaan saja: memasukkan kata sandi. Tata letaknya karena itu satu
-// kolom sempit yang tenang — tanpa hero pemasaran yang mengalihkan perhatian.
-// ============================================================================
-
 function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -42,7 +35,6 @@ function LoginForm() {
       return;
     }
 
-    // Only allow same-origin relative paths — blocks open redirect via ?next=
     const rawNext = searchParams.get("next") ?? "/admin";
     const next =
       rawNext.startsWith("/") && !rawNext.startsWith("//") ? rawNext : "/admin";
@@ -62,9 +54,6 @@ function LoginForm() {
         <span className="a-key">Panel admin</span>
       </header>
 
-      {/* Kartu diletakkan sedikit di atas titik tengah: secara optis terasa
-          lebih seimbang daripada tepat di tengah, karena mata membaca dari
-          atas dan ruang sisa di bawah tidak terasa kosong. */}
       <main className="flex flex-1 items-start justify-center px-6 pb-24 pt-6 sm:pt-16">
         <section
           key={shake}
@@ -102,8 +91,6 @@ function LoginForm() {
                   aria-invalid={error ? true : undefined}
                   className="w-full rounded-lg border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-3 py-2.5 pr-11 text-sm text-[var(--color-a-text)] outline-none transition-colors placeholder:text-[var(--color-a-faint)] hover:border-[var(--color-a-accent)]/50 focus:border-[var(--color-a-accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-1 focus-visible:outline-[var(--color-a-accent)] lg:px-4 lg:py-3.5 lg:pr-14"
                 />
-                {/* Tombol lihat sandi: mengurangi salah ketik tanpa
-                    mengorbankan privasi di layar bersama. */}
                 <button
                   type="button"
                   onClick={() => setShowPassword((v) => !v)}

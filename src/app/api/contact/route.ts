@@ -5,10 +5,6 @@ import { contactForm } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-// ---------------------------------------------------------------------------
-// Rate limit (in-memory, per isolate — cukup untuk memperlambat spam, bukan
-// proteksi absolut; sama seperti /api/comments). 1 pesan per IP per 2 menit.
-// ---------------------------------------------------------------------------
 const RATE_WINDOW_MS = 120_000;
 const rateMap = new Map<string, number>();
 
@@ -37,7 +33,6 @@ const MAX_EMAIL = 160;
 const MAX_SUBJECT = 140;
 const MAX_MESSAGE = 4000;
 
-/** Hash IP dengan salt rahasia — disimpan hanya untuk audit spam, bukan PII mentah. */
 async function hashIp(ip: string): Promise<string | null> {
   const salt = process.env.ADMIN_COOKIE_SECRET || process.env.ADMIN_PASSWORD;
   if (!salt || !ip || ip === "unknown") return null;
@@ -58,7 +53,6 @@ async function hashIp(ip: string): Promise<string | null> {
   }
 }
 
-/** IP asli di Cloudflare — `x-forwarded-for` bisa dipalsukan klien. */
 function clientIp(req: NextRequest): string {
   const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
   if (cf?.clientIp) return cf.clientIp;
@@ -69,10 +63,6 @@ function clientIp(req: NextRequest): string {
   );
 }
 
-// ---------------------------------------------------------------------------
-// GET — daftar pesan masuk (admin only).
-//   ?status=new|read|replied|archived  → filter opsional
-// ---------------------------------------------------------------------------
 export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -92,24 +82,18 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
 
   const { data, error } = await query;
   if (error) {
-    // Jangan bocorkan pesan internal DB ke klien.
     console.error("contact_messages list failed:", error.message);
     return NextResponse.json({ error: "Gagal memuat pesan." }, { status: 500 });
   }
   return NextResponse.json({ messages: data ?? [] });
 });
 
-// ---------------------------------------------------------------------------
-// POST — kirim pesan dari form kontak publik.
-// ---------------------------------------------------------------------------
 export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "Data tidak valid." }, { status: 400 });
   }
 
-  // Honeypot — field tersembunyi yang harusnya kosong. Balas sukses palsu
-  // supaya bot tidak mencoba lagi.
   if (clean((body as Record<string, unknown>).website)) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
@@ -161,9 +145,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   return NextResponse.json({ ok: true, id: data.id }, { status: 201 });
 });
 
-// ---------------------------------------------------------------------------
-// PATCH — ubah status pesan (admin only). Body: { id, status }
-// ---------------------------------------------------------------------------
 const STATUSES = ["new", "read", "replied", "archived"] as const;
 
 export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
@@ -203,9 +184,6 @@ export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
   return NextResponse.json(data);
 });
 
-// ---------------------------------------------------------------------------
-// DELETE — hapus pesan (admin only). ?id=<uuid>
-// ---------------------------------------------------------------------------
 export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;

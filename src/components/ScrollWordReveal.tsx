@@ -16,18 +16,13 @@ import { getScrollDirection } from "@/lib/scroll-direction";
 type ScrollWordRevealProps = {
   text: string;
   className?: string;
-  /** Opacity each word rests at before its reveal (default 0.25) */
   baseOpacity?: number;
-  /** Optional color ramp (base → full) applied while a word reveals */
   baseColor?: string;
   fullColor?: string;
   highlight?: readonly string[];
   highlightClassName?: string;
-  /** Seconds between successive words in the cascade (default 0.04) */
   stagger?: number;
-  /** Replay the word cascade every time it enters the viewport */
   replay?: boolean;
-  /** Link each word's reveal progress to scroll position in both directions */
   scrub?: boolean;
   as?: "p" | "span" | "h2" | "h3" | "h4" | "div";
   "aria-label"?: string;
@@ -35,8 +30,6 @@ type ScrollWordRevealProps = {
 
 const FINE_POINTER = "(hover: hover) and (pointer: fine)";
 
-/** Resolved before first paint on the client (no post-paint flip), so the
- *  first in-view batch and every later batch get the same treatment. */
 function useFinePointer(): boolean {
   return useSyncExternalStore(
     (onChange) => {
@@ -72,8 +65,6 @@ function ScrubWord({
   className,
   fine,
 }: ScrubWordProps) {
-  // Hooks stay unconditional (rules of hooks); the filter only reaches the
-  // DOM on fine pointers so touch GPUs never rasterize a blurred layer.
   const opacity = useTransform(progress, range, [baseOpacity, 1]);
   const blur = useTransform(progress, range, [8, 0]);
   const filter = useMotionTemplate`blur(${blur}px)`;
@@ -126,13 +117,6 @@ export default function ScrollWordReveal({
   const [hasEntered, setHasEntered] = useState(false);
   const [entryDirection, setEntryDirection] = useState<"from-top" | "from-bottom">("from-bottom");
 
-  // Touch scrolling can move the page faster than a per-word cascade can
-  // settle, and touch GPUs re-raster filtered text every frame. Coarse
-  // pointers therefore collapse the timed cascade to readable,
-  // geometry-stable text and scrub with opacity/color only (no filter, no
-  // spring); fine pointers keep the richer desktop reveal.
-  //
-  // Dideklarasikan sebelum effect observer karena dipakai sebagai dependency.
   const fine = useFinePointer();
 
   useEffect(() => {
@@ -157,12 +141,6 @@ export default function ScrollWordReveal({
     );
     observer.observe(node);
     return () => observer.disconnect();
-    // `fine` wajib jadi dependency: pada render klien pertama cabang `!fine`
-    // dipakai (snapshot server = false) dan cabang itu tidak memasang
-    // rootRef, jadi efek ini berhenti di `if (!node) return` di atas dan
-    // tidak pernah dijalankan ulang. Akibatnya kata-kata masuk ke cabang
-    // cascade dengan filter blur(7px) tanpa observer yang bisa menyalakan
-    // `hasEntered` — teks tertahan blur permanen di perangkat fine pointer.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fine]);
 
@@ -173,10 +151,6 @@ export default function ScrollWordReveal({
 
   const Component = Tag as React.ElementType;
 
-  // Reduced-motion users get stable, fully-readable copy. Scrub mode stays
-  // available on coarse pointers too, but there it binds straight to scroll
-  // position with opacity/color only; fine pointers keep the full
-  // blur-to-sharp spring reveal.
   if (reduceMotion) {
     return (
       <Component className={className} aria-label={ariaLabel ?? text}>
@@ -222,9 +196,6 @@ export default function ScrollWordReveal({
     );
   }
 
-  // Timed cascades remain reserved for fine pointers. This keeps the
-  // existing desktop choreography stable for other sections using this
-  // shared component while About/What I Do opt into scrub mode.
   if (!fine) {
     return (
       <Component className={className} aria-label={ariaLabel ?? text}>
@@ -247,8 +218,6 @@ export default function ScrollWordReveal({
     hidden: {},
     visible: {
       transition: {
-        // On language changes, reveal the new copy quickly enough that a
-        // long paragraph never appears stuck while its words cascade.
         staggerChildren: replay ? Math.min(stagger, 0.018) : stagger,
       },
     },
@@ -256,9 +225,6 @@ export default function ScrollWordReveal({
 
   const word: Variants = {
     hidden: {
-      // A phone can interrupt the cascade while the user is flick-scrolling.
-      // Keep touch text readable and geometrically stable instead of leaving
-      // words dimmed, offset, and rotated between observer updates.
       opacity: fine ? baseOpacity : 1,
       y: fine && replay && entryDirection === "from-top" ? -14 : fine ? 14 : 0,
       rotateZ:

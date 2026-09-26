@@ -9,9 +9,6 @@ export default function Footer() {
   const markRef = useRef<HTMLHeadingElement>(null);
   const reduceMotion = useReducedMotion();
 
-  // Pause the watermark gradient animation while it is offscreen. Nothing
-  // visible changes, but the browser stops repainting a 30vw text layer
-  // every frame while the user is somewhere else on the page.
   useEffect(() => {
     const el = markRef.current;
     if (!el) return;
@@ -26,8 +23,6 @@ export default function Footer() {
   return (
     <footer className="relative overflow-x-clip">
       <div className="pointer-events-none select-none overflow-x-clip -mt-8 md:-mt-16 lg:-mt-20">
-        {/* Once-only entrance: the watermark rises from below the fold the
-            first time the footer scrolls into view, then stays put. */}
         <motion.h1
           ref={markRef}
           initial={reduceMotion ? undefined : { y: 110, opacity: 0 }}

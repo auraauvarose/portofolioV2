@@ -20,18 +20,6 @@ import {
   AlertIcon,
 } from "@/components/admin/icons";
 
-// ============================================================================
-// SiteContentManager — editor konten situs.
-//
-// Mengedit nilai yang meng-override src/lib/config.ts. Seksi disimpan terpisah
-// (satu baris DB per seksi) supaya perubahan di satu seksi tidak menimpa seksi
-// lain, dan tombol "Reset" bisa mengembalikan satu seksi saja ke default.
-//
-// Editor di sini sengaja generik (field teks per-key) alih-alih form khusus
-// per seksi: bentuk data berbeda-beda dan terus berkembang, sementara struktur
-// JSON-nya sudah tervalidasi di server (bentuk harus cocok dengan default).
-// ============================================================================
-
 type Section = {
   key: string;
   data: unknown;
@@ -59,7 +47,6 @@ const SECTION_HINT: Record<string, string> = {
   techStack: "Kategori dan daftar teknologi.",
 };
 
-/** Tampilkan JSON rapi; bentuk data berbeda-beda per seksi. */
 function pretty(v: unknown): string {
   try {
     return JSON.stringify(v, null, 2);
@@ -68,7 +55,6 @@ function pretty(v: unknown): string {
   }
 }
 
-/** Satu baris ringkas untuk pratinjau isi seksi di keadaan tertutup. */
 function summarize(v: unknown): string {
   if (Array.isArray(v)) return `${v.length} item`;
   if (v && typeof v === "object") {
@@ -117,9 +103,6 @@ export default function SiteContentManager() {
     load();
   }, [load]);
 
-  // ── Validasi JSON langsung saat mengetik ──
-  // Sebelumnya galat baru muncul setelah tombol Simpan ditekan. Sekarang
-  // pengguna tahu ada salah ketik pada baris mana sebelum mencoba menyimpan.
   const parsed = useMemo(() => {
     if (!openKey) return { ok: true as const, value: undefined };
     try {
@@ -329,7 +312,6 @@ export default function SiteContentManager() {
                       }
                     />
 
-                    {/* Umpan balik validasi: status, bukan kalimat panjang. */}
                     <div className="mt-3 flex flex-wrap items-center gap-2 a-meta">
                       {parsed.ok ? (
                         <span className="inline-flex items-center gap-1.5 text-[var(--color-a-ok)]">

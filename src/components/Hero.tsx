@@ -27,8 +27,6 @@ export default function Hero() {
   const titlePointer = useRef({ x: 0, y: 0 });
   const titleRect = useRef<DOMRect | null>(null);
 
-  // Cache the title rect once (and on resize) instead of forcing layout on
-  // every pointermove — the hero title never moves in the layout.
   useEffect(() => {
     const el = heroRef.current?.querySelector<HTMLElement>(".hero-title-3d");
     if (!el) return;
@@ -41,8 +39,6 @@ export default function Hero() {
   }, []);
 
   const onMove = (e: React.MouseEvent<HTMLElement>) => {
-    // Coalesce CSS var writes to one per frame — mousemove fires faster than
-    // the display refreshes, and each write restyles the whole hero subtree.
     const el = e.currentTarget;
     lensRef.current.x = e.clientX;
     lensRef.current.y = e.clientY;
@@ -55,9 +51,6 @@ export default function Hero() {
   };
 
   const onTitleMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    // Touch moves belong to native page scrolling, and narrow viewports keep
-    // the headline completely flat. Avoid scheduling 3D CSS-variable writes
-    // on mobile even when a browser reports a fine pointer.
     if (e.pointerType !== "mouse" || window.matchMedia("(max-width: 767px)").matches) return;
     const el = e.currentTarget;
     titlePointer.current = { x: e.clientX, y: e.clientY };
@@ -98,9 +91,6 @@ export default function Hero() {
     if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
 
     const onScroll = () => {
-      // rAF-throttled, write-only: updates a CSS variable instead of calling
-      // setState, so scrolling never re-renders the Hero subtree. The dim
-      // overlay resolves the value in CSS via --hero-dim.
       if (scrollRAF.current) return;
       scrollRAF.current = requestAnimationFrame(() => {
         scrollRAF.current = 0;

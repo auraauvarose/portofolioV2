@@ -46,7 +46,6 @@ function MoonIcon({ className }: { className?: string }) {
 
 type SocialLink = { label: string; href: string };
 
-/** Ambil URL asli dari konten situs; fallback ke href bawaan ikon. */
 function hrefFor(social: Social, socials: readonly SocialLink[]): string {
   const found = socials.find(
     (s) => s.label.toLowerCase() === social.label.toLowerCase(),

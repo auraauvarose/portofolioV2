@@ -51,13 +51,6 @@ const THEME_META: Record<
   light: { label: "themeLight", icon: SunIcon },
 };
 
-/**
- * Menu kontrol halaman: pilihan tema + musik.
- *
- * Penempatan sengaja SATU aturan untuk semua ukuran layar — fixed menempel di
- * atas, di-center horizontal. Tidak ada cabang `md:` yang memindahkan atau
- * menyembunyikannya, jadi tampilan mobile identik dengan desktop.
- */
 export default function PageControls() {
   const { theme, setTheme, t } = useLanguage();
 

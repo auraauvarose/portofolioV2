@@ -6,13 +6,9 @@ import { motion, useMotionValue, useSpring } from "motion/react";
 type MagneticProps = {
   children: React.ReactNode;
   className?: string;
-  /** 0–1: how far the content leans toward the cursor */
   strength?: number;
 };
 
-/** Wraps a control so it leans toward the cursor while it is near, then
- *  springs back on leave. Fine pointers only — touch devices get the plain
- *  children untouched. */
 export default function Magnetic({
   children,
   className = "",

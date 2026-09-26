@@ -1,11 +1,3 @@
-// Normalisasi ringkasan analitik sebelum dipakai panel.
-//
-// Panel menerima JSON dari /api/analytics tanpa validasi runtime. Bila respons
-// datang dari versi lama (field device/jam/lokasi belum ada) atau berbentuk tak
-// terduga, akses `.length` pada field yang hilang akan membuat panel crash.
-// Fungsi ini memaksa bentuk yang aman: semua daftar jadi array, semua angka
-// jadi number (NaN → 0), dan entri log cacat dibuang.
-
 import type { VisitLogEntry } from "./visit-log";
 
 export type CountedLabel = { label: string; count: number };
@@ -30,7 +22,6 @@ export type AnalyticsSummary = {
 
 export const DEFAULT_DAYS = 30;
 
-/** Angka aman: NaN/Infinity/tipe lain → 0. */
 function num(value: unknown): number {
   return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
@@ -39,7 +30,6 @@ function isObject(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
-/** Daftar aman: bukan array → []. */
 function arr(value: unknown): unknown[] {
   return Array.isArray(value) ? value : [];
 }
@@ -80,7 +70,6 @@ function visitEntries(value: unknown): VisitLogEntry[] {
     }));
 }
 
-/** Ringkasan kosong yang aman dipakai panel (semua section tampil kosong). */
 function emptySummary(days: number = DEFAULT_DAYS): AnalyticsSummary {
   return {
     migrated: true,
@@ -103,7 +92,6 @@ export function normalizeSummary(input: unknown): AnalyticsSummary {
   if (!isObject(input)) return emptySummary();
 
   return {
-    // Absen → false: panel menampilkan notice migrasi, bukan gagal diam.
     migrated: input.migrated === true,
     days: num(input.days) || DEFAULT_DAYS,
     total: num(input.total),

@@ -26,7 +26,6 @@ export default function Gallery({
   const [isLandscape, setIsLandscape] = useState(false);
   const [active, setActive] = useState<string>("all");
 
-  // Kategori yang benar-benar dipakai data — bukan daftar statis.
   const categories = useMemo(() => {
     const set = new Set(items.map((p) => p.category).filter(Boolean));
     return [...set];
@@ -37,19 +36,15 @@ export default function Gallery({
     [items, active],
   );
 
-  // Dibaca oleh handler keyboard tanpa ikut jadi dependency effect.
   const filteredRef = useRef(filtered);
   useEffect(() => {
     filteredRef.current = filtered;
   }, [filtered]);
 
-  // Kategori bisa hilang setelah admin menghapus foto — kembalikan ke "all"
-  // supaya daftar tidak diam-diam kosong.
   useEffect(() => {
     if (active !== "all" && !categories.includes(active)) setActive("all");
   }, [active, categories]);
 
-  // Navigasi lightbox: Escape menutup, panah kiri/kanan berpindah foto.
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if (lightbox === null) return;
@@ -65,7 +60,6 @@ export default function Gallery({
           if (cur === null) return cur;
           const total = filteredRef.current.length;
           if (total === 0) return cur;
-          // Memutar (wrap) supaya tidak pernah mentok di ujung.
           return (cur + step + total) % total;
         });
       }
@@ -81,8 +75,6 @@ export default function Gallery({
   useEffect(() => {
     setSlide(0);
     setDeskPage(0);
-    // Indeks lightbox mengacu ke daftar hasil filter, jadi harus ditutup
-    // saat filter berubah agar tidak menampilkan foto yang berbeda.
     setLightbox(null);
   }, [active]);
 
@@ -108,7 +100,6 @@ export default function Gallery({
         await orientation.lock("landscape");
       }
     } catch {
-      // iOS Safari blocks programmatic rotation — device auto-rotate only.
     }
   }
 
@@ -117,7 +108,6 @@ export default function Gallery({
       if (document.fullscreenElement) await document.exitFullscreen();
       screen.orientation?.unlock?.();
     } catch {
-      // ignore
     }
   }
 
@@ -175,7 +165,6 @@ export default function Gallery({
         {t(gallery.description)}
       </Reveal>
 
-        {/* Filter kategori — hanya muncul kalau ada lebih dari satu kategori */}
         {categories.length > 1 && (
           <Reveal className="mb-8 flex flex-wrap items-center gap-2">
             {["all", ...categories].map((cat) => {
@@ -215,7 +204,6 @@ export default function Gallery({
           </Reveal>
         ) : (
           <>
-            {/* Mount only the active breakpoint's tree (see Projects). */}
             {isDesktop ? (
               <div className="hidden md:block">
                 {(() => {
@@ -304,7 +292,6 @@ export default function Gallery({
               </button>
             )}
 
-            {/* Panah navigasi — hanya bila ada lebih dari satu foto */}
             {filtered.length > 1 && (
               <>
                 <button
@@ -354,7 +341,6 @@ export default function Gallery({
                 onClick={(e) => e.stopPropagation()}
               />
 
-              {/* Penghitung posisi + petunjuk navigasi keyboard */}
               <div
                 className="flex items-center gap-3 text-xs text-[#ffffff]/70"
                 onClick={(e) => e.stopPropagation()}

@@ -12,7 +12,6 @@ export default function Error({
   reset: () => void;
 }) {
   useEffect(() => {
-    // Log ke console agar terlihat di Cloudflare Workers logs / browser.
     console.error("Unhandled error:", error);
   }, [error]);
 
@@ -34,8 +33,6 @@ export default function Error({
         {errorPage.body.id}
       </p>
 
-      {/* Digest membantu mencocokkan laporan dengan log server tanpa
-          membocorkan stack trace ke pengunjung. */}
       {error.digest && (
         <p className="mt-4 font-mono text-[11px] text-gray-700">
           ref: {error.digest}

@@ -33,10 +33,8 @@ const ZOOM_STEP = 1.1;
 const TILT_MAX = 2.4;
 const FIT_PAD = 100;
 
-// Motion tuning — exponential damping (frame-rate independent). Higher
-// lambda = snappier. Pan stays 1:1 (direct) so dragging never feels laggy.
-const TILT_LAMBDA = 8; // per second
-const ZOOM_LAMBDA = 9; // per second
+const TILT_LAMBDA = 8;
+const ZOOM_LAMBDA = 9;
 const SNAP_EPS = { zoom: 0.0004, pan: 0.1, tilt: 0.002 };
 
 type Vec = { x: number; y: number };
@@ -120,9 +118,6 @@ function getMapSize(layout: CategoryNode[]) {
   return { w: maxX - minX, h: maxY - minY };
 }
 
-// LAYOUT dihitung di dalam komponen (bergantung konten dari DB) dan di-memo
-// supaya tidak dihitung ulang setiap render.
-
 function makePath(a: Vec, b: Vec, bow = 0.14) {
   const mx = (a.x + b.x) / 2;
   const my = (a.y + b.y) / 2;
@@ -153,17 +148,11 @@ function Node({
   depth: number;
   delay: number;
   entered: boolean;
-  /** Mobile: skip translateZ — no 3D sorting while scrolling */
   flat?: boolean;
-  /** seconds; negative = start mid-phase. Omit to disable floating */
   floatDelay?: number;
   floatDuration?: number;
   children: ReactNode;
 }) {
-  // The float runs on a SEPARATE child element so the entrance transition
-  // (outer) and the ambient bob (inner) never fight over one transform.
-  // `entered` only gates the one-shot entrance; the float starts with a
-  // negative delay and simply never stops — no restart, no re-layout.
   const floatAnim =
     floatDelay === undefined
       ? undefined
@@ -202,10 +191,7 @@ function TechStackMindMap() {
   const [defaultZoom, setDefaultZoom] = useState(1);
   const [hovered, setHovered] = useState<number | null>(null);
   const [tip, setTip] = useState<Tip | null>(null);
-  // Mobile/touch: flatten the 3D world. Tilt (the only depth consumer) is
-  // mouse-only, so preserve-3d + perspective there is pure scroll cost.
   const [flat, setFlat] = useState(false);
-  // Entrance plays exactly once, on mount — never on scroll re-entry.
   const [entered, setEntered] = useState(false);
 
   useEffect(() => {
@@ -219,19 +205,14 @@ function TechStackMindMap() {
   const panRef = useRef<Vec>({ x: 0, y: 0 });
   const zoomRef = useRef(1);
   const tiltRef = useRef<Vec>({ x: 0, y: 0 });
-  // Motion targets — the RAF loop eases current state toward these.
   const targetPanRef = useRef<Vec>({ x: 0, y: 0 });
   const targetZoomRef = useRef(1);
-  // Pointer position in [-1, 1]; resolved against TILT_MAX each frame.
   const tiltTargetRef = useRef<Vec>({ x: 0, y: 0 });
   const worldRef = useRef<HTMLDivElement | null>(null);
   const bgRef = useRef<HTMLDivElement | null>(null);
   const worldRaf = useRef(0);
   const lastFrameTs = useRef(0);
 
-  // One writer, one frame: pointer/wheel/reset handlers only update refs,
-  // then this single loop paints. No setState per pointermove, no CSS
-  // transition chasing JS writes — the classic jank sources, both removed.
   const paint = useCallback(() => {
     const w = worldRef.current;
     if (!w) return;
@@ -252,10 +233,9 @@ function TechStackMindMap() {
       const dt = lastFrameTs.current ? Math.min((ts - lastFrameTs.current) / 1000, 0.05) : 0.016;
       lastFrameTs.current = ts;
 
-      // Exponential ease toward targets — same feel at 60/120/144 Hz.
       const ease = (lambda: number) => 1 - Math.exp(-lambda * dt);
       const zk = ease(ZOOM_LAMBDA);
-      const pk = 1; // pan targets are written 1:1 by drag handlers
+      const pk = 1;
       const tk = ease(TILT_LAMBDA);
 
       zoomRef.current += (targetZoomRef.current - zoomRef.current) * zk;
@@ -270,8 +250,6 @@ function TechStackMindMap() {
 
       paint();
 
-      // Settle check: stop the loop when everything reached its target so an
-      // idle map costs zero frames.
       const zDelta = Math.abs(targetZoomRef.current - zoomRef.current);
       const xDelta = Math.abs(targetPanRef.current.x - panRef.current.x);
       const yDelta = Math.abs(targetPanRef.current.y - panRef.current.y);
@@ -310,16 +288,11 @@ function TechStackMindMap() {
   const hoveredRef = useRef<number | null>(null);
 
   useEffect(() => {
-    // Entrance: flip once after first paint so the pop-in + line draw
-    // transition actually plays. Replays only on remount, not on scroll.
     const raf = requestAnimationFrame(() => setEntered(true));
     return () => cancelAnimationFrame(raf);
   }, []);
 
   useEffect(() => {
-    // Ambient loops (glow pulse, rotating rings, node floats) keep invalidating
-    // styles every frame even while the section is far below the viewport.
-    // Pause them offscreen; the visuals are identical when the map is seen.
     const el = containerRef.current;
     if (!el) return;
     const io = new IntersectionObserver(
@@ -353,12 +326,9 @@ function TechStackMindMap() {
       setDefaultZoom(z);
     };
     fit();
-    // `fit` sengaja tidak masuk daftar: ia fungsi murni ukuran canvas dan
-    // hanya perlu dijalankan ulang saat skala paint berubah.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [paint]);
 
-  // Smooth zoom: wheel nudges the TARGET; the RAF loop glides there.
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -459,8 +429,6 @@ function TechStackMindMap() {
 
   const onPointerMove = useCallback(
     (e: ReactPointerEvent<HTMLDivElement>) => {
-      // Hover is handled by the individual skill links now. The map-level
-      // pointer path only owns active drag/tilt work.
       if (
         e.pointerType === "mouse" &&
         !gestureRef.current &&
@@ -480,8 +448,6 @@ function TechStackMindMap() {
       if (!g) return;
 
       if (g.type === "pan") {
-        // Drag is 1:1: write current AND target so the loop paints the exact
-        // finger/cursor position with zero lag.
         const p = { x: g.panX + (e.clientX - g.startX), y: g.panY + (e.clientY - g.startY) };
         panRef.current = p;
         targetPanRef.current = p;
@@ -541,8 +507,6 @@ function TechStackMindMap() {
   );
 
   const onPointerLeave = useCallback(() => {
-    // Ease the tilt back to level instead of snapping — the damped loop
-    // makes the release feel weighted.
     tiltTargetRef.current = { x: 0, y: 0 };
     scheduleWorldTransform();
     if (hoverTimerRef.current) window.clearTimeout(hoverTimerRef.current);
@@ -559,10 +523,6 @@ function TechStackMindMap() {
     scheduleWorldTransform();
   }, [defaultZoom, scheduleWorldTransform]);
 
-  /* Cleanup sekali saat unmount. Nilai .current SENGAJA dibaca saat cleanup
-     berjalan — kita ingin membatalkan timer/RAF yang masih pending pada saat
-     itu. Aturan exhaustive-deps menganggap ini berbahaya, padahal justru itu
-     perilaku yang diinginkan, jadi aturannya dimatikan untuk effect ini saja. */
   /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     return () => {
@@ -605,9 +565,6 @@ function TechStackMindMap() {
 }
 .mm-in .mm-link { stroke-dashoffset: 0; }
 .mm-link.mm-active { stroke-dashoffset: 0.24; }
-/* Offscreen: freeze ambient loops (visuals unchanged while visible).
-   !important is required because node wrappers carry inline animation
-   shorthands that would otherwise outrank this rule. */
 .mm-halt .mm-float,
 .mm-halt .mm-glow,
 .mm-halt .mm-ring,
@@ -936,8 +893,6 @@ function TechStackMobile() {
 }
 
 export default function TechStack() {
-  // Start with the light renderer so mobile never mounts the expensive map
-  // during hydration. Desktop swaps to the mind map after media is known.
   const [isMobile, setIsMobile] = useState(true);
 
   useEffect(() => {

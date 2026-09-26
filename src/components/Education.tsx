@@ -16,17 +16,11 @@ import { useLanguage } from "@/components/providers";
 import { useSiteContent } from "@/components/site-content-provider";
 import { litMask, nodeFractions } from "@/lib/spine";
 
-/** Period strings that read as "still ongoing" — they get the live dot and
- *  the accent border. Mirrors the check in ExperienceTimeline so both
- *  sections agree on what "present" looks like. */
 const CURRENT_WORDS = ["present", "sekarang", "now", "kini", "saat ini"];
 const readsCurrent = (period: string) =>
   CURRENT_WORDS.some((w) => period.toLowerCase().includes(w));
 
-/** One glyph per study field, matched by position. Two entries today, so a
- *  fixed pair keeps the markup honest without touching the content config. */
 const FIELD_ICONS = [
-  // pen tool — visual communication design
   <svg
     key="design"
     viewBox="0 0 24 24"
@@ -42,7 +36,6 @@ const FIELD_ICONS = [
     <path d="M2 2l7.586 7.586" />
     <circle cx="11" cy="11" r="2" />
   </svg>,
-  // code brackets — informatics
   <svg
     key="code"
     viewBox="0 0 24 24"
@@ -67,8 +60,6 @@ export default function Education() {
   const reduceMotion = useReducedMotion();
   const [touch, setTouch] = useState(false);
   const [active, setActive] = useState(0);
-  // Nyala tiap node spine, diturunkan dari progres garis (bukan dari band
-  // IntersectionObserver). Lihat komentar di blok useScroll di bawah.
   const [lit, setLit] = useState<boolean[]>([]);
   const fractionsRef = useRef<number[]>([]);
 
@@ -80,9 +71,6 @@ export default function Education() {
     return () => mq.removeEventListener("change", onChange);
   }, []);
 
-  // Which entry is the reader looking at? A card counts as active once it
-  // crosses the middle band of the viewport, which is what lights its spine
-  // node and tints its panel.
   useEffect(() => {
     const nodes = cardRefs.current.filter(Boolean) as HTMLDivElement[];
     if (!nodes.length || typeof IntersectionObserver === "undefined") return;
@@ -100,7 +88,6 @@ export default function Education() {
     return () => io.disconnect();
   }, [education.items.length]);
 
-  // Spine fill: the timeline rail draws itself down as the entries scroll by.
   const { scrollYProgress } = useScroll({
     target: cardsRef,
     offset: ["start 0.62", "end 0.72"],
@@ -112,9 +99,6 @@ export default function Education() {
   });
   const spineScale = useTransform(spineProgress, [0, 1], [0, 1]);
 
-  // Nodes light up from the SAME progress value that drives the fill, so the
-  // dot can never lag the line. Each node's position is measured once as a
-  // fraction of the rail's length, then re-derived whenever the spring moves.
   const applyLit = useCallback(
     (progress: number) => {
       const fractions = fractionsRef.current;
@@ -139,9 +123,6 @@ export default function Education() {
     const centres = cardRefs.current.filter(Boolean).map((card) => {
       const node = card!.querySelector<HTMLElement>(".edu-node");
       if (!node) return Number.NaN;
-      // Layout offsets ignore the card's entrance transform — exactly what we
-      // want. The node's own translateY(-50%) is folded back in via the
-      // computed matrix so the maths stays honest if the CSS offset changes.
       let ty = 0;
       const matrix = getComputedStyle(node).transform;
       if (matrix && matrix !== "none") {
@@ -182,7 +163,6 @@ export default function Education() {
   return (
     <section className="relative px-6 py-16 md:px-10 md:py-32">
       <div className="relative mx-auto grid max-w-7xl gap-10 md:grid-cols-[minmax(0,320px)_1fr] md:gap-16">
-        {/* Sticky rail: kicker + heading stay pinned while cards scroll */}
         <div className="self-start md:sticky md:top-28">
           <Reveal
             variant="left"
@@ -220,8 +200,6 @@ export default function Education() {
         </div>
 
         <div ref={cardsRef} className="relative space-y-8 md:space-y-12 md:pl-14">
-          {/* Timeline rail — one line for the whole list, plus a fill that
-              tracks scroll. Nodes live on each card so they always line up. */}
           <span
             ref={railRef}
             aria-hidden="true"
@@ -253,7 +231,6 @@ export default function Education() {
   );
 }
 
-/** Bentuk satu entri pendidikan. Struktur sama dengan config.ts. */
 type EducationItem = {
   period: string;
   school: string;
@@ -286,8 +263,6 @@ function EducationCard({
   const number = String(index + 1).padStart(2, "0");
   const icon = FIELD_ICONS[index % FIELD_ICONS.length];
 
-  // Entrance plays exactly once — a card never re-hides when scrolled back
-  // above the fold. transformPerspective keeps the subtle 3D settle readable.
   return (
     <motion.div
       ref={ref}
@@ -305,10 +280,6 @@ function EducationCard({
       style={reduceMotion ? undefined : { transformPerspective: 1000 }}
       className="relative"
     >
-      {/* Spine node — sits on the timeline rail, aligned by CSS. It lights up
-          from the rail's own scroll progress (the `lit` prop), not from which
-          card happens to be centred, so the dot turns orange the moment the
-          line reaches it. */}
       <span
         aria-hidden="true"
         className={`edu-node hidden md:flex ${active ? "is-current" : ""} ${
@@ -318,9 +289,6 @@ function EducationCard({
         <span />
       </span>
 
-      {/* Depth stack: panel → ghost numeral → content plane. Tilt3D rotates
-          the whole group while each plane keeps its own translateZ, so the
-          copy slides across the numeral instead of moving with it. */}
       <Tilt3D
         className="h-full"
         max={9}

@@ -8,17 +8,6 @@ import type { SiteContentKey } from "@/types";
 
 export const dynamic = "force-dynamic";
 
-// ============================================================================
-// /api/site-content — editor konten situs.
-//
-//   GET  → semua seksi (default config digabung dengan override DB)
-//   PUT  → simpan satu seksi: { key, data }
-//
-// Hanya seksi yang terdaftar di SITE_KEYS yang boleh ditulis. Nilai divalidasi
-// terhadap bentuk default-nya supaya data rusak tidak pernah masuk DB dan
-// membuat halaman publik blank.
-// ============================================================================
-
 const SITE_KEYS = [
   "nav",
   "profile",
@@ -33,13 +22,6 @@ function isSiteKey(v: unknown): v is SiteContentKey {
   return typeof v === "string" && (SITE_KEYS as readonly string[]).includes(v);
 }
 
-/**
- * Validasi dangkal: tolak yang jelas-jelas salah tanpa memaksa skema ketat.
- *
- * Tujuannya bukan memvalidasi tiap field (bentuknya beragam per seksi), tapi
- * memastikan tipe atasnya cocok dengan default — sehingga merge di
- * getSiteContent() tidak pernah menghasilkan bentuk yang merusak render.
- */
 function shapeMatches(fallback: unknown, value: unknown): string | null {
   if (fallback === null || fallback === undefined) return null;
 
@@ -59,12 +41,8 @@ function shapeMatches(fallback: unknown, value: unknown): string | null {
   return null;
 }
 
-/** Batas ukuran supaya satu seksi tidak bisa membengkakkan DB/response. */
 const MAX_SECTION_BYTES = 200_000;
 
-// ---------------------------------------------------------------------------
-// GET — semua seksi
-// ---------------------------------------------------------------------------
 export const GET = withJsonErrors(async function GET() {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -77,8 +55,6 @@ export const GET = withJsonErrors(async function GET() {
     .select("key,data,updated_at");
 
   if (error) {
-    // Tabel belum dimigrasi → kembalikan default supaya admin tetap bisa
-    // membuka tab dan melihat nilai yang sedang tampil di situs.
     console.warn("site-content GET:", error.message);
     return NextResponse.json({
       sections: SITE_KEYS.map((key) => ({
@@ -111,9 +87,6 @@ export const GET = withJsonErrors(async function GET() {
   });
 });
 
-// ---------------------------------------------------------------------------
-// PUT — simpan satu seksi
-// ---------------------------------------------------------------------------
 export const PUT = withJsonErrors(async function PUT(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -137,7 +110,6 @@ export const PUT = withJsonErrors(async function PUT(req: NextRequest) {
     );
   }
 
-  // Cocokkan bentuk dengan default supaya tidak bisa menyimpan tipe yang salah.
   const defaults = defaultSiteContent();
   const problem = shapeMatches(defaults[key], data);
   if (problem) {
@@ -169,9 +141,6 @@ export const PUT = withJsonErrors(async function PUT(req: NextRequest) {
   return NextResponse.json({ ok: true, ...saved });
 });
 
-// ---------------------------------------------------------------------------
-// DELETE — kembalikan satu seksi ke default config.ts
-// ---------------------------------------------------------------------------
 export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -189,7 +158,6 @@ export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
     return NextResponse.json({ error: "Gagal mereset seksi." }, { status: 500 });
   }
 
-  // Kembalikan nilai default supaya UI bisa langsung menampilkannya.
   invalidate(CACHE_TAGS.siteContent);
   return NextResponse.json({ ok: true, data: defaultSiteContent()[key] });
 });

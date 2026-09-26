@@ -73,13 +73,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
     });
   }, []);
 
-  /**
-   * Pindah ke tema tertentu dengan animasi panel buka-jendela.
-   *
-   * No-op bila tema tujuan sudah aktif — menu pilihan tema boleh mengirim
-   * tema yang sedang dipakai tanpa memicu animasi kosong. Sumber kebenaran
-   * tetap class pada <html> (di-set pre-hydration oleh layout.tsx).
-   */
   const setTheme = useCallback(
     (next: Theme) => {
       const root = document.documentElement;
@@ -90,20 +83,16 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         setThemeState(next);
       };
 
-      // Reduced motion → skip animation, swap directly
       if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
         apply();
         return;
       }
 
-      // Window-opening overlay: two panels split top/bottom.
-      // Only composited transforms → zero layout thrash, no lag.
       if (themePanels.current) {
         themePanels.current.forEach((p) => p.remove());
         themePanels.current = null;
       }
 
-      // Determine ink color from the current theme (no getComputedStyle → no forced recalc)
       const ink = root.classList.contains("dark") ? "#0d0e13" : "#f4f4f5";
 
       const mk = (cls: string) => {
@@ -128,8 +117,6 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
         { duration: 550, easing: ease, fill: "forwards" },
       );
 
-      // Swap theme behind the panels — deferred to the next frame so the
-      // panel animation starts before the class swap triggers style recalc.
       requestAnimationFrame(() => {
         apply();
       });

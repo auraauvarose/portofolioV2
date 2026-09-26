@@ -6,23 +6,6 @@ import { dirname, resolve } from "node:path";
 
 import { THEME_CHOICES, isTheme, readStoredTheme } from "../src/lib/theme.ts";
 
-// ============================================================================
-// Menu kontrol halaman /komentar — pilihan tema + musik.
-//
-// Permintaan user: "bagian halaman komentar sediakan menu untuk pilihan thema,
-// music kalau mode desktop buat di atas aja center kalau di mobile sama kan aja."
-//
-// Kontrak yang dikunci di sini:
-//   1. Menu menawarkan KEDUA tema secara eksplisit (bukan cuma tombol toggle),
-//      sehingga pilihan tema adalah keputusan user, bukan tebakan.
-//   2. Menu juga menyediakan kontrol musik.
-//   3. Penempatan: fixed di atas, center — dan identik di mobile (tanpa
-//      cabang md:/hidden yang memindahkan atau menyembunyikannya).
-//
-// Logika murni (src/lib/theme.ts) diuji langsung; wiring komponen diperiksa
-// dari sumbernya, mengikuti pola tests/education-spine.test.ts.
-// ============================================================================
-
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const src = (p: string) => readFileSync(resolve(root, p), "utf8");

@@ -5,23 +5,6 @@ import { MAX_UPLOAD_BYTES } from "@/lib/config";
 
 export const dynamic = "force-dynamic";
 
-// ============================================================================
-// Presign upload.
-//
-// Endpoint ini memberi URL PUT yang sudah ditandatangani ke R2. Tanpa
-// pembatasan, sesi admin yang bocor bisa dipakai mengunggah file sembarang ke
-// domain publik — termasuk HTML atau SVG yang, bila dibuka, menjalankan
-// skrip di origin CDN.
-//
-// Tiga pembatasan di bawah menutup itu:
-//   1. allowlist content-type  → hanya gambar & PDF
-//   2. allowlist folder        → tidak bisa keluar dari struktur yang dikenal
-//   3. ukuran wajib angka      → sebelumnya field `size` yang dihilangkan
-//                                akan melewati batas 50 MB
-// ============================================================================
-
-/** Tipe yang boleh diunggah. Sengaja TIDAK termasuk image/svg+xml dan
- *  text/html — keduanya bisa membawa skrip. */
 const ALLOWED_TYPES = new Set([
   "image/jpeg",
   "image/png",
@@ -31,7 +14,6 @@ const ALLOWED_TYPES = new Set([
   "application/pdf",
 ]);
 
-/** Folder yang dikenal. Nilai lain ditolak, bukan disanitasi diam-diam. */
 const ALLOWED_FOLDERS = new Set(["projects", "certifications", "gallery", "test"]);
 
 export async function POST(req: NextRequest) {
@@ -56,7 +38,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 1. Content-type harus dari allowlist.
     const type = contentType.toLowerCase().split(";")[0].trim();
     if (!ALLOWED_TYPES.has(type)) {
       return NextResponse.json(
@@ -67,7 +48,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 2. Ukuran WAJIB angka — sebelumnya bisa dihilangkan untuk melewati batas.
     if (typeof size !== "number" || !Number.isFinite(size) || size <= 0) {
       return NextResponse.json(
         { error: "size wajib diisi sebagai angka." },
@@ -83,7 +63,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // 3. Folder harus dari allowlist.
     const folderValue = typeof folder === "string" && folder ? folder : undefined;
     if (folderValue && !ALLOWED_FOLDERS.has(folderValue)) {
       return NextResponse.json(
@@ -101,7 +80,6 @@ export async function POST(req: NextRequest) {
     return NextResponse.json(result);
   } catch (err) {
     console.error("presign error:", err);
-    // Jangan bocorkan pesan internal ke klien.
     return NextResponse.json(
       { error: "Gagal membuat URL unggah." },
       { status: 500 },

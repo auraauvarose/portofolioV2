@@ -24,15 +24,6 @@ import {
   LockIcon,
 } from "@/components/admin/icons";
 
-// ============================================================================
-// AdminDashboard — kerangka panel admin.
-//
-// Tata letak: rail navigasi tetap di kiri, satu panel kerja di kanan. Seksi
-// aktif disimpan di hash URL supaya bisa ditautkan langsung, tahan muat ulang,
-// dan tombol Back browser bekerja seperti yang diharapkan.
-// ============================================================================
-
-/** Tautan cepat ke situs publik — selalu dibuka di tab baru. */
 function SiteLink() {
   return (
     <a
@@ -58,8 +49,6 @@ export default function AdminDashboard() {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
   );
 
-  // Sinkronkan seksi dengan hash URL. Dibaca setelah mount (bukan saat render)
-  // karena hash tidak tersedia di server dan akan memicu hydration mismatch.
   useEffect(() => {
     function syncFromHash() {
       const raw = window.location.hash.replace(/^#/, "");
@@ -72,8 +61,6 @@ export default function AdminDashboard() {
 
   const navigate = useCallback((key: TabKey) => {
     setTab(key);
-    // history.replaceState: mengubah hash tanpa menumpuk riwayat, supaya
-    // tombol Back kembali ke halaman sebelumnya — bukan ke seksi sebelumnya.
     window.history.replaceState(null, "", `#${key}`);
     window.scrollTo({ top: 0, behavior: "smooth" });
   }, []);
@@ -124,7 +111,6 @@ export default function AdminDashboard() {
   return (
     <AdminCountsProvider>
       <div className="admin-scale min-h-[100dvh] bg-[var(--color-a-canvas)] text-[var(--color-a-text)]">
-        {/* ── Bilah atas ── */}
         <header className="sticky top-0 z-[110] border-b border-[var(--color-a-line)] bg-[var(--color-a-canvas)]/85 backdrop-blur-md">
           <div className="mx-auto flex h-16 max-w-[84rem] items-center justify-between gap-4 px-4 sm:px-6 lg:h-[5rem] lg:max-w-[96rem] lg:px-10">
             <div className="flex min-w-0 items-center gap-3">
@@ -160,14 +146,10 @@ export default function AdminDashboard() {
           </div>
         </header>
 
-        {/* ── Isi: rail + panel ── */}
         <div className="mx-auto grid max-w-[84rem] gap-8 px-4 py-6 sm:px-6 lg:max-w-[96rem] lg:grid-cols-[17rem_minmax(0,1fr)] lg:gap-16 lg:px-10 lg:py-14">
           <AdminRail tab={tab} onNavigate={navigate} />
 
           <main className="min-w-0">
-            {/* Rail sudah memberi konteks posisi, dan tiap panel punya
-                header-nya sendiri. Jadi di sini tidak ada judul tambahan —
-                konten langsung mulai tanpa lapisan judul yang berulang. */}
             <div key={tab} className="admin-fade-up">
               {tab === "messages" && <MessagesManager />}
               {tab === "analytics" && <AnalyticsPanel />}

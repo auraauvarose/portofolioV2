@@ -7,17 +7,6 @@ import {
   ChevronDownIcon,
 } from "@/components/admin/icons";
 
-// ============================================================================
-// ReorderableRow — baris daftar admin yang bisa digeser.
-//
-// Drag-and-drop (mouse) + tombol naik/turun (keyboard & sentuh). Tombolnya
-// bukan sekadar pelengkap: drag HTML5 tidak bisa dioperasikan dengan keyboard,
-// jadi tanpa tombol ini urutan tidak dapat diubah oleh pengguna keyboard.
-//
-// Nomor urut ditampilkan mono di kiri supaya posisi tiap baris terbaca
-// sekilas — sebelumnya urutan hanya bisa disimpulkan dari posisi visual.
-// ============================================================================
-
 type Props = {
   index: number;
   total: number;
@@ -52,9 +41,6 @@ export default function ReorderableRow({
             : "border-[var(--color-a-line)] hover:bg-[var(--color-a-surface)]"
       }`}
     >
-      {/* Kendali urutan: nomor + geser + naik/turun dalam satu genggaman.
-          Lebarnya dijaga tetap supaya thumbnail & judul di semua baris
-          selalu mulai di posisi x yang sama. */}
       <div className="flex w-[4.5rem] shrink-0 items-center gap-1">
         <span
           aria-hidden="true"

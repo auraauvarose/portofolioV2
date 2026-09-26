@@ -3,19 +3,6 @@
 import type { ComponentType, ReactNode } from "react";
 import { AlertIcon, CheckIcon, InfoIcon } from "@/components/admin/icons";
 
-// ============================================================================
-// Primitif UI panel admin.
-//
-// Sebelumnya setiap manager menulis ulang tombol, chip, dan header-nya
-// sendiri, sehingga gaya antar panel perlahan berbeda. Semua yang berulang
-// dikumpulkan di sini supaya perubahan gaya cukup dilakukan sekali.
-//
-// Semua kelas `a-*` didefinisikan di globals.css (blok ADMIN WORKBENCH) dan
-// memakai token --color-a-* sehingga tema terang/gelap ikut otomatis.
-// ============================================================================
-
-// ── Tombol ──────────────────────────────────────────────────────────────────
-
 type ButtonVariant = "primary" | "ghost" | "quiet" | "danger";
 
 export function Button({
@@ -76,8 +63,6 @@ export function IconButton({
   );
 }
 
-// ── Chip status ─────────────────────────────────────────────────────────────
-
 export type ChipTone = "neutral" | "accent" | "ok" | "warn";
 
 export function Chip({
@@ -92,18 +77,6 @@ export function Chip({
   return <span className={`a-chip a-chip-${tone} ${className}`}>{children}</span>;
 }
 
-// ── Header panel ────────────────────────────────────────────────────────────
-
-/**
- * Judul tiap panel.
- *
- * Sengaja tanpa label teknis (nama tabel/endpoint): di sebelah judul, itu
- * terbaca seperti sisa debug. Informasi semacam itu muncul di Notice saat
- * memang dibutuhkan — mis. ketika tabelnya belum ada dan pengguna harus
- * menjalankan migrasi.
- *
- * `meta` menampung angka/status yang tidak perlu jadi kalimat.
- */
 export function PanelHeader({
   title,
   description,
@@ -141,8 +114,6 @@ export function PanelHeader({
   );
 }
 
-// ── Pesan ───────────────────────────────────────────────────────────────────
-
 type NoticeTone = "ok" | "error" | "info" | "warn";
 
 const NOTICE_ICON: Record<NoticeTone, ComponentType<{ className?: string }>> = {
@@ -159,10 +130,6 @@ const NOTICE_COLOR: Record<NoticeTone, string> = {
   info: "var(--color-a-dim)",
 };
 
-/**
- * Pesan inline. `role="alert"` hanya untuk galat supaya pembaca layar tidak
- * mengumumkan setiap pesan sukses.
- */
 export function Notice({
   tone = "info",
   children,
@@ -211,15 +178,6 @@ export function Notice({
   );
 }
 
-// ── Keadaan kosong ──────────────────────────────────────────────────────────
-
-/**
- * Keadaan kosong = ajakan bertindak, bukan jalan buntu. Selalu menyebut
- * langkah berikutnya, bukan sekadar "tidak ada data".
- *
- * Proporsinya sengaja rapat (bukan blok setinggi layar): daftar kosong tetap
- * harus terasa seperti bagian dari panel, bukan halaman tersendiri.
- */
 export function EmptyState({
   icon: Icon,
   title,
@@ -247,12 +205,6 @@ export function EmptyState({
   );
 }
 
-// ── Loading skeleton ────────────────────────────────────────────────────────
-
-/**
- * Skeleton berbentuk konten. Bentuknya meniru baris daftar supaya tata letak
- * tidak melompat saat data tiba.
- */
 export function ListSkeleton({ rows = 4 }: { rows?: number }) {
   return (
     <div aria-hidden="true" className="flex flex-col">
@@ -295,9 +247,6 @@ export function CardsSkeleton({ count = 6 }: { count?: number }) {
   );
 }
 
-// ── Baris aksi form ─────────────────────────────────────────────────────────
-
-/** Baris aksi form yang menempel di bawah, terpisah dari isian. */
 export function FormActions({ children }: { children: ReactNode }) {
   return (
     <div className="mt-7 flex flex-wrap items-center gap-2.5 border-t border-[var(--color-a-line)] pt-5">
@@ -306,17 +255,6 @@ export function FormActions({ children }: { children: ReactNode }) {
   );
 }
 
-// ── Filter tersegmentasi ────────────────────────────────────────────────────
-
-/**
- * Filter satu-pilihan yang menyesuaikan bentuk dengan lebar layar:
- *   - ≥ sm : deretan tab (semua pilihan terlihat sekaligus, sekali klik)
- *   - < sm : <select> bawaan (lima tab tidak muat; menggulir mendatar tanpa
- *            penanda hanya membuat pilihan terakhir tampak terpotong)
- *
- * Bentuknya beda, tetapi pilihan dan maknanya sama persis — jadi tidak ada
- * fitur yang hilang di layar kecil.
- */
 export function SegmentedFilter<T extends string>({
   label,
   options,
@@ -330,7 +268,6 @@ export function SegmentedFilter<T extends string>({
 }) {
   return (
     <>
-      {/* Tab — layar lebar */}
       <div
         className="a-seg hidden sm:inline-flex"
         role="group"
@@ -352,7 +289,6 @@ export function SegmentedFilter<T extends string>({
         ))}
       </div>
 
-      {/* Select — layar sempit */}
       <div className="relative w-full sm:hidden">
         <label className="sr-only" htmlFor={`seg-${label}`}>
           {label}

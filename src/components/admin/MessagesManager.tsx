@@ -22,14 +22,6 @@ import {
 } from "@/components/admin/icons";
 import type { ContactMessage, ContactStatus } from "@/types";
 
-// ============================================================================
-// MessagesManager — kotak masuk pesan kontak.
-//
-// Tiap pesan bisa dibuka di tempat (tidak ada modal): percakapan kontak
-// jarang butuh layar penuh, dan daftar tetap terlihat sehingga pesan
-// berikutnya bisa langsung diproses.
-// ============================================================================
-
 const STATUS_LABEL: Record<ContactStatus, string> = {
   new: "Baru",
   read: "Dibaca",
@@ -62,7 +54,6 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-/** Waktu relatif untuk pesan baru; tanggal penuh untuk yang lebih lama. */
 function formatWhen(iso: string): string {
   const d = new Date(iso);
   if (Number.isNaN(d.getTime())) return "—";
@@ -93,7 +84,6 @@ function formatFull(iso: string): string {
   });
 }
 
-/** Balasan email, diisi otomatis subjek & kutipan pesan asli. */
 function mailtoReply(m: ContactMessage): string {
   const subject = m.subject ? `Re: ${m.subject}` : "Re: pesan dari portofolio";
   const quoted = m.message
@@ -148,7 +138,6 @@ export default function MessagesManager() {
     return base;
   }, [items]);
 
-  // Rail memakai angka yang sama — tidak perlu mengambil ulang dari server.
   useReportCount("messages", counts.new);
 
   const visible = useMemo(() => {
@@ -201,7 +190,6 @@ export default function MessagesManager() {
   function toggleExpand(m: ContactMessage) {
     const next = expanded === m.id ? null : m.id;
     setExpanded(next);
-    // Membuka pesan baru otomatis menandainya "dibaca".
     if (next && m.status === "new") void setStatus(m, "read");
   }
 
@@ -234,7 +222,6 @@ export default function MessagesManager() {
         </Notice>
       )}
 
-      {/* Baris kendali: filter status + pencarian. */}
       {!loading && items.length > 0 && (
         <div className="mb-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center">
           <SegmentedFilter

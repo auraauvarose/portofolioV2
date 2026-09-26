@@ -6,39 +6,10 @@ import { dirname, resolve } from "node:path";
 
 import { DEFAULT_SITE_URL } from "../src/lib/site.ts";
 
-// ============================================================================
-// SEO dasar: beranda harus punya ISI di HTML pertama, dan canonical harus
-// menunjuk ke domain sendiri.
-//
-// Riwayat masalah (terverifikasi via curl ke situs live):
-//   1. src/components/HomeClient.tsx dulu `return` HANYA lapisan hitam saat
-//      phase === "enter". Karena phase mulai dari "enter", HTML yang dikirim
-//      server tidak pernah memuat satu pun section — body cuma 2 <div>, 0
-//      heading, teks terlihat 36 karakter. Google tidak punya apa pun untuk
-//      diindeks.
-//   2. src/lib/site.ts fallback-nya host workers.dev, dan NEXT_PUBLIC_SITE_URL
-//      tidak diset — jadi canonical, og:url, robots.txt, dan sitemap.xml
-//      semuanya mempublikasikan workers.dev sebagai versi resmi situs,
-//      bukan auraauvarose.my.id.
-//
-// Kontrak yang dikunci:
-//   A. pohon halaman dirender sejak HTML pertama (tidak ada early return
-//      yang menyembunyikannya),
-//   B. H1 tetap ada di markup Hero,
-//   C. animasi curtain TIDAK dihapus — cover hitam tetap menutupi fase
-//      "enter" dan slide-down exit-nya tetap ada,
-//   D. canonical/robots/sitemap diturunkan dari DEFAULT_SITE_URL yang menunjuk
-//      ke auraauvarose.my.id, tanpa sisa alamat workers.dev.
-// ============================================================================
-
 const here = dirname(fileURLToPath(import.meta.url));
 const root = resolve(here, "..");
 const src = (p: string) => readFileSync(resolve(root, p), "utf8");
 
-/**
- * Buang komentar supaya yang diperiksa hanya kode. Pola `//` sengaja
- * mensyaratkan karakter sebelum bukan ":" agar `https://` tidak terpotong.
- */
 function stripComments(code: string): string {
   return code
     .replace(/\/\*[\s\S]*?\*\//g, "")
@@ -59,8 +30,6 @@ describe("A. beranda dirender ke HTML sejak awal", () => {
 
   test("SmoothScroll merender pohon halaman tanpa syarat", () => {
     assert.match(HOME, /<SmoothScroll>/, "SmoothScroll tidak dirender");
-    // Tidak ada early return JSX sebelum pohon: satu-satunya `return` di atas
-    // pohon adalah pembuka `return (` milik pohon itu sendiri.
     const beforeTree = HOME.split("<SmoothScroll>")[0];
     assert.doesNotMatch(
       beforeTree,

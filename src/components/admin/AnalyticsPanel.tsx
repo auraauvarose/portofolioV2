@@ -22,28 +22,12 @@ import {
   type AnalyticsSummary,
 } from "@/lib/analytics-summary";
 
-// ============================================================================
-// AnalyticsPanel — ringkasan kunjungan.
-//
-// Datanya sengaja tanpa cookie & tanpa PII: hanya path, hostname referrer, dan
-// hash ber-salt untuk menghitung kunjungan unik. Lihat /api/analytics.
-//
-// Grafik harian memakai batang berbagi-skala dengan sumbu nol yang jelas,
-// supaya tinggi batang bisa dibandingkan secara langsung. Nilai puncak
-// ditandai agar tidak perlu menebak dari tinggi saja.
-//
-// Respons API selalu lewat normalizeSummary: panel tidak boleh crash hanya
-// karena field baru belum ada di respons (versi lama / cache).
-// ============================================================================
-
 const RANGES = [7, 30, 90] as const;
 
-/** Label jam: 0 → "00:00" ... 23 → "23:00" (zona WIB). */
 function hourLabel(h: number): string {
   return `${String(h).padStart(2, "0")}:00`;
 }
 
-/** Format tanggal ringkas untuk label sumbu: "12 Feb". */
 function shortDate(iso: string): string {
   const d = new Date(`${iso}T00:00:00`);
   if (Number.isNaN(d.getTime())) return iso;
@@ -62,7 +46,6 @@ function Bar({ value, max }: { value: number; max: number }) {
   );
 }
 
-/** Angka besar dengan label kecil — pola ringkasan yang mudah dipindai. */
 function Stat({
   label,
   value,
@@ -124,16 +107,13 @@ export default function AnalyticsPanel() {
     1,
     ...(data?.topLocations.map((l) => l.count) ?? [1]),
   );
-  /** Log kunjungan terakhir — default array kosong bila respons lama tanpa field ini. */
   const recentVisits = data?.recentVisits ?? [];
 
-  /** Jam tersibuk (WIB) — ditandai di grafik jam. */
   const peakHour = useMemo(() => {
     if (!data?.byHour.length) return null;
     return data.byHour.reduce((a, b) => (b.count > a.count ? b : a)).hour;
   }, [data]);
 
-  /** Hari tersibuk — ditandai di grafik supaya puncak tidak perlu ditebak. */
   const peakDate = useMemo(() => {
     if (!data?.byDay.length) return null;
     return data.byDay.reduce((a, b) => (b.count > a.count ? b : a)).date;
@@ -211,7 +191,6 @@ export default function AnalyticsPanel() {
         />
       ) : data && data.migrated ? (
         <div className="flex flex-col gap-7">
-          {/* Ringkasan angka */}
           <div className="grid gap-3 sm:grid-cols-3">
             <Stat label="Total kunjungan" value={data.total} />
             <Stat label="Pengunjung unik" value={data.unique} />
@@ -222,7 +201,6 @@ export default function AnalyticsPanel() {
             />
           </div>
 
-          {/* Per hari */}
           <section className="a-panel p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="a-key">Kunjungan per hari</h3>
@@ -241,8 +219,6 @@ export default function AnalyticsPanel() {
               )}
             </div>
 
-            {/* Batang berbagi skala. Tinggi minimum 3% supaya hari bernilai
-                nol tetap terlihat sebagai garis dasar, bukan hilang. */}
             <div className="flex h-36 items-end gap-[3px]" role="img" aria-label={`Grafik kunjungan harian selama ${data.days} hari, puncak ${maxDay} kunjungan`}>
               {data.byDay.map((d) => {
                 const isPeak = d.date === peakDate && d.count > 0;
@@ -278,7 +254,6 @@ export default function AnalyticsPanel() {
             </div>
           </section>
 
-          {/* Halaman & referrer */}
           <div className="grid gap-5 md:grid-cols-2">
             <section className="a-panel p-4 sm:p-5">
               <h3 className="a-key mb-4">Halaman teratas</h3>
@@ -332,10 +307,7 @@ export default function AnalyticsPanel() {
             </section>
           </div>
 
-          {/* Perangkat · Jam · Lokasi */}
-          {/* Perangkat · Jam · Lokasi */}
           <div className="grid gap-5 md:grid-cols-2">
-            {/* Perangkat */}
             <section className="a-panel p-4 sm:p-5">
               <h3 className="a-key mb-4">Perangkat</h3>
               {data.byDevice.length === 0 ? (
@@ -361,7 +333,6 @@ export default function AnalyticsPanel() {
               )}
             </section>
 
-            {/* Browser */}
             <section className="a-panel p-4 sm:p-5">
               <h3 className="a-key mb-4">Browser</h3>
               {data.byBrowser.length === 0 ? (
@@ -390,7 +361,6 @@ export default function AnalyticsPanel() {
               )}
             </section>
 
-            {/* Merek ponsel — hanya perangkat mobile yang punya merek. */}
             <section className="a-panel p-4 sm:p-5">
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="a-key">Merek ponsel</h3>
@@ -424,7 +394,6 @@ export default function AnalyticsPanel() {
               )}
             </section>
 
-            {/* Jam kunjungan (WIB) */}
             <section className="a-panel p-4 sm:p-5">
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
                 <h3 className="a-key">Jam kunjungan (WIB)</h3>
@@ -443,7 +412,6 @@ export default function AnalyticsPanel() {
                 </p>
               ) : (
                 <>
-                  {/* Batang per jam 00–23 dalam WIB; tinggi dibagi skala maksimum. */}
                   <div
                     className="flex h-28 items-end gap-[2px]"
                     role="img"
@@ -480,7 +448,6 @@ export default function AnalyticsPanel() {
               )}
             </section>
 
-            {/* Lokasi */}
             <section className="a-panel p-4 sm:p-5 md:col-span-2">
               <h3 className="a-key mb-4">Lokasi pengunjung</h3>
               {data.topLocations.length === 0 ? (
@@ -507,7 +474,6 @@ export default function AnalyticsPanel() {
             </section>
           </div>
 
-          {/* Log kunjungan terakhir: device - lokasi - jam WIB */}
           <section className="a-panel p-4 sm:p-5">
             <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
               <h3 className="a-key">Log kunjungan terakhir</h3>
@@ -528,7 +494,6 @@ export default function AnalyticsPanel() {
                     key={`${v.time}-${i}`}
                     className="flex flex-wrap items-baseline gap-x-3 gap-y-0.5 py-2.5"
                   >
-                    {/* Urutan sesuai permintaan: device - lokasi - jam. */}
                     <span className="w-20 shrink-0 text-xs font-medium text-[var(--color-a-text)]">
                       {v.device}
                     </span>

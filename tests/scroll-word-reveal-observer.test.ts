@@ -4,25 +4,6 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-// ============================================================================
-// Laporan user: "ada bug saat halaman direfresh2 halaman itu fontnya malah
-// blur" — lalu dipertegas "dari awal load website nya buram".
-//
-// Akar masalah: effect IntersectionObserver di ScrollWordReveal berjalan
-// dengan deps `[]`. Pada render klien pertama useFinePointer() masih memakai
-// snapshot server (false), jadi cabang `!fine` yang dirender — dan cabang itu
-// TIDAK memasang ref={rootRef}. Effect mount karena itu berhenti di
-// `if (!node) return` dan tidak pernah dijalankan ulang. Setelah snapshot
-// berubah ke fine=true, kata-kata masuk ke cabang cascade dengan
-// filter: blur(7px) + opacity 0.2 TANPA observer yang bisa menyalakan
-// `hasEntered` -> teks tertahan blur permanen di perangkat fine pointer.
-//
-// Kontrak yang dikunci di sini: effect observer WAJIB jalan ulang saat mode
-// pointer berubah, `fine` wajib sudah terdeklarasi saat itu (kalau tidak:
-// "Cannot access 'fine' before initialization"), dan cabang cascade tetap
-// memasang ref yang diobservasi.
-// ============================================================================
-
 const here = dirname(fileURLToPath(import.meta.url));
 const SWR = readFileSync(
   resolve(here, "../src/components/ScrollWordReveal.tsx"),

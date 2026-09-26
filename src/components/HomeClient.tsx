@@ -35,8 +35,6 @@ const GREET_MS = 320;
 const HOLD_MS = 500;
 type Phase = "enter" | "show" | "exit";
 
-/** Isolated so greeting state changes never rerender the page tree behind
- *  the curtain (previously every 320ms tick re-rendered the whole page). */
 function LoadingCurtain({ onDone }: { onDone: () => void }) {
   const [index, setIndex] = useState(0);
 
@@ -106,9 +104,6 @@ export default function HomeClient({
     const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const markScrolling = () => {
       if (!isTouchDevice) return;
-      // Keep the decorative full-viewport effects intact, but stop their
-      // invalidation while a finger is actively moving the page. They resume
-      // automatically after the gesture settles.
       document.documentElement.classList.add("is-scrolling");
       if (scrollEndTimer.current) window.clearTimeout(scrollEndTimer.current);
       scrollEndTimer.current = window.setTimeout(() => {
@@ -119,8 +114,6 @@ export default function HomeClient({
 
     const onScroll = (event?: Event) => {
       if (event?.type === "scroll") markScrolling();
-      // rAF-throttle + early-exit: avoids re-rendering the whole tree on
-      // every scroll event (multiple per frame on mobile).
       if (scrollRAF.current) return;
       scrollRAF.current = requestAnimationFrame(() => {
         scrollRAF.current = 0;
@@ -156,18 +149,10 @@ export default function HomeClient({
   return (
     <SmoothScroll>
       <main className="relative min-h-screen overflow-x-clip bg-ink">
-        {/* "enter" lasts a single frame, but it still needs an opaque cover or
-            the hero would flash before the curtain mounts.
-            The page tree below is deliberately rendered from the very first
-            HTML paint: returning only this cover (as it used to) meant
-            crawlers received an empty document — no headings, no text — while
-            the visitor saw the same animation as now. */}
         {phase === "enter" && (
           <div className="fixed inset-0 z-[99999] bg-ink" aria-hidden="true" />
         )}
 
-        {/* Mounted only during "show": flipping to "exit" unmounts the child,
-            which is what tells AnimatePresence to play the slide-down exit. */}
         <AnimatePresence>
           {phase === "show" && <LoadingCurtain onDone={() => setPhase("exit")} />}
         </AnimatePresence>

@@ -3,9 +3,6 @@
 import { useEffect, useState } from "react";
 
 export default function CustomCursor() {
-  // Touch devices: never render the dot/ring and never start the rAF loop.
-  // The mix-blend-difference ring is a GPU blend layer — a known mobile
-  // flicker source — so it must not exist there at all.
   const [enabled, setEnabled] = useState(false);
 
   useEffect(() => {

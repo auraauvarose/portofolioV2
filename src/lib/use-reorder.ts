@@ -2,14 +2,6 @@
 
 import { useCallback, useRef, useState } from "react";
 
-// ============================================================================
-// useReorder — drag-and-drop urutan untuk daftar di /admin.
-//
-// Sengaja memakai HTML5 drag events bawaan, tanpa library: daftar di admin
-// hanya puluhan baris, dan menambah dependensi (dnd-kit ~40 kB) tidak
-// sepadan. Untuk aksesibilitas keyboard tersedia tombol naik/turun di UI.
-// ============================================================================
-
 export type ReorderTable =
   | "projects"
   | "certifications"
@@ -50,7 +42,6 @@ export function useReorder<T extends { id: string }>(
     [table],
   );
 
-  /** Pindahkan item dari `from` ke `to`, lalu simpan. */
   const move = useCallback(
     (from: number, to: number) => {
       if (from === to || from < 0 || to < 0) return;
@@ -60,7 +51,7 @@ export function useReorder<T extends { id: string }>(
       const [moved] = next.splice(from, 1);
       next.splice(to, 0, moved);
 
-      setItems(next); // optimistis — UI langsung berubah
+      setItems(next);
       void persist(next);
     },
     [items, setItems, persist],
@@ -75,14 +66,12 @@ export function useReorder<T extends { id: string }>(
     [items, move],
   );
 
-  // --- Handler drag untuk satu baris ---
   const dragHandlers = useCallback(
     (index: number) => ({
       draggable: true,
       onDragStart: (e: React.DragEvent) => {
         dragIndex.current = index;
         setDragId(items[index]?.id ?? null);
-        // Firefox butuh setData agar drag benar-benar dimulai.
         e.dataTransfer.setData("text/plain", items[index]?.id ?? "");
         e.dataTransfer.effectAllowed = "move";
       },

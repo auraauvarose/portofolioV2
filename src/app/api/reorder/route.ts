@@ -3,17 +3,6 @@ import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { invalidateTable } from "@/lib/revalidate-content";
 
-// ============================================================================
-// Reorder — simpan urutan konten.
-//
-// Menyimpan `sort_order` = posisi indeks untuk sekumpulan id sekaligus.
-// Dipakai oleh drag-and-drop di /admin (Projects, Certifications, Gallery).
-//
-// Endpoint ini ada supaya urutan bisa diubah tanpa menembak PUT per baris
-// (yang juga akan memicu pembersihan R2 & validasi field yang tidak perlu).
-// ============================================================================
-
-/** Tabel yang boleh diurutkan ulang — daftar putih, bukan input bebas. */
 const TABLES = [
   "projects",
   "certifications",
@@ -50,7 +39,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   if (ids.length > 500) {
     return NextResponse.json({ error: "Terlalu banyak item." }, { status: 400 });
   }
-  // Setiap id harus UUID yang valid — mencegah injeksi ke filter .eq().
   if (!ids.every((id) => typeof id === "string" && UUID_RE.test(id))) {
     return NextResponse.json({ error: "Ada id yang tidak valid." }, { status: 400 });
   }
@@ -60,8 +48,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
 
   const supabase = await createSupabaseAdmin();
 
-  // Tulis sort_order = indeks. Dijalankan berurutan agar kegagalan di tengah
-  // tidak meninggalkan urutan yang setengah jadi tanpa kita ketahui.
   for (let i = 0; i < ids.length; i++) {
     const { error } = await supabase
       .from(table)

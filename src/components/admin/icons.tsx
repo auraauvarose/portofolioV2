@@ -1,8 +1,5 @@
 "use client";
 
-/* Ikon SVG konsisten untuk seluruh admin — stroke 1.8, currentColor,
-   ukuran dikontrol lewat className (default 16px). */
-
 type IconProps = { className?: string };
 
 function base(className?: string) {

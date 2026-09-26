@@ -24,7 +24,6 @@ export default function SectionHeading({
       (entries) => {
         for (const entry of entries) {
           if (entry.isIntersecting) {
-            // Reveal exactly once — scrolling away never re-masks the words.
             setVisible(true);
             io.disconnect();
             break;

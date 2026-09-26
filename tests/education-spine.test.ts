@@ -6,20 +6,6 @@ import { dirname, resolve } from "node:path";
 
 import { nodeFractions, litMask } from "../src/lib/spine.ts";
 
-// ============================================================================
-// Node spine Education harus menyala TEPAT saat garis melewatinya.
-//
-// Laporan user: "garis di bagian Education itu bundarnya tidak otomatis
-// orange saat garis melewati bundar itu" — garis (fill accent, scaleY dari
-// progres scroll) bergerak mulus, tapi bulatan hanya jadi orange kalau kartu
-// masuk band IntersectionObserver. Dua sumber kebenaran -> garis sudah lewat
-// sementara bulatan masih abu-abu.
-//
-// Perbaikan: satu sumber kebenaran. Fraksi posisi tiap node di sepanjang rail
-// diukur dari geometri rail, lalu node menyala bila progres garis >= fraksi.
-// Kontrak murninya dikunci di sini; wiring di Education.tsx juga diperiksa.
-// ============================================================================
-
 const here = dirname(fileURLToPath(import.meta.url));
 const EDU = readFileSync(resolve(here, "../src/components/Education.tsx"), "utf8");
 
@@ -74,9 +60,6 @@ describe("litMask — node menyala tepat saat tepi garis mencapainya", () => {
     assert.deepEqual(litMask(1, [Number.NaN]), [false]);
   });
 
-  // Inti laporan user: definisi geometris dan definisi berbasis progres harus
-  // identik. Tepi fill ada di railTop + p * railHeight; node menyala bila tepi
-  // sudah melewati (>=) titik tengahnya.
   test("identik dengan definisi geometris 'tepi garis melewati node'", () => {
     const railTop = 16;
     const railHeight = 535;

@@ -78,7 +78,6 @@ export default function ImageUpload({
           body: file,
         });
       } catch {
-        // `fetch` melempar (bukan respons non-OK) → hampir selalu CORS.
         throw new Error(
           "Unggahan terputus oleh browser (CORS). Pastikan bucket R2 sudah punya konfigurasi CORS yang mengizinkan PUT dari domain ini — lihat README.",
         );
@@ -125,8 +124,6 @@ export default function ImageUpload({
             : "border-[var(--color-a-line-2)]"
         }`}
       >
-        {/* Pratinjau rasio tetap supaya form tidak melompat saat gambar
-            selesai dimuat. */}
         <div className="flex h-24 w-full shrink-0 items-center justify-center overflow-hidden rounded-md border border-[var(--color-a-line)] bg-[var(--color-a-surface-2)] sm:w-36">
           {value ? (
             isPdf ? (

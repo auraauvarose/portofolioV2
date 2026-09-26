@@ -11,29 +11,11 @@ import {
   type ReactNode,
 } from "react";
 
-// ============================================================================
-// AdminCounts — angka notifikasi untuk rail navigasi.
-//
-// Rail perlu tahu ada berapa pesan baru & komentar menunggu tanpa harus
-// membuka kedua panel itu.
-//
-// Sumber angkanya dua lapis supaya tidak ada permintaan ganda:
-//   1. Satu kali pengambilan di latar saat panel admin dibuka, supaya badge
-//      sudah benar walau seksi tersebut belum pernah dibuka.
-//   2. Panel yang sedang terbuka melaporkan angkanya sendiri lewat report() —
-//      datanya sudah ada di tangan, jadi tidak perlu diambil ulang.
-//
-// Pengambilan latar sengaja gagal diam-diam: badge adalah pelengkap, bukan
-// penghalang. Kalau jaringan bermasalah, rail tetap tampil tanpa angka.
-// ============================================================================
-
 type CountKey = "messages" | "comments";
 type Counts = Record<CountKey, number>;
 
 type AdminCountsValue = Counts & {
-  /** Laporkan angka dari panel yang sudah memegang datanya. */
   report: (key: CountKey, value: number) => void;
-  /** Ambil ulang dari server (dipakai setelah perubahan status). */
   refresh: () => void;
 };
 
@@ -48,10 +30,6 @@ export function useAdminCounts() {
   return useContext(AdminCountsContext);
 }
 
-/**
- * Laporkan angka ke rail setiap kali nilainya berubah. Dipakai panel yang
- * memegang data lengkapnya sendiri, sehingga rail tidak perlu fetch ulang.
- */
 export function useReportCount(key: CountKey, value: number) {
   const { report } = useAdminCounts();
   useEffect(() => {
@@ -61,8 +39,6 @@ export function useReportCount(key: CountKey, value: number) {
 
 export function AdminCountsProvider({ children }: { children: ReactNode }) {
   const [counts, setCounts] = useState<Counts>({ messages: 0, comments: 0 });
-  // Seksi yang sudah melaporkan angkanya sendiri tidak boleh ditimpa oleh
-  // hasil pengambilan latar yang mungkin lebih tua.
   const reported = useRef<Record<CountKey, boolean>>({
     messages: false,
     comments: false,
@@ -75,9 +51,6 @@ export function AdminCountsProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const refresh = useCallback(() => {
-    // Setelah perubahan status, panel yang terbuka akan melaporkan angka
-    // barunya sendiri. Buka kembali izin pengambilan latar untuk seksi yang
-    // belum pernah dibuka.
     reported.current = { messages: false, comments: false };
     setNonce((n) => n + 1);
   }, []);
@@ -120,7 +93,6 @@ export function AdminCountsProvider({ children }: { children: ReactNode }) {
 
       if (!alive) return;
       setCounts((prev) => ({
-        // Angka yang dilaporkan panel lebih baru — jangan ditimpa.
         messages: reported.current.messages ? prev.messages : (messages ?? prev.messages),
         comments: reported.current.comments ? prev.comments : (comments ?? prev.comments),
       }));

@@ -1,7 +1,5 @@
 "use client";
 
-// Thumbnail berkas untuk baris daftar. Rasio tetap supaya tinggi baris
-// konsisten walau gambar punya dimensi berbeda-beda.
 export default function FileThumb({ url }: { url: string | null }) {
   const isPdf = url
     ? (() => {
@@ -45,8 +43,6 @@ export default function FileThumb({ url }: { url: string | null }) {
           <img src={url} alt="" className="h-full w-full object-cover" />
         )
       ) : (
-        // Slot kosong tetap tampil supaya kolom thumbnail tidak bergeser
-        // saat ada baris tanpa gambar.
         <span
           aria-hidden="true"
           className="flex h-full w-full items-center justify-center"

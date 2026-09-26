@@ -6,11 +6,9 @@ import { useLanguage } from "@/components/providers";
 import { experienceSection } from "@/lib/config";
 import type { Experience } from "@/types";
 
-/** Riwayat kerja / organisasi. Kosong = seksi tidak dirender sama sekali. */
 export default function ExperienceTimeline({ items }: { items: Experience[] }) {
   const { t, lang } = useLanguage();
 
-  // Tidak ada entri → jangan tampilkan seksi kosong di situs publik.
   if (items.length === 0) return null;
 
   return (
@@ -27,7 +25,6 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
         </Reveal>
 
         <ol className="relative">
-          {/* Rail vertikal — digambar sekali, bukan per item. */}
           <span
             aria-hidden="true"
             className="absolute left-0 top-2 hidden h-[calc(100%-1rem)] w-px bg-white/10 md:block"
@@ -40,8 +37,6 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
                 ? item.description_en
                 : item.description_id || item.description_en;
 
-            // Period yang sudah menyatakan "sekarang/present" tidak perlu
-            // badge tambahan — menghindari "2024 - Sekarang [Present]".
             const currentWords = ["sekarang", "present", "now", "kini", "saat ini"];
             const periodSaysCurrent = currentWords.some((w) =>
               (item.period ?? "").toLowerCase().includes(w),
@@ -51,7 +46,6 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
               <li key={item.id} className="relative md:pl-10">
                 <Reveal delay={i * 70}>
                   <article className="mb-10 border-b border-white/10 pb-8 last:mb-0 last:border-0 last:pb-0">
-                    {/* Titik penanda pada rail */}
                     <span
                       aria-hidden="true"
                       className={`absolute left-[-3.5px] top-2 hidden h-2 w-2 rounded-full md:block ${

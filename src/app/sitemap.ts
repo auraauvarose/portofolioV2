@@ -2,8 +2,6 @@ import type { MetadataRoute } from "next";
 import { getProjectSlugs } from "@/lib/data";
 import { absoluteUrl } from "@/lib/site";
 
-// Sitemap dihasilkan ulang tiap jam; datanya dibaca lewat klien publik
-// (tanpa cookies) supaya bisa dirender saat build.
 export const revalidate = 3600;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
@@ -24,7 +22,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  // Halaman case study — satu entri per project yang punya slug.
   const slugs = await getProjectSlugs();
   const caseStudies: MetadataRoute.Sitemap = slugs.map((slug) => ({
     url: absoluteUrl(`/work/${slug}`),

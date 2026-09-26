@@ -3,16 +3,6 @@ import assert from "node:assert/strict";
 
 import { keyFromPublicUrl } from "../src/lib/r2-cleanup.ts";
 
-// ============================================================================
-// keyFromPublicUrl menentukan file mana yang boleh DIHAPUS dari R2.
-//
-// Ini kode destruktif: salah menentukan key berarti menghapus file yang salah
-// atau file milik orang lain. Test di bawah mengunci tiga jaminan:
-//   1. hanya URL di bawah base kita yang lolos,
-//   2. tidak ada cara keluar dari folder lewat "..",
-//   3. domain yang menyerupai base kita ditolak.
-// ============================================================================
-
 const ORIGINAL = process.env.NEXT_PUBLIC_R2_PUBLIC_URL;
 
 before(() => {
@@ -56,7 +46,6 @@ describe("keyFromPublicUrl", () => {
   });
 
   test("domain yang menyerupai base ditolak", () => {
-    // Ini jebakan klasik: prefix cocok sebagai string tapi host berbeda.
     assert.equal(
       keyFromPublicUrl("https://cdn.example.com.evil.com/foto.jpg"),
       null,

@@ -7,10 +7,6 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 
 export const dynamic = "force-dynamic";
 
-// ---------------------------------------------------------------------------
-// Rate limit (in-memory, per instance — cukup untuk memperlambat spam, bukan
-// proteksi absolut). 1 komentar per IP per 60 detik.
-// ---------------------------------------------------------------------------
 const RATE_WINDOW_MS = 60_000;
 const rateMap = new Map<string, number>();
 
@@ -19,7 +15,6 @@ function rateLimited(key: string): boolean {
   const last = rateMap.get(key) ?? 0;
   if (now - last < RATE_WINDOW_MS) return true;
   rateMap.set(key, now);
-  // Cegah map tumbuh tanpa batas
   if (rateMap.size > 5000) {
     const cutoff = now - RATE_WINDOW_MS;
     for (const [k, t] of rateMap) {
@@ -35,7 +30,6 @@ function clean(v: unknown): string {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-/** IP asli di Cloudflare — `x-forwarded-for` bisa dipalsukan klien. */
 function clientIp(req: NextRequest): string {
   const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
   if (cf?.clientIp) return cf.clientIp;
@@ -46,11 +40,6 @@ function clientIp(req: NextRequest): string {
   );
 }
 
-// ---------------------------------------------------------------------------
-// GET — daftar komentar.
-//   ?scope=admin  → semua komentar + email pengirim (admin only)
-//   (default)     → komentar terpublikasi tanpa email (publik)
-// ---------------------------------------------------------------------------
 export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const scope = searchParams.get("scope");
@@ -80,17 +69,12 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
   return NextResponse.json({ comments: data ?? [] });
 });
 
-// ---------------------------------------------------------------------------
-// POST — kirim komentar baru (publik, tervalidasi)
-// ---------------------------------------------------------------------------
 export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const body = await req.json().catch(() => null);
   if (!body || typeof body !== "object") {
     return NextResponse.json({ error: "Invalid body" }, { status: 400 });
   }
 
-  // Honeypot: field tersembunyi yang harusnya tetap kosong — kalau terisi,
-  // hampir pasti bot. Balas sukses palsu agar bot tidak mencoba lagi.
   if (clean(body.website)) {
     return NextResponse.json({ ok: true }, { status: 201 });
   }
@@ -125,9 +109,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     );
   }
 
-  // Tulis via service_role (RLS insert policy tetap memvalidasi panjang).
-  // `approved: false` → komentar masuk antrean moderasi dulu, tidak langsung
-  // tayang. Admin menyetujui lewat /admin → Comments.
   const supabase = await createSupabaseAdmin();
   const { data, error } = await supabase
     .from("comments")
@@ -142,15 +123,10 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
-  // Balas tanpa menyingkap status moderasi — pengirim cukup tahu terkirim.
   invalidate(CACHE_TAGS.comments);
   return NextResponse.json({ ...data, pending: true }, { status: 201 });
 });
 
-// ---------------------------------------------------------------------------
-// PATCH — moderasi komentar (admin only). Body: { id, approved }
-// Menyembunyikan komentar dari publik tanpa menghapusnya.
-// ---------------------------------------------------------------------------
 export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -186,9 +162,6 @@ export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
   return NextResponse.json(data);
 });
 
-// ---------------------------------------------------------------------------
-// DELETE — hapus komentar (admin only)
-// ---------------------------------------------------------------------------
 export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;

@@ -2,15 +2,6 @@
 
 import { useId, type ReactNode } from "react";
 
-// ============================================================================
-// Field — satu baris isian untuk seluruh form admin.
-//
-// Label selalu terhubung ke input lewat id (htmlFor + aria-describedby), jadi
-// pembaca layar mengumumkan label dan catatan bantuan bersama nilainya.
-// `hint` menampung catatan bantuan supaya tidak ditulis sebagai <p> lepas di
-// setiap manager — sebelumnya itu membuat spasi antar form tidak seragam.
-// ============================================================================
-
 type FieldProps = {
   label: string;
   value: string;
@@ -18,14 +9,10 @@ type FieldProps = {
   placeholder?: string;
   textarea?: boolean;
   required?: boolean;
-  /** id <datalist> untuk memberi saran nilai (tetap bisa ketik bebas). */
   list?: string;
-  /** Catatan bantuan di bawah isian. */
   hint?: ReactNode;
-  /** Tinggi textarea dalam baris (default 3). */
   rows?: number;
   type?: "text" | "url" | "email" | "number";
-  /** Ubah ke kontrol kustom (mis. <select>) memakai id & kelas yang sama. */
   render?: (props: {
     id: string;
     describedBy: string | undefined;

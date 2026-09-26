@@ -18,8 +18,6 @@ export const PUT = withJsonErrors(async function PUT(
   const supabase = await createSupabaseAdmin();
   const body = await req.json();
 
-  // Ambil URL gambar lama SEBELUM update, supaya file yang tergantikan bisa
-  // dibersihkan dari R2.
   const { data: before } = await supabase
     .from("projects")
     .select("image_url")
@@ -55,7 +53,6 @@ export const PUT = withJsonErrors(async function PUT(
 
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // Update sukses → bersihkan gambar lama bila sudah tidak dipakai.
   const nextImage = (data as { image_url: string | null }).image_url;
   if (previousImage && previousImage !== nextImage) {
     await deleteR2IfUnreferenced(supabase, IMAGE_COLUMN, previousImage);
@@ -84,7 +81,6 @@ export const DELETE = withJsonErrors(async function DELETE(
   const { error } = await supabase.from("projects").delete().eq("id", id);
   if (error) return NextResponse.json({ error: error.message }, { status: 400 });
 
-  // Baris sudah hilang → gambar jadi yatim (kecuali dipakai baris lain).
   const imageUrl =
     (before as { image_url: string | null } | null)?.image_url ?? null;
   await deleteR2IfUnreferenced(supabase, IMAGE_COLUMN, imageUrl);

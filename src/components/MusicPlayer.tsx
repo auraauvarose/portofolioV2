@@ -20,7 +20,6 @@ export default function MusicPlayer({
   const label = playing ? t(pageControls.pauseMusic) : t(pageControls.playMusic);
 
   if (variant === "bar") {
-    // Varian bar: pill ringkas sejajar tema di menu atas halaman.
     return (
       <button
         type="button"

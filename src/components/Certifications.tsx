@@ -162,7 +162,6 @@ export default function Certifications({
           </Reveal>
         ) : (
           <>
-            {/* Mount only the active breakpoint's tree (see Projects). */}
             {isDesktop ? (
               <div className="hidden md:block">
                 {(() => {

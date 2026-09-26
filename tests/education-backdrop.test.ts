@@ -4,30 +4,11 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
-// ============================================================================
-// Backdrop Education harus BERSIH — lapisan aura dihapus, bukan diabu-abukan.
-//
-// Riwayat: `.edu-aura` dulu lapisan radial-gradient seluas section (1440x823)
-// berwarna terracotta, sehingga seluruh latar Education kebasahan orange.
-// Percobaan pertama menggantinya dengan gradient netral (putih/hitam tipis),
-// tapi itu masih meninggalkan kabut abu-abu di backdrop. Permintaan akhir:
-// hapus saja lapisannya — backdrop polos, tanpa kabut.
-//
-// Yang dikunci di sini:
-//   1. tidak ada lagi rule .edu-aura di CSS (dark maupun light),
-//   2. tidak ada lagi elemen ber-class edu-aura di markup Education,
-//   3. aksen foreground yang MEMANG orange tetap utuh,
-//   4. wash di permukaan kartu (.edu-panel) tetap dibiarkan (di luar scope).
-// ============================================================================
-
 const here = dirname(fileURLToPath(import.meta.url));
 const CSS = readFileSync(resolve(here, "../src/app/globals.css"), "utf8");
 const EDU = readFileSync(resolve(here, "../src/components/Education.tsx"), "utf8");
 
-/** Pecah CSS jadi daftar rule datar { sel, body }. */
 function parseRules(css: string): { sel: string; body: string }[] {
-  // Komentar dibuang lebih dulu: isinya bebas dan tanpa ini teks komentar
-  // ikut menempel ke selector sehingga pencarian rule jadi meleset.
   const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: { sel: string; body: string }[] = [];
   const re = /([^{}]+)\{([^{}]*)\}/g;
@@ -43,7 +24,6 @@ function parseRules(css: string): { sel: string; body: string }[] {
 
 const RULES = parseRules(CSS);
 
-/** Body deklarasi untuk selector persis. */
 function ruleBody(selector: string): string | null {
   const hits = RULES.filter((r) => r.sel === selector);
   return hits.length ? hits[hits.length - 1].body : null;
@@ -51,7 +31,6 @@ function ruleBody(selector: string): string | null {
 
 type Rgba = { r: number; g: number; b: number; a: number };
 
-/** Semua warna rgba/rgb di dalam sebuah body deklarasi. */
 function colors(body: string): Rgba[] {
   const out: Rgba[] = [];
   const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/g;
@@ -67,7 +46,6 @@ function colors(body: string): Rgba[] {
   return out;
 }
 
-/** Cukup merah-dominan untuk terbaca sebagai orange/terracotta. */
 const isOrange = (c: Rgba) => c.a > 0.02 && c.r > c.g + 30 && c.r > c.b + 40;
 
 describe("lapisan backdrop Education (.edu-aura) sudah DIHAPUS", () => {
@@ -106,7 +84,6 @@ describe("lapisan backdrop Education (.edu-aura) sudah DIHAPUS", () => {
 });
 
 describe("aksen foreground Education tetap terracotta", () => {
-  // Batasan keras: yang dihapus hanya lapisan backdrop, bukan aksennya.
   test(".edu-chip masih pakai accent", () => {
     const body = ruleBody(".edu-chip");
     assert.ok(body, "rule .edu-chip hilang");
@@ -132,8 +109,6 @@ describe("aksen foreground Education tetap terracotta", () => {
   });
 
   test("wash di permukaan kartu (.edu-panel) sengaja DIBIARKAN", () => {
-    // User memilih "cukup backdrop section saja" — kalau test ini gagal karena
-    // panel jadi netral, itu perubahan di luar scope.
     const body = ruleBody(".edu-panel");
     assert.ok(body, "rule .edu-panel hilang");
     assert.ok(

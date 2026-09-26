@@ -3,11 +3,6 @@ import assert from "node:assert/strict";
 
 import { parseBrowser, parseDevice, parsePhoneBrand } from "../src/lib/device.ts";
 
-// ============================================================================
-// parseDevice — klasifikasi perangkat dari user-agent untuk analitik.
-// Kontrak: mobile / tablet / desktop; UA asli tidak disimpan di mana pun.
-// ============================================================================
-
 describe("parseDevice", () => {
   test("iPhone → mobile", () => {
     assert.equal(
@@ -63,11 +58,6 @@ describe("parseDevice", () => {
     assert.equal(parseDevice("bot-crawler-xyz"), "desktop");
   });
 });
-
-// ============================================================================
-// parseBrowser — browser dari user-agent. Kontrak: nama browser, "Lainnya"
-// untuk UA tak dikenal, null untuk UA kosong (tidak dihitung).
-// ============================================================================
 
 const UA = {
   chromeWin:
@@ -133,11 +123,6 @@ describe("parseBrowser", () => {
     assert.equal(parseBrowser("bot-crawler-xyz"), "Lainnya");
   });
 });
-
-// ============================================================================
-// parsePhoneBrand — merek ponsel. Hanya untuk perangkat mobile: UA desktop
-// tidak punya merek, jadi null (bukan "Lainnya").
-// ============================================================================
 
 describe("parsePhoneBrand", () => {
   test("iPhone → Apple", () => {

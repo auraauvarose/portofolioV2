@@ -1,9 +1,5 @@
 import type { Localized } from "@/types";
 
-// NOTE: This module is imported by CLIENT components — never add server-only
-// secrets (passwords, API keys, cookie secrets) here. They would be inlined
-// into the public JS bundle. Server-only config lives in `server-config.ts`.
-
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export const profile = {
@@ -30,11 +26,8 @@ export const nav: { en: string; id: string }[] = [
 ];
 
 export const hero = {
-  // Judul besar di hero — dua baris. Dipakai di Hero.tsx untuk tampilan
-  // utama (judul 3D) dan tampilan lensa (mode hover).
   titleLine1: { en: "FULLSTACK", id: "FULLSTACK" },
   titleLine2: { en: "DEVELOPER", id: "DEVELOPER" },
-  // Judul pada tampilan lensa
   lensLine1: { en: "SOFTWARE", id: "SOFTWARE" },
   lensLine2: { en: "ENGINEER", id: "ENGINEER" },
 } as const;
@@ -320,8 +313,6 @@ export const gallery = {
     en: "No photos in this category yet.",
     id: "Belum ada foto di kategori ini.",
   },
-  // Label ramah untuk kategori galeri. Kategori yang tidak terdaftar di sini
-  // tetap ditampilkan apa adanya, jadi admin bebas menambah nilai baru.
   categoryLabels: {
     general: { en: "General", id: "Umum" },
     event: { en: "Events", id: "Acara" },
@@ -397,9 +388,6 @@ export const commentsPage = {
   cta: { en: "Leave a Comment", id: "Tulis Komentar" },
 } as const;
 
-// ============================================================================
-// Menu kontrol halaman (tema + musik) — dipakai PageControls.
-// ============================================================================
 export const pageControls = {
   themeLabel: { en: "Theme", id: "Tema" },
   themeDark: { en: "Dark", id: "Gelap" },
@@ -409,9 +397,6 @@ export const pageControls = {
   pauseMusic: { en: "Pause music", id: "Jeda musik" },
 } as const;
 
-// ============================================================================
-// Contact form — dikirim ke tabel contact_messages, dibaca di /admin → Inbox.
-// ============================================================================
 export const contactForm = {
   openLabel: { en: "Send a Message", id: "Kirim Pesan" },
   closeLabel: { en: "Close", id: "Tutup" },
@@ -464,9 +449,6 @@ export const contactForm = {
   },
 } as const;
 
-// ============================================================================
-// Halaman case study /work/<slug>
-// ============================================================================
 export const caseStudy = {
   back: { en: "All projects", id: "Semua proyek" },
   overview: { en: "Overview", id: "Ringkasan" },
@@ -485,9 +467,6 @@ export const caseStudy = {
   otherProjects: { en: "Other projects", id: "Proyek lainnya" },
 } as const;
 
-// ============================================================================
-// Halaman error & 404
-// ============================================================================
 export const notFoundPage = {
   kicker: { en: "Error 404", id: "Error 404" },
   heading: { en: "Page not found", id: "Halaman tidak ditemukan" },
@@ -510,9 +489,6 @@ export const errorPage = {
   home: { en: "Back to home", id: "Kembali ke beranda" },
 } as const;
 
-// ============================================================================
-// Experience & Testimonials (Tahap 3)
-// ============================================================================
 export const experienceSection = {
   kicker: { en: "Experience", id: "Pengalaman" },
   heading: { en: "Where I've Worked", id: "Riwayat Kerja" },

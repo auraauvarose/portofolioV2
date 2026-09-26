@@ -159,9 +159,6 @@ export default function SpiderWalker() {
         }
       }
 
-      // Pause the rAF loop while the spider is idle/hanging — nothing moves,
-      // so no DOM writes are needed until the next scheduled action. The
-      // visual is identical; this just stops a permanent 60fps loop on mobile.
       if (st.mode === "idle" || st.mode === "webHang") {
         const wait = st.idleUntil - performance.now();
         if (wait > 0) {
@@ -210,9 +207,6 @@ export default function SpiderWalker() {
       }
     };
 
-    // Keep the spider's animation, but yield its tiny rAF loop to native
-    // touch scrolling. It resumes at the same perimeter position after the
-    // gesture settles instead of being removed from mobile altogether.
     const onScroll = () => {
       if (!touchMq.matches || mq.matches) return;
       stopLoop();
@@ -223,7 +217,6 @@ export default function SpiderWalker() {
       }, 140);
     };
 
-    // Background tabs: stop the loop + timers entirely, resume on return.
     const onVisibility = () => {
       if (document.hidden) {
         stopLoop();

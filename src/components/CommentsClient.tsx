@@ -15,10 +15,6 @@ import { useLanguage } from "@/components/providers";
 import { comments } from "@/lib/config";
 import type { GuestComment } from "@/types";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 function relativeTime(iso: string, justNowLabel: string): string {
   const then = new Date(iso).getTime();
   if (Number.isNaN(then)) return "";
@@ -44,7 +40,6 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-// Warna avatar deterministik dari nama — palet senada dengan tema.
 const AVATAR_HUES = [16, 32, 205, 258, 150, 340];
 function avatarHue(name: string): number {
   let h = 0;
@@ -75,10 +70,6 @@ function StarRow({ value, small = false }: { value: number; small?: boolean }) {
   );
 }
 
-// ---------------------------------------------------------------------------
-// Kartu komentar
-// ---------------------------------------------------------------------------
-
 function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: number; justNowLabel: string }) {
   const hue = avatarHue(c.name);
   return (
@@ -87,8 +78,6 @@ function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: numbe
       variant={index % 2 === 0 ? "left" : "right"}
       className="h-full"
     >
-      {/* Kartu murah: hover hanya border-color (paint kecil), bukan glow
-          radial yang harus di-raster ulang tiap pointermove. */}
       <article className="glass flex h-full flex-col gap-4 rounded-2xl border border-white/10 p-6 transition-[border-color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-accent/50 hover:-translate-y-1">
           <div className="flex items-start justify-between gap-4">
             <div className="flex items-center gap-3">
@@ -118,30 +107,21 @@ function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: numbe
   );
 }
 
-// ---------------------------------------------------------------------------
-// Halaman komentar
-// ---------------------------------------------------------------------------
-
 export default function CommentsClient({ initial }: { initial: GuestComment[] }) {
   const { t } = useLanguage();
   const reduceMotion = useReducedMotion();
   const sectionRef = useRef<HTMLElement | null>(null);
 
-  // Daftar komentar tidak pernah diubah di klien: komentar baru berstatus
-  // pending (menunggu moderasi) sehingga tidak langsung ditambahkan.
   const items = initial;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
-  // Honeypot — field tersembunyi; bot yang mengisinya diabaikan server.
   const [website, setWebsite] = useState("");
   const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  // Pause loop warna badge saat section di luar layar (pola yang sama
-  // dengan section Contact).
   useEffect(() => {
     const el = sectionRef.current;
     if (!el) return;
@@ -170,9 +150,6 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         setStatus("error");
         return;
       }
-      // Komentar baru berstatus pending (belum tayang), jadi JANGAN
-      // ditambahkan ke daftar publik — kalau ditambahkan, pengunjung melihat
-      // komentarnya sendiri seolah sudah tayang padahal masih moderasi.
       setStatus("ok");
       setName("");
       setEmail("");
@@ -193,18 +170,13 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         <CustomCursor />
         <SpiderWalker />
         <ScrollProgress />
-        {/* Menu kontrol (tema + musik) — fixed di atas, center, sama di mobile. */}
         <PageControls />
-        {/* tv-static (grain full-viewport) sengaja tidak dipakai di halaman
-            ini — repaint viewport tiap 0.5s adalah sumber lag di GPU lemah. */}
 
         <section
           id="comments"
           ref={sectionRef}
           className="comments-stage relative overflow-hidden px-6 py-16 md:px-10 md:py-32"
         >
-          {/* Latar minimalis: hanya warna flat + hairline — tanpa blur/orb/
-              animasi latar agar scrolling tetap ringan di perangkat lemah. */}
           <div className="comments-stage__frame relative mx-auto max-w-7xl">
             <SectionHeading
               index={comments.index}
@@ -218,7 +190,6 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
               </p>
             </Reveal>
 
-            {/* Badge "open for notes" — pola identik dengan badge Contact */}
             <Reveal className="mb-12">
               <div className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#22c55e] animate-color-cycle-ink">
                 <span className="relative flex h-2 w-2">
@@ -229,14 +200,12 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
               </div>
             </Reveal>
 
-            {/* ── Form komentar ── */}
             <Reveal variant="zoom" className="mb-16 md:mb-20">
               <form
                 onSubmit={onSubmit}
                 className="glass rounded-3xl p-6 md:p-10"
                 noValidate
               >
-                  {/* Honeypot — tersembunyi dari manusia */}
                   <div className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
                     <label>
                       Website
@@ -305,7 +274,6 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                     </p>
                   </div>
 
-                  {/* Rating bintang */}
                   <div className="mt-2">
                     <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
                       {t(comments.ratingLabel)}
@@ -387,7 +355,6 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                 </form>
               </Reveal>
 
-            {/* ── Daftar komentar ── */}
             {items.length === 0 ? (
               <Reveal>
                 <div className="glass rounded-2xl p-12 text-center">
@@ -403,7 +370,6 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
               </div>
             )}
 
-            {/* ── Tombol kembali ke beranda ── */}
             <Reveal className="mt-20 flex justify-center">
               <Link
                 href="/"

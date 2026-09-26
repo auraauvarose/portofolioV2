@@ -8,7 +8,6 @@ import { getProjectBySlug, getProjectSlugs, getProjects } from "@/lib/data";
 import { absoluteUrl, SITE_NAME } from "@/lib/site";
 import { isValidSlug } from "@/lib/slug";
 
-// Case study dibaca dari Supabase; pakai ISR agar tidak query tiap request.
 export const revalidate = 300;
 
 type Params = { params: Promise<{ slug: string }> };
@@ -51,7 +50,6 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 export default async function CaseStudyPage({ params }: Params) {
   const { slug } = await params;
 
-  // Tolak slug aneh sebelum menyentuh database.
   if (!isValidSlug(slug)) notFound();
 
   const project = await getProjectBySlug(slug);
@@ -68,7 +66,6 @@ export default async function CaseStudyPage({ params }: Params) {
       <CaseStudy project={project} others={others} />
       <Footer />
 
-      {/* JSON-LD: CreativeWork — membantu mesin pencari memahami halaman ini */}
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{

@@ -1,5 +1,3 @@
-// Test untuk normalisasi ringkasan analitik: respons API yang tidak lengkap
-// (chunk lama / field baru belum ada) tidak boleh membuat panel crash.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { normalizeSummary } from "../src/lib/analytics-summary";

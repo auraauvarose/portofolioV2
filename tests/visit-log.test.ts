@@ -1,5 +1,3 @@
-// Test untuk log kunjungan: format jam WIB dan entri log
-// "nama device - lokasi - jam".
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import {

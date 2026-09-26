@@ -8,11 +8,8 @@ type RevealProps = {
   className?: string;
   delay?: number;
   as?: keyof React.JSX.IntrinsicElements;
-  /** Media variant: images inside un-clip from a zoomed-in state */
   media?: boolean;
-  /** Entrance flavor */
   variant?: "rise" | "left" | "right" | "zoom" | "flip";
-  /** Replay while entering/leaving the viewport instead of playing once */
   replay?: boolean;
 };
 
@@ -55,11 +52,9 @@ export default function Reveal({
             }
             setVisible(true);
             if (!replay) {
-              // Default behavior: play once and keep the final state.
               observer.disconnect();
             }
           } else if (replay) {
-            // Replay mode is intentionally opt-in for About/What I Do only.
             setVisible(false);
           }
         }
@@ -76,8 +71,6 @@ export default function Reveal({
     <Component
       ref={ref}
       className={`reveal ${media ? "reveal-media" : ""} ${VARIANT_CLASS[variant]} ${replay ? `replay-${entryDirection}` : ""} ${visible ? "is-visible" : ""} ${className}`}
-      // Backwards fill holds the from-state for the whole delay, so grid
-      // stagger stays invisible until each card's turn.
       style={delay ? { animationDelay: `${delay}ms` } : undefined}
     >
       {children}

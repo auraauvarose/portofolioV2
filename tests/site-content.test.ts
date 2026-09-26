@@ -3,15 +3,6 @@ import assert from "node:assert/strict";
 
 import { defaultSiteContent } from "../src/lib/site-content.ts";
 
-// ============================================================================
-// Konten situs memakai prinsip config-first: config.ts adalah DEFAULT dan
-// database hanya MENIMPA. Test ini mengunci jaminan yang membuat situs tidak
-// pernah blank:
-//   1. default selalu lengkap (semua seksi ada dan tidak kosong),
-//   2. override sebagian tidak menghapus key lain,
-//   3. data yang bentuknya salah tidak merusak hasil.
-// ============================================================================
-
 describe("defaultSiteContent", () => {
   const content = defaultSiteContent();
 
@@ -81,7 +72,6 @@ describe("defaultSiteContent", () => {
 describe("merge override (semantik yang dipakai getSiteContent)", () => {
   const base = defaultSiteContent();
 
-  /** Cerminan mergeSection(): objek DB menimpa, key lain tetap. */
   const merge = <T extends object>(fallback: T, override: unknown): T =>
     !override || typeof override !== "object" || Array.isArray(override)
       ? fallback
@@ -95,7 +85,6 @@ describe("merge override (semantik yang dipakai getSiteContent)", () => {
 
     assert.equal(merged.name, "Nama Baru");
     assert.equal(merged.email, "baru@example.com");
-    // Key yang tidak di-override harus tetap dari default.
     assert.equal(merged.cvUrl, base.profile.cvUrl);
     assert.deepEqual(merged.socials, base.profile.socials);
     assert.deepEqual(merged.location, base.profile.location);
@@ -106,11 +95,8 @@ describe("merge override (semantik yang dipakai getSiteContent)", () => {
   });
 
   test("data bentuk salah diabaikan, bukan merusak", () => {
-    // Array dikirim untuk objek -> default dipakai.
     assert.deepEqual(merge(base.profile, [1, 2, 3]), base.profile);
-    // String dikirim untuk objek -> default dipakai.
     assert.deepEqual(merge(base.profile, "teks"), base.profile);
-    // null / undefined -> default dipakai.
     assert.deepEqual(merge(base.profile, null), base.profile);
     assert.deepEqual(merge(base.profile, undefined), base.profile);
   });

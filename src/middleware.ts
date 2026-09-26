@@ -2,15 +2,6 @@ import { NextResponse, type NextRequest } from "next/server";
 import { ADMIN_COOKIE, verifySessionValue } from "@/lib/admin-cookie";
 import { sessionSecret } from "@/lib/server-config";
 
-// API routes that must NEVER be reachable without an admin session.
-// Route handlers still call requireUser() themselves — this is a real second
-// layer (the previous matcher listed these paths but enforced nothing).
-//
-// Deliberately excluded:
-//   /api/comments — public GET (approved guestbook entries) + public POST;
-//                   admin-only DELETE is enforced inside the handler.
-//   /api/contact  — public POST (contact form); GET/PATCH/DELETE are admin
-//                   only and handled per-method below.
 const PROTECTED_API_PREFIXES = [
   "/api/projects",
   "/api/certifications",
@@ -21,9 +12,6 @@ const PROTECTED_API_PREFIXES = [
   "/api/testimonials",
 ];
 
-// Path yang boleh di-POST tanpa login. Method lain di path yang sama wajib
-// admin — tanpa aturan per-method ini, `GET /api/contact` akan membocorkan
-// seluruh isi inbox ke publik.
 const PUBLIC_POST_ONLY = ["/api/contact", "/api/analytics"];
 
 function isProtectedApi(path: string): boolean {
@@ -79,9 +67,6 @@ export const config = {
     "/api/experience/:path*",
     "/api/testimonials/:path*",
     "/api/analytics",
-    // Pembedaan per-method (POST publik, sisanya admin) terjadi di middleware.
-    // /api/comments tidak didaftarkan: GET & POST-nya memang publik, dan
-    // DELETE-nya sudah dijaga requireUser() di dalam handler.
     "/api/contact",
   ],
 };

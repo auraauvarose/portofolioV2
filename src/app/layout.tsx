@@ -84,7 +84,6 @@ const array = localFont({
 });
 
 export const metadata: Metadata = {
-  // metadataBase membuat semua URL relatif (OG image, canonical) jadi absolut.
   metadataBase: new URL(siteUrl()),
   title: {
     default: SITE_TITLE,
@@ -154,7 +153,6 @@ export const viewport: Viewport = {
   ],
 };
 
-/** JSON-LD Person — membantu Google menampilkan rich result. */
 const personJsonLd = {
   "@context": "https://schema.org",
   "@type": "Person",
@@ -188,8 +186,6 @@ export default async function RootLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Konten situs diambil sekali di server (DB → fallback config.ts) lalu
-  // disebarkan lewat context. Tidak ada fetch waterfall di klien.
   const siteContent = await getSiteContent();
 
   return (

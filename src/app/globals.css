@@ -8,8 +8,7 @@
   --font-hero: var(--font-tanker), var(--font-cabinet), sans-serif;
   --font-serif: var(--font-zodiak), Georgia, serif;
 
-  /* Warm-neutral palette (Apriyanto Dwi Herlambang reference) */
-  --color-accent: #eb5939; /* terracotta / warm orange accent */
+  --color-accent: #eb5939;
   --color-accent-soft: #d5542f;
   --color-ink: #0d0e13;
   --color-panel: #13151c;
@@ -18,33 +17,21 @@
   --color-fg: #ffffff;
   --color-muted: #9ca3af;
 
-  /* ── Admin workbench tokens ───────────────────────────────────────────────
-     Panel admin adalah alat kerja, bukan halaman pemasaran. Token semantik
-     ini menggantikan utility putih-transparan supaya kontrasnya terkendali
-     penuh di kedua tema (nilai light-mode di-override di blok admin bawah).
-     Nilai di sini = tema gelap. */
-  --color-a-canvas: #0b0c11; /* kanvas halaman */
-  --color-a-surface: #12141b; /* permukaan terangkat (baris, kartu) */
-  --color-a-surface-2: #191c25; /* permukaan terangkat saat hover/aktif */
-  --color-a-line: rgba(255, 255, 255, 0.09); /* hairline pemisah */
-  --color-a-line-2: rgba(255, 255, 255, 0.17); /* hairline kontrol */
-  --color-a-text: #ece8e0; /* teks utama */
-  --color-a-dim: #9aa1af; /* teks sekunder */
-  --color-a-faint: #7c8494; /* teks tersier / meta — tetap ≥4.5:1 */
-  --color-a-accent: #eb5939; /* aksen tunggal (terracotta) */
-  /* Warna aksen saat hover. Dipisah per tema karena arah hover-nya berbeda:
-     di tema gelap aksen menggelap sedikit, di tema terang harus lebih gelap
-     lagi supaya teks di atasnya tetap lolos kontras. */
+  --color-a-canvas: #0b0c11;
+  --color-a-surface: #12141b;
+  --color-a-surface-2: #191c25;
+  --color-a-line: rgba(255, 255, 255, 0.09);
+  --color-a-line-2: rgba(255, 255, 255, 0.17);
+  --color-a-text: #ece8e0;
+  --color-a-dim: #9aa1af;
+  --color-a-faint: #7c8494;
+  --color-a-accent: #eb5939;
   --color-a-accent-hover: #d5542f;
-  /* Teks di atas bidang aksen. Tinta gelap di atas terracotta terang —
-     pola yang sama dengan situs publik, dan lolos kontras (5.5:1). */
   --color-a-on-accent: #0d0e13;
   --color-a-ok: #3fb950;
   --color-a-warn: #d29922;
   --color-a-danger: #f85149;
 
-  /* Wajah utilitas untuk data: indeks frame, angka, slug, path. Mono sistem
-     (tanpa unduhan font tambahan) — dipakai dengan tabular-nums. */
   --font-data: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
     "Liberation Mono", monospace;
 
@@ -109,7 +96,6 @@
       transform: scale(0.8);
     }
   }
-  /* Status dot color rotation (shared 8s loop so every element stays in sync) */
   @keyframes color-cycle {
     0%,
     100% {
@@ -155,8 +141,6 @@
       opacity: 0;
     }
   }
-  /* Filter-only animation keeps the huge watermark out of the paint loop.
-     Animating background-position repaints the clipped text on every frame. */
   @keyframes mark-hue-gpu {
     0%,
     100% {
@@ -169,21 +153,13 @@
 }
 
 html {
-  /* No scroll-behavior: smooth — Lenis owns scrolling (globals intent:
-     CSS smooth scrolling fights Lenis's per-frame scroll position). */
-  /* Paint the canvas behind the page (theme-aware) so rubber-band overscroll
-     never exposes a white band at the screen edges. */
   background-color: var(--color-ink);
 }
 
-/* Custom cursor: hide the native pointer only where the cursor is mounted
-   (main site), and grow the ring over interactive elements. */
 .no-native-cursor,
 .no-native-cursor * {
   cursor: none !important;
 }
-/* Touch devices: the custom cursor is never mounted; hide any pre-hydration
-   ghost layers too (blend layers there cause mobile GPU flicker). */
 @media (hover: none), (pointer: coarse) {
   #cursor-dot,
   #cursor-ring {
@@ -202,12 +178,8 @@ html {
   --color-ecru: #2f2f2f;
   --color-khaki: #6b6b6b;
   --color-fg: #0d0e13;
-  --color-muted: #1c1c1e; /* nav links — keep clearly readable on light bg */
+  --color-muted: #1c1c1e;
 
-  /* Admin tokens — light. Permukaan naik jadi putih, teks turun ke hampir
-     hitam. Semua nilai di bawah sudah dihitung agar lolos WCAG AA (≥4.5:1)
-     di atas kanvas #f2f1ee maupun permukaan putih — termasuk teks meta
-     terkecil, karena banyak label di panel admin berukuran 11px. */
   --color-a-canvas: #f2f1ee;
   --color-a-surface: #ffffff;
   --color-a-surface-2: #eceae5;
@@ -215,28 +187,17 @@ html {
   --color-a-line-2: rgba(13, 14, 19, 0.2);
   --color-a-text: #16171c;
   --color-a-dim: #565d69;
-  /* Nilai terkecil yang masih lolos 4.5:1 di ketiga permukaan tema terang
-     (kanvas, putih, dan permukaan terangkat) — termasuk teks 11px. */
   --color-a-faint: #616873;
   --color-a-accent: #b03a0d;
   --color-a-accent-hover: #8f2f0a;
-  /* Aksen light sudah cukup gelap, jadi teks di atasnya harus terang. */
   --color-a-on-accent: #ffffff;
   --color-a-ok: #156b2e;
   --color-a-warn: #7d5100;
-  /* Lebih gelap dari merah "standar" karena teks galat tampil di atas
-     bidang bertint merah muda, bukan langsung di atas kanvas. */
   --color-a-danger: #b81c26;
 }
-/* ===========================================================================
-   LIGHT MODE — comprehensive overrides so the whole site stays readable when
-   the theme toggle is switched to light (`.dark` class removed).
-   Strategy: flip the hardcoded dark-mode utility colors that components use.
-   ========================================================================= */
 :root:not(.dark) body {
   color: #1c1c1e;
 }
-/* Foreground text */
 :root:not(.dark) .text-white,
 :root:not(.dark) .text-gray-100 {
   color: #1c1c1e;
@@ -265,7 +226,6 @@ html {
   color: #444444;
 }
 
-/* Subtle dark surfaces used as light hovers / hairline fills */
 :root:not(.dark) .bg-black\/5 {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -275,9 +235,7 @@ html {
 :root:not(.dark) .bg-black\/20 {
   background-color: rgba(0, 0, 0, 0.12);
 }
-/* Strong overlays stay dark for photo/input contrast */
 
-/* White-tinted surfaces become dark-tinted in light mode */
 :root:not(.dark) [class*="bg-white/"] {
   background-color: rgba(0, 0, 0, 0.05);
 }
@@ -300,8 +258,6 @@ html {
   color: rgba(0, 0, 0, 0.08);
 }
 
-/* Watermark AURA (font Array): tint the letterform dots with a shifting
-   gradient. Clipped to the glyphs, so only the letters get color. */
 .footer-mark.footer-mark-color {
   color: transparent;
   -webkit-text-fill-color: transparent;
@@ -327,21 +283,12 @@ html {
     rgba(211, 84, 47, 0.4)
   );
 }
-/* Pause the watermark animation while it is offscreen (toggled from Footer). */
 .footer-mark.footer-mark-color.mark-halt {
   animation-play-state: paused !important;
   will-change: auto;
 }
-/* Keep one compositor-friendly animation on every viewport. */
 
-/* Touch scrolling gets the browser's native frame budget. These effects keep
-   their full animations between gestures, but don't repaint a fixed viewport
-   texture or a full-screen hero image over every scroll frame. */
 @media (hover: none), (pointer: coarse) {
-  /* Keep the hero float and decorative static animation on mobile, but let
-     native touch scroll own the frame budget while the finger is moving.
-     The footer watermark joins in: its 30vw hue-rotate re-rasterizes a
-     viewport-wide text surface on every scroll frame. */
   html.is-scrolling .tv-static::before,
   html.is-scrolling .tv-static::after,
   html.is-scrolling .animate-hero-float,
@@ -351,12 +298,10 @@ html {
 
 }
 
-/* Borders: white-tinted → dark-tinted */
 :root:not(.dark) [class*="border-white/"] {
   border-color: rgba(0, 0, 0, 0.1);
 }
 
-/* Carousel slide arrows: solid dark with white arrows in light mode */
 :root:not(.dark) button.carousel-arrow {
   background-color: #0d0e13;
   border-color: rgba(255, 255, 255, 0.2);
@@ -367,11 +312,9 @@ html {
   color: var(--color-accent);
 }
 
-/* Outlined/glass styles */
 :root:not(.dark) .text-outline {
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
 }
-/* Marquee: filled — white in dark mode, black in light mode */
 .marquee-mask .text-outline {
   -webkit-text-stroke: 0;
   color: #ffffff;
@@ -406,8 +349,6 @@ body {
   color: #000;
 }
 
-/* Hide the scrollbar across all browsers (only the visual bar; page stays
-   scrollable). */
 ::-webkit-scrollbar {
   display: none;
   width: 0;
@@ -495,11 +436,6 @@ body {
     scrollbar-width: none;
   }
 
-  /* Film-grain / "TV static" overlay.
-     Layer sizing: the grain keyframes translate ±5%, so the layer only needs
-     ~116% of the viewport with 8% overscan — the old desktop 400%×400% layer
-     was 16 viewport-sized textures to rasterize and blend for zero visual
-     difference. Same texture, same animation, ~12x less GPU memory/paint. */
   .grain::before,
   .tv-static::before {
     content: "";
@@ -530,8 +466,6 @@ body {
   .tv-static::after {
     content: "";
     position: fixed;
-    /* Extend 8px past top/bottom: scan-jump translates down 8px, which on an
-       inset-0 layer exposed a flickering gap band at the top edge. */
     inset: -8px 0;
     z-index: 89;
     pointer-events: none;
@@ -592,9 +526,6 @@ body {
   animation-play-state: paused !important;
 }
 
-/* Freeze ambient color/animation loops for a paused section (Contact badge).
-   !important beats the inline arbitrary-value animation shorthand.
-   Offscreen visuals are identical; the compositor just stops waking up. */
 .cycle-halt .animate-color-cycle,
 .cycle-halt .animate-color-cycle-ink,
 .cycle-halt [class*="ping-soft"],
@@ -602,14 +533,8 @@ body {
   animation-play-state: paused !important;
 }
 
-/* Reveal-on-scroll v3 — plays exactly once (JS adds .is-visible and never
-   removes it). "Emersion": rise + fade (+ a de-blur pass on precise
-   pointers), settling on an expo-out curve with no overshoot wobble.
-   Keyframes end at `transform: none` / `filter: none` so nothing keeps a
-   raster or layer context after the settle. */
 .reveal {
   opacity: 0;
-  /* No will-change: browsers auto-promote elements during active animations. */
 }
 .reveal.is-visible {
   animation: reveal-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
@@ -624,8 +549,6 @@ body {
     transform: none;
   }
 }
-/* De-blur pass — fine pointers only. Touch GPUs re-raster filtered surfaces
-   every frame, so phones/tablets get the rise + fade without the blur. */
 @media (hover: hover) and (pointer: fine) {
   .reveal.is-visible {
     animation-name: reveal-in-blur;
@@ -643,8 +566,6 @@ body {
     filter: none;
   }
 }
-/* Media variant: images inside start zoomed-in and un-clip to rest scale.
-   Only the pre-visible state sets a transform, so hover zooms keep working. */
 .reveal-media img {
   transition: transform 1.15s cubic-bezier(0.16, 1, 0.3, 1);
 }
@@ -652,7 +573,6 @@ body {
   transform: scale(1.12);
 }
 
-/* Entrance flavors — same timing/curve as the base rise, different staging. */
 .reveal.v-left.is-visible:not(.replay-from-top):not(.replay-from-bottom) {
   animation-name: reveal-in-left;
 }
@@ -764,9 +684,6 @@ body {
   }
 }
 
-/* Spotlight card glow — a soft radial light that follows the cursor. Positioned
-   by --sx/--sy (set in JS on pointermove), tinted by --sc (rgb triple). The
-   host must clip the glow, hence the same radius as the cards it wraps. */
 .spotlight-glow {
   position: absolute;
   inset: 0;
@@ -790,10 +707,6 @@ body {
   }
 }
 
-/* Tilt3D glare — a wide, soft sheen that tracks the cursor across the card
-   (--gx/--gy are percentages written by Tilt3D on pointermove). Mix-blend
-   keeps the underlying image/colors visible; opacity animates in on hover.
-   The glare sits above card content but is pointer-transparent. */
 .tilt-glare {
   position: absolute;
   inset: 0;
@@ -818,9 +731,6 @@ body {
   }
 }
 
-/* Tilt3D parallax layers — children marked .tilt-layer pop out of the card
-   plane by their own --tz while the parent tilts (parent keeps preserve-3d).
-   Touch cards use the same depth stack; the JS gesture decides when to animate. */
 .tilt-inner {
   position: relative;
 }
@@ -833,15 +743,6 @@ body {
   }
 }
 
-/* ── Education (03): depth-stacked learning-journey cards ──────────────────
-   Each card is a real 3D stack, not a flat panel with a tilt on top.
-   `.edu-stack` keeps `preserve-3d`, so the card surface, the oversized index
-   numeral and the lifted content plane parallax against one another while
-   Tilt3D rotates the group — the same trick the hero headline uses, moved
-   onto a card. Layer order is read off translateZ (set inline as --tz):
-   panel → numeral → content → icon chip.
-   `.edu-stack` sits on Tilt3D's own `.tilt-inner`, so the grid below is what
-   stacks the three planes into one cell. */
 .edu-stack {
   display: grid;
   grid-template-areas: "card";
@@ -851,7 +752,6 @@ body {
   grid-area: card;
 }
 
-/* Card surface — the middle plane the other layers float above. */
 .edu-panel {
   display: block;
   border-radius: 1.75rem;
@@ -881,9 +781,6 @@ body {
   box-shadow: 0 30px 68px -32px rgba(176, 58, 13, 0.35);
 }
 
-/* Oversized index numeral printed on the card surface. Sits above the panel
-   but below the content plane (translateZ), so tilting slides the copy
-   across the numeral instead of moving them together. */
 .edu-ghost-wrap {
   position: absolute;
   top: 0.15rem;
@@ -912,8 +809,6 @@ body {
   color: rgba(176, 58, 13, 0.16);
 }
 
-/* Content plane — lifted toward the viewer, with its own preserve-3d so the
-   icon chip can ride one plane further forward. */
 .edu-body {
   position: relative;
   z-index: 4;
@@ -926,7 +821,6 @@ body {
   }
 }
 
-/* Icon chip: the frontmost plane, so it visibly pops out of the card. */
 .edu-chip {
   display: inline-flex;
   height: 3.5rem;
@@ -968,8 +862,6 @@ body {
   border-color: rgba(176, 58, 13, 0.55);
 }
 
-/* Small inline index that precedes the period. Kept off the white/opacity
-   utility because the light theme rewrites every `text-white/*` class. */
 .edu-index-mark {
   font-family: var(--font-display);
   color: rgba(255, 255, 255, 0.18);
@@ -978,10 +870,6 @@ body {
   color: rgba(13, 14, 19, 0.24);
 }
 
-/* Spine node — pinned to the timeline rail by CSS, so it never drifts with
-   the card's entrance transform. Only rendered at md+ (see the markup).
-   The -54.5px offset is the container's md:pl-14 (3.5rem) minus half the
-   12px node, so the 8px dot centres exactly on the 1px rail at left: 7px. */
 .edu-node {
   position: absolute;
   left: -54.5px;
@@ -1023,7 +911,6 @@ body {
   box-shadow: 0 0 0 4px rgba(176, 58, 13, 0.18);
 }
 
-/* Live dot for a period that reads "present". */
 .edu-pulse {
   position: relative;
   display: inline-block;
@@ -1058,10 +945,6 @@ body {
   }
 }
 
-/* Phones: collapse the depth stack to a flat card. With no pointer-driven
-   tilt available, a lifted plane would just read as content overflowing its
-   panel, so the layers return to the card plane. Same reasoning as the
-   `.hero-title-3d` rule further down. */
 @media (max-width: 767px) {
   .edu-stack,
   .edu-body {
@@ -1075,8 +958,6 @@ body {
   }
 }
 
-/* Contact — masked line-by-line headline. The Reveal root flips the inner
-   spans up from behind their masks, staggered via inline transition-delay. */
 .reveal.is-visible [data-contact-line] {
   transform: translateY(0) !important;
 }
@@ -1087,9 +968,6 @@ body {
   }
 }
 
-/* SectionHeading — masked word-by-word headline reveal + kicker/line choreography.
-   Triggerable from a `.sh` root (SectionHeading) or any `.reveal` root (custom
-   headings that embed the same classes). */
 .sh-mask {
   display: inline-block;
   overflow: hidden;
@@ -1145,32 +1023,26 @@ body {
   transform: scaleX(1);
 }
 
-/* Scroll-linked word reveal (About bio + What I Do rows) */
 .scroll-word {
   display: inline;
 }
 .scroll-word-inner {
   display: inline-block;
-  /* No will-change here: one per WORD = hundreds of promoted layers on
-     mobile. Opacity is promoted on the fly while animating. */
   white-space: pre-wrap;
 }
 
-/* Orange brand highlight for scroll-reveal words — theme-aware */
 .text-highlight {
-  color: #ff7a50; /* lighter warm orange — ~7:1 on dark ink */
+  color: #ff7a50;
 }
 :root:not(.dark) .text-highlight {
-  color: #b3391f; /* darker terracotta — ~5.5:1 on light backgrounds */
+  color: #b3391f;
 }
 
-/* On a WhatIDo row hover/tap, force words fully opaque */
 .group:hover .scroll-word-inner,
 .group.is-active .scroll-word-inner {
   opacity: 1 !important;
 }
 
-/* WhatIDo hover/tap: force ink/black on the orange overlay */
 #whatido .group:hover .scroll-word-inner,
 #whatido .group.is-active .scroll-word-inner {
   color: black !important;
@@ -1180,8 +1052,6 @@ body {
   color: var(--color-ink) !important;
 }
 
-/* Letter-by-letter reveal for the About headline — plays exactly once.
-   Keyframes rest at `transform: none` / `filter: none` (no kept raster). */
 .letter {
   display: inline-block;
   opacity: 0;
@@ -1199,7 +1069,6 @@ body {
     transform: none;
   }
 }
-/* De-blur pass — fine pointers only (see .reveal note). */
 @media (hover: hover) and (pointer: fine) {
   .letter.is-in {
     animation-name: letter-in-blur;
@@ -1242,7 +1111,6 @@ body {
   }
 }
 
-/* Music player equalizer — animated bars */
 .eq-bar {
   display: inline-block;
   width: 3px;
@@ -1272,7 +1140,6 @@ html {
   overflow-x: clip;
 }
 
-/* Avoid 300ms tap delay and remove tap flash */
 button,
 a,
 [role="button"],
@@ -1285,16 +1152,12 @@ summary {
   -webkit-tap-highlight-color: transparent;
 }
 
-/* Tailwind v4 preflight leaves buttons at `cursor: default`; restore pointer */
 button:not(:disabled),
 [role="button"]:not(:disabled),
 summary {
   cursor: pointer;
 }
 
-/* Mobile menu + touch interactivity */
-
-/* Staggered entrance for mobile menu items */
 @keyframes menu-item-in {
   from {
     opacity: 0;
@@ -1310,7 +1173,6 @@ summary {
   animation: menu-item-in 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
-/* Fade-in for the mobile menu footer controls */
 @keyframes menu-fade-in {
   from {
     opacity: 0;
@@ -1323,10 +1185,6 @@ summary {
   animation: menu-fade-in 0.6s ease-out forwards;
 }
 
-/* Mobile menu panel: fully opaque, unblended backdrop. The old bg-ink/95
-   (95% alpha) let the page bleed through behind the links on phones, which
-   read as a smeared/ghosted background. Solid fill + no filter/backdrop
-   keeps it flat — it also skips the per-frame backdrop raster on mobile GPUs. */
 .mobile-menu-panel {
   background-color: var(--color-ink);
   background-image: none;
@@ -1335,7 +1193,6 @@ summary {
   backdrop-filter: none;
 }
 
-/* Mobile carousel slide-in */
 @keyframes slide-in-right {
   from {
     opacity: 0;
@@ -1369,7 +1226,6 @@ summary {
   }
 }
 
-/* Tap feedback for touch screens */
 @media (hover: none) {
   .touch-active:active {
     transform: scale(0.94);
@@ -1378,14 +1234,10 @@ summary {
   button.menu-link:active {
     color: #eb5939;
   }
-  /* Hero character: kill 3D tilt on touch devices */
   .hero-tilt-inner {
     transform: none !important;
     will-change: auto;
   }
-  /* Touch uses press + drag to explore the card; prevent the browser from
-     interpreting the gesture as an image/link drag while preserving vertical
-     page scrolling until the gesture clearly becomes horizontal. */
   .tilt-host {
     touch-action: pan-y;
   }
@@ -1395,21 +1247,15 @@ summary {
     transform-style: preserve-3d !important;
     will-change: transform;
   }
-  /* Keep vertical swipes available for page scrolling. Horizontal movement is
-     the depth gesture and is handled by Tilt3D without a scroll lock. */
-  /* Avoid sticky tap-hover in mobile Safari; the active gesture owns glare. */
   .tilt-host:hover .tilt-glare {
     opacity: 0;
   }
-  /* The glare follows touch too, but remains subtle to protect readability. */
   .tilt-host[data-tilting="true"] .tilt-glare {
     opacity: 0.75;
   }
 }
 
-/* Spider Walker — laba-laba yang patroli mengelilingi perimeter viewport */
 .spider-walker {
-  /* Warna silhouette monokrom — mengikuti tema: putih di dark, hitam di light */
   color: var(--color-fg);
 }
 .spider-leg {
@@ -1436,7 +1282,6 @@ summary {
   );
   will-change: height, opacity;
 }
-/* Benang ikut tema: gelap di light mode */
 :root:not(.dark) .spider-thread {
   background: linear-gradient(
     to bottom,
@@ -1455,7 +1300,6 @@ summary {
     transform: rotate(14deg);
   }
 }
-/* Scroll hint arrow — gentle bob */
 @keyframes scroll-hint-bob {
   from {
     transform: translateY(-3px);
@@ -1470,9 +1314,6 @@ summary {
   }
 }
 
-/* Cursor/touch tilt for the hero headline. This is the light CSS 3D version
-   of interactive depth typography: perspective + rotateX/Y + translateZ.
-   It stays outside the orange lens interaction and settles back on leave. */
 .hero-title-3d {
   --title-rotate-x: 0deg;
   --title-rotate-y: 0deg;
@@ -1504,8 +1345,6 @@ summary {
   pointer-events: none;
   filter: blur(0.2px);
 }
-/* Teks tetap filled putih (utility di Hero.tsx); yang ditambahkan hanya garis
-   tipis hitam di sekeliling huruf supaya kontras di atas artwork hero. */
 .hero-title-3d__heading {
   z-index: 1;
   -webkit-text-stroke: 1px rgb(13 14 19 / 0.85);
@@ -1519,21 +1358,13 @@ summary {
 .hero-title-3d:hover .hero-title-3d__heading > span {
   color: rgb(255 255 255 / 1);
 }
-/* Flat hero title only on mobile-sized viewports. The width clause guarantees
-   phones see no 3D at all even when the browser reports a fine pointer
-   (desktop-site mode, narrow desktop window, or devtools without touch
-   emulation). Desktop and tablet viewports keep the full effect. */
 @media (max-width: 767px) {
-  /* Keep the mobile headline flat and crisp. Desktop pointer motion keeps the
-     full depth animation. */
   .hero-title-3d,
   .hero-title-3d__stage {
     perspective: none;
     transform-style: flat;
   }
   .hero-title-3d__depth {
-    /* Remove the duplicate depth layer on phones so the headline is flat and
-       stays crisp while the page is being scrolled. */
     display: none;
   }
   .hero-title-3d__heading {
@@ -1558,27 +1389,13 @@ summary {
   }
 }
 
-/* Mobile: cap huge decorative blur circles (hero glow, preloader halo) at a
-   much smaller radius. 120px+ blurs create enormous GPU layers that jank
-   mobile compositing; the glow reads identically at 40px on a phone. */
 @media (max-width: 768px) {
   .hero-blur {
     filter: blur(40px);
   }
 }
 
-/* Touch: take every per-frame filter raster out of the scroll path.
-   Backdrop-filtered surfaces (glass cards, carousel arrows, photo badges)
-   re-sample the backdrop on each scroll frame on mobile GPUs, so they keep
-   their semi-opaque dark fills and drop only the blur. The hero glow swaps
-   its blur(40px) for an equivalent radial gradient — the tint reads the
-   same, but a gradient is painted once and never re-rasterized.
-   Fine-pointer viewports keep the full effects, including the 768px blur
-   cap directly above. */
 @media (hover: none), (pointer: coarse) {
-  /* !important beats Tailwind's backdrop-blur utilities and the .glass rule
-     in the utilities layer; -webkit- is the property iOS Safari reads.
-     Backgrounds are untouched — the semi-opaque fills stay readable. */
   [class*="backdrop-blur"],
   .carousel-arrow,
   .glass {
@@ -1586,8 +1403,6 @@ summary {
     backdrop-filter: none !important;
   }
 
-  /* Base swap for both circles: no filter, and the gradient replaces the
-     utility tint (background-color: transparent drops the bg-accent fill). */
   .hero-blur {
     filter: none !important;
     background-color: transparent;
@@ -1599,8 +1414,6 @@ summary {
     );
   }
 
-  /* Softer circle (bg-accent/5): the attribute selector outranks the base
-     rule above, so only this circle halves the tint. */
   .hero-blur[class*="bg-accent/5"] {
     background-image: radial-gradient(
       circle,
@@ -1611,9 +1424,6 @@ summary {
   }
 }
 
-/* ── Theme toggle: window-opening panels (top/bottom split) ──
-   Two fixed halves slide up/down, revealing the new theme.
-   Only `transform` animates → GPU-composited, no layout thrash. */
 .theme-panel {
   position: fixed;
   left: 0;
@@ -1630,7 +1440,6 @@ summary {
   bottom: 0;
 }
 
-/* ── Admin: entrance + micro-interactions (matches main-site motion) ── */
 @keyframes admin-fade-up {
   from {
     opacity: 0;
@@ -1645,7 +1454,6 @@ summary {
   opacity: 0;
   animation: admin-fade-up 0.7s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
-/* Staggered children inside an admin-fade-up host */
 .admin-stagger > * {
   opacity: 0;
   animation: admin-fade-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1656,7 +1464,6 @@ summary {
 .admin-stagger > *:nth-child(4) { animation-delay: 0.26s; }
 .admin-stagger > *:nth-child(5) { animation-delay: 0.33s; }
 .admin-stagger > *:nth-child(6) { animation-delay: 0.4s; }
-/* Error shake for the login card */
 @keyframes admin-shake {
   0%, 100% { transform: translateX(0); }
   20% { transform: translateX(-7px); }
@@ -1684,7 +1491,6 @@ summary {
   }
 }
 
-/* Admin uses the same restrained entrance language as the login screen. */
 .admin-list > * {
   opacity: 0;
   animation: admin-fade-up 0.55s cubic-bezier(0.16, 1, 0.3, 1) forwards;
@@ -1697,42 +1503,17 @@ summary {
 .admin-list > *:nth-child(6) { animation-delay: 0.24s; }
 
 @layer components {
-  /* ═══════════════════════════════════════════════════════════════════════════
-     ADMIN WORKBENCH
-     Panel admin dibaca sebagai alat kerja: rapat, tenang, dan setiap penanda
-     membawa informasi. Aksen terracotta dipakai hemat — hanya untuk keadaan
-     aktif dan satu tindakan utama per layar.
-     ═══════════════════════════════════════════════════════════════════════════ */
 
-  /* Angka & identifier: mono + tabular supaya kolom angka tidak bergoyang dan
-     slug/path mudah dibedakan dari teks prosa. */
   .a-data {
     font-family: var(--font-data);
     font-variant-numeric: tabular-nums;
     font-feature-settings: "tnum";
   }
 
-  /* Angka statistik besar: wajah display, bukan mono.
-
-     Mono di sini tidak membeli apa pun: setiap kartu statistik hanya memuat
-     SATU angka, jadi tidak ada kolom yang perlu dijajarkan — dan pada ukuran
-     besar mono justru terbaca seperti keluaran terminal, bukan ringkasan.
-     Karena itu .a-data tetap mono (ia masih dipakai untuk path, slug, nama
-     env, dan timestamp yang memang berbaris), dan angka besar pindah ke
-     wajah display.
-
-     Hanya font-family yang diatur di sini — sengaja. Kelas ini hidup di layer
-     `components`, yang kalah dari utility Tailwind, sehingga text-3xl /
-     font-semibold / leading-none di komponen tetap menjadi penentu ukuran.
-     Kalau line-height ikut ditulis di sini, nilainya akan berebut dengan
-     leading-none dan hasilnya bergantung urutan sumber. */
   .a-stat {
     font-family: var(--font-bevellier);
   }
 
-  /* Satu cincin fokus untuk seluruh admin. `outline` (bukan box-shadow) supaya
-     tidak terpotong oleh container ber-overflow dan tetap terlihat di tema
-     terang maupun gelap. */
   .a-focus:focus-visible,
   .a-rail-link:focus-visible,
   .a-btn:focus-visible,
@@ -1743,20 +1524,12 @@ summary {
     border-radius: 0.375rem;
   }
 
-  /* ── Skala teks admin ───────────────────────────────────────────────────── */
-
-  /* Dua ukuran teks kecil sebagai utility bernama, bukan nilai px tetap.
-     Alasannya: pada layar ≥lg seluruh ramp huruf panel admin dinaikkan
-     (lihat blok "Skala desktop" di akhir), dan nilai px tetap tidak bisa
-     ikut naik. */
   .a-meta {
-    font-size: 0.6875rem; /* 11px — metadata, catatan bantuan */
+    font-size: 0.6875rem;
   }
   .a-micro {
-    font-size: 0.625rem; /* 10px — label terkecil (badge, chip) */
+    font-size: 0.625rem;
   }
-
-  /* ── Rail navigasi ──────────────────────────────────────────────────────── */
 
   .a-rail-link {
     position: relative;
@@ -1776,9 +1549,6 @@ summary {
     background-color: var(--color-a-surface-2);
     color: var(--color-a-text);
   }
-  /* Penanda aktif: spine terracotta, bukan blok warna penuh. Blok penuh di
-     9 baris nav membuat rail jadi pusat perhatian, padahal yang utama adalah
-     isi panel. */
   .a-rail-link[aria-current="page"] {
     background-color: var(--color-a-surface-2);
     color: var(--color-a-text);
@@ -1794,8 +1564,6 @@ summary {
     border-radius: 2px;
     background-color: var(--color-a-accent);
   }
-
-  /* ── Kontrol ────────────────────────────────────────────────────────────── */
 
   .a-btn {
     display: inline-flex;
@@ -1822,7 +1590,6 @@ summary {
     opacity: 0.45;
     cursor: not-allowed;
   }
-  /* Satu tindakan utama per layar. */
   .a-btn-primary {
     background-color: var(--color-a-accent);
     color: var(--color-a-on-accent);
@@ -1830,7 +1597,6 @@ summary {
   .a-btn-primary:hover:not(:disabled) {
     background-color: var(--color-a-accent-hover);
   }
-  /* Aksi sekunder: hairline, tanpa isian. */
   .a-btn-ghost {
     border: 1px solid var(--color-a-line-2);
     color: var(--color-a-text);
@@ -1850,7 +1616,6 @@ summary {
     color: var(--color-a-danger);
   }
 
-  /* Tombol ikon: kotak 36px — target sentuh aman, tetap rapat secara visual. */
   .a-icon-btn {
     display: inline-flex;
     align-items: center;
@@ -1879,20 +1644,12 @@ summary {
     color: var(--color-a-danger);
   }
 
-  /* Segmented control (filter status, rentang tanggal) */
-  /* Segmented control (filter status, rentang tanggal).
-     `display` sengaja TIDAK diatur di sini: aturan ini tidak berada di dalam
-     @layer, sehingga akan mengalahkan utility Tailwind seperti `hidden` —
-     itulah yang dulu membuat tab desktop ikut tampil di layar ponsel.
-     Bentuk tampilannya diatur lewat utility di komponen. */
   .a-seg {
     gap: 2px;
     padding: 3px;
     border-radius: 0.625rem;
     border: 1px solid var(--color-a-line);
     background-color: var(--color-a-surface);
-    /* Jaring pengaman: di jendela desktop yang sangat sempit, deretan tab
-       boleh digeser mendatar alih-alih meluber keluar panel. */
     max-width: 100%;
     overflow-x: auto;
     scrollbar-width: none;
@@ -1923,10 +1680,6 @@ summary {
     color: var(--color-a-on-accent);
   }
 
-  /* ── Permukaan ──────────────────────────────────────────────────────────── */
-
-  /* Baris daftar. Hairline hanya di bawah — bukan kotak penuh per item —
-     supaya daftar panjang terbaca sebagai satu tabel, bukan tumpukan kartu. */
   .a-row {
     border-bottom: 1px solid var(--color-a-line);
     transition: background-color 0.18s ease;
@@ -1941,11 +1694,6 @@ summary {
     background-color: var(--color-a-surface);
   }
 
-  /* Chip status: satu bentuk, warna dari token semantik.
-
-     Wajahnya Chillax supaya chip berbicara dengan suara yang sama seperti
-     .a-key — keduanya label huruf besar bergaris jarak lebar, dan sebelumnya
-     keduanya justru memakai dua wajah berbeda (mono vs Switzer). */
   .a-chip {
     display: inline-flex;
     align-items: center;
@@ -1980,10 +1728,6 @@ summary {
     color: var(--color-a-warn);
   }
 
-  /* ── Loading skeleton ───────────────────────────────────────────────────── */
-
-  /* Placeholder berbentuk konten, bukan spinner generik: mata sudah tahu
-     tata letak akhirnya sebelum data tiba. */
   .a-skel {
     border-radius: 0.375rem;
     background-image: linear-gradient(
@@ -2004,7 +1748,6 @@ summary {
     }
   }
 
-  /* Drawer rail masuk dari kiri. Transform-only → GPU-composited. */
   @keyframes admin-rail-in {
     from {
       transform: translateX(-100%);
@@ -2014,20 +1757,6 @@ summary {
     }
   }
 
-  /* ── Baris judul seksi (ledger rule) ────────────────────────────────────── */
-
-  /* Kunci seksi ditulis uppercase bergaris jarak lebar seperti label indeks
-     arsip: memberi jangkar visual yang sama di setiap panel tanpa hiasan
-     tambahan.
-
-     Wajahnya Chillax, bukan mono sistem. Alasannya: mono sistem dirakit dari
-     font yang kebetulan ada di OS pembaca, jadi label yang sama tampil
-     berbeda di Windows, macOS, dan Android — satu-satunya bagian admin yang
-     tampilannya tidak bisa ditentukan perancang. Chillax sudah dimuat di
-     layout.tsx, jadi menggantinya tidak menambah satu pun unduhan baru.
-
-     Bobot 600 ditulis eksplisit karena Chillax di sini hanya punya satu
-     potongan (600); tanpa itu peramban mensintesis bobot palsu. */
   .a-key {
     font-family: var(--font-chillax);
     font-weight: 600;
@@ -2054,27 +1783,8 @@ summary {
   }
 }
 
-/* ═══════════════════════════════════════════════════════════════════════════
-   SKALA DESKTOP — panel admin
-   ═══════════════════════════════════════════════════════════════════════════
-
-   Di layar besar, panel admin sebelumnya terasa kecil: teks 14px dan kontrol
-   36px dirancang untuk layar sentuh, lalu dipakai apa adanya di monitor
-   desktop yang jaraknya lebih jauh dari mata.
-
-   Menyalakan ulang ramp huruf lewat variabel tema Tailwind (`--text-*`)
-   membuat SEMUA utility `text-sm`/`text-xs`/… di dalam admin ikut naik tanpa
-   menyentuh satu pun komponen. Hanya aktif mulai `lg` supaya tata letak
-   ponsel tetap rapat dan hemat ruang.
-
-   Nilai rem dipakai (bukan px) agar ikut menghormati preferensi ukuran huruf
-   peramban pengguna. */
-
 @media (min-width: 64rem) {
   .admin-scale {
-    /* Dua langkah di atas skala bawaan Tailwind — panel admin dibaca dari
-       jarak monitor, bukan dari telapak tangan:
-       xs 12→14 · sm 14→16 · base 16→18 · lg 18→20 · xl 20→24 · 2xl 24→28 */
     --text-xs: 0.875rem;
     --text-xs--line-height: calc(1.25 / 0.875);
     --text-sm: 1rem;
@@ -2090,50 +1800,38 @@ summary {
     --text-3xl: 2.25rem;
     --text-3xl--line-height: calc(2.625 / 2.25);
 
-    /* Ritme ruang ikut naik. Padding, gap, tinggi kontrol, dan inset semua
-       dihitung dari --spacing, jadi satu nilai ini memperbesar seluruh panel
-       tanpa menyentuh satu pun komponen. 0.29rem = 4.64px, 16% di atas
-       bawaan 4px — cukup terasa tanpa membuat tata letak terasa longgar. */
     --spacing: 0.29rem;
   }
 
-  /* Ukuran teks bernama di komponen ikut naik. Yang terkecil dinaikkan paling
-     agresif secara relatif, karena di situlah "terasa kecil" berasal. */
   .admin-scale .a-meta {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
   }
   .admin-scale .a-micro {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
   }
   .admin-scale .a-rail-link {
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
   }
   .admin-scale .a-btn {
-    font-size: 0.875rem; /* 14px */
+    font-size: 0.875rem;
     padding: 0.625rem 1.25rem;
   }
-  /* Tombol selebar panel (login). Satu-satunya kontrol yang boleh setinggi
-     ini — tombol lain tetap rapat supaya toolbar tidak terasa berat.
-     Diletakkan setelah .a-btn karena specificity-nya sama; yang menang
-     adalah yang terakhir dibaca. */
   .admin-scale .a-btn-lg {
-    font-size: 1rem; /* 16px */
+    font-size: 1rem;
     padding: 0.9rem 1.5rem;
   }
   .admin-scale .a-tab {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
     padding: 0.4375rem 0.95rem;
   }
   .admin-scale .a-chip {
-    font-size: 0.75rem; /* 12px */
+    font-size: 0.75rem;
     padding: 0.2rem 0.7rem;
   }
   .admin-scale .a-key {
-    font-size: 0.8125rem; /* 13px */
+    font-size: 0.8125rem;
   }
 
-  /* Target klik membesar seiring teks — jari bukan lagi alat input utama,
-     presisi kursor memungkinkan kontrol lebih besar tanpa terasa berat. */
   .admin-scale .a-icon-btn {
     height: 2.75rem;
     width: 2.75rem;
@@ -2143,11 +1841,6 @@ summary {
   }
 }
 
-/* ── Guestbook stage (minimalis) ─────────────────────────────────────────────
-   Performance-first: satu warna flat + hairline saja. Tanpa grid overlay,
-   orb blur, gradient bertumpuk, atau animasi background — semuanya paint-only
-   sekali saat render, nol invalidasi saat scroll. Tetap dibedakan dari
-   sekitarnya lewat tint terracotta sangat tipis dan border atas aksen. */
 .comments-stage {
   background-color: #0d0e13;
   border-top: 1px solid rgb(235 89 57 / 0.22);

@@ -13,7 +13,6 @@ function initialsOf(name: string): string {
   return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
 }
 
-/** Social proof. Kosong = seksi tidak dirender sama sekali. */
 export default function Testimonials({ items }: { items: Testimonial[] }) {
   const { t, lang } = useLanguage();
 
@@ -40,7 +39,6 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
             return (
               <Reveal key={item.id} delay={i * 70}>
                 <figure className="flex h-full flex-col justify-between border border-white/10 p-6 transition-colors duration-300 hover:border-accent/40 sm:p-7">
-                  {/* Tanda kutip dekoratif */}
                   <span
                     aria-hidden="true"
                     className="text-display mb-4 block text-4xl leading-none text-accent/40"

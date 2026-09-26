@@ -4,26 +4,12 @@ import { adminPassword } from "@/lib/server-config";
 
 export const dynamic = "force-dynamic";
 
-// ============================================================================
-// Rate limit login — memperlambat brute-force password.
-//
-// CATATAN PENTING: penyimpanan ini in-memory per isolate. Di Cloudflare
-// Workers, isolate bisa didaur ulang dan ada banyak isolate, jadi angka di
-// bawah BUKAN batas keras. Ini tetap menaikkan biaya serangan secara
-// signifikan, tapi pertahanan utama tetap:
-//   1. ADMIN_PASSWORD panjang & acak (jangan kata yang bisa ditebak),
-//   2. Cloudflare WAF rate-limiting rule pada /api/admin/login.
-// Lihat README → Security.
-// ============================================================================
-
-/** Jendela waktu & ambang percobaan gagal. */
-const WINDOW_MS = 15 * 60_000; // 15 menit
+const WINDOW_MS = 15 * 60_000;
 const MAX_ATTEMPTS = 8;
 
 type Bucket = { count: number; first: number; blockedUntil: number };
 const attempts = new Map<string, Bucket>();
 
-/** IP asli di Cloudflare — header bisa dipalsukan klien. */
 function clientIp(req: NextRequest): string {
   const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
   if (cf?.clientIp) return cf.clientIp;
@@ -34,7 +20,6 @@ function clientIp(req: NextRequest): string {
   );
 }
 
-/** Sisa waktu blokir (detik), atau 0 bila tidak diblokir. */
 function blockedFor(key: string): number {
   const b = attempts.get(key);
   if (!b) return 0;
@@ -43,7 +28,6 @@ function blockedFor(key: string): number {
   return 0;
 }
 
-/** Catat percobaan gagal; kunci bila melewati ambang. */
 function recordFailure(key: string): void {
   const now = Date.now();
   const b = attempts.get(key);
@@ -53,13 +37,11 @@ function recordFailure(key: string): void {
   } else {
     b.count += 1;
     if (b.count >= MAX_ATTEMPTS) {
-      // Blokir makin lama seiring percobaan berlanjut.
       const factor = Math.min(b.count - MAX_ATTEMPTS + 1, 6);
       b.blockedUntil = now + WINDOW_MS * factor;
     }
   }
 
-  // Cegah map tumbuh tanpa batas.
   if (attempts.size > 5000) {
     const cutoff = now - WINDOW_MS;
     for (const [k, v] of attempts) {
@@ -73,8 +55,6 @@ function clearFailures(key: string): void {
 }
 
 export async function POST(req: NextRequest) {
-  // Fail-closed: if the server has no ADMIN_PASSWORD secret, logins are
-  // impossible until it is configured (never falls back to a default).
   if (!adminPassword()) {
     return NextResponse.json(
       { error: "Login admin belum dikonfigurasi di server (ADMIN_PASSWORD)." },
@@ -100,7 +80,6 @@ export async function POST(req: NextRequest) {
   try {
     body = await req.json();
   } catch {
-    // Body bukan JSON — diperlakukan sebagai password kosong.
   }
 
   const password = typeof body.password === "string" ? body.password : "";
@@ -110,11 +89,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Password salah." }, { status: 401 });
   }
 
-  // Berhasil → bersihkan riwayat gagal untuk IP ini.
   clearFailures(ip);
 
-  // Secure flag from the actual request protocol (NODE_ENV is not guaranteed
-  // on the Workers runtime).
   await setAdminCookie(req.nextUrl.protocol === "https:");
   return NextResponse.json({ ok: true });
 }

@@ -127,7 +127,6 @@ export default function Projects({
 
             <div className="mt-4 flex items-center justify-between gap-3 md:mt-5">
               <div className="flex flex-wrap items-center gap-x-4 gap-y-2">
-                {/* Halaman case study internal — hanya bila project punya slug */}
                 {project.slug && (
                   <a
                     href={`/work/${project.slug}`}
@@ -205,8 +204,6 @@ export default function Projects({
           </Reveal>
         ) : (
           <>
-            {/* Mount only the active breakpoint's tree: both copies used to
-                render (CSS-hidden), doubling cards, observers and image work. */}
             {isDesktop ? (
               <div className="hidden md:block">
                 {(() => {

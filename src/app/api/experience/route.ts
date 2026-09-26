@@ -4,10 +4,6 @@ import { requireUser } from "@/lib/auth";
 import { invalidate } from "@/lib/revalidate-content";
 import { CACHE_TAGS } from "@/lib/supabase/public";
 
-// ============================================================================
-// /api/experience — CRUD riwayat kerja (admin only).
-// ============================================================================
-
 const MAX = { role: 120, company: 120, location: 120, period: 60, desc: 2000 };
 
 function clean(v: unknown, max: number): string {
@@ -32,9 +28,6 @@ function fields(body: Record<string, unknown>) {
   };
 }
 
-// ---------------------------------------------------------------------------
-// GET — daftar pengalaman (admin only).
-// ---------------------------------------------------------------------------
 export const GET = withJsonErrors(async function GET() {
   const { error: authError } = await requireUser();
   if (authError) return authError;

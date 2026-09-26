@@ -7,8 +7,6 @@ export default function robots(): MetadataRoute.Robots {
       {
         userAgent: "*",
         allow: "/",
-        // Panel admin & API tidak boleh diindeks. Halaman login admin pun
-        // tidak ada gunanya di hasil pencarian.
         disallow: ["/admin", "/admin/", "/api/"],
       },
     ],

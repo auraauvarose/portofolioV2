@@ -1,31 +1,9 @@
 #!/usr/bin/env node
-/**
- * Periksa (dan opsional pasang) kebijakan CORS pada bucket Cloudflare R2.
- *
- * Browser upload memakai presigned PUT langsung ke R2. Tanpa CORS yang benar,
- * unggahan gagal dengan error "Failed to fetch" yang tidak informatif.
- * Script ini membuat masalah itu terlihat dan bisa diperbaiki.
- *
- * Penggunaan:
- *   node scripts/check-r2-cors.mjs            # periksa saja
- *   node scripts/check-r2-cors.mjs --apply    # pasang kebijakan yang disarankan
- *
- * Kredensial dibaca dari .env.local (R2_ACCOUNT_ID, R2_ACCESS_KEY_ID,
- * R2_SECRET_ACCESS_KEY, R2_BUCKET_NAME).
- *
- * Memakai `aws4fetch` — dependency resmi proyek ini. Sebelumnya script ini
- * mengimpor @aws-sdk/client-s3 yang HANYA tersedia sebagai dependency
- * transitive dari OpenNext, sehingga bisa hilang kapan saja dan membuat
- * script gagal tanpa sebab yang jelas.
- */
 
 import fs from "node:fs";
 import path from "node:path";
 import { AwsClient } from "aws4fetch";
 
-// ---------------------------------------------------------------------------
-// Baca .env.local tanpa dependensi tambahan
-// ---------------------------------------------------------------------------
 const envPath = path.join(process.cwd(), ".env.local");
 if (fs.existsSync(envPath)) {
   for (const line of fs.readFileSync(envPath, "utf8").split("\n")) {
@@ -61,15 +39,8 @@ const aws = new AwsClient({
   region: "auto",
 });
 
-/** CORS memakai query param `?cors` pada endpoint bucket. */
 const corsUrl = `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com/${R2_BUCKET_NAME}?cors`;
 
-/**
- * Kebijakan yang disarankan.
- *
- * Ganti "*" dengan domain asli di produksi supaya situs lain tidak bisa
- * mengunggah ke bucket ini memakai kredensial yang bocor.
- */
 const recommended = [
   {
     AllowedOrigins: ["*"],
@@ -80,7 +51,6 @@ const recommended = [
   },
 ];
 
-/** Ambil aturan CORS saat ini. 404 = belum ada kebijakan. */
 async function getCors() {
   const res = await aws.fetch(corsUrl, { method: "GET" });
   if (res.status === 404) return { exists: false, rules: [] };
@@ -91,10 +61,6 @@ async function getCors() {
   return { exists: true, rules: parseCorsXml(xml) };
 }
 
-/**
- * Parse respons XML CORS seadanya — cukup untuk menampilkan metode & origin
- * tanpa menarik parser XML.
- */
 function parseCorsXml(xml) {
   const rules = [];
   const blocks = xml.match(/<CORSRule>[\s\S]*?<\/CORSRule>/g) ?? [];
@@ -112,12 +78,10 @@ function parseCorsXml(xml) {
   return rules;
 }
 
-/** Apakah aturan saat ini sudah mengizinkan PUT untuk unggahan browser? */
 function allowsPut(rules) {
   return rules.some((r) => (r.AllowedMethods ?? []).includes("PUT"));
 }
 
-/** Bentuk XML CORSConfiguration dari objek aturan. */
 function toXml(rules) {
   const ruleXml = rules
     .map(

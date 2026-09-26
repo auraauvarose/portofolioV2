@@ -16,19 +16,6 @@ import {
   CloseIcon,
 } from "@/components/admin/icons";
 
-// ============================================================================
-// AdminRail — navigasi panel admin.
-//
-// Sembilan seksi dikelompokkan menurut alur kerja (masuk → konten → pustaka),
-// bukan dijejer sebagai satu deret tab. Kelompok membuat rail tetap terbaca
-// walau isinya bertambah, dan setiap tautan menyebut satu pekerjaan konkret.
-//
-// Rail adalah <nav> asli berisi tautan yang mengubah hash URL, sehingga:
-//   - tombol Back browser bekerja seperti yang diharapkan,
-//   - seksi bisa ditautkan langsung (/admin#projects),
-//   - dibuka ulang di tab yang sama tetap di seksi terakhir.
-// ============================================================================
-
 export type TabKey =
   | "messages"
   | "analytics"
@@ -51,7 +38,6 @@ type Group = {
   items: Item[];
 };
 
-/** Dikelompokkan menurut alur kerja, bukan menurut tabel database. */
 export const RAIL_GROUPS: Group[] = [
   {
     label: "Masuk",
@@ -95,8 +81,6 @@ export function tabLabel(key: TabKey): string {
   return key;
 }
 
-// ── Satu tautan rail ────────────────────────────────────────────────────────
-
 function RailLink({
   item,
   active,
@@ -113,7 +97,6 @@ function RailLink({
     <a
       href={`#${key}`}
       onClick={(e) => {
-        // Biarkan modifier-click berperilaku normal (buka di tab baru).
         if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
         e.preventDefault();
         onNavigate(key);
@@ -124,8 +107,6 @@ function RailLink({
       <Icon className="h-4 w-4 shrink-0 opacity-80" />
       <span className="min-w-0 flex-1 truncate">{label}</span>
       {badge !== undefined && badge > 0 && (
-        // Angka notifikasi: satu-satunya isian aksen di rail selain penanda
-        // seksi aktif, jadi mata langsung menemukannya.
         <span
           className="a-data shrink-0 rounded-full px-1.5 py-0.5 a-micro font-semibold leading-none"
           style={{
@@ -140,8 +121,6 @@ function RailLink({
     </a>
   );
 }
-
-// ── Isi rail ────────────────────────────────────────────────────────────────
 
 function RailBody({
   tab,
@@ -180,8 +159,6 @@ function RailBody({
   );
 }
 
-// ── Rail ────────────────────────────────────────────────────────────────────
-
 export default function AdminRail({
   tab,
   onNavigate,
@@ -192,8 +169,6 @@ export default function AdminRail({
   const [drawerOpen, setDrawerOpen] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
 
-  // Drawer mobile: Escape menutup, fokus pindah ke tombol tutup saat dibuka,
-  // dan latar belakang tidak ikut ter-scroll.
   useEffect(() => {
     if (!drawerOpen) return;
     const onKey = (e: KeyboardEvent) => {
@@ -215,14 +190,12 @@ export default function AdminRail({
 
   return (
     <>
-      {/* ── Rail tetap (≥ lg) ── */}
       <aside className="hidden lg:block">
         <div className="sticky top-28">
           <RailBody tab={tab} onNavigate={navigate} />
         </div>
       </aside>
 
-      {/* ── Pemicu drawer (< lg) ── */}
       <div className="lg:hidden">
         <button
           type="button"
@@ -234,15 +207,12 @@ export default function AdminRail({
             <MenuIcon className="h-4 w-4" />
             <span className="normal-case tracking-normal">Seksi</span>
           </span>
-          {/* Seksi aktif ditulis penuh (tanpa peredupan) — ini satu-satunya
-              penanda posisi saat rail tersembunyi di layar kecil. */}
           <span className="a-data a-meta normal-case tracking-normal">
             {tabLabel(tab)}
           </span>
         </button>
       </div>
 
-      {/* ── Drawer mobile ── */}
       {drawerOpen && (
         <div className="fixed inset-0 z-[120] lg:hidden">
           <div

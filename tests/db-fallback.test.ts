@@ -1,6 +1,3 @@
-// Test untuk withFallback: percobaan bertingkat yang meneruskan data dari
-// percobaan yang berhasil. Dipakai untuk kolom DB yang mungkin belum ada
-// (migrasi manual) pada INSERT maupun SELECT.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { withFallback } from "../src/lib/db-fallback";

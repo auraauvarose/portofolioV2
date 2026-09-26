@@ -1,19 +1,7 @@
-// ============================================================================
-// Admin session token.
-//
-// Format: "<exp_unix_seconds>.<hex hmac-sha256(secret, domain + exp)>"
-//
-// Replaces the previous scheme (a non-cryptographic 32-bit hash of the
-// secret), which was derivable/brute-forceable and produced a static,
-// never-expiring token. WebCrypto only — safe on Cloudflare Workers.
-// NEVER expose session values or any preimage of this HMAC in public code
-// or diagnostic endpoints.
-// ============================================================================
-
 export const ADMIN_COOKIE = "admin_session";
 
 const SESSION_DOMAIN = "admin-session-v1:";
-export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7; // 7 days
+export const SESSION_TTL_SECONDS = 60 * 60 * 24 * 7;
 
 const encoder = new TextEncoder();
 
@@ -35,7 +23,6 @@ async function hmacHex(secret: string, message: string): Promise<string> {
   return bytesToHex(sig);
 }
 
-/** Length-checked constant-time string comparison. */
 function safeEqual(a: string, b: string): boolean {
   if (a.length !== b.length) return false;
   let diff = 0;
@@ -43,14 +30,12 @@ function safeEqual(a: string, b: string): boolean {
   return diff === 0;
 }
 
-/** Mint a fresh session token value. Returns "" when no secret is configured. */
 export async function createSessionValue(secret: string): Promise<string> {
   if (!secret) return "";
   const exp = Math.floor(Date.now() / 1000) + SESSION_TTL_SECONDS;
   return `${exp}.${await hmacHex(secret, SESSION_DOMAIN + exp)}`;
 }
 
-/** Verify a session token: well-formed, signature valid, not expired. */
 export async function verifySessionValue(
   secret: string,
   value: string | undefined | null,

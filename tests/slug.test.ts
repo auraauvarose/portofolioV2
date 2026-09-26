@@ -3,13 +3,6 @@ import assert from "node:assert/strict";
 
 import { slugify, isValidSlug } from "../src/lib/slug.ts";
 
-// ============================================================================
-// Slug dipakai untuk URL /work/<slug>. Nilai ini sampai ke database dan ke
-// route publik, jadi dua hal harus dijamin:
-//   1. slugify menghasilkan slug yang selalu valid,
-//   2. isValidSlug menolak apa pun yang bisa keluar dari pola route.
-// ============================================================================
-
 describe("slugify", () => {
   test("judul biasa jadi huruf kecil bertanda hubung", () => {
     assert.equal(slugify("Portfolio Dashboard"), "portfolio-dashboard");
@@ -32,7 +25,6 @@ describe("slugify", () => {
   });
 
   test("teks non-latin habis karakter -> string kosong", () => {
-    // Tidak ada alfanumerik yang tersisa; pemanggil harus menanganinya.
     assert.equal(slugify("日本語"), "");
   });
 
@@ -101,8 +93,6 @@ describe("isValidSlug", () => {
   });
 
   test("menolak hubung ganda (slugify selalu menciutkannya)", () => {
-    // slugify() menciutkan deretan non-alfanumerik jadi SATU hubung, jadi
-    // hubung ganda tidak pernah dihasilkan dan sengaja ditolak di sini.
     assert.ok(!isValidSlug("a--b"));
   });
 

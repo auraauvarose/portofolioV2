@@ -5,22 +5,6 @@ import type { ReactNode, PointerEvent, MouseEvent as ReactMouseEvent } from "rea
 
 const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
 
-/**
- * Interactive 3D tilt card.
- *
- * v2 — deep tilt with damped motion instead of the old jump:
- *  - rAF lerp loop: the rotation eases toward the cursor and springs back
- *    on leave, so the card never snaps (the old 200ms CSS transition made
- *    it feel stuck/asleep).
- *  - translateZ lift: the whole card floats toward the viewer on hover.
- *  - cursor-following glare sheen, kept subtle during touch gestures.
- *  - inner layers (children with translateZ) get real parallax because the
- *    inner wrapper keeps `transform-style: preserve-3d`.
- *
- * Touch devices use press + drag instead of hover: a finger can explore the
- * card depth without hijacking normal vertical page scrolling. Reduced-motion
- * preferences still disable the effect.
- */
 export default function Tilt3D({
   children,
   className = "",
@@ -33,15 +17,10 @@ export default function Tilt3D({
 }: {
   children: ReactNode;
   className?: string;
-  /** Max tilt in degrees at the card edges. */
   max?: number;
-  /** Scale while hovered. */
   scale?: number;
-  /** Extra translateZ (px) while hovered — card pops toward the viewer. */
   lift?: number;
-  /** Cursor-following sheen overlay (opt-in; default off). */
   glare?: boolean;
-  /** Extra classes for the glare (border radius should match the card). */
   glareClassName?: string;
   innerClassName?: string;
 }) {
@@ -71,9 +50,6 @@ export default function Tilt3D({
     };
     const observer = new ResizeObserver(markDirty);
     observer.observe(el);
-    // getBoundingClientRect() goes stale after any scroll/resize — a cached
-    // rect would compute wild tilt angles (e.g. 190deg) for cards far from
-    // their original position. Re-measure lazily on demand instead.
     window.addEventListener("scroll", markDirty, { passive: true });
     window.addEventListener("resize", markDirty);
     return () => {
@@ -125,16 +101,14 @@ export default function Tilt3D({
     const el = hostRef.current;
     if (!el) return;
     el.dataset.tilting = "true";
-    // Lazy re-measure: never trust a rect captured before the last scroll.
     if (rectDirtyRef.current || !rectRef.current) {
       rectRef.current = el.getBoundingClientRect();
       rectDirtyRef.current = false;
     }
     const r = rectRef.current;
     if (!r.width || !r.height) return;
-    const nx = ((clientX - r.left) / r.width) * 2 - 1; // -1 .. 1
+    const nx = ((clientX - r.left) / r.width) * 2 - 1;
     const ny = ((clientY - r.top) / r.height) * 2 - 1;
-    // Hard safety clamp: guards against any pathological rect/input values.
     const cx = Math.max(-1, Math.min(1, nx));
     const cy = Math.max(-1, Math.min(1, ny));
     target.current.rx = -cy * max;
@@ -158,8 +132,6 @@ export default function Tilt3D({
     }
     if (e.pointerType !== "touch" || !touchActiveRef.current) return;
 
-    // Let a mostly vertical gesture remain a page scroll. A small horizontal
-    // movement is the intentional "explore depth" gesture for the card.
     if (gestureRef.current === "undecided") {
       const dx = e.clientX - touchStartRef.current.x;
       const dy = e.clientY - touchStartRef.current.y;
@@ -195,8 +167,6 @@ export default function Tilt3D({
     touchActiveRef.current = true;
     gestureRef.current = "undecided";
     touchStartRef.current = { x: e.clientX, y: e.clientY };
-    // Give every press an immediate depth response; a vertical drag can still
-    // hand control back to the page once its direction becomes clear.
     tiltAt(e.clientX, e.clientY);
     target.current.s = scale * 0.98;
     ensureLoop();

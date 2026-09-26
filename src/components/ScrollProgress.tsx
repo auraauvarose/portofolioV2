@@ -2,8 +2,6 @@
 
 import { motion, useReducedMotion, useScroll, useSpring } from "motion/react";
 
-/** Hairline accent bar pinned to the top of the viewport. The fill tracks
- *  overall page scroll with a light spring so it glides instead of ticking. */
 export default function ScrollProgress() {
   const reduceMotion = useReducedMotion();
   const { scrollYProgress } = useScroll();

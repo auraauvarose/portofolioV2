@@ -3,18 +3,6 @@ import * as defaults from "@/lib/config";
 import type { SiteContentKey } from "@/types";
 import type { nav as defaultNav } from "@/lib/config";
 
-// ============================================================================
-// Konten situs — DB dengan fallback ke config.ts.
-//
-// PRINSIP: config.ts adalah DEFAULT, database hanya menimpa. Jadi:
-//   - tabel kosong / belum dimigrasi  → situs tetap tampil utuh dari config,
-//   - satu seksi rusak / tidak valid  → hanya seksi itu yang jatuh ke default,
-//   - kolom baru ditambahkan ke config → otomatis tersedia tanpa migrasi.
-//
-// Seksi disimpan per-baris (bukan satu blob) supaya dua admin yang mengedit
-// seksi berbeda tidak saling menimpa.
-// ============================================================================
-
 export type SiteContent = {
   nav: typeof defaultNav;
   profile: typeof defaults.profile;
@@ -25,7 +13,6 @@ export type SiteContent = {
   techStack: typeof defaults.techStack;
 };
 
-/** Default dari config.ts — selalu lengkap, dipakai sebagai basis merge. */
 export function defaultSiteContent(): SiteContent {
   return {
     nav: defaults.nav,
@@ -38,7 +25,6 @@ export function defaultSiteContent(): SiteContent {
   };
 }
 
-/** Gabungan dangkal: objek DB menimpa default, key yang hilang tetap ada. */
 function mergeSection<T extends object>(fallback: T, override: unknown): T {
   if (!override || typeof override !== "object" || Array.isArray(override)) {
     return fallback;
@@ -46,13 +32,6 @@ function mergeSection<T extends object>(fallback: T, override: unknown): T {
   return { ...fallback, ...(override as Partial<T>) };
 }
 
-/**
- * Ambil seluruh konten situs.
- *
- * Sengaja TIDAK pernah melempar: kegagalan apa pun (DB mati, tabel belum
- * dibuat, RLS menolak) menghasilkan default dari config.ts. Halaman publik
- * tidak boleh blank hanya karena konten dinamis gagal dimuat.
- */
 export async function getSiteContent(): Promise<SiteContent> {
   const base = defaultSiteContent();
 
@@ -65,7 +44,6 @@ export async function getSiteContent(): Promise<SiteContent> {
       .select("key,data");
 
     if (error) {
-      // Tabel belum dibuat (migrasi Tahap 3 belum jalan) bukan error fatal.
       console.warn("getSiteContent: memakai default —", error.message);
       return base;
     }
@@ -84,7 +62,6 @@ export async function getSiteContent(): Promise<SiteContent> {
   }
 }
 
-/** Satu seksi saja (dipakai editor admin). */
 export async function getSiteSection<K extends SiteContentKey>(
   key: K,
 ): Promise<SiteContent[K]> {

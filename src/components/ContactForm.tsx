@@ -19,7 +19,6 @@ export default function ContactForm() {
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
   const [message, setMessage] = useState("");
-  // Honeypot — dibiarkan kosong oleh manusia, diisi oleh bot.
   const [website, setWebsite] = useState("");
 
   const [status, setStatus] = useState<Status>("idle");
@@ -171,8 +170,6 @@ export default function ContactForm() {
         />
       </label>
 
-      {/* Honeypot: disembunyikan dari manusia & screen reader, tapi tetap ada
-          di DOM supaya bot yang mengisi semua field akan tertangkap. */}
       <div aria-hidden="true" className="absolute left-[-9999px] top-auto h-0 w-0 overflow-hidden">
         <label>
           Website

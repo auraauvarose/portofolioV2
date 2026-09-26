@@ -12,7 +12,6 @@ export { ADMIN_COOKIE };
 
 export function verifyAdminPassword(password: string): boolean {
   const b = adminPassword();
-  // Fail-closed: no password configured ⇒ admin login is disabled.
   if (!b) return false;
   const a = String(password).trim();
   if (a.length !== b.length) return false;
@@ -26,14 +25,9 @@ export async function isAdmin(): Promise<boolean> {
   return verifySessionValue(sessionSecret(), store.get(ADMIN_COOKIE)?.value);
 }
 
-/**
- * Issue an admin session cookie.
- * `secure` must be derived from the REQUEST (https), not process.env.NODE_ENV,
- * which is not guaranteed on the Workers runtime.
- */
 export async function setAdminCookie(secure: boolean): Promise<void> {
   const secret = sessionSecret();
-  if (!secret) return; // guarded by login route; belt & suspenders
+  if (!secret) return;
   const value = await createSessionValue(secret);
   if (!value) return;
   const store = await cookies();

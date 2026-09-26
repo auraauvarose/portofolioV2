@@ -12,9 +12,6 @@ function isConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
 }
 
-// Data contoh yang tampil saat Supabase belum diisi/kosong.
-// `slug` sengaja null: halaman case study hanya boleh ditautkan bila barisnya
-// benar-benar ada di database, supaya tidak ada tautan /work/<slug> yang 404.
 const DEMO_PROJECTS: Project[] = [
   {
     id: "demo-portfolio",
@@ -167,7 +164,6 @@ export async function getComments(): Promise<GuestComment[]> {
   if (!isConfigured()) return [];
   try {
     const supabase = createSupabasePublic(CACHE_TAGS.comments);
-    // Email sengaja tidak diseleksikan — kolom itu hanya untuk admin.
     const { data, error } = await supabase
       .from("comments")
       .select("id,name,message,rating,approved,created_at")
@@ -185,18 +181,11 @@ export async function getComments(): Promise<GuestComment[]> {
   }
 }
 
-// ============================================================================
-// Case study — halaman /work/<slug>
-// ============================================================================
-
-/** Satu project berdasarkan slug, atau null kalau tidak ada. */
 export async function getProjectBySlug(slug: string): Promise<Project | null> {
   if (!isConfigured()) {
     return DEMO_PROJECTS.find((p) => p.slug === slug) ?? null;
   }
   try {
-    // Klien publik: dipanggil juga saat build (generateStaticParams), di mana
-    // `cookies()` belum tersedia.
     const supabase = createSupabasePublic(CACHE_TAGS.projects);
     const { data, error } = await supabase
       .from("projects")
@@ -214,7 +203,6 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
   }
 }
 
-/** Semua slug project — dipakai sitemap dan daftar tautan internal. */
 export async function getProjectSlugs(): Promise<string[]> {
   if (!isConfigured()) {
     return DEMO_PROJECTS.map((p) => p.slug).filter((s): s is string => Boolean(s));
@@ -237,11 +225,6 @@ export async function getProjectSlugs(): Promise<string[]> {
     return [];
   }
 }
-
-// ============================================================================
-// Experience & testimonials — dibaca lewat klien publik (tanpa cookies) agar
-// bisa dirender saat build maupun di request.
-// ============================================================================
 
 export async function getExperience(): Promise<Experience[]> {
   if (!isConfigured()) return [];

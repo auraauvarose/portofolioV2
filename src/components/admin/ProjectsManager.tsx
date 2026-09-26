@@ -46,10 +46,6 @@ const EMPTY = {
   image_url: "",
 };
 
-/**
- * Kekurangan yang bisa dilihat pengunjung. Ditampilkan sebagai chip di baris
- * supaya isian yang belum lengkap ketemu tanpa membuka form satu per satu.
- */
 function gaps(p: Project): string[] {
   const out: string[] = [];
   if (!p.image_url) out.push("tanpa gambar");
@@ -84,8 +80,6 @@ export default function ProjectsManager() {
       .from("projects")
       .select("*")
       .order("sort_order", { ascending: true })
-      // Tiebreaker sama dengan urutan publik (src/lib/data.ts) supaya daftar
-      // di admin persis mencerminkan yang dilihat pengunjung.
       .order("created_at", { ascending: false });
     setItems((data as Project[]) ?? []);
     setLoading(false);
@@ -243,8 +237,6 @@ export default function ProjectsManager() {
       )}
       {reorderError && <Notice tone="error">{reorderError}</Notice>}
 
-      {/* Pencarian hanya muncul kalau daftarnya sudah cukup panjang untuk
-          membuat penggulungan jadi lambat. */}
       {!loading && items.length > 6 && (
         <div className="mb-4 flex items-center gap-2 rounded-lg border border-[var(--color-a-line-2)] bg-[var(--color-a-surface)] px-3">
           <SearchIcon className="h-4 w-4 shrink-0 text-[var(--color-a-faint)]" />
@@ -291,8 +283,6 @@ export default function ProjectsManager() {
         <div className="mb-8">
           {visible.map((p) => {
             const missing = gaps(p);
-            // Indeks asli dipakai untuk drag supaya urutan tetap benar walau
-            // daftar sedang difilter.
             const realIndex = items.findIndex((x) => x.id === p.id);
             return (
               <ReorderableRow
@@ -309,8 +299,6 @@ export default function ProjectsManager() {
                 <FileThumb url={p.image_url} />
                 <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-                    {/* Judul kosong harus terlihat sebagai masalah, bukan
-                        baris yang tampak seperti judul aneh. */}
                     {p.title_en ? (
                       <p className="truncate text-sm font-medium text-[var(--color-a-text)]">
                         {p.title_en}
@@ -335,9 +323,6 @@ export default function ProjectsManager() {
                     {p.year ? ` · ${p.year}` : ""}
                     {p.slug ? ` · /work/${p.slug}` : ""}
                   </p>
-                  {/* Satu chip untuk semua kekurangan, bukan satu chip per
-                      masalah — tiga pil sekaligus membuat baris jadi ramai
-                      dan justru menyulitkan pemindaian. */}
                   {missing.length > 0 && (
                     <p className="mt-1.5 a-meta text-[var(--color-a-warn)]">
                       Belum lengkap: {missing.join(", ")}

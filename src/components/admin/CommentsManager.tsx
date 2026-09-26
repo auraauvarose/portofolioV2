@@ -24,14 +24,6 @@ import {
 } from "@/components/admin/icons";
 import type { GuestComment } from "@/types";
 
-// ============================================================================
-// CommentsManager — moderasi buku tamu.
-//
-// Dua pekerjaan yang berbeda: menyetujui yang menunggu (antrean) dan
-// menyembunyikan yang sudah tayang. Filter bawaan karena itu "Menunggu" —
-// bukan "Semua" — supaya tugas utama langsung terlihat.
-// ============================================================================
-
 type Filter = "pending" | "visible" | "all";
 
 function initialsOf(name: string): string {
@@ -53,7 +45,6 @@ function formatFull(iso: string): string {
   });
 }
 
-/** Bintang penuh untuk nilai rating; hanya dirender bila rating ada. */
 function Stars({ value }: { value: number | null }) {
   if (typeof value !== "number") return null;
   return (
@@ -82,10 +73,6 @@ export default function CommentsManager() {
   const [error, setError] = useState<string | null>(null);
   const [busyId, setBusyId] = useState<string | null>(null);
   const [filter, setFilter] = useState<Filter>("pending");
-  // Apakah pengguna sudah memilih filter sendiri. Selama belum, filter
-  // mengikuti keadaan data: antrean moderasi kalau ada yang menunggu —
-  // kalau tidak, langsung tampilkan semua supaya tidak mendarat di layar
-  // kosong padahal ada 11 komentar.
   const filterTouched = useRef(false);
   const [query, setQuery] = useState("");
 
@@ -154,12 +141,8 @@ export default function CommentsManager() {
     [items],
   );
 
-  // Rail memakai angka yang sama — tidak perlu mengambil ulang dari server.
   useReportCount("comments", pendingCount);
 
-  // Setelah data tiba: kalau tidak ada yang menunggu dan pengguna belum
-  // menyentuh filter, pindah ke "Semua". Tanpa ini, panel terbuka pada
-  // daftar kosong padahal ada puluhan komentar tayang.
   useEffect(() => {
     if (loading || filterTouched.current) return;
     setFilter(pendingCount > 0 ? "pending" : "all");
@@ -217,7 +200,6 @@ export default function CommentsManager() {
             label="Filter moderasi"
             value={filter}
             onChange={(key) => {
-              // Pilihan manual mengunci filter — efek auto-pilih berhenti.
               filterTouched.current = true;
               setFilter(key);
             }}
@@ -315,7 +297,6 @@ export default function CommentsManager() {
                       )}
                     </div>
                     <p className="mt-1 flex flex-wrap items-center gap-x-2 a-meta text-[var(--color-a-faint)]">
-                      {/* Email hanya tampil di admin — tidak pernah di publik. */}
                       {c.email ? (
                         <a
                           href={`mailto:${c.email}`}
@@ -335,7 +316,6 @@ export default function CommentsManager() {
                   </div>
 
                   <div className="flex shrink-0 items-center gap-1.5">
-                    {/* Inti moderasi: satu tombol yang membalik status tayang. */}
                     <button
                       type="button"
                       onClick={() => setApproved(c, !c.approved)}

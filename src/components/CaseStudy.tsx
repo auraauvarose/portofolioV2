@@ -6,7 +6,6 @@ import { useLanguage } from "@/components/providers";
 import { caseStudy } from "@/lib/config";
 import type { Project } from "@/types";
 
-/** Pecah teks jadi paragraf pada baris kosong. */
 function paragraphs(text: string | null | undefined): string[] {
   if (!text) return [];
   return text
@@ -128,7 +127,6 @@ export default function CaseStudy({
           )}
         </Reveal>
 
-        {/* Hero image */}
         {project.image_url && (
           <Reveal className="mt-10">
             { }
@@ -140,7 +138,6 @@ export default function CaseStudy({
           </Reveal>
         )}
 
-        {/* Tech stack */}
         {project.tech_stack.length > 0 && (
           <Reveal className="mt-10">
             <p className="mb-3 text-[10px] uppercase tracking-[0.24em] text-gray-500">
@@ -159,7 +156,6 @@ export default function CaseStudy({
           </Reveal>
         )}
 
-        {/* Body */}
         {body.length > 0 && (
           <div className="mt-12 flex flex-col gap-6">
             {body.map((para, i) => (
@@ -172,15 +168,12 @@ export default function CaseStudy({
           </div>
         )}
 
-        {/* Kalau belum ada konten panjang, tampilkan deskripsi singkat saja
-            supaya halaman tidak terasa kosong. */}
         {body.length === 0 && description && (
           <p className="mt-12 text-base leading-[1.85] text-gray-400">
             {description}
           </p>
         )}
 
-        {/* Links */}
         {(project.link || project.repo_url) && (
           <Reveal className="mt-12 border-t border-white/10 pt-8">
             <p className="mb-4 text-[10px] uppercase tracking-[0.24em] text-gray-500">
@@ -213,7 +206,6 @@ export default function CaseStudy({
           </Reveal>
         )}
 
-        {/* Other projects */}
         {others.length > 0 && (
           <Reveal className="mt-16 border-t border-white/10 pt-10">
             <p className="mb-6 text-[10px] uppercase tracking-[0.24em] text-gray-500">

@@ -19,9 +19,6 @@ export default function Marquee({
     if (!wrap || !skewEl) return;
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
 
-    // rAF loop runs only while the marquee is on screen AND the scroll skew
-    // has not settled: once it eases back to straight the loop stops until
-    // the next scroll event. Transform-only (compositor), same visuals.
     let visible = false;
     let raf = 0;
     let lastY = window.scrollY;
@@ -36,7 +33,6 @@ export default function Marquee({
       const target = Math.max(-7, Math.min(7, v * 0.3));
       skew += (target - skew) * 0.1;
       if (target === 0 && Math.abs(skew) < 0.02) {
-        // Fully settled: snap straight and stop scheduling frames.
         if (skew !== 0) {
           skew = 0;
           skewEl.style.transform = "skewX(0deg)";
@@ -54,8 +50,6 @@ export default function Marquee({
     const io = new IntersectionObserver(
       (entries) => {
         visible = entries[0]?.isIntersecting ?? false;
-        // Offscreen: pause both the infinite translateX loop and its layer
-        // hints. The visual state is unchanged when the marquee is visible.
         trackRef.current?.classList.toggle("marquee-paused", !visible);
         if (visible) {
           lastY = window.scrollY;

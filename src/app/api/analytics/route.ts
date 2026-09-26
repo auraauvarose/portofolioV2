@@ -7,24 +7,9 @@ import { withFallback } from "@/lib/db-fallback";
 
 export const dynamic = "force-dynamic";
 
-// ============================================================================
-// /api/analytics — pencatatan pageview tanpa cookie & tanpa PII.
-//
-//   POST  publik   → catat satu pageview
-//   GET   admin    → ringkasan (total, per hari, halaman teratas, referrer,
-//                    perangkat, browser, merek ponsel, jam kunjungan, lokasi)
-//
-// Privasi: IP TIDAK disimpan mentah — hanya HMAC-SHA256 dengan salt rahasia,
-// dipotong, dan dipakai semata untuk membedakan kunjungan unik. Tidak ada
-// cookie, tidak ada ID pelacak. User-agent hanya dipakai untuk mengklasifikasi
-// perangkat lalu dibuang. Lokasi hanya negara/kota kasar dari geolokasi
-// Cloudflare (tanpa koordinat, tanpa alamat).
-// ============================================================================
-
 const MAX_PATH = 200;
 const MAX_REF = 120;
 
-/** Rate limit in-memory: cukup untuk meredam spam beacon. */
 const WINDOW_MS = 10_000;
 const seen = new Map<string, number>();
 
@@ -56,7 +41,6 @@ function clientIp(req: NextRequest): string {
   );
 }
 
-/** Negara & kota kasar dari geolokasi Cloudflare — tanpa koordinat. */
 function geoOf(req: NextRequest): { country: string | null; city: string | null } {
   const cf = (
     req as NextRequest & { cf?: { country?: string; city?: string } }
@@ -67,7 +51,6 @@ function geoOf(req: NextRequest): { country: string | null; city: string | null 
   };
 }
 
-/** Hash IP + user-agent dengan salt; tidak bisa dibalik ke orangnya. */
 async function visitorHash(req: NextRequest): Promise<string | null> {
   const salt = process.env.ADMIN_COOKIE_SECRET || process.env.ADMIN_PASSWORD;
   if (!salt) return null;
@@ -95,11 +78,7 @@ async function visitorHash(req: NextRequest): Promise<string | null> {
   }
 }
 
-// ---------------------------------------------------------------------------
-// POST — catat pageview (publik)
-// ---------------------------------------------------------------------------
 export const POST = withJsonErrors(async function POST(req: NextRequest) {
-  // Nonaktif secara default; aktifkan lewat env agar tidak diam-diam mencatat.
   if (process.env.NEXT_PUBLIC_ANALYTICS_ENABLED !== "true") {
     return NextResponse.json({ ok: true, disabled: true });
   }
@@ -128,9 +107,6 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     visitor_hash: await visitorHash(req),
   };
 
-  // Payload terbaru dulu; tiap kolom yang belum ada (migrasi tahap5/tahap4.sql
-  // belum dijalankan) mundur satu tingkat supaya pencatatan tetap jalan
-  // alih-alih berhenti total.
   const { ok, error } = await withFallback(
     [
       {
@@ -152,14 +128,10 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     async (payload) => await supabase.from("page_views").insert(payload),
   );
 
-  // Kegagalan pencatatan tidak boleh terlihat oleh pengunjung.
   if (!ok) console.warn("analytics insert:", error);
   return NextResponse.json({ ok: true });
 });
 
-// ---------------------------------------------------------------------------
-// GET — ringkasan (admin)
-// ---------------------------------------------------------------------------
 export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const { error: authError } = await requireUser();
   if (authError) return authError;
@@ -172,7 +144,6 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
 
   const supabase = await createSupabaseAdmin();
 
-  /** Baris page_views yang dipakai ringkasan; kolom baru boleh absen. */
   type Row = {
     path: string;
     referrer: string | null;
@@ -185,9 +156,6 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     created_at: string;
   };
 
-  // Kolom baru ditambahkan lewat migrasi manual (tahap4/tahap5.sql). Bila belum
-  // dijalankan, SELECT dengan kolom itu gagal — mundur ke daftar kolom lama agar
-  // data lama tetap tampil (bukan dilaporkan sebagai "tabel belum ada").
   const { ok, data, error } = await withFallback<string, Row[]>(
     [
       "path,referrer,visitor_hash,device,browser,phone_brand,country,city,created_at",
@@ -252,7 +220,6 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     if (r.phone_brand) {
       brandCount.set(r.phone_brand, (brandCount.get(r.phone_brand) ?? 0) + 1);
     }
-    // Jam kunjungan dalam zona WIB (UTC+7) — jam 0–23.
     const hour = (new Date(r.created_at).getUTCHours() + 7) % 24;
     hourCount.set(hour, (hourCount.get(hour) ?? 0) + 1);
     if (r.country || r.city) {
@@ -284,8 +251,6 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     byHour: [...hourCount.entries()].sort((a, b) => a[0] - b[0])
       .map(([hour, count]) => ({ hour, count })),
     topLocations: top(locCount, 8),
-    // Log kunjungan terakhir: rows sudah urut terbaru dulu (order desc),
-    // jadi cukup potong 20 dan format via lib/visit-log. Tanpa IP/UA.
     recentVisits: rows.slice(0, 20).map((r) =>
       visitLogEntry({
         path: r.path,

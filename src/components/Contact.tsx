@@ -26,8 +26,6 @@ function useLocalTime() {
       }
     };
     update();
-    // The displayed value has minute precision, so schedule the next check
-    // at the next minute boundary instead of waking React every second.
     let id: ReturnType<typeof setTimeout>;
     const schedule = () => {
       const delay = 60_000 - (Date.now() % 60_000) + 50;
@@ -56,8 +54,6 @@ export default function Contact() {
   const sectionRef = useRef<HTMLElement | null>(null);
 
   useEffect(() => {
-    // The status badge interpolates colors every frame; pause that loop while
-    // the section is offscreen so it cannot invalidate the blend backdrop.
     const el = sectionRef.current;
     if (!el) return;
     const io = new IntersectionObserver(
@@ -111,7 +107,6 @@ export default function Contact() {
         </Reveal>
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
-          {/* Form kontak — jalur konversi utama */}
           <Reveal variant="left">
             <div className="border border-white/10 bg-white/[0.015] p-6 sm:p-8">
               <ContactForm />
@@ -119,8 +114,6 @@ export default function Contact() {
           </Reveal>
 
           <div className="grid gap-8 sm:grid-cols-2 lg:content-start">
-            {/* Email + CTA guestbook: melebar penuh agar alamat email tidak
-                terpotong di tengah kata pada kolom sempit. */}
             <Reveal variant="right" className="sm:col-span-2">
               <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
                 {t(contact.emailLabel)}
@@ -131,7 +124,6 @@ export default function Contact() {
               >
                 {profile.email}
               </a>
-              {/* Tombol pindah ke halaman komentar — tepat di bawah email */}
               <div className="mt-4">
                 <Magnetic strength={0.25}>
                   <a

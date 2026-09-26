@@ -96,7 +96,6 @@ export type Testimonial = {
   created_at: string;
 };
 
-/** Seksi konten situs yang bisa ditimpa dari admin (lihat supabase/tahap3.sql). */
 export type SiteContentKey =
   | "nav"
   | "profile"

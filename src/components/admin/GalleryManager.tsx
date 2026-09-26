@@ -262,9 +262,6 @@ export default function GalleryManager() {
                       : "border-[var(--color-a-line)] hover:border-[var(--color-a-line-2)]"
                 }`}
               >
-                {/* Kendali mengapung di atas gambar. Disembunyikan sampai
-                    hover/fokus supaya foto jadi fokus utama kartu — tetapi
-                    tetap ada saat difokus keyboard (focus-within). */}
                 <div className="absolute inset-x-2 top-2 z-10 flex items-start justify-between gap-1 opacity-0 transition-opacity group-hover/card:opacity-100 group-focus-within/card:opacity-100">
                   <span
                     aria-hidden="true"
@@ -421,8 +418,6 @@ export default function GalleryManager() {
               list="gallery-categories"
               hint="Menjadi filter di halaman galeri publik. Kategori baru bisa diketik bebas."
             />
-            {/* Saran nilai; admin tetap bisa mengetik kategori baru.
-                Kategori yang belum terdaftar tampil apa adanya di publik. */}
             <datalist id="gallery-categories">
               {CATEGORY_SUGGESTIONS.map((c) => (
                 <option key={c} value={c} />
