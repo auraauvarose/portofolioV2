@@ -3,20 +3,20 @@
 > Verdict: **green**
 
 ## Spec
-- Goal: Beranda auraauvarose.my.id mengirim HTML berisi konten + H1 ke crawler, dan canonical/robots/sitemap menunjuk ke auraauvarose.my.id, tanpa menghilangkan satu pun animasi yang sudah ada.
-- Scope: In: src/components/HomeClient.tsx (hapus early-return yang menyembunyikan seluruh halaman saat phase === "enter", ganti dengan overlay penutup) dan src/lib/site.ts (DEFAULT_SITE_URL → https://auraauvarose.my.id). Out: Google Search Console, DNS, redirect workers.dev, .env.local, vercel.app, file lain.
-- Acceptance criteria: 1) `npm run typecheck` lolos. 2) `npm run lint` lolos. 3) `npm test` lolos. 4) `npm run build` (atau cf:build) lolos. 5) HTML hasil build untuk "/" memuat tag <h1> dan teks nyata (bukan 36 karakter), bukan lagi hanya 2 div kosong. 6) canonical/og:url/robots/sitemap pada hasil build menunjuk ke https://auraauvarose.my.id. 7) Curtain loading tetap: greeting cycle, slide-down exit 0,7s, dan urutan visual hitam → greeting → Hero tidak berubah.
-- Failure modes: Kalau halaman dirender saat "enter", ada risiko: (a) flash konten sebelum curtain tampil — dimitigasi overlay z-[99999] bg-ink; (b) error SSR karena window/document di luar useEffect — sudah diverifikasi nol hit; (c) animasi Hero/Lenis jalan sebelum curtain selesai — Hero memang sudah selalu dirender setelah mount, dan Lenis hanya membaca scroll, jadi tidak ada perubahan perilaku; (d) konten terlihat crawler tapi user melihat layar hitam lebih lama — durasi tidak berubah. Kalau build/typecheck gagal, revert file itu saja.
-- Priorities: Prioritas: (1) animasi tidak boleh berubah/rusak, (2) HTML berisi konten, (3) canonical benar. Kalau ada konflik antara "HTML penuh" dan "animasi mulus", animasi menang.
-- Non-goals: Bukan tujuan: peringkat 1 untuk kata "aura" (tidak mungkin untuk situs nol backlink), mendaftarkan Search Console, mengubah desain/tampilan, menambah section, mengubah durasi animasi, menyentuh .env.local atau secrets, redirect workers.dev.
+- Goal: Section Tech Stack (index 05) di homepage portofolio tampil lebih menarik secara visual tanpa kehilangan keterbacaan isi, dan bug B8 (section hilang total di tablet landscape) ikut hilang.
+- Scope: IN: hanya src/components/TechStack.tsx —worthy rewrite komponen itu sendiri (JSX, Tailwind class, dan blok <style> lokal). OUT: src/lib/config.ts (kategori, techDescriptions, techLinks, techIcon), HomeClient.tsx, globals.css, tests, dan data/content di dashboard. Tidak ada dependency baru, tidak ada perubahan kontrak data.
+- Acceptance criteria: 1. src/components/TechStack.tsx hanya satu komponen responsif — tidak ada lagi cabang isMobile/pointer:coarse yang bertabrakan dengan CSS md:hidden, sehingga section selalu tampil di semua viewport termasuk tablet landscape. 2. Konstelasi/garis SVG dekoratif tampil sebagai lapisan latar di belakang kartu, pointer-events:none, tidak menghalangi interaksi. 3. Filter kategori (tombol All + 01..04) berfungsi: klik menyorot satu kartu dan meredupkan yang lain; state dapat dibalik; setiap tombol punya aria-pressed. 4. Deskripsi tiap teknologi tampil selalu di dalam kartu dengan clamp 2 baris, berasal dari techDescriptions, dan teksnya ikut ter-render di HTML (bukan hover-only). 5. Tiap item yang punya techLinks tetap jadi link eksternal (target _blank, rel noreferrer); item tanpa link tidak meniru-niru jadi link. 6. Token yang dipakai sudah ada di design system: accent, panel, a-on-accent, font-data, dark: variant. 7. Animasi pulse dihentikan saat section di luar viewport (IntersectionObserver) dan dinonaktifkan pada prefers-reduced-motion. 8. npm run typecheck exit 0 dan npm run lint exit 0; test yang sudah ada (site-content, seo-home-html) tetap hijau.
+- Failure modes: Tablet landscape (pointer:coarse dan lebar >=768px): section tidak boleh hilang — ini regresi B8 yang harusmustahil terjadi karena tidak ada lagi cabang JS/CSS yang bertentangan. Flash saat hydration: server dan client harus merender markup yang sama, jadi tidak boleh ada state viewport yang默认值 berbeda di awal render. Item teknologi tanpa techDescriptions: baris deskripsi di-skip, kartu tetap utuh. Item tanpa techLinks: tidak boleh jadi elemen <a> palsu yang tidak melakukan apa-apa. Judul kategori duplikat dari dashboard: key React memakai title.en, jadi ini asumsi data yang sudah berlaku di kode lama — tidak diubah. Tombol filter aktif tapi kartu ter-filter lalu konten berubah (mis. DB override): index solo bisa menunjuk ke kategori yang tidak ada — ditangani karena solo hanya dipakai sebagai perbandingan index, bukan untuk mengambil data. Browser lama tanpa support :focus-visible atau line-clamp: degradasi aman ke perilaku normal, bukan blank.
+- Priorities: Urutan prioritas: (1) keterbacaan isi di atas semua — nama teknologi harus terbaca tanpa interaksi apa pun; (2) tidak ada regresi_layout/hilang di viewport mana pun; (3) rasa visual yang "menarik"_gpu,交换机 konstelasi dekoratif adalah bonus yang boleh dikorbankan kalauWQ perlu disederhanakan; (4) aksesibilitas keyboard dan aria. Kalau ada konflik, pilih opsi paling sederhana yang tetap memenuhi 1 dan 2.
+- Non-goals: Tidak menambah teknologi/kategori baru. Tidak mengubah isi atau terjemahan deskripsi yang sudah ada. Tidak menambah package baru. Tidak menyentuh komponen section lain Though. Tidak menambah file test baru untuk perubahan visual/CSS. Tidak melakukan commit atau push.
 
 ## Test evidence
 - failing runs: 0
 - passing runs: 2
 
-- [spec] Beranda auraauvarose.my.id mengirim HTML berisi konten + H1 ke crawler, dan canonical/robots/sitemap menunjuk ke auraauv…
-- [green] cd /home/auraauvarose/portofolioV2 && echo "=== typecheck ===" && npx tsc --noEmit 2>&1 | tail -5; echo "typecheck exit=…
-- [green] echo "=== git status ==="; git status --porcelain; echo "=== untracked test file? ==="; ls -l tests/seo-home-html.test.t…
+- [spec] Section Tech Stack (index 05) di homepage portofolio tampil lebih menarik secara visual tanpa kehilangan keterbacaan isi…
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -20; echo "TEST_EXIT=${PIPESTATUS[0]}"
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -12; echo "TEST_EXIT=${PIPESTATUS[0]}"
 
 ## Adversary review
 No adversary review ran for this session.
@@ -25,4 +25,4 @@ No adversary review ran for this session.
 Not run.
 
 ## Delivery
-- implementation edits: 8
+- implementation edits: 6
