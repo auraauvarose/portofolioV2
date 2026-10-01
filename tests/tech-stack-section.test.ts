@@ -249,6 +249,39 @@ describe("E. layer konstelasi dekoratif", () => {
   });
 });
 
+describe("K. mobile ringkas — chip, bukan daftar berdeskripsi", () => {
+  test("ada komponen chip ringkas yang dipakai di render", () => {
+    assert.match(CODE, /function TechChip\(/, "belum ada chip ringkas untuk mobile");
+    assert.match(CODE, /<TechChip/, "chip ringkas belum dirender");
+  });
+
+  /* Tidak boleh memakai `max-md:hidden`: string-nya memuat `md:hidden` yang
+     dijaga test A sebagai akar bug B8. Semantiknya sama lewat hidden + md:flex. */
+  test("daftar baris panjang disembunyikan di mobile", () => {
+    const list = CODE.match(/<ul className="[^"]*"[^>]*>\s*\{cat\.items\.map\(\(label\) => \(\s*<TechRow/)?.[0];
+    assert.ok(list, "daftar <TechRow> tidak ditemukan");
+    assert.match(
+      list,
+      /className="[^"]*\bhidden\b[^"]*\bmd:flex\b/,
+      `daftar baris berdeskripsi masih tampil di mobile — itu yang bikin section panjang: ${list}`,
+    );
+  });
+
+  test("grid chip hanya tampil di mobile (hidden by default, flex < md)", () => {
+    const grid = CODE.match(/<ul className="hidden[^"]*"/)?.[0];
+    assert.ok(grid, "grid chip mobile harus `hidden` di desktop");
+    assert.match(grid, /max-md:flex/, "grid chip harus jadi flex di mobile");
+  });
+
+  test("chip tidak memuat deskripsi per item", () => {
+    assert.doesNotMatch(
+      CODE,
+      /max-md:line-clamp-1/,
+      "deskripsi per item di mobile membuat tiap baris jadi dua baris",
+    );
+  });
+});
+
 describe("F. data tetap dari sumber yang sama", () => {
   test("kategori tetap dibaca dari useSiteContent, bukan hard-code", () => {
     assert.match(

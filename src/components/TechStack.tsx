@@ -31,7 +31,7 @@ function TechRow({ label }: { label: string }) {
 
   const body = (
     <>
-      <span className="ts-icon mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03] text-zinc-500 max-md:mt-0 max-md:h-7 max-md:w-7 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
+      <span className="ts-icon mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03] text-zinc-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
         {techIcon(label, "h-4 w-4") ?? (
           <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
         )}
@@ -42,7 +42,7 @@ function TechRow({ label }: { label: string }) {
           {label}
         </span>
         {description ? (
-          <span className="mt-1 block text-xs leading-relaxed text-zinc-500 line-clamp-2 max-md:mt-0.5 max-md:line-clamp-1 dark:text-zinc-400">
+          <span className="mt-1 block text-xs leading-relaxed text-zinc-500 line-clamp-2 dark:text-zinc-400">
             {t(description)}
           </span>
         ) : null}
@@ -76,12 +76,56 @@ function TechRow({ label }: { label: string }) {
           href={link}
           target="_blank"
           rel="noreferrer"
-          className="flex items-start gap-3 px-3 py-2.5 no-underline outline-none max-md:gap-2.5 max-md:px-2 max-md:py-1.5 focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex items-start gap-3 px-3 py-2.5 no-underline outline-none focus-visible:ring-2 focus-visible:ring-accent"
         >
           {body}
         </a>
       ) : (
-        <div className="flex items-start gap-3 px-3 py-2.5 max-md:gap-2.5 max-md:px-2 max-md:py-1.5">{body}</div>
+        <div className="flex items-start gap-3 px-3 py-2.5">{body}</div>
+      )}
+    </li>
+  );
+}
+
+function TechChip({ label }: { label: string }) {
+  const { t } = useLanguage();
+  const description = techDescriptions[label];
+  const link = techLinks[label];
+  const hint = description ? t(description) : label;
+
+  const inner = (
+    <>
+      <span className="ts-icon flex h-5 w-5 shrink-0 items-center justify-center text-zinc-500 dark:text-zinc-400">
+        {techIcon(label, "h-3.5 w-3.5") ?? (
+          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+        )}
+      </span>
+      <span className="ts-label text-[12px] font-medium leading-none text-zinc-700 transition-colors duration-300 dark:text-zinc-200">
+        {label}
+      </span>
+    </>
+  );
+
+  const chip =
+    "ts-chip flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] py-1.5 pe-3 ps-1.5 no-underline outline-none dark:border-white/10 dark:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-accent";
+
+  return (
+    <li className="relative">
+      {link ? (
+        <a
+          href={link}
+          target="_blank"
+          rel="noreferrer"
+          title={hint}
+          aria-label={`${label} — ${hint}`}
+          className={chip}
+        >
+          {inner}
+        </a>
+      ) : (
+        <span title={hint} className={chip}>
+          {inner}
+        </span>
       )}
     </li>
   );
@@ -193,6 +237,23 @@ export default function TechStack() {
   color: var(--color-a-on-accent);
   transform: translateY(-1px);
 }
+.ts-chip {
+  transition:
+    border-color 0.3s ease,
+    background-color 0.3s ease,
+    transform 0.3s ease;
+}
+.ts-chip:hover,
+.ts-chip:focus-visible {
+  border-color: var(--color-accent);
+  transform: translateY(-1px);
+}
+.ts-chip:hover .ts-icon,
+.ts-chip:focus-visible .ts-icon,
+.ts-chip:hover .ts-label,
+.ts-chip:focus-visible .ts-label {
+  color: var(--color-accent);
+}
 .ts-pulse {
   animation: ts-pulse 2.4s ease-in-out infinite;
 }
@@ -231,7 +292,7 @@ export default function TechStack() {
           <div
             role="group"
             aria-label={t(UI.filter)}
-            className="flex flex-wrap items-center gap-1.5"
+            className="no-scrollbar -mx-4 flex items-center gap-1.5 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
           >
             <button
               type="button"
@@ -301,7 +362,13 @@ export default function TechStack() {
                     </span>
                   </header>
 
-                  <ul className="mt-3 flex flex-col gap-0.5 max-md:mt-2">
+                  <ul className="hidden max-md:mt-2.5 max-md:flex max-md:flex-wrap max-md:gap-1.5">
+                    {cat.items.map((label) => (
+                      <TechChip key={label} label={label} />
+                    ))}
+                  </ul>
+
+                  <ul className="mt-3 hidden flex-col gap-0.5 md:flex">
                     {cat.items.map((label) => (
                       <TechRow key={label} label={label} />
                     ))}
