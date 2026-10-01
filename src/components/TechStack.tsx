@@ -31,7 +31,7 @@ function TechRow({ label }: { label: string }) {
 
   const body = (
     <>
-      <span className="ts-icon mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03] text-zinc-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
+      <span className="ts-icon mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03] text-zinc-500 max-md:mt-0 max-md:h-7 max-md:w-7 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
         {techIcon(label, "h-4 w-4") ?? (
           <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
         )}
@@ -42,7 +42,7 @@ function TechRow({ label }: { label: string }) {
           {label}
         </span>
         {description ? (
-          <span className="mt-1 block text-xs leading-relaxed text-zinc-500 line-clamp-2 dark:text-zinc-400">
+          <span className="mt-1 block text-xs leading-relaxed text-zinc-500 line-clamp-2 max-md:mt-0.5 max-md:line-clamp-1 dark:text-zinc-400">
             {t(description)}
           </span>
         ) : null}
@@ -76,12 +76,12 @@ function TechRow({ label }: { label: string }) {
           href={link}
           target="_blank"
           rel="noreferrer"
-          className="flex items-start gap-3 px-3 py-2.5 no-underline outline-none focus-visible:ring-2 focus-visible:ring-accent"
+          className="flex items-start gap-3 px-3 py-2.5 no-underline outline-none max-md:gap-2.5 max-md:px-2 max-md:py-1.5 focus-visible:ring-2 focus-visible:ring-accent"
         >
           {body}
         </a>
       ) : (
-        <div className="flex items-start gap-3 px-3 py-2.5">{body}</div>
+        <div className="flex items-start gap-3 px-3 py-2.5 max-md:gap-2.5 max-md:px-2 max-md:py-1.5">{body}</div>
       )}
     </li>
   );
@@ -115,7 +115,7 @@ export default function TechStack() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative px-6 py-24 md:px-10 md:py-32">
+    <section ref={sectionRef} className="relative px-6 py-24 max-md:px-4 max-md:py-16 md:px-10 md:py-32">
       <style>{`
 .ts-bg {
   background-image:
@@ -216,7 +216,7 @@ export default function TechStack() {
           index="05"
         />
 
-        <div className="mb-8 flex flex-col gap-4 border-y border-black/10 py-4 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 md:mb-10">
+        <div className="mb-8 flex flex-col gap-4 border-y border-black/10 py-4 max-md:mb-6 max-md:gap-3 max-md:py-3 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 md:mb-10">
           <p className="flex items-center gap-3 font-data text-[11px] uppercase tracking-[0.24em] text-zinc-500 dark:text-zinc-400">
             <span className="ts-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
             <span className="text-zinc-800 dark:text-zinc-100">{total}</span>
@@ -237,7 +237,7 @@ export default function TechStack() {
               type="button"
               aria-pressed={solo === null}
               onClick={() => setSolo(null)}
-              className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:px-3 max-md:py-1 focus-visible:ring-2 focus-visible:ring-accent ${
                 solo === null
                   ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
                   : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
@@ -252,7 +252,7 @@ export default function TechStack() {
                 type="button"
                 aria-pressed={solo === i}
                 onClick={() => setSolo(solo === i ? null : i)}
-                className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none focus-visible:ring-2 focus-visible:ring-accent ${
+                className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:px-3 max-md:py-1 focus-visible:ring-2 focus-visible:ring-accent ${
                   solo === i
                     ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
                     : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
@@ -265,7 +265,7 @@ export default function TechStack() {
           </div>
         </div>
 
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-12">
+        <div className="grid gap-4 max-md:gap-3 sm:grid-cols-2 lg:grid-cols-12">
           {categories.map((cat, i) => (
             <Reveal
               key={cat.title.en}
@@ -282,11 +282,11 @@ export default function TechStack() {
               >
                 <section
                   aria-labelledby={`ts-cat-${i}`}
-                  className={`ts-card relative h-full rounded-3xl border border-black/10 bg-panel p-5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] md:p-6 dark:border-white/10 dark:shadow-[0_28px_70px_-46px_rgba(0,0,0,0.9)] ${
+                  className={`ts-card relative h-full rounded-3xl border border-black/10 bg-panel p-5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] max-md:rounded-2xl max-md:p-4 md:p-6 dark:border-white/10 dark:shadow-[0_28px_70px_-46px_rgba(0,0,0,0.9)] ${
                     solo !== null && solo !== i ? "ts-dim" : ""
                   }`}
                 >
-                  <header className="flex items-baseline gap-3 border-b border-black/10 pb-4 dark:border-white/10">
+                  <header className="flex items-baseline gap-3 border-b border-black/10 pb-4 max-md:pb-3 dark:border-white/10">
                     <span className="font-display text-sm text-accent">
                       0{i + 1}
                     </span>
@@ -301,7 +301,7 @@ export default function TechStack() {
                     </span>
                   </header>
 
-                  <ul className="mt-3 flex flex-col gap-0.5">
+                  <ul className="mt-3 flex flex-col gap-0.5 max-md:mt-2">
                     {cat.items.map((label) => (
                       <TechRow key={label} label={label} />
                     ))}
