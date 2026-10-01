@@ -75,8 +75,8 @@ export default async function CaseStudyPage({ params }: Params) {
             name: project.title_en,
             description: project.description_en ?? undefined,
             url: absoluteUrl(`/work/${project.slug}`),
-            image: project.image_url ?? undefined,
-            dateCreated: project.year ?? undefined,
+            image: project.image_url ? absoluteUrl(project.image_url) : undefined,
+            dateCreated: project.year ? `${project.year}-01-01` : undefined,
             keywords: project.tech_stack.join(", "),
             author: {
               "@type": "Person",

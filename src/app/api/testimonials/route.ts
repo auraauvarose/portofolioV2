@@ -3,6 +3,7 @@ import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { invalidate } from "@/lib/revalidate-content";
 import { CACHE_TAGS } from "@/lib/supabase/public";
+import { isUuid } from "@/lib/uuid";
 
 const MAX = { quote: 1000, author: 120, role: 120, company: 120, url: 500 };
 
@@ -41,7 +42,9 @@ export const GET = withJsonErrors(async function GET() {
     console.error("testimonials GET:", error.message);
     return NextResponse.json({ error: "Gagal memuat." }, { status: 500 });
   }
-  invalidate(CACHE_TAGS.testimonials);
+  // GET tidak boleh membuang cache: panel admin memuatnya dengan
+  // `cache:"no-store"` setiap kali dibuka, sehingga memanggil invalidate di sini
+  // menghapus cache tag publik hanya karena admin membuka halaman.
   return NextResponse.json({ items: data ?? [] });
 });
 
@@ -123,12 +126,26 @@ export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
   if (!id) {
     return NextResponse.json({ error: "id wajib diisi." }, { status: 400 });
   }
+  if (!isUuid(id)) {
+    return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
+  }
 
   const supabase = await createSupabaseAdmin();
-  const { error } = await supabase.from("testimonials").delete().eq("id", id);
+  const { data: removed, error } = await supabase
+    .from("testimonials")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
   if (error) {
     console.error("testimonials DELETE:", error.message);
     return NextResponse.json({ error: "Gagal menghapus." }, { status: 500 });
+  }
+  if (!removed || removed.length === 0) {
+    return NextResponse.json(
+      { error: "Data tidak ditemukan." },
+      { status: 404 },
+    );
   }
   invalidate(CACHE_TAGS.testimonials);
   return NextResponse.json({ ok: true });

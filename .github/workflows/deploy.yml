@@ -3,15 +3,86 @@ name: Deploy to Cloudflare Workers
 on:
   push:
     branches: [main, master]
+  pull_request:
+    branches: [main, master]
   workflow_dispatch:
 
 concurrency:
   group: cf-deploy-${{ github.ref }}
   cancel-in-progress: true
 
+# Least privilege: tidak ada step di workflow ini yang butuh GITHUB_TOKEN untuk
+# menulis (issue/PR/package). Job `deploy` tetap bisa deploy karena memakai
+# secret Cloudflare (CLOUDFLARE_API_TOKEN), bukan GITHUB_TOKEN.
+permissions:
+  contents: read
+
 jobs:
-  deploy:
+  # Gate kualitas. Jalan untuk SEMUA event (push, pull_request, manual) supaya
+  # PR diperiksa sebelum merge, bukan sesudahnya. Job ini tidak memakai secret
+  # apa pun, jadi aman dijalankan untuk PR dari fork.
+  quality:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      # `tsx --test` mencetak "tests 0" dan TETAP exit 0 bila glob tidak
+      # mencocokkan file apa pun, sehingga gate ini bisa hijau tanpa satu tes pun
+      # (mis. folder tests/ ter-rename). Karena itu jumlah tes diverifikasi.
+      #
+      # `set -o pipefail` + pemeriksaan status eksplisit wajib: tanpa itu exit
+      # code `npm test` yang gagal tertelan oleh `tee`, dan karena skrip berakhir
+      # dengan `echo`, step ini akan lolos meski tesnya merah.
+      - name: Test
+        run: |
+          set -o pipefail
+          npm test 2>&1 | tee /tmp/test-output.txt
+          status=$?
+
+          if [ "$status" -ne 0 ]; then
+            echo "::error::npm test gagal dengan exit code $status."
+            exit "$status"
+          fi
+
+          count="$(grep -aE '^(ℹ|#) tests [0-9]+[[:space:]]*$' /tmp/test-output.txt | tail -n 1 | grep -oE '[0-9]+' || true)"
+
+          if [ -z "$count" ]; then
+            echo "::error::Jumlah tes tidak terbaca dari output test runner — gate tidak bisa diverifikasi."
+            exit 1
+          fi
+
+          if [ "$count" -eq 0 ]; then
+            echo "::error::Tidak ada tes yang dijalankan (tests 0). Periksa glob 'tests/**/*.test.ts'."
+            exit 1
+          fi
+
+          echo "Jumlah tes yang dijalankan: $count"
+
+  deploy:
+    # Deploy HANYA untuk push ke main/master atau workflow_dispatch.
+    # PR (termasuk dari fork) berhenti di job `quality`: build, `wrangler deploy`,
+    # dan sinkronisasi secret tidak boleh jalan pada event pull_request.
+    if: github.event_name != 'pull_request'
+    needs: quality
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     env:
@@ -27,17 +98,6 @@ jobs:
 
       - name: Install dependencies
         run: npm ci
-
-      # Gate kualitas: jalankan sebelum build supaya kode bermasalah tidak
-      # sampai ter-deploy. Keduanya cepat (beberapa detik).
-      - name: Lint
-        run: npm run lint
-
-      - name: Typecheck
-        run: npm run typecheck
-
-      - name: Test
-        run: npm test
 
       # NEXT_PUBLIC_* vars are inlined into the client bundle at build time, so
       # they must be present as env vars during the OpenNext/Next build.
@@ -79,3 +139,5 @@ jobs:
               ADMIN_COOKIE_SECRET: env.ADMIN_COOKIE_SECRET}' \
             > /tmp/secrets.json
           npx wrangler secret bulk /tmp/secrets.json
+          # Jangan tinggalkan berkas berisi kredensial di runner.
+          rm -f /tmp/secrets.json

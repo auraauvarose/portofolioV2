@@ -3,6 +3,9 @@
 import { useEffect, useRef } from "react";
 
 const SIZE = 30;
+// Must match .spider-thread's fixed height in globals.css: the thread is
+// scaled on the compositor instead of having its layout height rewritten.
+const THREAD_BASE = 2000;
 const SPEED_MIN = 40;
 const SPEED_MAX = 60;
 const STOP_EVERY_MIN = 20000;
@@ -72,8 +75,12 @@ export default function SpiderWalker() {
     };
 
     const setThread = (h: number) => {
-      thread.style.top = `${-h}px`;
-      thread.style.height = `${h}px`;
+      // Compositor-only: the thread box is 1px x THREAD_BASE (see
+      // .spider-thread), anchored at the walker's top edge with
+      // transform-origin: bottom center, so scaleY(h / THREAD_BASE) renders
+      // exactly h px of thread upward. Writing top / height here used to
+      // force a layout on every frame.
+      thread.style.transform = `translateX(-50%) scaleY(${h / THREAD_BASE})`;
       thread.style.opacity = h > 0 ? "1" : "0";
     };
 

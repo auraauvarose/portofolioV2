@@ -30,7 +30,12 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const storedLang = window.localStorage.getItem("lang");
-    if (storedLang === "en" || storedLang === "id") setLangState(storedLang);
+    if (storedLang === "en" || storedLang === "id") {
+      setLangState(storedLang);
+      // <html lang> di layout ditulis statis "en"; tanpa ini screen reader dan
+      // penerjemah otomatis tetap memakai bahasa Inggris saat pengguna memilih ID.
+      document.documentElement.lang = storedLang;
+    }
 
     const initial = readStoredTheme(window.localStorage.getItem("theme"));
     setThemeState(initial);
@@ -62,12 +67,14 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 
   const setLang = useCallback((next: Lang) => {
     setLangState(next);
+    document.documentElement.lang = next;
     window.localStorage.setItem("lang", next);
   }, []);
 
   const toggle = useCallback(() => {
     setLangState((prev) => {
       const next = prev === "en" ? "id" : "en";
+      document.documentElement.lang = next;
       window.localStorage.setItem("lang", next);
       return next;
     });

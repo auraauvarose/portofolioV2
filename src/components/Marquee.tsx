@@ -94,6 +94,7 @@ export default function Marquee({
   return (
     <div
       ref={wrapRef}
+      aria-hidden="true"
       className="marquee-mask relative z-[1] overflow-hidden border-y border-white/5 bg-ink py-6"
     >
       <div

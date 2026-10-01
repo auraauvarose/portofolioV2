@@ -24,7 +24,13 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("gallery POST:", error.message);
+    return NextResponse.json(
+      { error: "Gagal menyimpan foto." },
+      { status: 400 },
+    );
+  }
   invalidate(CACHE_TAGS.gallery);
   return NextResponse.json(data, { status: 201 });
 });

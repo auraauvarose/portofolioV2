@@ -7,7 +7,7 @@ import SectionHeading from "@/components/SectionHeading";
 import MobileCarousel from "@/components/MobileCarousel";
 import Tilt3D from "@/components/Tilt3D";
 import { useLanguage } from "@/components/providers";
-import { useIsDesktop } from "@/lib/use-media-query";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import { gallery } from "@/lib/config";
 import type { GalleryPhoto } from "@/types";
 
@@ -19,7 +19,6 @@ export default function Gallery({
   embedded?: boolean;
 }) {
   const { t, lang } = useLanguage();
-  const isDesktop = useIsDesktop();
   const [lightbox, setLightbox] = useState<number | null>(null);
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
@@ -77,6 +76,9 @@ export default function Gallery({
     setDeskPage(0);
     setLightbox(null);
   }, [active]);
+
+  const lightboxOpen = lightbox !== null && Boolean(filtered[lightbox]);
+  const lightboxRef = useFocusTrap<HTMLDivElement>(lightboxOpen);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -204,8 +206,7 @@ export default function Gallery({
           </Reveal>
         ) : (
           <>
-            {isDesktop ? (
-              <div className="hidden md:block">
+            <div className="hidden md:block">
                 {(() => {
                   const pages = chunk(filtered, 3);
                   const idx = Math.min(deskPage, pages.length - 1);
@@ -227,9 +228,9 @@ export default function Gallery({
                     </MobileCarousel>
                   );
                 })()}
-              </div>
-            ) : (
-              <div className="md:hidden">
+            </div>
+
+            <div className="md:hidden">
                 {(() => {
                   const idx = Math.min(slide, filtered.length - 1);
                   const total = filtered.length;
@@ -244,8 +245,7 @@ export default function Gallery({
                     </MobileCarousel>
                   );
                 })()}
-              </div>
-            )}
+            </div>
           </>
         )}
     </>
@@ -256,8 +256,12 @@ export default function Gallery({
     filtered[lightbox] &&
     createPortal(
           <div
+            ref={lightboxRef}
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
             onClick={closeLightbox}
+            role="dialog"
+            aria-modal="true"
+            aria-label={filtered[lightbox].title_en || filtered[lightbox].title_id || "Photo"}
           >
             <button
               className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"

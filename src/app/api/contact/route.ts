@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { contactForm } from "@/lib/config";
+import { clientIp } from "@/lib/client-ip";
 
 export const dynamic = "force-dynamic";
 
@@ -51,16 +52,6 @@ async function hashIp(ip: string): Promise<string | null> {
   } catch {
     return null;
   }
-}
-
-function clientIp(req: NextRequest): string {
-  const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
-  if (cf?.clientIp) return cf.clientIp;
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
 }
 
 export const GET = withJsonErrors(async function GET(req: NextRequest) {

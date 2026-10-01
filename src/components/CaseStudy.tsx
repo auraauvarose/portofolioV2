@@ -133,7 +133,9 @@ export default function CaseStudy({
             <img
               src={project.image_url}
               alt={project.alt_text || title}
-              className="w-full border border-white/10 object-cover"
+              loading="lazy"
+              decoding="async"
+              className="aspect-[16/10] w-full border border-white/10 object-cover"
             />
           </Reveal>
         )}

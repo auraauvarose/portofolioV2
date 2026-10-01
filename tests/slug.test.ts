@@ -32,6 +32,30 @@ describe("slugify", () => {
     assert.ok(slugify("a".repeat(200)).length <= 80);
   });
 
+  test("idempoten di batas 80 karakter: hubung sisa pemotongan dibuang", () => {
+    const samples = [
+      "a".repeat(79) + " b",
+      "a".repeat(78) + "  b",
+      "a".repeat(80) + " b",
+      "a".repeat(79) + "-b",
+      "a".repeat(79) + " b c",
+      "a".repeat(79) + " - b",
+    ];
+    for (const s of samples) {
+      const once = slugify(s);
+      const twice = slugify(once);
+      assert.equal(
+        twice,
+        once,
+        `slugify tidak idempoten di batas 80: ${JSON.stringify(once)} -> ${JSON.stringify(twice)}`,
+      );
+      assert.ok(
+        once === "" || isValidSlug(once),
+        `slugify(79 huruf + "${s.slice(79)}") -> ${JSON.stringify(once)} tidak valid`,
+      );
+    }
+  });
+
   test("slugify tidak pernah menghasilkan hubung ganda atau di ujung", () => {
     const samples = ["a - b", "A--B", "x & - y", "test - - test", "---x---"];
     for (const s of samples) {

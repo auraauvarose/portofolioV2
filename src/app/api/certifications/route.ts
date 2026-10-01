@@ -29,7 +29,13 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     .select()
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("certifications POST:", error.message);
+    return NextResponse.json(
+      { error: "Gagal menyimpan sertifikat." },
+      { status: 400 },
+    );
+  }
   invalidate(CACHE_TAGS.certifications);
   return NextResponse.json(data, { status: 201 });
 });

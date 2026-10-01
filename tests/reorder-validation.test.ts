@@ -1,48 +1,42 @@
 import { test, describe } from "node:test";
 import assert from "node:assert/strict";
-
-const TABLES = [
-  "projects",
-  "certifications",
-  "gallery_photos",
-  "experience",
-  "testimonials",
-] as const;
-
-const isTable = (v: unknown): boolean =>
-  typeof v === "string" && (TABLES as readonly string[]).includes(v);
-
-const UUID_RE =
-  /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
-
-const isUuid = (v: unknown): boolean => typeof v === "string" && UUID_RE.test(v);
+import {
+  REORDER_TABLES,
+  MAX_REORDER_ITEMS,
+  isReorderTable,
+  validateReorderPayload,
+} from "../src/lib/reorder-validation.ts";
+import { isUuid } from "../src/lib/uuid.ts";
 
 const VALID_UUID = "2cb308a3-1528-43ca-8f16-2839fd47a481";
+const U2 = "6a864a5e-b0b0-419c-b0c9-521d85cbbfb2";
 
 describe("validasi tabel", () => {
   test("menerima tabel yang terdaftar", () => {
-    for (const t of TABLES) assert.ok(isTable(t), `${t} seharusnya diterima`);
+    for (const t of REORDER_TABLES) {
+      assert.ok(isReorderTable(t), `${t} seharusnya diterima`);
+    }
   });
 
   test("menolak tabel di luar daftar putih", () => {
-    assert.ok(!isTable("contact_messages"), "inbox tidak boleh diurutkan");
-    assert.ok(!isTable("users"));
-    assert.ok(!isTable("site_content"));
+    assert.ok(!isReorderTable("contact_messages"), "inbox tidak boleh diurutkan");
+    assert.ok(!isReorderTable("users"));
+    assert.ok(!isReorderTable("site_content"));
   });
 
   test("menolak upaya injeksi lewat nama tabel", () => {
-    assert.ok(!isTable("projects; drop table projects"));
-    assert.ok(!isTable("projects--"));
-    assert.ok(!isTable("projects, users"));
-    assert.ok(!isTable("public.projects"));
+    assert.ok(!isReorderTable("projects; drop table projects"));
+    assert.ok(!isReorderTable("projects--"));
+    assert.ok(!isReorderTable("projects, users"));
+    assert.ok(!isReorderTable("public.projects"));
   });
 
   test("menolak nilai non-string", () => {
-    assert.ok(!isTable(null));
-    assert.ok(!isTable(undefined));
-    assert.ok(!isTable(123));
-    assert.ok(!isTable({}));
-    assert.ok(!isTable(["projects"]));
+    assert.ok(!isReorderTable(null));
+    assert.ok(!isReorderTable(undefined));
+    assert.ok(!isReorderTable(123));
+    assert.ok(!isReorderTable({}));
+    assert.ok(!isReorderTable(["projects"]));
   });
 });
 
@@ -68,67 +62,83 @@ describe("validasi id", () => {
   });
 });
 
-describe("aturan payload (cerminan handler)", () => {
-  function validate(body: unknown): { ok: boolean; error?: string } {
-    if (!body || typeof body !== "object") return { ok: false, error: "bentuk" };
-    const { table, ids } = body as { table?: unknown; ids?: unknown };
-
-    if (!isTable(table)) return { ok: false, error: "tabel" };
-    if (!Array.isArray(ids) || ids.length === 0)
-      return { ok: false, error: "ids kosong" };
-    if (ids.length > 500) return { ok: false, error: "terlalu banyak" };
-    if (!ids.every(isUuid)) return { ok: false, error: "id tidak valid" };
-    if (new Set(ids).size !== ids.length)
-      return { ok: false, error: "duplikat" };
-    return { ok: true };
-  }
-
-  const U2 = "6a864a5e-b0b0-419c-b0c9-521d85cbbfb2";
+describe("validateReorderPayload", () => {
+  const errorOf = (body: unknown): string | undefined => {
+    const result = validateReorderPayload(body);
+    return result.ok ? undefined : result.error;
+  };
 
   test("payload benar diterima", () => {
-    assert.ok(validate({ table: "projects", ids: [VALID_UUID, U2] }).ok);
+    const result = validateReorderPayload({
+      table: "projects",
+      ids: [VALID_UUID, U2],
+    });
+    assert.equal(result.ok, true);
+    if (result.ok) {
+      assert.equal(result.table, "projects");
+      assert.deepEqual(result.ids, [VALID_UUID, U2]);
+    }
   });
 
   test("menolak ids kosong", () => {
-    assert.equal(validate({ table: "projects", ids: [] }).error, "ids kosong");
+    assert.equal(
+      errorOf({ table: "projects", ids: [] }),
+      "ids wajib berupa array.",
+    );
   });
 
   test("menolak ids bukan array", () => {
     assert.equal(
-      validate({ table: "projects", ids: "bukan-array" }).error,
-      "ids kosong",
+      errorOf({ table: "projects", ids: "bukan-array" }),
+      "ids wajib berupa array.",
     );
   });
 
   test("menolak satu id tidak valid di antara yang valid", () => {
     assert.equal(
-      validate({ table: "projects", ids: [VALID_UUID, "rusak"] }).error,
-      "id tidak valid",
+      errorOf({ table: "projects", ids: [VALID_UUID, "rusak"] }),
+      "Ada id yang tidak valid.",
     );
   });
 
   test("menolak duplikat", () => {
     assert.equal(
-      validate({ table: "projects", ids: [VALID_UUID, VALID_UUID] }).error,
-      "duplikat",
+      errorOf({ table: "projects", ids: [VALID_UUID, VALID_UUID] }),
+      "Ada id duplikat.",
     );
   });
 
-  test("menolak lebih dari 500 item", () => {
-    const many = Array.from({ length: 501 }, () => VALID_UUID);
-    assert.equal(validate({ table: "projects", ids: many }).error, "terlalu banyak");
+  test("menolak lebih dari batas item", () => {
+    const many = Array.from({ length: MAX_REORDER_ITEMS + 1 }, (_, i) =>
+      `2cb308a3-1528-43ca-8f16-${String(i).padStart(12, "0")}`,
+    );
+    assert.equal(
+      errorOf({ table: "projects", ids: many }),
+      "Terlalu banyak item.",
+    );
+  });
+
+  test("menerima tepat di batas item", () => {
+    const unique = Array.from({ length: MAX_REORDER_ITEMS }, (_, i) =>
+      `2cb308a3-1528-43ca-8f16-${String(i).padStart(12, "0")}`,
+    );
+    assert.equal(validateReorderPayload({ table: "projects", ids: unique }).ok, true);
   });
 
   test("menolak body bukan objek", () => {
-    assert.equal(validate(null).error, "bentuk");
-    assert.equal(validate("teks").error, "bentuk");
-    assert.equal(validate(undefined).error, "bentuk");
+    for (const body of [null, "teks", undefined, 42, true]) {
+      assert.equal(errorOf(body), "Data tidak valid.");
+    }
   });
 
   test("menolak tabel tidak dikenal walau ids valid", () => {
     assert.equal(
-      validate({ table: "contact_messages", ids: [VALID_UUID] }).error,
-      "tabel",
+      errorOf({ table: "contact_messages", ids: [VALID_UUID] }),
+      "Tabel tidak dikenal.",
     );
+  });
+
+  test("menolak tabel yang hilang", () => {
+    assert.equal(errorOf({ ids: [VALID_UUID] }), "Tabel tidak dikenal.");
   });
 });

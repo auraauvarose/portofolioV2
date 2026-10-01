@@ -61,10 +61,3 @@ export async function getSiteContent(): Promise<SiteContent> {
     return base;
   }
 }
-
-export async function getSiteSection<K extends SiteContentKey>(
-  key: K,
-): Promise<SiteContent[K]> {
-  const all = await getSiteContent();
-  return all[key];
-}

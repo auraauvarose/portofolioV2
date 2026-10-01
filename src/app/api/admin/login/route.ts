@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyAdminPassword, setAdminCookie } from "@/lib/admin-auth";
-import { adminPassword } from "@/lib/server-config";
+import { adminPassword, sessionSecret } from "@/lib/server-config";
+import { clientIp } from "@/lib/client-ip";
 
 export const dynamic = "force-dynamic";
 
@@ -9,16 +10,6 @@ const MAX_ATTEMPTS = 8;
 
 type Bucket = { count: number; first: number; blockedUntil: number };
 const attempts = new Map<string, Bucket>();
-
-function clientIp(req: NextRequest): string {
-  const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
-  if (cf?.clientIp) return cf.clientIp;
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
 
 function blockedFor(key: string): number {
   const b = attempts.get(key);
@@ -58,6 +49,20 @@ export async function POST(req: NextRequest) {
   if (!adminPassword()) {
     return NextResponse.json(
       { error: "Login admin belum dikonfigurasi di server (ADMIN_PASSWORD)." },
+      { status: 503 },
+    );
+  }
+
+  // Gagal-tertutup: tanpa secret terpisah, cookie sesi ditandatangani dengan
+  // password admin dan pesan yang ditandatangani (`admin-session-v1:<exp>`)
+  // seluruhnya diketahui penyerang — satu cookie cukup untuk brute-force
+  // offline. Lebih baik menolak login daripada menerbitkan sesi seperti itu.
+  if (!sessionSecret()) {
+    return NextResponse.json(
+      {
+        error:
+          "ADMIN_COOKIE_SECRET belum diisi di server. Isi dengan string acak minimal 32 karakter.",
+      },
       { status: 503 },
     );
   }

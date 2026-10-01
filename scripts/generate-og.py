@@ -21,6 +21,7 @@ the card always matches the site's typography. Requires `woff2_decompress`
 
 from __future__ import annotations
 
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -31,6 +32,10 @@ ROOT = Path(__file__).resolve().parent.parent
 FONTS = ROOT / "public" / "fonts"
 TMP = ROOT / ".ogtmp"
 OUT = ROOT / "public" / "og.png"
+
+# Domain yang dicetak di footer kartu — ikut sumber yang sama dengan src/lib/site.ts.
+SITE_URL = os.environ.get("NEXT_PUBLIC_SITE_URL") or "https://auraauvarose.my.id"
+DOMAIN = SITE_URL.strip().removeprefix("https://").removeprefix("http://").rstrip("/")
 
 # Brand tokens — keep in sync with src/app/globals.css
 INK = (13, 14, 19)          # dark background
@@ -230,7 +235,7 @@ def main() -> None:
     foot_font = ImageFont.truetype(str(switzer_400), 23)
     foot_bold = ImageFont.truetype(str(switzer_600), 23)
     draw_tracked(
-        draw, (MARGIN, FOOTER_Y + 22), "portofolio.auraauvaroseendica.workers.dev", foot_font, GRAY_DIM
+        draw, (MARGIN, FOOTER_Y + 22), DOMAIN, foot_font, GRAY_DIM
     )
 
     tag = "Available for projects"

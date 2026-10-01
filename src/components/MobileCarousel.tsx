@@ -68,14 +68,25 @@ export default function MobileCarousel({
       </Reveal>
 
       {total > 1 && (
-        <div className="mt-4 flex items-center justify-center gap-2">
+        // `gap-4` (16px), bukan `gap-2` (8px): dengan jarak 8px, dua titik hanya
+        // berjarak 16px dari pusat ke pusat, sehingga area sentuh yang cukup
+        // besar MUSTAHIL dibuat tanpa saling menutupi — dan titik yang tertutup
+        // bukan sekadar sulit ditekan, ia memindahkan slide yang salah karena
+        // elemen yang lebih belakang di DOM memenangkan hit-test.
+        <div className="mt-4 flex items-center justify-center gap-4">
           {Array.from({ length: total }, (_, i) => (
             <button
               key={i}
               type="button"
-              aria-label={`Slide ${i + 1}`}
+              aria-label={`Ke slide ${i + 1}`}
+              aria-current={i === idx ? "true" : undefined}
               onClick={() => onSlide(i)}
-              className={`h-2 w-2 rounded-full transition-all ${
+              // Area sentuh 24x44 px: ke samping 8px (tepat setengah `gap-4`,
+              // jadi kotak dua titik bersinggungan tanpa saling menutupi), ke
+              // atas/bawah 18px. Dengan perluasan ke samping yang lebih besar,
+              // kotak titik pertama menutupi titik pertama itu sendiri dan klik
+              // di sana malah berpindah ke slide berikutnya.
+              className={`relative h-2 w-2 rounded-full transition-all after:absolute after:-inset-x-[8px] after:-inset-y-[18px] after:content-[''] ${
                 i === idx
                   ? "w-6 bg-accent"
                   : "bg-white/25 hover:bg-white/50"

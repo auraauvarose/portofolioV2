@@ -66,6 +66,7 @@ export default function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           rows={rows}
+          required={required}
           aria-describedby={hintId}
           className={`${base} resize-y leading-relaxed`}
         />
@@ -77,6 +78,7 @@ export default function Field({
           onChange={(e) => onChange(e.target.value)}
           placeholder={placeholder}
           list={list}
+          required={required}
           aria-describedby={hintId}
           className={base}
         />

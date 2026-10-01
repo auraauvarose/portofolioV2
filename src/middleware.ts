@@ -10,9 +10,18 @@ const PROTECTED_API_PREFIXES = [
   "/api/site-content",
   "/api/experience",
   "/api/testimonials",
+  "/api/reorder",
 ];
 
 const PUBLIC_POST_ONLY = ["/api/contact", "/api/analytics"];
+
+/**
+ * Rute yang boleh diakses publik lewat GET dan POST, tetapi PATCH/DELETE-nya
+ * hanya untuk admin. `/api/comments` menerima komentar pengunjung (POST) dan
+ * menampilkan komentar yang sudah disetujui (GET), sementara moderasi dan
+ * penghapusan hanya lewat sesi admin.
+ */
+const PUBLIC_READ_WRITE = ["/api/comments"];
 
 function isProtectedApi(path: string): boolean {
   return PROTECTED_API_PREFIXES.some(
@@ -22,6 +31,9 @@ function isProtectedApi(path: string): boolean {
 
 function isAdminOnlyApi(path: string, method: string): boolean {
   if (isProtectedApi(path)) return true;
+  if (PUBLIC_READ_WRITE.includes(path)) {
+    return method !== "GET" && method !== "POST";
+  }
   if (PUBLIC_POST_ONLY.includes(path)) return method !== "POST";
   return false;
 }
@@ -66,6 +78,8 @@ export const config = {
     "/api/site-content/:path*",
     "/api/experience/:path*",
     "/api/testimonials/:path*",
+    "/api/reorder",
+    "/api/comments",
     "/api/analytics",
     "/api/contact",
   ],

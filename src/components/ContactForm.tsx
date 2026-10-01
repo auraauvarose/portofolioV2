@@ -7,7 +7,7 @@ import { contactForm } from "@/lib/config";
 type Status = "idle" | "sending" | "sent" | "error";
 
 const inputBase =
-  "w-full rounded-md border border-white/10 bg-white/[0.02] px-3.5 py-3 text-sm text-white outline-none transition-colors duration-300 placeholder:text-gray-600 hover:border-white/25 focus:border-accent focus:bg-white/[0.04]";
+  "w-full rounded-md border border-white/10 bg-white/[0.02] px-3.5 py-3 text-sm text-white outline-none transition-colors duration-300 placeholder:text-gray-600 dark:placeholder:text-gray-400 hover:border-white/25 focus:border-accent focus:bg-white/[0.04]";
 
 const labelBase =
   "mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-gray-400";
@@ -98,7 +98,7 @@ export default function ContactForm() {
         <h3 className="text-display text-xl uppercase text-white">
           {t(contactForm.heading)}
         </h3>
-        <p className="mt-1.5 text-sm leading-relaxed text-gray-500">
+        <p className="mt-1.5 text-sm leading-relaxed text-gray-500 dark:text-gray-400">
           {t(contactForm.description)}
         </p>
       </div>
@@ -201,7 +201,7 @@ export default function ContactForm() {
         >
           {status === "sending" ? t(contactForm.sending) : t(contactForm.submit)}
         </button>
-        <p className="text-xs leading-relaxed text-gray-600">
+        <p className="text-xs leading-relaxed text-gray-600 dark:text-gray-400">
           {t(contactForm.emailLabel)}:{" "}
           <a
             href="mailto:auraauvaroseendica@gmail.com"

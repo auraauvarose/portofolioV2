@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import Nav from "@/components/Nav";
 import SiteConstellation from "@/components/SiteConstellation";
 import SmoothScroll, { getLenis } from "@/components/SmoothScroll";
@@ -31,15 +31,38 @@ import type {
   Testimonial,
 } from "@/types";
 
-const GREETINGS = ["Hello", "Hola", "Ciao", "こんにちは", "Hallo"];
+const GREETINGS = ["Hello", "Hola"];
 const GREET_MS = 320;
-const HOLD_MS = 500;
+const HOLD_MS = 250;
+const INTRO_KEY = "aura:intro-shown";
 type Phase = "enter" | "show" | "exit";
+
+function introAlreadyShown(): boolean {
+  try {
+    return sessionStorage.getItem(INTRO_KEY) === "1";
+  } catch {
+    return false;
+  }
+}
+
+function markIntroShown(): void {
+  try {
+    sessionStorage.setItem(INTRO_KEY, "1");
+  } catch {
+    return;
+  }
+}
 
 function LoadingCurtain({ onDone }: { onDone: () => void }) {
   const [index, setIndex] = useState(0);
+  const reduceMotion = useReducedMotion();
 
   useEffect(() => {
+    if (reduceMotion) {
+      onDone();
+      return;
+    }
+
     let i = 0;
     const total = GREETINGS.length;
     const iv = setInterval(() => {
@@ -56,7 +79,7 @@ function LoadingCurtain({ onDone }: { onDone: () => void }) {
       clearInterval(iv);
       clearTimeout(go);
     };
-  }, [onDone]);
+  }, [onDone, reduceMotion]);
 
   return (
     <motion.div
@@ -143,6 +166,11 @@ export default function HomeClient({
   }, []);
 
   useEffect(() => {
+    if (introAlreadyShown()) {
+      setPhase("exit");
+      return;
+    }
+    markIntroShown();
     const raf = requestAnimationFrame(() => setPhase("show"));
     return () => cancelAnimationFrame(raf);
   }, []);

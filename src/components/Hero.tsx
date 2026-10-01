@@ -203,6 +203,7 @@ export default function Hero() {
 
       <div
         className="pointer-events-none fixed left-0 top-0 z-50 hidden lg:block"
+        aria-hidden="true"
         style={{
           transform: `translate(calc(var(--mx) - ${DISC / 2}px), calc(var(--my) - ${DISC / 2}px))`,
           willChange: "transform",
@@ -234,11 +235,11 @@ export default function Hero() {
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-black sm:text-base md:mb-8 md:text-xl">
               {eyebrow}
             </p>
-            <h1 className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-black sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
+            <p className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-black sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
               {lens1}
               <br />
               {lens2}
-            </h1>
+            </p>
           </div>
         </div>
       </div>

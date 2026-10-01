@@ -1,4 +1,5 @@
 import { CACHE_TAGS, createSupabasePublic } from "@/lib/supabase/public";
+import { isValidSlug } from "@/lib/slug";
 import type {
   Project,
   Certification,
@@ -10,6 +11,11 @@ import type {
 
 function isConfigured() {
   return Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL);
+}
+
+function withDemoFallback<T>(rows: T[], demo: T[]): T[] {
+  if (rows.length > 0) return rows;
+  return process.env.NODE_ENV === "production" ? [] : demo;
 }
 
 const DEMO_PROJECTS: Project[] = [
@@ -99,7 +105,7 @@ const DEMO_CERTIFICATIONS: Certification[] = [
 const DEMO_GALLERY: GalleryPhoto[] = [];
 
 export async function getProjects(): Promise<Project[]> {
-  if (!isConfigured()) return DEMO_PROJECTS;
+  if (!isConfigured()) return withDemoFallback([], DEMO_PROJECTS);
   try {
     const supabase = createSupabasePublic(CACHE_TAGS.projects);
     const { data, error } = await supabase
@@ -109,18 +115,18 @@ export async function getProjects(): Promise<Project[]> {
       .order("created_at", { ascending: false });
     if (error) {
       console.error("getProjects error:", error.message);
-      return DEMO_PROJECTS;
+      return [];
     }
     const rows = (data as Project[]) ?? [];
-    return rows.length > 0 ? rows : DEMO_PROJECTS;
+    return withDemoFallback(rows, DEMO_PROJECTS);
   } catch (err) {
     console.error("getProjects failed:", err);
-    return DEMO_PROJECTS;
+    return [];
   }
 }
 
 export async function getCertifications(): Promise<Certification[]> {
-  if (!isConfigured()) return DEMO_CERTIFICATIONS;
+  if (!isConfigured()) return withDemoFallback([], DEMO_CERTIFICATIONS);
   try {
     const supabase = createSupabasePublic(CACHE_TAGS.certifications);
     const { data, error } = await supabase
@@ -129,18 +135,18 @@ export async function getCertifications(): Promise<Certification[]> {
       .order("sort_order", { ascending: true });
     if (error) {
       console.error("getCertifications error:", error.message);
-      return DEMO_CERTIFICATIONS;
+      return [];
     }
     const rows = (data as Certification[]) ?? [];
-    return rows.length > 0 ? rows : DEMO_CERTIFICATIONS;
+    return withDemoFallback(rows, DEMO_CERTIFICATIONS);
   } catch (err) {
     console.error("getCertifications failed:", err);
-    return DEMO_CERTIFICATIONS;
+    return [];
   }
 }
 
 export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
-  if (!isConfigured()) return DEMO_GALLERY;
+  if (!isConfigured()) return withDemoFallback([], DEMO_GALLERY);
   try {
     const supabase = createSupabasePublic(CACHE_TAGS.gallery);
     const { data, error } = await supabase
@@ -150,13 +156,13 @@ export async function getGalleryPhotos(): Promise<GalleryPhoto[]> {
       .order("created_at", { ascending: false });
     if (error) {
       console.error("getGalleryPhotos error:", error.message);
-      return DEMO_GALLERY;
+      return [];
     }
     const rows = (data as GalleryPhoto[]) ?? [];
-    return rows.length > 0 ? rows : DEMO_GALLERY;
+    return withDemoFallback(rows, DEMO_GALLERY);
   } catch (err) {
     console.error("getGalleryPhotos failed:", err);
-    return DEMO_GALLERY;
+    return [];
   }
 }
 
@@ -222,6 +228,34 @@ export async function getProjectSlugs(): Promise<string[]> {
       .filter((s): s is string => Boolean(s));
   } catch (err) {
     console.error("getProjectSlugs failed:", err);
+    return [];
+  }
+}
+
+export async function getProjectSitemapEntries(): Promise<
+  { slug: string; lastModified: Date }[]
+> {
+  if (!isConfigured()) return [];
+  try {
+    const supabase = createSupabasePublic(CACHE_TAGS.projects);
+    const { data, error } = await supabase
+      .from("projects")
+      .select("slug,created_at")
+      .not("slug", "is", null);
+    if (error) {
+      console.error("getProjectSitemapEntries error:", error.message);
+      return [];
+    }
+    return ((data ?? []) as { slug: string | null; created_at: string | null }[])
+      .filter((row): row is { slug: string; created_at: string | null } =>
+        Boolean(row.slug && isValidSlug(row.slug)),
+      )
+      .map((row) => ({
+        slug: row.slug,
+        lastModified: row.created_at ? new Date(row.created_at) : new Date(),
+      }));
+  } catch (err) {
+    console.error("getProjectSitemapEntries failed:", err);
     return [];
   }
 }

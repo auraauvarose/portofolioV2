@@ -4,6 +4,8 @@ import { requireUser } from "@/lib/auth";
 import { invalidate } from "@/lib/revalidate-content";
 import { CACHE_TAGS } from "@/lib/supabase/public";
 import { createSupabaseServer } from "@/lib/supabase/server";
+import { clientIp } from "@/lib/client-ip";
+import { isUuid } from "@/lib/uuid";
 
 export const dynamic = "force-dynamic";
 
@@ -30,16 +32,6 @@ function clean(v: unknown): string {
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/;
 
-function clientIp(req: NextRequest): string {
-  const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
-  if (cf?.clientIp) return cf.clientIp;
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
-}
-
 export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const scope = searchParams.get("scope");
@@ -54,7 +46,13 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
       .select("id,name,email,message,rating,approved,created_at")
       .order("created_at", { ascending: false })
       .limit(500);
-    if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+    if (error) {
+      console.error("comments GET(admin):", error.message);
+      return NextResponse.json(
+        { error: "Gagal memuat komentar." },
+        { status: 400 },
+      );
+    }
     return NextResponse.json({ comments: data ?? [] });
   }
 
@@ -65,7 +63,10 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     .eq("approved", true)
     .order("created_at", { ascending: false })
     .limit(100);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("comments GET:", error.message);
+    return NextResponse.json({ error: "Gagal memuat komentar." }, { status: 400 });
+  }
   return NextResponse.json({ comments: data ?? [] });
 });
 
@@ -122,7 +123,13 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     .select("id,name,message,rating,created_at")
     .single();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("comments POST:", error.message);
+    return NextResponse.json(
+      { error: "Gagal menyimpan komentar." },
+      { status: 400 },
+    );
+  }
   invalidate(CACHE_TAGS.comments);
   return NextResponse.json({ ...data, pending: true }, { status: 201 });
 });
@@ -138,6 +145,9 @@ export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
 
   const id = clean(body.id);
   if (!id) return NextResponse.json({ error: "id wajib diisi." }, { status: 400 });
+  if (!isUuid(id)) {
+    return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
+  }
 
   if (typeof body.approved !== "boolean") {
     return NextResponse.json(
@@ -154,7 +164,13 @@ export const PATCH = withJsonErrors(async function PATCH(req: NextRequest) {
     .select("id,approved")
     .maybeSingle();
 
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  if (error) {
+    console.error("comments PATCH:", error.message);
+    return NextResponse.json(
+      { error: "Gagal memperbarui komentar." },
+      { status: 400 },
+    );
+  }
   if (!data) {
     return NextResponse.json({ error: "Komentar tidak ditemukan." }, { status: 404 });
   }
@@ -169,10 +185,30 @@ export const DELETE = withJsonErrors(async function DELETE(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get("id");
   if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  if (!isUuid(id)) {
+    return NextResponse.json({ error: "ID tidak valid." }, { status: 400 });
+  }
 
   const supabase = await createSupabaseAdmin();
-  const { error } = await supabase.from("comments").delete().eq("id", id);
-  if (error) return NextResponse.json({ error: error.message }, { status: 400 });
+  const { data: removed, error } = await supabase
+    .from("comments")
+    .delete()
+    .eq("id", id)
+    .select("id");
+
+  if (error) {
+    console.error("comments DELETE:", error.message);
+    return NextResponse.json(
+      { error: "Gagal menghapus komentar." },
+      { status: 400 },
+    );
+  }
+  if (!removed || removed.length === 0) {
+    return NextResponse.json(
+      { error: "Komentar tidak ditemukan." },
+      { status: 404 },
+    );
+  }
   invalidate(CACHE_TAGS.comments);
   return NextResponse.json({ ok: true });
 });

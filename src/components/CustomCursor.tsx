@@ -2,6 +2,12 @@
 
 import { useEffect, useState } from "react";
 
+// 3.5rem grown size / 2.25rem base box — must match .cursor-ring-grow in
+// globals.css. Applied inside the inline transform below (instead of the
+// standalone `scale` property) because that property would also scale the
+// translate that positions the ring.
+const RING_GROW_SCALE = 1.5556;
+
 export default function CustomCursor() {
   const [enabled, setEnabled] = useState(false);
 
@@ -23,6 +29,7 @@ export default function CustomCursor() {
     let ringY = targetY;
     let raf = 0;
     let hover = false;
+    let ringScale = 1;
     let dirty = false;
 
     const schedule = () => {
@@ -38,6 +45,7 @@ export default function CustomCursor() {
       const interactive = !!t?.closest?.("a, button, [role='button'], input, [contenteditable]");
       if (interactive !== hover) {
         hover = interactive;
+        ringScale = hover ? RING_GROW_SCALE : 1;
         ring.classList.toggle("cursor-ring-grow", hover);
       }
       schedule();
@@ -48,14 +56,14 @@ export default function CustomCursor() {
       ringX += (targetX - ringX) * 0.16;
       ringY += (targetY - ringY) * 0.16;
       dot.style.transform = `translate(${targetX}px, ${targetY}px) translate(-50%, -50%)`;
-      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+      ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%) scale(${ringScale})`;
       dirty = Math.abs(targetX - ringX) > 0.1 || Math.abs(targetY - ringY) > 0.1;
       if (dirty) schedule();
     };
 
     window.addEventListener("mousemove", onMove, { passive: true });
     dot.style.transform = `translate(${targetX}px, ${targetY}px) translate(-50%, -50%)`;
-    ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%)`;
+    ring.style.transform = `translate(${ringX}px, ${ringY}px) translate(-50%, -50%) scale(${ringScale})`;
     document.body.classList.add("no-native-cursor");
 
     return () => {
@@ -81,7 +89,7 @@ export default function CustomCursor() {
         className="pointer-events-none fixed left-0 top-0 z-[99997] h-9 w-9 rounded-full border border-white mix-blend-difference"
         style={{
           willChange: "transform",
-          transition: "transform 0.25s ease-out, width 0.2s ease-out, height 0.2s ease-out, border-color 0.2s ease-out",
+          transition: "transform 0.25s ease-out, border-color 0.2s ease-out",
         }}
       />
     </>

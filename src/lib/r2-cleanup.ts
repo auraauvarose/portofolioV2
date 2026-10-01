@@ -19,13 +19,28 @@ export function keyFromPublicUrl(url: string | null | undefined): string | null 
 
   const key = url.slice(cleanBase.length + 1);
   const bare = key.split("?")[0].split("#")[0];
-  if (!bare || bare.includes("..")) return null;
+  if (!bare) return null;
 
+  // Decode DULU, baru validasi: memeriksa bentuk ter-encode membuat
+  // `%2e%2e%2f` lolos filter `..` lalu berubah jadi `../` setelah decode.
+  let decoded: string;
   try {
-    return decodeURIComponent(bare);
+    decoded = decodeURIComponent(bare);
   } catch {
     return null;
   }
+
+  if (!decoded || decoded.includes("..")) return null;
+
+  // Key ini dipakai untuk MENGHAPUS objek, jadi hanya bentuk yang memang
+  // dihasilkan `createPresignedUpload` yang diterima. Segmen kosong menutup
+  // awalan "/", garis miring ganda, dan garis miring di ujung; spasi serta
+  // karakter kontrol ditolak terpisah. Menolak key yang sebenarnya sah itu
+  // murah, menghapus objek yang salah tidak bisa dibatalkan.
+  if (decoded.split("/").some((segment) => segment === "")) return null;
+  if (/[\s\u0000-\u001f\u007f]/.test(decoded)) return null;
+
+  return decoded;
 }
 
 export async function deleteR2IfUnreferenced(

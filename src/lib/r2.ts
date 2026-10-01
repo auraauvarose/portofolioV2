@@ -50,6 +50,10 @@ export async function createPresignedUpload(params: {
     region: "auto",
     signQuery: true,
     headers: { "Content-Type": params.contentType },
+    // Tanpa ini, aws4fetch membuang Content-Type dari daftar header yang
+    // ditandatangani (UNSIGNABLE_HEADERS), sehingga klien bisa PUT objek dengan
+    // Content-Type apa pun — mis. text/html — dan R2 menyimpannya apa adanya.
+    allHeaders: true,
   });
 
   const { url } = await signer.sign();

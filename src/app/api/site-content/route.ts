@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { invalidate } from "@/lib/revalidate-content";
 import { CACHE_TAGS } from "@/lib/supabase/public";
 import { defaultSiteContent } from "@/lib/site-content";
+import { deepShapeMatches } from "@/lib/site-content-shape";
 import type { SiteContentKey } from "@/types";
 
 export const dynamic = "force-dynamic";
@@ -20,25 +21,6 @@ const SITE_KEYS = [
 
 function isSiteKey(v: unknown): v is SiteContentKey {
   return typeof v === "string" && (SITE_KEYS as readonly string[]).includes(v);
-}
-
-function shapeMatches(fallback: unknown, value: unknown): string | null {
-  if (fallback === null || fallback === undefined) return null;
-
-  if (Array.isArray(fallback)) {
-    if (!Array.isArray(value)) return "harus berupa array";
-    return null;
-  }
-  if (typeof fallback === "object") {
-    if (!value || typeof value !== "object" || Array.isArray(value)) {
-      return "harus berupa objek";
-    }
-    return null;
-  }
-  if (typeof fallback !== typeof value) {
-    return `harus bertipe ${typeof fallback}`;
-  }
-  return null;
 }
 
 const MAX_SECTION_BYTES = 200_000;
@@ -111,7 +93,7 @@ export const PUT = withJsonErrors(async function PUT(req: NextRequest) {
   }
 
   const defaults = defaultSiteContent();
-  const problem = shapeMatches(defaults[key], data);
+  const problem = deepShapeMatches(defaults[key], data);
   if (problem) {
     return NextResponse.json(
       { error: `Bentuk data tidak sesuai: ${problem}.` },

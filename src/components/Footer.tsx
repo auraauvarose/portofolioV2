@@ -6,7 +6,7 @@ import { useSiteContent } from "@/components/site-content-provider";
 
 export default function Footer() {
   const { profile } = useSiteContent();
-  const markRef = useRef<HTMLHeadingElement>(null);
+  const markRef = useRef<HTMLParagraphElement>(null);
   const reduceMotion = useReducedMotion();
 
   useEffect(() => {
@@ -23,7 +23,7 @@ export default function Footer() {
   return (
     <footer className="relative overflow-x-clip">
       <div className="pointer-events-none select-none overflow-x-clip -mt-8 md:-mt-16 lg:-mt-20">
-        <motion.h1
+        <motion.p
           ref={markRef}
           initial={reduceMotion ? undefined : { y: 110, opacity: 0 }}
           whileInView={reduceMotion ? undefined : { y: 0, opacity: 1 }}
@@ -33,7 +33,7 @@ export default function Footer() {
           style={{ fontFamily: "var(--font-array)" }}
         >
           {profile.name.split(" ")[0]}
-        </motion.h1>
+        </motion.p>
       </div>
     </footer>
   );

@@ -5,6 +5,7 @@ import { useLanguage } from "@/components/providers";
 import { useSiteContent } from "@/components/site-content-provider";
 import { socialIcon } from "@/components/social-icons";
 import MusicPlayer from "@/components/MusicPlayer";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 
 const ANCHORS = ["#about", "#work", "#contact"];
 
@@ -15,6 +16,7 @@ export default function Nav() {
   const { nav, profile } = useSiteContent();
   const [open, setOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const profileRef = useFocusTrap<HTMLDivElement>(profileOpen);
 
   useEffect(() => {
     if (!open && !profileOpen) return;
@@ -48,6 +50,8 @@ export default function Nav() {
           <img
             src={PROFILE_IMG}
             alt={profile.name}
+            width={400}
+            height={225}
             className="h-full w-full object-cover object-center"
           />
         </button>
@@ -61,7 +65,7 @@ export default function Nav() {
               <a
                 key={i}
                 href={anchor}
-                className="group relative block h-[28px] overflow-hidden md:h-[32px]"
+                className="group relative block h-[28px] overflow-hidden py-2 -my-2 md:h-[32px]"
               >
                 <div className="flex flex-col transition-transform duration-500 ease-[cubic-bezier(0.76,0,0.24,1)] group-hover:-translate-y-1/2">
                   <span className="flex h-[28px] items-center justify-end text-[13px] font-bold uppercase tracking-[0.2em] text-muted transition-colors duration-300 md:h-[32px] md:text-[14px]">
@@ -106,6 +110,8 @@ export default function Nav() {
 
       <div
         id="mobile-menu"
+        inert={!open}
+        aria-hidden={!open}
         className={`mobile-menu-panel fixed inset-0 z-[95] flex flex-col items-center justify-center gap-2 px-6 transition-opacity duration-300 md:hidden ${
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
         }`}
@@ -186,11 +192,12 @@ export default function Nav() {
 
       {profileOpen && (
         <div
+          ref={profileRef}
           className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
           onClick={() => setProfileOpen(false)}
           role="dialog"
           aria-modal="true"
-          aria-label="Profile photo"
+          aria-label={profile.name}
         >
           <button
             type="button"
@@ -209,6 +216,8 @@ export default function Nav() {
               <img
                 src={PROFILE_IMG}
                 alt={profile.name}
+                width={400}
+                height={225}
                 className="h-full w-full object-cover object-center"
               />
             </div>

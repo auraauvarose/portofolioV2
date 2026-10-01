@@ -40,6 +40,7 @@ const cabinetGrotesk = localFont({
   ],
   variable: "--font-cabinet",
   display: "swap",
+  preload: false,
 });
 
 const comico = localFont({
@@ -48,6 +49,7 @@ const comico = localFont({
   ],
   variable: "--font-comico",
   display: "swap",
+  preload: false,
 });
 
 const bevellier = localFont({
@@ -57,6 +59,7 @@ const bevellier = localFont({
   ],
   variable: "--font-bevellier",
   display: "swap",
+  preload: false,
 });
 
 const chillax = localFont({
@@ -65,6 +68,7 @@ const chillax = localFont({
   ],
   variable: "--font-chillax",
   display: "swap",
+  preload: false,
 });
 
 const zodiak = localFont({
@@ -73,6 +77,7 @@ const zodiak = localFont({
   ],
   variable: "--font-zodiak",
   display: "swap",
+  preload: false,
 });
 
 const array = localFont({
@@ -81,6 +86,7 @@ const array = localFont({
   ],
   variable: "--font-array",
   display: "swap",
+  preload: false,
 });
 
 export const metadata: Metadata = {
@@ -197,7 +203,13 @@ export default async function RootLayout({
       <body className="antialiased">
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('theme');var dark=t==='light'?false:(t==='dark'?true:true);var r=document.documentElement;if(dark){r.classList.add('dark');r.style.colorScheme='dark';}else{r.classList.remove('dark');r.style.colorScheme='light';}}catch(e){}})();`,
+            // Kelas "js" menandai bahwa JavaScript aktif. Aturan penyembunyian
+            // animasi masuk (`.reveal`, `.sh-word`) di globals.css dijaga
+            // selector `html.js`, sehingga tanpa JavaScript — termasuk bagi
+            // crawler yang tidak menjalankannya — konten tetap terlihat, bukan
+            // tersembunyi selamanya karena IntersectionObserver tidak pernah
+            // sempat berjalan.
+            __html: `(function(){var r=document.documentElement;r.classList.add('js');try{var t=localStorage.getItem('theme');var dark=t==='light'?false:(t==='dark'?true:true);if(dark){r.classList.add('dark');r.style.colorScheme='dark';}else{r.classList.remove('dark');r.style.colorScheme='light';}}catch(e){}})();`,
           }}
         />
         <script

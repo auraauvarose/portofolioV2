@@ -60,7 +60,7 @@ function StarRow({ value, small = false }: { value: number; small?: boolean }) {
           fill={i < value ? "currentColor" : "none"}
           stroke="currentColor"
           strokeWidth="1.6"
-          className={i < value ? "text-accent" : "text-gray-600"}
+          className={i < value ? "text-accent" : "text-gray-600 dark:text-gray-400"}
           aria-hidden="true"
         >
           <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
@@ -92,7 +92,7 @@ function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: numbe
               </span>
               <div className="min-w-0">
                 <p className="truncate font-semibold text-white">{c.name}</p>
-                <p className="text-xs uppercase tracking-widest text-gray-500">
+                <p className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
                   {relativeTime(c.created_at, justNowLabel)}
                 </p>
               </div>
@@ -172,6 +172,8 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         <ScrollProgress />
         <PageControls />
 
+        <h1 className="sr-only">{t(comments.kicker)}</h1>
+
         <section
           id="comments"
           ref={sectionRef}
@@ -225,7 +227,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
 
                   <div className="mt-6 grid gap-5 md:grid-cols-2">
                     <div>
-                      <label htmlFor="c-name" className="mb-2 block text-xs uppercase tracking-widest text-gray-500">
+                      <label htmlFor="c-name" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
                         {t(comments.nameLabel)}
                       </label>
                       <input
@@ -240,7 +242,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                       />
                     </div>
                     <div>
-                      <label htmlFor="c-email" className="mb-2 block text-xs uppercase tracking-widest text-gray-500">
+                      <label htmlFor="c-email" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
                         {t(comments.emailLabel)}
                       </label>
                       <input
@@ -256,7 +258,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                   </div>
 
                   <div className="mt-5">
-                    <label htmlFor="c-message" className="mb-2 block text-xs uppercase tracking-widest text-gray-500">
+                    <label htmlFor="c-message" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
                       {t(comments.messageLabel)}
                     </label>
                     <textarea
@@ -269,13 +271,13 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                       placeholder={t(comments.messagePlaceholder)}
                       className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-600 outline-none transition-colors duration-300 focus:border-accent"
                     />
-                    <p className="mt-1 text-right text-xs text-gray-600">
+                    <p className="mt-1 text-right text-xs text-gray-600 dark:text-gray-400">
                       {message.length}/{maxChars}
                     </p>
                   </div>
 
                   <div className="mt-2">
-                    <p className="mb-2 text-xs uppercase tracking-widest text-gray-500">
+                    <p className="mb-2 text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
                       {t(comments.ratingLabel)}
                     </p>
                     <div className="flex items-center gap-1.5" onMouseLeave={() => setHoverRating(null)}>
@@ -297,7 +299,7 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
                               fill={active ? "currentColor" : "none"}
                               stroke="currentColor"
                               strokeWidth="1.6"
-                              className={`transition-colors duration-200 ${active ? "text-accent" : "text-gray-600 hover:text-accent"}`}
+                              className={`transition-colors duration-200 ${active ? "text-accent" : "text-gray-600 dark:text-gray-400 hover:text-accent"}`}
                               aria-hidden="true"
                             >
                               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />

@@ -34,9 +34,63 @@ describe("keyFromPublicUrl", () => {
   });
 
   test("karakter ter-encode di-decode", () => {
+    assert.equal(keyFromPublicUrl("https://cdn.example.com/a%2Fb.jpg"), "a/b.jpg");
     assert.equal(
-      keyFromPublicUrl("https://cdn.example.com/foto%20spasi.jpg"),
-      "foto spasi.jpg",
+      keyFromPublicUrl("https://cdn.example.com/projects%2F123-foto.jpg"),
+      "projects/123-foto.jpg",
+    );
+  });
+
+  test("key cacat ditolak: garis miring ganda dan segmen kosong", () => {
+    for (const bad of [
+      "https://cdn.example.com//projects//a.jpg",
+      "https://cdn.example.com///a.jpg",
+      "https://cdn.example.com/projects//a.jpg",
+      "https://cdn.example.com/projects/a.jpg/",
+      "https://cdn.example.com/a%2F%2Fb.jpg",
+      "https://cdn.example.com/%2Fprojects%2Fa.jpg",
+    ]) {
+      assert.equal(keyFromPublicUrl(bad), null, `${bad} seharusnya null`);
+    }
+  });
+
+  test("key cacat ditolak: spasi dan karakter kontrol", () => {
+    for (const bad of [
+      "https://cdn.example.com/a b.jpg",
+      "https://cdn.example.com/foto%20spasi.jpg",
+      "https://cdn.example.com/a%09b.jpg",
+      "https://cdn.example.com/a%00b.jpg",
+      "https://cdn.example.com/a%0Ab.jpg",
+      "https://cdn.example.com/a%1Fb.jpg",
+      "https://cdn.example.com/a%7Fb.jpg",
+    ]) {
+      assert.equal(keyFromPublicUrl(bad), null, `${bad} seharusnya null`);
+    }
+  });
+
+  test("traversal ter-encode tetap ditolak (validasi setelah decode)", () => {
+    for (const bad of [
+      "https://cdn.example.com/%2e%2e%2fsecret",
+      "https://cdn.example.com/%2E%2E%2Fsecret",
+      "https://cdn.example.com/a%2F..%2Fb",
+      "https://cdn.example.com/..%2fsecret",
+    ]) {
+      assert.equal(keyFromPublicUrl(bad), null, `${bad} seharusnya null`);
+    }
+  });
+
+  test("key sah tidak ikut tertolak", () => {
+    assert.equal(
+      keyFromPublicUrl("https://cdn.example.com/projects/123-foto.jpg"),
+      "projects/123-foto.jpg",
+    );
+    assert.equal(
+      keyFromPublicUrl("https://cdn.example.com/projects/123-foto.jpg?x=1"),
+      "projects/123-foto.jpg",
+    );
+    assert.equal(
+      keyFromPublicUrl("https://cdn.example.com/1758000000000-uuid-foto.webp"),
+      "1758000000000-uuid-foto.webp",
     );
   });
 

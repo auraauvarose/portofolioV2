@@ -7,7 +7,7 @@ import SectionHeading from "@/components/SectionHeading";
 import Tilt3D from "@/components/Tilt3D";
 import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
-import { useIsDesktop } from "@/lib/use-media-query";
+import { useFocusTrap } from "@/lib/use-focus-trap";
 import { caseStudy, work } from "@/lib/config";
 import type { Project } from "@/types";
 
@@ -19,11 +19,11 @@ export default function Projects({
   embedded?: boolean;
 }) {
   const { t, lang } = useLanguage();
-  const isDesktop = useIsDesktop();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Project | null>(null);
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
+  const modalRef = useFocusTrap<HTMLDivElement>(selected !== null);
 
   useEffect(() => {
     setSlide(0);
@@ -61,8 +61,18 @@ export default function Projects({
     return (
       <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
         <article
+          role="button"
+          tabIndex={0}
+          aria-haspopup="dialog"
           onClick={() => setSelected(project)}
-          className="group h-full cursor-pointer rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-[border-color,box-shadow] duration-300 hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)]"
+          onKeyDown={(e) => {
+            if (e.target !== e.currentTarget) return;
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              setSelected(project);
+            }
+          }}
+          className="group h-full cursor-pointer rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <div
             className="tilt-layer relative aspect-[16/10] overflow-hidden rounded-t-2xl bg-black/40"
@@ -204,8 +214,7 @@ export default function Projects({
           </Reveal>
         ) : (
           <>
-            {isDesktop ? (
-              <div className="hidden md:block">
+            <div className="hidden md:block">
                 {(() => {
                   const pages = chunk(filtered, 2);
                   const idx = Math.min(deskPage, pages.length - 1);
@@ -226,9 +235,9 @@ export default function Projects({
                     </MobileCarousel>
                   );
                 })()}
-              </div>
-            ) : (
-              <div className="md:hidden">
+            </div>
+
+            <div className="md:hidden">
                 {(() => {
                   const idx = Math.min(slide, filtered.length - 1);
                   const current = filtered[idx];
@@ -243,8 +252,7 @@ export default function Projects({
                     </MobileCarousel>
                   );
                 })()}
-              </div>
-            )}
+            </div>
           </>
         )}
     </>
@@ -252,6 +260,7 @@ export default function Projects({
 
   const modal = selected && createPortal(
           <div
+            ref={modalRef}
             className="fixed inset-0 z-[110] flex items-center justify-center bg-black p-6"
             onClick={() => setSelected(null)}
             role="dialog"

@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { getProjectSlugs } from "@/lib/data";
+import { getProjectSitemapEntries } from "@/lib/data";
 import { absoluteUrl } from "@/lib/site";
 
 export const revalidate = 3600;
@@ -22,10 +22,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   ];
 
-  const slugs = await getProjectSlugs();
-  const caseStudies: MetadataRoute.Sitemap = slugs.map((slug) => ({
-    url: absoluteUrl(`/work/${slug}`),
-    lastModified: now,
+  const entries = await getProjectSitemapEntries();
+  const caseStudies: MetadataRoute.Sitemap = entries.map((entry) => ({
+    url: absoluteUrl(`/work/${entry.slug}`),
+    lastModified: entry.lastModified,
     changeFrequency: "monthly",
     priority: 0.7,
   }));

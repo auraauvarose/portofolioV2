@@ -3,6 +3,7 @@ import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { invalidate } from "@/lib/revalidate-content";
 import { CACHE_TAGS } from "@/lib/supabase/public";
+import { normalizeSlug } from "@/lib/slug";
 
 export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const { error: authError } = await requireUser();
@@ -10,6 +11,15 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
 
   const supabase = await createSupabaseAdmin();
   const body = await req.json();
+
+  const rawSlug = body.slug;
+  const slug = normalizeSlug(rawSlug);
+  if (typeof rawSlug === "string" && rawSlug.trim() && !slug) {
+    return NextResponse.json(
+      { error: "Slug tidak valid: gunakan huruf, angka, dan tanda hubung." },
+      { status: 400 },
+    );
+  }
 
   const { data, error } = await supabase
     .from("projects")
@@ -24,7 +34,7 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
       link: body.link ?? null,
       repo_url: body.repo_url ?? null,
       alt_text: body.alt_text ?? null,
-      slug: body.slug ?? null,
+      slug,
       content_en: body.content_en ?? null,
       content_id: body.content_id ?? null,
       tech_stack: body.tech_stack ?? [],
@@ -35,7 +45,19 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     .single();
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 400 });
+    // Pesan mentah dari driver Postgres membocorkan nama kolom dan constraint,
+    // jadi hanya kode duplikat yang diterjemahkan ke pesan yang bisa ditindak.
+    if (error.code === "23505") {
+      return NextResponse.json(
+        { error: "Slug sudah dipakai proyek lain." },
+        { status: 409 },
+      );
+    }
+    console.error("projects POST:", error.message);
+    return NextResponse.json(
+      { error: "Gagal menyimpan proyek." },
+      { status: 400 },
+    );
   }
   invalidate(CACHE_TAGS.projects);
   return NextResponse.json(data, { status: 201 });

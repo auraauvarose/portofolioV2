@@ -9,10 +9,14 @@ export function withJsonErrors<C = unknown>(
     try {
       return await handler(req, context);
     } catch (err) {
+      // Detail lengkap hanya ke log server. Pesan mentah (termasuk pesan driver
+      // Postgres/Supabase) tidak boleh sampai ke klien karena membocorkan
+      // struktur skema ke endpoint publik seperti /api/comments dan /api/contact.
       console.error("api error:", err);
-      const msg =
-        err instanceof Error ? err.message : "Internal server error";
-      return NextResponse.json({ error: msg }, { status: 500 });
+      return NextResponse.json(
+        { error: "Terjadi kesalahan di server." },
+        { status: 500 },
+      );
     }
   };
 }

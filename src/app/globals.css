@@ -183,8 +183,13 @@ html {
   }
 }
 .cursor-ring-grow {
-  width: 3.5rem;
-  height: 3.5rem;
+  /* Grown size is 3.5rem against the 2.25rem base box. The 1.5556 factor is
+     applied by CustomCursor inside its per-frame inline transform — the
+     standalone `scale` property cannot be used here, because it would scale
+     the translate that positions the ring too. Only paint properties change,
+     and the border is divided by the same factor so the rendered stroke
+     still measures 1px. */
+  border-width: calc(1px / 1.5556);
   border-color: var(--color-accent);
 }
 
@@ -305,6 +310,7 @@ html {
 }
 
 @media (hover: none), (pointer: coarse) {
+  html.is-scrolling .grain::before,
   html.is-scrolling .tv-static::before,
   html.is-scrolling .tv-static::after,
   html.is-scrolling .animate-hero-float,
@@ -584,7 +590,7 @@ html.is-scrolled {
   animation-play-state: paused !important;
 }
 
-.reveal {
+html.js .reveal {
   opacity: 0;
 }
 .reveal.is-visible {
@@ -1030,8 +1036,8 @@ html.is-scrolled {
   display: inline-block;
   transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.sh .sh-word,
-.reveal .sh-word {
+:where(html.js) .sh .sh-word,
+:where(html.js) .reveal .sh-word {
   transform: translateY(125%);
 }
 .sh.sh-in .sh-word,
@@ -1044,10 +1050,10 @@ html.is-scrolled {
     opacity 0.7s ease,
     transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.sh .sh-kicker,
-.sh .sh-index,
-.reveal .sh-kicker,
-.reveal .sh-index {
+:where(html.js) .sh .sh-kicker,
+:where(html.js) .sh .sh-index,
+:where(html.js) .reveal .sh-kicker,
+:where(html.js) .reveal .sh-index {
   opacity: 0;
   transform: translateY(14px);
 }
@@ -1064,8 +1070,8 @@ html.is-scrolled {
 .sh-line {
   transition: transform 1.1s cubic-bezier(0.16, 1, 0.3, 1) 0.2s;
 }
-.sh .sh-line,
-.reveal .sh-line {
+:where(html.js) .sh .sh-line,
+:where(html.js) .reveal .sh-line {
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -1321,17 +1327,22 @@ summary {
 .spider-thread {
   position: absolute;
   left: 50%;
-  top: 0;
+  bottom: 100%;
   width: 1px;
-  height: 0;
+  /* Fixed reference box (THREAD_BASE in SpiderWalker.tsx). SpiderWalker sets
+     scaleY(h / THREAD_BASE) so the thread reaches exactly h px up from the
+     walker without writing layout properties (top / height) every frame.
+     2000px covers hang depths up to a 5700px-tall viewport. */
+  height: 2000px;
   opacity: 0;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scaleY(0);
+  transform-origin: bottom center;
   background: linear-gradient(
     to bottom,
     rgba(255, 255, 255, 0.55),
     rgba(255, 255, 255, 0.12)
   );
-  will-change: height, opacity;
+  will-change: transform, opacity;
 }
 :root:not(.dark) .spider-thread {
   background: linear-gradient(

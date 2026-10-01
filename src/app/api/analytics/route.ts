@@ -4,6 +4,7 @@ import { requireUser } from "@/lib/auth";
 import { parseBrowser, parseDevice, parsePhoneBrand } from "@/lib/device";
 import { visitLogEntry } from "@/lib/visit-log";
 import { withFallback } from "@/lib/db-fallback";
+import { clientIp } from "@/lib/client-ip";
 
 export const dynamic = "force-dynamic";
 
@@ -31,23 +32,37 @@ function clean(v: unknown, max: number): string | null {
   return t || null;
 }
 
-function clientIp(req: NextRequest): string {
-  const cf = (req as NextRequest & { cf?: { clientIp?: string } }).cf;
-  if (cf?.clientIp) return cf.clientIp;
-  return (
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ??
-    req.headers.get("x-real-ip") ??
-    "unknown"
-  );
+function geoOf(req: NextRequest): { country: string | null; city: string | null } {
+  // OpenNext -> Cloudflare tidak meneruskan `cf` ke NextRequest, jadi
+  // `(req as ...).cf` selalu undefined: jalur lama itu mati. Header yang
+  // benar-benar dikirim Cloudflare adalah `cf-ipcountry` berisi dua huruf
+  // kapital ("ID", "SG"); "XX" (tidak diketahui) dan "T1" (Tor) dianggap null.
+  const raw = (req.headers.get("cf-ipcountry") ?? "").trim().toUpperCase();
+  const country =
+    /^[A-Z]{2}$/.test(raw) && raw !== "XX" && raw !== "T1" ? raw : null;
+  // Cloudflare tidak menyediakan header kota di jalur ini.
+  return { country, city: null };
 }
 
-function geoOf(req: NextRequest): { country: string | null; city: string | null } {
-  const cf = (
-    req as NextRequest & { cf?: { country?: string; city?: string } }
-  ).cf;
+const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
+
+/**
+ * Tanggal & jam WIB (UTC+7) dari timestamp ISO. Idiom yang sama dengan
+ * src/lib/visit-log.ts: geser +7 jam dulu, baru baca getter UTC-nya.
+ * Tanpa library tanggal.
+ */
+function wibParts(iso: string): { day: string; hour: number } {
+  const shifted = new Date(new Date(iso).getTime() + WIB_OFFSET_MS);
+  if (Number.isNaN(shifted.getTime())) {
+    // Timestamp tak terbaca: pertahankan perilaku lama (tanggal apa adanya,
+    // jam NaN) alih-alih membuang baris dari agregasi.
+    return { day: iso.slice(0, 10), hour: new Date(iso).getUTCHours() };
+  }
+  const month = String(shifted.getUTCMonth() + 1).padStart(2, "0");
+  const date = String(shifted.getUTCDate()).padStart(2, "0");
   return {
-    country: cf?.country ? cf.country.slice(0, 2).toUpperCase() : null,
-    city: cf?.city ? cf.city.slice(0, 60) : null,
+    day: `${shifted.getUTCFullYear()}-${month}-${date}`,
+    hour: shifted.getUTCHours(),
   };
 }
 
@@ -194,6 +209,20 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
 
   const rows = data ?? [];
 
+  // `rows` dipotong `.limit(20_000)`, jadi `rows.length` bukan total
+  // sesungguhnya. Ambil count asli lewat HEAD (tanpa mengirim baris); bila
+  // query count gagal, jatuh kembali ke jumlah baris yang dianalisis.
+  let total = rows.length;
+  try {
+    const { count, error: countError } = await supabase
+      .from("page_views")
+      .select("*", { count: "exact", head: true })
+      .gte("created_at", since);
+    if (!countError && typeof count === "number") total = count;
+  } catch (countErr) {
+    console.warn("analytics count:", countErr);
+  }
+
   const uniques = new Set<string>();
   const pathCount = new Map<string, number>();
   const refCount = new Map<string, number>();
@@ -205,10 +234,10 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
   const locCount = new Map<string, number>();
 
   for (const r of rows) {
+    const { day, hour } = wibParts(r.created_at);
     if (r.visitor_hash) uniques.add(r.visitor_hash);
     pathCount.set(r.path, (pathCount.get(r.path) ?? 0) + 1);
     if (r.referrer) refCount.set(r.referrer, (refCount.get(r.referrer) ?? 0) + 1);
-    const day = r.created_at.slice(0, 10);
     dayCount.set(day, (dayCount.get(day) ?? 0) + 1);
 
     if (r.device) {
@@ -220,7 +249,6 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     if (r.phone_brand) {
       brandCount.set(r.phone_brand, (brandCount.get(r.phone_brand) ?? 0) + 1);
     }
-    const hour = (new Date(r.created_at).getUTCHours() + 7) % 24;
     hourCount.set(hour, (hourCount.get(hour) ?? 0) + 1);
     if (r.country || r.city) {
       const loc =
@@ -238,7 +266,7 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
   return NextResponse.json({
     migrated: true,
     days,
-    total: rows.length,
+    total,
     unique: uniques.size,
     byDay: [...dayCount.entries()]
       .sort((a, b) => (a[0] < b[0] ? -1 : 1))
