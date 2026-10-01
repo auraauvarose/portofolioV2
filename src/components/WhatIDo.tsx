@@ -24,8 +24,8 @@ export default function WhatIDo() {
   const fullColor = theme === "dark" ? "#ff7a50" : "#b3391f";
 
   return (
-    <section id="whatido" className="w-full">
-      <div className="mx-auto flex max-w-6xl flex-col px-4 pt-2 pb-2 md:px-12 lg:pt-24 lg:pb-24 lg:px-20">
+    <section id="whatido" className="relative w-full">
+      <div className="relative mx-auto flex max-w-6xl flex-col px-4 pt-2 pb-2 md:px-12 lg:pt-24 lg:pb-24 lg:px-20">
         <Reveal variant="left" replay className="mb-10 flex items-center gap-4 text-sm uppercase tracking-[0.4em] text-gray-500 md:mb-14">
           <span className="font-display text-accent">02</span>
           <span>{t(whatIDo.kicker)}</span>

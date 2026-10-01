@@ -19,8 +19,8 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section id="testimonials" className="px-6 py-16 md:px-10 md:py-32">
-      <div className="mx-auto max-w-6xl">
+    <section id="testimonials" className="relative px-6 py-16 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-6xl">
         <SectionHeading
           kicker={testimonialsSection.kicker}
           heading={testimonialsSection.heading}

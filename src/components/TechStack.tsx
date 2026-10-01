@@ -24,26 +24,6 @@ const UI: Record<string, Localized> = {
 const CHEVRON =
   "M7 17 17 7M9 7h8v8";
 
-/* Konstelasi dekoratif: murni visual, tidak menerima event pointer. */
-const NODES = [
-  { x: 12, y: 22 },
-  { x: 31, y: 12 },
-  { x: 52, y: 26 },
-  { x: 74, y: 15 },
-  { x: 90, y: 34 },
-  { x: 8, y: 58 },
-  { x: 44, y: 52 },
-  { x: 66, y: 63 },
-  { x: 86, y: 74 },
-  { x: 22, y: 84 },
-  { x: 58, y: 88 },
-];
-
-const EDGES: readonly [number, number][] = [
-  [0, 1], [1, 2], [2, 3], [3, 4], [0, 5], [2, 6], [3, 6],
-  [4, 7], [6, 7], [5, 9], [7, 8], [9, 10], [6, 10], [1, 6],
-];
-
 function TechRow({ label }: { label: string }) {
   const { t } = useLanguage();
   const description = techDescriptions[label];
@@ -224,61 +204,10 @@ export default function TechStack() {
 @media (prefers-reduced-motion: reduce) {
   .ts-pulse { animation: none; }
 }
-
-/* Konstelasi: garis tumbuh perlahan + denyut lembut antar node. */
-.ts-link {
-  stroke-dasharray: 1;
-  stroke-dashoffset: 1;
-  animation: ts-draw 1.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-}
-@keyframes ts-draw { to { stroke-dashoffset: 0; } }
-.ts-node { animation: ts-breathe 5s ease-in-out infinite; }
-@keyframes ts-breathe {
-  0%, 100% { opacity: 0.55; }
-  50% { opacity: 1; }
-}
-.ts-halt .ts-link,
-.ts-halt .ts-node { animation-play-state: paused; }
-@media (prefers-reduced-motion: reduce) {
-  .ts-link { animation: none; stroke-dasharray: none; stroke-dashoffset: 0; }
-  .ts-node { animation: none; }
-}
 `}</style>
 
       <div aria-hidden className="ts-bg pointer-events-none absolute inset-0" />
 
-      <svg
-        aria-hidden
-        viewBox="0 0 100 100"
-        preserveAspectRatio="none"
-        className="pointer-events-none absolute inset-0 h-full w-full"
-      >
-        {EDGES.map(([a, b], i) => (
-          <line
-            key={i}
-            pathLength={1}
-            x1={NODES[a].x}
-            y1={NODES[a].y}
-            x2={NODES[b].x}
-            y2={NODES[b].y}
-            stroke="currentColor"
-            strokeWidth={0.14}
-            className="ts-link text-black/[0.16] dark:text-white/[0.16]"
-            style={{ animationDelay: `${i * 90}ms` }}
-          />
-        ))}
-        {NODES.map((node, i) => (
-          <circle
-            key={i}
-            className="ts-node text-zinc-500/70 dark:text-zinc-400/70"
-            cx={node.x}
-            cy={node.y}
-            r={0.32}
-            fill="currentColor"
-            style={{ animationDelay: `${i * 160}ms` }}
-          />
-        ))}
-      </svg>
 
       <div className="relative mx-auto max-w-7xl">
         <SectionHeading

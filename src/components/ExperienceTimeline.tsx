@@ -12,8 +12,8 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
   if (items.length === 0) return null;
 
   return (
-    <section id="experience" className="px-6 py-16 md:px-10 md:py-32">
-      <div className="mx-auto max-w-5xl">
+    <section id="experience" className="relative px-6 py-16 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-5xl">
         <SectionHeading
           kicker={experienceSection.kicker}
           heading={experienceSection.heading}

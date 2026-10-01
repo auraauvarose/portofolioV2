@@ -113,8 +113,8 @@ export default function Certifications({
   );
 
   return (
-    <section className="px-6 py-16 md:px-10 md:py-32">
-      <div className="mx-auto max-w-7xl">
+    <section className="relative px-6 py-16 md:px-10 md:py-32">
+      <div className="relative mx-auto max-w-7xl">
         <SectionHeading
           kicker={certifications.kicker}
           heading={certifications.heading}

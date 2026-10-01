@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 import Nav from "@/components/Nav";
+import SiteConstellation from "@/components/SiteConstellation";
 import SmoothScroll, { getLenis } from "@/components/SmoothScroll";
 import { EASE_INOUT } from "@/lib/motion";
 import Hero from "@/components/Hero";
@@ -212,6 +213,7 @@ export default function HomeClient({
       </Magnetic>
 
       <Nav />
+      <SiteConstellation />
       <div className="sticky top-0 z-0 h-screen">
         <Hero />
       </div>

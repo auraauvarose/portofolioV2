@@ -2,6 +2,22 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* Warna titik background situs. Didaftarkan sebagai <color> supaya bisa
+   di-transition dari abu-abu ke orange saat halaman di-scroll. */
+@property --site-dot {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(127, 127, 127, 0.22);
+}
+
+/* Titik konstelasi. Default nyaris mati di atas latar gelap; menyala orange
+   begitu halaman di-scroll. Butuh @property supaya bisa di-transition. */
+@property --sc-node {
+  syntax: "<color>";
+  inherits: true;
+  initial-value: rgba(127, 127, 127, 0.1);
+}
+
 @theme {
   --font-sans: var(--font-switzer), ui-sans-serif, system-ui, sans-serif;
   --font-display: var(--font-cabinet), "Arial Narrow", Impact, sans-serif;
@@ -338,10 +354,45 @@ html {
 
 body {
   background-color: var(--color-ink);
+  background-image: radial-gradient(var(--site-dot) 1px, transparent 1px);
+  background-size: 26px 26px;
   color: var(--color-ecru);
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: clip;
+}
+
+/* Menyalakan titik background + titik konstelasi jadi orange begitu halaman
+   di-scroll.
+
+   JANGAN pasang `transition` pada --site-dot / --sc-node. --site-dot dipakai di
+   background-image body, dan body dicat setinggi seluruh dokumen; mentransisikan
+   properti itu berarti tiap frame selama durasi transisi memicu repaint gradien
+   sepanjang dokumen. Karena pemicunya scroll > 24px sementara Hero setinggi
+   100vh, efeknya terasa sebagai scroll patah di awal dan hanya di Hero. Warna
+   harus berubah instan. */
+html.is-scrolled {
+  --site-dot: rgba(235, 89, 57, 0.3);
+  --sc-node: rgba(235, 89, 57, 0.55);
+}
+
+/* Titik latar: kanvasnya panjang dan bergeser saat scroll, tiap titik denyut
+   pelan. Warna diambil dari --sc-node supaya ikut menyala orange saat scroll. */
+.sc-inner {
+  --sc-drift: 0.45;
+}
+.sc-node {
+  background-color: var(--sc-node);
+  box-shadow: 0 0 10px var(--sc-node);
+  animation: sc-breathe 5s ease-in-out infinite;
+}
+@keyframes sc-breathe {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .sc-inner { --sc-drift: 0; }
+  .sc-node { animation: none; }
 }
 
 ::selection {

@@ -67,3 +67,6 @@ ANALISIS-WEBSITE.md
 
 # skrip & screenshot verifikasi (profil Chrome di dalamnya bisa ratusan MB)
 .verify/
+
+# screenshot verifikasi
+/.artifacts/

@@ -15,6 +15,10 @@ const stripComments = (code: string) =>
 
 const CODE = stripComments(TECH);
 
+/* Konstelasi latar dipindah ke komponen bersama, jadi assertion tentang
+   SVG/node/edge harus dibaca dari sana, bukan dari TechStack. */
+const SC_CODE = stripComments(src("src/components/SiteConstellation.tsx"));
+
 /* Isolasi blok CSS lokal komponen: dari .ts-bg sampai penutup terakhir. */
 function cssBlock(selector: string): string | null {
   const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
@@ -38,15 +42,11 @@ describe("G. background bebas orange", () => {
   });
 
   test("node konstelasi tidak memakai text-accent", () => {
-    const circle = CODE.match(/<circle[\s\S]*?\/>/g) ?? [];
-    assert.ok(circle.length > 0, "node konstelasi tidak ditemukan");
-    for (const node of circle) {
-      assert.doesNotMatch(
-        node,
-        /text-accent/,
-        `node konstelasi masih orange: ${node}`,
-      );
-    }
+    assert.doesNotMatch(
+      SC_CODE,
+      /text-accent/,
+      "node konstelasi masih orange",
+    );
   });
 });
 
@@ -238,19 +238,14 @@ describe("D. animasi dihormati", () => {
 });
 
 describe("E. layer konstelasi dekoratif", () => {
-  test("SVG konstelasi dirender sebagai latar", () => {
-    assert.match(CODE, /<svg/, "layer konstelasi dekoratif harus ada");
-    assert.match(CODE, /aria-hidden/, "SVG dekoratif wajib aria-hidden");
+  test("layer konstelasi dirender sebagai latar", () => {
+    assert.match(SC_CODE, /aria-hidden/, "layer dekoratif wajib aria-hidden");
     assert.match(
-      CODE,
+      SC_CODE,
       /pointer-events-none/,
       "layer dekoratif tidak boleh menadah klik/hover pengguna",
     );
-  });
-
-  test("node dan edge konstelasi dirender dari data yang sama", () => {
-    assert.match(CODE, /NODES\.map/, "node konstelasi harus dirender dari NODES");
-    assert.match(CODE, /EDGES\.map/, "edge konstelasi harus dirender dari EDGES");
+    assert.match(SC_CODE, /nodes\.map/, "titik konstelasi harus dirender dari daftar titik");
   });
 });
 
