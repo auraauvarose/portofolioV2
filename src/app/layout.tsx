@@ -89,6 +89,41 @@ const array = localFont({
   preload: false,
 });
 
+/* Bricolage Grotesque adalah variable font (dua sumbu: opsz 12..96, wght
+   400..800). Rentang sumbu ditulis di `declarations`, bukan di `weight`, karena
+   `weight` hanya menerima satu nilai dan akan mengunci seluruh keluarga ke satu
+   ketebalan. Karena satu file melayani semua bobot, bobot apa pun di dalam
+   rentang bisa dipakai lewat `font-variation-settings` tanpa mengunduh file
+   tambahan. */
+const bricolage = localFont({
+  src: [
+    {
+      path: "../../public/fonts/BricolageGrotesque-var.woff2",
+      weight: "400 800",
+      style: "normal",
+    },
+  ],
+  variable: "--font-bricolage",
+  display: "swap",
+  preload: false,
+  declarations: [
+    { prop: "font-variation-settings", value: '"opsz" 32' },
+  ],
+});
+
+const instrument = localFont({
+  src: [
+    {
+      path: "../../public/fonts/InstrumentSerif-Italic.woff2",
+      weight: "400",
+      style: "italic",
+    },
+  ],
+  variable: "--font-instrument",
+  display: "swap",
+  preload: false,
+});
+
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl()),
   title: {
@@ -197,7 +232,7 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
-      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${chillax.variable} ${zodiak.variable} ${array.variable} dark`}
+      className={`${switzer.variable} ${tanker.variable} ${cabinetGrotesk.variable} ${comico.variable} ${bevellier.variable} ${chillax.variable} ${zodiak.variable} ${array.variable} ${bricolage.variable} ${instrument.variable} dark`}
       style={{ colorScheme: "dark" }}
     >
       <body className="antialiased">

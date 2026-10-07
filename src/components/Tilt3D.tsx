@@ -14,6 +14,7 @@ export default function Tilt3D({
   glare = false,
   glareClassName = "rounded-2xl",
   innerClassName = "",
+  disabled = false,
 }: {
   children: ReactNode;
   className?: string;
@@ -23,6 +24,11 @@ export default function Tilt3D({
   glare?: boolean;
   glareClassName?: string;
   innerClassName?: string;
+  /** Mematikan kemiringan sepenuhnya, termasuk saat perangkat mendukung
+   *  pointer. Dipakai bila gestur horizontal di area yang sama sudah dipakai
+   *  hal lain — di carousel HP, geser kiri/kanan berarti pindah slide, dan
+   *  tilt yang ikut aktif akan berebut gestur yang sama. */
+  disabled?: boolean;
 }) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const innerRef = useRef<HTMLDivElement | null>(null);
@@ -41,9 +47,9 @@ export default function Tilt3D({
   useEffect(() => {
     const el = hostRef.current;
     if (!el) return;
-    enabledRef.current = !window.matchMedia(
-      "(prefers-reduced-motion: reduce)",
-    ).matches;
+    enabledRef.current =
+      !disabled &&
+      !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (typeof ResizeObserver === "undefined") return;
     const markDirty = () => {
       rectDirtyRef.current = true;
@@ -59,7 +65,7 @@ export default function Tilt3D({
       if (rafRef.current) cancelAnimationFrame(rafRef.current);
       rafRef.current = 0;
     };
-  }, []);
+  }, [disabled]);
 
   const apply = () => {
     const el = innerRef.current;

@@ -447,6 +447,24 @@ html.is-scrolled {
     font-weight: 600;
     letter-spacing: 0.08em;
   }
+  /* Bricolage Grotesque dengan sumbu optik dibuka. `opsz` 40 dipilih untuk
+     ukuran judul section: di bawah itu kontras tebal-tipisnya terlalu rapat
+     sehingga terbaca seperti grotesk netral biasa — persis yang ingin
+     dihindari — dan di atas 64 batang hurufnya mulai terlalu tipis untuk
+     ukuran ini. */
+  .text-bricolage {
+    font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+    font-weight: 600;
+    font-variation-settings: "opsz" 40, "wght" 600;
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+  .text-instrument {
+    font-family: var(--font-instrument), Georgia, serif;
+    font-style: italic;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
   .text-serif-accent {
     font-family: var(--font-serif);
     font-style: italic;
@@ -801,147 +819,149 @@ html.js .reveal {
 }
 
 /* ── Education ────────────────────────────────────────────────────────────
-   Daftar editorial, bukan grid kartu. Hierarki dibawa tipografi dan aturan
-   rambut: tidak ada permukaan kartu, tidak ada chip ikon, tidak ada denyut
-   beranimasi. Ketiganya menambah wadah tanpa menambah informasi, dan tiga
-   wadah bersarang di satu entri adalah pola template — bukan keputusan.
-   Nomor entri, periode, dan lokasi turun ke kolom meta dengan font data
-   supaya terbaca sebagai catatan akademik, bukan sebagai kartu produk. */
-.edu-list {
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-:root:not(.dark) .edu-list {
-  border-top-color: rgba(13, 14, 19, 0.1);
+   Pita, bukan daftar. Tiap entri memakai satu pita selebar layar: garis
+   pemisah berjalan dari tepi ke tepi, sementara isinya tetap sejajar dengan
+   judul section. Tidak ada kolom kiri, tidak ada kartu — hierarki dibawa
+   ukuran huruf dan kepadatan, bukan wadah.
+
+   Ruang di dalam pita dibentuk dua kedalaman: angka indeks yang didorong jauh
+   ke belakang (mengecil, bergerak paling lambat) dan judul gelar yang diangkat
+   ke depan. Lihat GHOST_DEPTH / TITLE_DEPTH di Education.tsx. */
+.edu-band {
+  position: relative;
 }
 
-.edu-row {
-  position: relative;
-  display: grid;
-  gap: 0.875rem;
-  padding: 1.875rem 0 2.125rem;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  transition: border-color 0.45s ease;
+/* Garis pemisah: satu-satunya pemisah antar entri. Warnanya naik saat pitanya
+   sedang dibaca, jadi posisi baca terbaca dari garis — bukan dari kotak. */
+.edu-band-rule {
+  height: 1px;
+  background: rgba(255, 255, 255, 0.09);
+  transition: background-color 0.5s ease;
 }
-:root:not(.dark) .edu-row {
-  border-bottom-color: rgba(13, 14, 19, 0.1);
+:root:not(.dark) .edu-band-rule {
+  background: rgba(13, 14, 19, 0.11);
 }
-/* Entri yang sedang dibaca ditandai garis bawahnya, bukan kotak di sekitarnya:
-   penanda satu dimensi cukup untuk menunjukkan posisi baca. */
-.edu-row.is-focus {
-  border-bottom-color: rgba(235, 89, 57, 0.45);
+.edu-band.is-active > .edu-band-rule {
+  background: linear-gradient(
+    to right,
+    rgba(235, 89, 57, 0.75),
+    rgba(235, 89, 57, 0.12) 62%,
+    transparent
+  );
 }
-:root:not(.dark) .edu-row.is-focus {
-  border-bottom-color: rgba(176, 58, 13, 0.45);
+:root:not(.dark) .edu-band.is-active > .edu-band-rule {
+  background: linear-gradient(
+    to right,
+    rgba(176, 58, 13, 0.7),
+    rgba(176, 58, 13, 0.12) 62%,
+    transparent
+  );
 }
-@media (min-width: 768px) {
-  .edu-row {
-    grid-template-columns: 190px minmax(0, 1fr);
-    gap: 3.5rem;
-    padding: 2.5rem 0 2.75rem;
+
+.edu-band-stage {
+  transform-origin: center top;
+  /* Pita ber-transform mempromosikan keturunannya jadi layer sendiri. Tanpa
+     petunjuk ini, tepi garis 1px bergetar selama animasi masuk berjalan. */
+  backface-visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .edu-band-stage {
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
 
-.edu-meta {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: baseline;
-  gap: 0.375rem 0.75rem;
+/* Pita sengaja TIDAK memotong isinya dan TIDAK memakai isolation: isolate.
+   Keduanya grouping property yang meratakan preserve-3d, sehingga kedalaman
+   angka dan judul hilang tanpa peringatan. Angka latar yang keluar tepi
+   ditahan dengan menaruhnya di dalam kotak selebar pita, bukan dengan
+   overflow: hidden. */
+/* Isi pita: rel tahun sempit di kiri, judul besar di kanan. Dua kolom baru
+   dinyalakan di md; di HP keduanya menumpuk karena lebar 390px tidak cukup
+   untuk menaruh tahun dan judul berdampingan tanpa memepetkan judulnya. */
+.edu-band-inner {
+  position: relative;
+  padding: 2rem 0 2.25rem;
+  display: grid;
+  gap: 1rem;
+  transform-style: preserve-3d;
 }
 @media (min-width: 768px) {
-  .edu-meta {
+  .edu-band-inner {
+    grid-template-columns: 150px minmax(0, 1fr);
+    gap: 3rem;
+    padding: 3rem 0 3.25rem;
+  }
+}
+
+/* Angka indeks raksasa, didorong jauh ke belakang. Karena paling jauh dari
+   bidang baca, ia mengecil dan bergeser paling lambat saat pita miring —
+   itulah yang membuatnya terbaca sebagai latar, bukan sebagai label besar.
+
+   Ditaruh di kanan, bukan kiri: judul gelar sudah memakai sisi kiri, dan angka
+   di kiri bawah jatuh tepat di belakang label detail serta paragraf deskripsi —
+   terbaca sebagai tabrakan, bukan sebagai latar. Sisi kanan pita kosong di
+   semua lebar, jadi angka di sana tidak pernah bertabrakan dengan apa pun. */
+.edu-band-ghost {
+  position: absolute;
+  right: -0.02em;
+  bottom: 0.02em;
+  z-index: 0;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 800;
+  font-variation-settings: "opsz" 96, "wght" 800;
+  font-size: clamp(6rem, 17vw, 13rem);
+  line-height: 0.74;
+  letter-spacing: -0.07em;
+  color: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+  user-select: none;
+  transform: translateZ(var(--edu-depth, 0px));
+  transition: color 0.6s ease;
+}
+:root:not(.dark) .edu-band-ghost {
+  color: rgba(13, 14, 19, 0.055);
+}
+.edu-band.is-active .edu-band-ghost {
+  color: rgba(235, 89, 57, 0.14);
+}
+:root:not(.dark) .edu-band.is-active .edu-band-ghost {
+  color: rgba(176, 58, 13, 0.12);
+}
+
+/* Rel tahun di kolom kiri. Di layar lebar ia berdiri di atas judul, jadi tahun
+   terbaca lebih dulu — urutan yang benar untuk entri berurutan waktu. */
+.edu-band-meta {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+}
+@media (min-width: 768px) {
+  .edu-band-meta {
     flex-direction: column;
     align-items: flex-start;
-    gap: 0.3125rem;
+    gap: 0.25rem;
   }
 }
 
-.edu-rail {
-  position: absolute;
-  left: 7px;
-  top: 0;
-  display: none;
-  height: 100%;
-  width: 1px;
-  background: rgba(255, 255, 255, 0.1);
-}
-:root:not(.dark) .edu-rail {
-  background: rgba(13, 14, 19, 0.12);
-}
-/* Fill sengaja ditulis setelah aturan tema terang di atas dan dengan
-   spesifisitas yang sama, supaya accent menang di kedua tema. */
-.edu-rail-fill {
-  transform-origin: top;
-  background: var(--color-accent);
-}
-:root:not(.dark) .edu-rail-fill {
-  background: var(--color-accent);
-}
-@media (min-width: 768px) {
-  .edu-rail {
-    display: block;
-  }
-}
-
-/* Penanda posisi entri di atas garis: satu titik kecil, tanpa cincin cahaya
-   dan tanpa denyut. Tugasnya hanya menunjukkan di mana garis sudah lewat. */
-.edu-node {
-  position: absolute;
-  left: -49px;
-  top: 46px;
+.edu-band-body {
+  position: relative;
   z-index: 2;
-  display: none;
-  height: 7px;
-  width: 7px;
-  transform: translate(-50%, -50%);
-  border-radius: 9999px;
-  border: 1px solid rgba(255, 255, 255, 0.3);
-  background: var(--color-ink);
-  transition:
-    background-color 0.4s ease,
-    border-color 0.4s ease;
-}
-:root:not(.dark) .edu-node {
-  border-color: rgba(13, 14, 19, 0.3);
-  background: var(--color-ink);
-}
-.edu-node.is-done {
-  border-color: var(--color-accent);
-  background: var(--color-accent);
-}
-.edu-node.is-current {
-  border-color: var(--color-accent);
-}
-@media (min-width: 768px) {
-  .edu-node {
-    display: block;
-  }
+  transform-style: preserve-3d;
 }
 
-/* Tipografi Education mengikuti About Me. About Me memakai tiga peran: nomor
-   section di Cabinet Grotesk, label kecil (kicker, CTA) di Switzer, dan teks
-   isi di Chillax SemiBold. Pembagian yang sama dipakai di sini, jadi tidak ada
-   keluarga font baru yang perlu diperkenalkan di section ini. */
-.edu-index-mark {
-  font-family: var(--font-display);
-  font-size: 0.75rem;
-  line-height: 1;
-  letter-spacing: 0.08em;
-  color: rgba(255, 255, 255, 0.32);
-}
-:root:not(.dark) .edu-index-mark {
-  color: rgba(13, 14, 19, 0.38);
-}
-
-/* Periode dan lokasi adalah label kecil seperti kicker About Me: Switzer,
-   bukan font isi — supaya kolom meta tetap terbaca sebagai data. */
 .edu-period {
+  font-family: var(--font-data);
+  font-variant-numeric: tabular-nums;
   font-size: 0.8125rem;
   line-height: 1.4;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.72);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.6);
 }
 :root:not(.dark) .edu-period {
-  color: rgba(13, 14, 19, 0.72);
+  color: rgba(13, 14, 19, 0.62);
 }
 /* Entri yang masih berjalan ditandai warnanya saja — tanpa denyut, karena
    animasi tanpa perubahan status hanya menambah gerak. */
@@ -950,35 +970,76 @@ html.js .reveal {
 }
 
 .edu-loc {
+  font-family: var(--font-data);
   font-size: 0.8125rem;
   line-height: 1.4;
-  letter-spacing: 0.04em;
-  color: rgba(255, 255, 255, 0.4);
+  letter-spacing: 0.06em;
+  color: rgba(255, 255, 255, 0.36);
 }
 :root:not(.dark) .edu-loc {
-  color: rgba(13, 14, 19, 0.45);
+  color: rgba(13, 14, 19, 0.42);
 }
 
-/* Sekolah dan deskripsi adalah teks isi — keluarga yang sama dengan paragraf
-   About Me, dibedakan ukuran dan warnanya saja. */
+/* Judul gelar adalah titik terbesar di pita: di sinilah hierarki section ini
+   berdiri, jadi ukurannya dilepas sampai hampir selebar kolom baca. Bricolage
+   Grotesque dengan sumbu optik dibuka di 72 — di ukuran ini kontras tebal-tipis
+   hurufnya terbuka penuh, dan itulah yang membuatnya tidak kaku.
+
+   `max-width: 15ch` menahan judul agar tidak menabrak angka latar di kanan,
+   sekaligus menjaga panjang barisnya tetap terbaca. Tanpa itu, judul sepanjang
+   "Visual Communication Design" mengisi 100% lebar pita dan sisa ruangnya nol. */
+.edu-degree {
+  position: relative;
+  z-index: 2;
+  max-width: 15ch;
+  font-family: var(--font-bricolage), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 620;
+  font-variation-settings: "opsz" 72, "wght" 620;
+  font-size: clamp(2.25rem, 6.4vw, 5rem);
+  line-height: 0.96;
+  letter-spacing: -0.035em;
+  text-wrap: balance;
+  color: #ffffff;
+  transform: translateZ(var(--edu-depth, 0px));
+  transform-style: preserve-3d;
+}
+:root:not(.dark) .edu-degree {
+  color: #16171c;
+}
+
 .edu-school {
+  position: relative;
+  z-index: 2;
   margin-top: 0.5rem;
-  font-family: var(--font-chillax);
-  font-weight: 600;
-  font-size: 1.125rem;
-  line-height: 1.35;
-  letter-spacing: 0.04em;
-  color: var(--color-ecru);
+  font-family: var(--font-instrument), Georgia, serif;
+  font-style: italic;
+  font-size: clamp(1.375rem, 2.6vw, 2rem);
+  line-height: 1.2;
+  color: var(--color-accent);
 }
 :root:not(.dark) .edu-school {
-  color: rgba(13, 14, 19, 0.78);
+  color: #b03a0d;
 }
 
-/* Label detail berperan seperti CTA About Me: huruf kapital, tracking lebar,
-   accent, garis bawah. */
+/* Kaki pita: label detail dan deskripsi berdampingan di layar lebar. Satu
+   kolom sempit di kiri, satu paragraf di kanan — supaya pitanya tetap terbaca
+   sebagai satu baris panjang, bukan tumpukan blok. */
+/* Kaki pita: label detail di atas, deskripsi di bawahnya. Tidak dibuat dua
+   kolom — kolom kirinya sudah dipakai rel tahun, jadi tiga kolom dalam satu
+   pita akan memecah perhatian tanpa menambah keterbacaan. */
+.edu-band-foot {
+  position: relative;
+  z-index: 2;
+  margin-top: 1.5rem;
+}
+@media (min-width: 768px) {
+  .edu-band-foot {
+    margin-top: 1.75rem;
+  }
+}
+
 .edu-detail {
   display: inline-block;
-  margin-top: 0.75rem;
   padding-bottom: 0.125rem;
   border-bottom: 1px solid rgba(235, 89, 57, 0.4);
   font-size: 0.75rem;
@@ -994,7 +1055,7 @@ html.js .reveal {
 
 .edu-desc {
   margin-top: 0.875rem;
-  max-width: 62ch;
+  max-width: 58ch;
   font-family: var(--font-chillax);
   font-weight: 600;
   font-size: 0.9375rem;
@@ -1006,9 +1067,19 @@ html.js .reveal {
   color: rgba(13, 14, 19, 0.68);
 }
 
-@media (prefers-reduced-motion: reduce) {
-  .edu-row {
-    transition: none;
+/* Di bawah 768px pita dimiringkan oleh animasi masuk berbasis scroll, bukan
+   kursor — jadi kedalaman tetap dinyalakan, hanya skalanya yang dikecilkan.
+   Angka latar di 390px selebar ~130px, dan kedalaman -110px akan membuatnya
+   membesar sampai keluar pita; -60px menahannya tetap di dalam. */
+@media (max-width: 767px) {
+  .edu-band-ghost {
+    --edu-depth: -60px;
+    font-size: clamp(5.5rem, 30vw, 9rem);
+    bottom: -0.02em;
+    right: -0.01em;
+  }
+  .edu-degree {
+    --edu-depth: 22px;
   }
 }
 

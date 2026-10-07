@@ -11,13 +11,9 @@ const EDU = readFileSync(resolve(here, "../src/components/Education.tsx"), "utf8
 function parseRules(css: string): { sel: string; body: string }[] {
   const clean = css.replace(/\/\*[\s\S]*?\*\//g, "");
   const out: { sel: string; body: string }[] = [];
-  const re = /([^{}]+)\{([^{}]*)\}/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(clean))) {
-    out.push({
-      sel: m[1].replace(/\s+/g, " ").trim(),
-      body: m[2],
-    });
+  const pattern = /([^{}]+)\{([^{}]*)\}/g;
+  for (const hit of clean.matchAll(pattern)) {
+    out.push({ sel: hit[1].replace(/\s+/g, " ").trim(), body: hit[2] });
   }
   return out;
 }
@@ -71,20 +67,14 @@ describe("aksen foreground Education tetap terracotta", () => {
     assert.match(body, /var\(--color-accent\)/, ".edu-detail kehilangan accent");
   });
 
-  test(".edu-rail-fill memakai accent", () => {
-    const body = ruleBody(".edu-rail-fill");
-    assert.ok(body, "rule .edu-rail-fill hilang");
-    assert.match(body, /var\(--color-accent\)/, "fill garis kehilangan accent");
-  });
-
-  test(".edu-node.is-done memakai accent", () => {
-    const body = ruleBody(".edu-node.is-done");
-    assert.ok(body, "rule .edu-node.is-done hilang");
-    assert.match(body, /var\(--color-accent\)/, "node selesai kehilangan accent");
-  });
-
-  test(".edu-index-mark masih ada", () => {
-    assert.ok(ruleBody(".edu-index-mark"), "rule .edu-index-mark hilang");
+  test(".edu-band-rule memakai accent saat pitanya aktif", () => {
+    const body = ruleBody(".edu-band.is-active > .edu-band-rule");
+    assert.ok(body, "rule .edu-band.is-active > .edu-band-rule hilang");
+    assert.match(
+      body,
+      /rgba\(235,\s*89,\s*57/,
+      "garis pita aktif kehilangan accent",
+    );
   });
 
   test(".edu-period.is-current memakai accent", () => {
@@ -92,9 +82,22 @@ describe("aksen foreground Education tetap terracotta", () => {
     assert.ok(body, "rule .edu-period.is-current hilang");
     assert.match(body, /var\(--color-accent\)/, "periode berjalan kehilangan accent");
   });
+
+  test(".edu-band-ghost memakai accent saat pitanya aktif", () => {
+    const body = ruleBody(".edu-band.is-active .edu-band-ghost");
+    assert.ok(body, "rule .edu-band.is-active .edu-band-ghost hilang");
+    assert.match(
+      body,
+      /rgba\(235,\s*89,\s*57/,
+      "angka latar pita aktif kehilangan accent",
+    );
+  });
 });
 
-describe("Education tidak lagi memakai wadah kartu", () => {
+describe("Education tidak kembali ke wadah kartu bergaya template", () => {
+  /* Wadah yang dulu pernah ada dan sengaja tidak dikembalikan: tiap-tiapnya
+     menambah bingkai tanpa menambah informasi. Pita baru (.edu-band) dibangun
+     dari nol dan tidak memakai satu pun kelas lama ini. */
   const removed = [
     ".edu-panel",
     ".edu-chip",
@@ -103,6 +106,15 @@ describe("Education tidak lagi memakai wadah kartu", () => {
     ".edu-ghost-wrap",
     ".edu-body",
     ".edu-stack",
+    ".edu-plate",
+    ".edu-slab",
+    ".edu-face",
+    ".edu-slot",
+    ".edu-rail",
+    ".edu-node",
+    ".edu-strip",
+    ".edu-toc",
+    ".edu-index-mark",
   ];
 
   for (const sel of removed) {
@@ -110,31 +122,27 @@ describe("Education tidak lagi memakai wadah kartu", () => {
       assert.equal(
         ruleBody(sel),
         null,
-        `${sel} masih ada — wadah kartu belum dibersihkan`,
+        `${sel} masih ada — wadah/rel lama belum dibersihkan`,
       );
     });
   }
 
   test("markup Education tidak merender wadah kartu itu", () => {
-    for (const cls of ["edu-panel", "edu-chip", "edu-pulse", "edu-ghost"]) {
+    for (const cls of [
+      "edu-panel",
+      "edu-chip",
+      "edu-pulse",
+      "edu-ghost",
+      "edu-plate",
+      "edu-slab",
+      "edu-rail",
+      "edu-node",
+    ]) {
       assert.doesNotMatch(
         EDU,
         new RegExp(cls),
         `${cls} masih dirender di Education.tsx`,
       );
     }
-  });
-
-  test("node adalah satu elemen, bukan pembungkus dengan anak", () => {
-    assert.equal(
-      ruleBody(".edu-node > span"),
-      null,
-      "node masih memakai struktur pembungkus > span",
-    );
-    assert.match(
-      EDU,
-      /className=\{`edu-node/,
-      "node tidak lagi dirender langsung sebagai elemen tunggal",
-    );
   });
 });
