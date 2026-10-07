@@ -25,7 +25,7 @@ export default function WhatIDo() {
 
   return (
     <section id="whatido" className="relative w-full">
-      <div className="relative mx-auto flex max-w-6xl flex-col px-4 pt-2 pb-2 md:px-12 lg:pt-24 lg:pb-24 lg:px-20">
+      <div className="relative mx-auto flex max-w-6xl flex-col px-6 pt-2 pb-2 md:px-12 lg:px-20 lg:pt-24 lg:pb-24">
         <Reveal variant="left" replay className="mb-10 flex items-center gap-4 text-sm uppercase tracking-[0.4em] text-gray-500 md:mb-14">
           <span className="font-display text-accent">02</span>
           <span>{t(whatIDo.kicker)}</span>
@@ -48,7 +48,7 @@ export default function WhatIDo() {
                 scrub
                 baseColor={baseColor}
                 fullColor={fullColor}
-                className="text-bevellier relative z-10 text-[14vw] uppercase leading-[0.9] text-[#2F2F2F] transition-colors duration-500 group-hover:text-black sm:text-[11vw] md:text-[9vw] lg:text-[110px] dark:text-white dark:group-hover:text-ink"
+                className="text-bevellier relative z-10 text-[clamp(3rem,16vw,4.5rem)] uppercase leading-[0.9] text-[#2F2F2F] transition-colors duration-500 group-hover:text-black sm:text-[11vw] md:text-[9vw] lg:text-[110px] dark:text-white dark:group-hover:text-ink"
               />
 
               <p

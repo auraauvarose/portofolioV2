@@ -34,7 +34,7 @@ export default function About() {
               <Reveal delay={240} replay>
                 <a
                   href={profile.cvUrl}
-                  className="group relative inline-flex items-center gap-3 py-1 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:text-accent"
+                  className="group relative inline-flex items-center gap-3 py-1 text-sm font-semibold uppercase tracking-widest text-white transition-colors hover:text-accent max-md:min-h-11"
                 >
                   {t(about.cta)}
                   <svg

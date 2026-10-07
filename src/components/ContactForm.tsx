@@ -10,7 +10,7 @@ const inputBase =
   "w-full rounded-md border border-white/10 bg-white/[0.02] px-3.5 py-3 text-sm text-white outline-none transition-colors duration-300 placeholder:text-gray-600 dark:placeholder:text-gray-400 hover:border-white/25 focus:border-accent focus:bg-white/[0.04]";
 
 const labelBase =
-  "mb-1.5 block text-[10px] uppercase tracking-[0.2em] text-gray-400";
+  "mb-1.5 block text-xs uppercase tracking-[0.2em] text-gray-400";
 
 export default function ContactForm() {
   const { t } = useLanguage();
@@ -84,7 +84,7 @@ export default function ContactForm() {
         <button
           type="button"
           onClick={() => setStatus("idle")}
-          className="text-xs uppercase tracking-widest text-gray-400 transition-colors hover:text-accent"
+          className="inline-flex items-center text-xs uppercase tracking-widest text-gray-400 transition-colors hover:text-accent max-md:min-h-11"
         >
           {t(contactForm.openLabel)}
         </button>
@@ -197,7 +197,7 @@ export default function ContactForm() {
         <button
           type="submit"
           disabled={status === "sending"}
-          className="rounded-md bg-accent px-7 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-md bg-accent px-7 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors duration-300 hover:bg-accent-soft active:scale-[0.98] disabled:cursor-not-allowed disabled:opacity-50 max-md:min-h-11"
         >
           {status === "sending" ? t(contactForm.sending) : t(contactForm.submit)}
         </button>
@@ -205,7 +205,7 @@ export default function ContactForm() {
           {t(contactForm.emailLabel)}:{" "}
           <a
             href="mailto:auraauvaroseendica@gmail.com"
-            className="text-gray-400 underline decoration-gray-700 underline-offset-2 transition-colors hover:text-accent"
+            className="text-gray-400 underline decoration-gray-700 underline-offset-2 transition-colors hover:text-accent max-md:inline-flex max-md:min-h-11 max-md:items-center"
           >
             auraauvaroseendica@gmail.com
           </a>

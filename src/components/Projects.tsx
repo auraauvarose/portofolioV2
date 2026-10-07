@@ -95,12 +95,12 @@ export default function Projects({
               </div>
             )}
             <div className="absolute left-3 top-3 flex items-center gap-2 md:left-4 md:top-4">
-              <span className="rounded-full bg-black/60 px-2.5 py-1 text-[11px] uppercase tracking-widest text-[#ffffff] backdrop-blur md:px-3 md:text-xs">
+              <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs uppercase tracking-widest text-[#ffffff] backdrop-blur md:px-3">
                 {project.year ?? project.category}
               </span>
             </div>
             {project.featured && (
-              <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1 text-[10px] font-semibold uppercase tracking-widest text-black md:right-4 md:top-4 md:text-[11px]">
+              <span className="absolute right-3 top-3 rounded-full bg-accent px-2.5 py-1 text-xs font-semibold uppercase tracking-widest text-black md:right-4 md:top-4">
                 {t(work.professionalLabel)}
               </span>
             )}
@@ -127,7 +127,7 @@ export default function Projects({
                 {project.tech_stack.map((tech) => (
                   <span
                     key={tech}
-                    className="rounded-md border border-white/10 px-2 py-0.5 text-[10px] text-gray-300 md:px-2.5 md:py-1 md:text-xs"
+                    className="rounded-md border border-white/10 px-2 py-0.5 text-xs text-gray-300 md:px-2.5 md:py-1"
                   >
                     {tech}
                   </span>
@@ -141,7 +141,7 @@ export default function Projects({
                   <a
                     href={`/work/${project.slug}`}
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent hover:underline md:text-sm"
+                    className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent hover:underline max-md:min-h-11 md:text-sm"
                   >
                     {t(caseStudy.readCaseStudy)}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -155,7 +155,7 @@ export default function Projects({
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-gray-400 transition-colors hover:text-accent md:text-sm"
+                    className="inline-flex items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-gray-400 transition-colors hover:text-accent max-md:min-h-11 md:text-sm"
                   >
                     {t(caseStudy.liveDemo)}
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -180,7 +180,7 @@ export default function Projects({
       <Reveal className="mb-10 flex flex-wrap items-center gap-3">
           <button
             onClick={() => setActive("all")}
-            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors ${
+            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
               active === "all"
                 ? "bg-accent text-black"
                 : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
@@ -192,7 +192,7 @@ export default function Projects({
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors ${
+              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
                 active === cat
                   ? "bg-accent text-black"
                   : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
@@ -302,7 +302,7 @@ export default function Projects({
                   {selected.year ?? selected.category}
                 </span>
                 {selected.featured && (
-                  <span className="rounded-full bg-accent px-3 py-1 text-[11px] font-semibold uppercase tracking-widest text-black">
+                  <span className="rounded-full bg-accent px-3 py-1 text-xs font-semibold uppercase tracking-widest text-black">
                     {t(work.professionalLabel)}
                   </span>
                 )}
@@ -333,7 +333,7 @@ export default function Projects({
                 {selected.slug && (
                   <a
                     href={`/work/${selected.slug}`}
-                    className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors hover:bg-accent-soft"
+                    className="inline-flex items-center gap-2 rounded-md bg-accent px-5 py-2.5 text-xs font-semibold uppercase tracking-[0.16em] text-black transition-colors hover:bg-accent-soft max-md:min-h-11"
                   >
                     {t(caseStudy.readCaseStudy)}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -347,7 +347,7 @@ export default function Projects({
                     target="_blank"
                     rel="noreferrer"
                     onClick={(e) => e.stopPropagation()}
-                    className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-accent hover:underline"
+                    className="inline-flex items-center gap-2 text-sm font-medium uppercase tracking-widest text-accent hover:underline max-md:min-h-11"
                   >
                     {t(caseStudy.liveDemo)}
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

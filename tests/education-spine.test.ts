@@ -101,7 +101,7 @@ describe("Education.tsx memakai progres garis sebagai satu-satunya sumber", () =
     assert.ok(nodeClass, "markup .edu-node tidak ditemukan di Education.tsx");
     assert.match(
       nodeClass[0],
-      /\$\{\s*lit\s*\?\s*"is-done"\s*:\s*""\s*\}/,
+      /\$\{\s*lit\s*\?\s*" is-done"\s*:\s*""\s*\}/,
       "is-done tidak dibaca dari nilai lit (harus dari progres garis)",
     );
   });

@@ -51,7 +51,7 @@ export default function MusicPlayer({
           onClick={toggleMusic}
           aria-label={label}
           aria-pressed={playing}
-          className="group flex touch-active items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm text-white transition-colors hover:border-accent hover:text-accent"
+          className="group flex touch-active items-center gap-3 rounded-full border border-white/15 bg-white/5 px-5 py-2 text-sm text-white transition-colors hover:border-accent hover:text-accent max-md:min-h-11"
         >
           {playing ? (
             <Equalizer className="h-4 w-4 text-accent" />

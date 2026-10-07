@@ -107,7 +107,7 @@ function TechChip({ label }: { label: string }) {
   );
 
   const chip =
-    "ts-chip flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] py-1.5 pe-3 ps-1.5 no-underline outline-none dark:border-white/10 dark:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-accent";
+    "ts-chip flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] py-1.5 pe-3 ps-1.5 no-underline outline-none dark:border-white/10 dark:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-accent max-md:min-h-11";
 
   return (
     <li className="relative">
@@ -159,7 +159,7 @@ export default function TechStack() {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative px-6 py-24 max-md:px-4 max-md:py-16 md:px-10 md:py-32">
+    <section ref={sectionRef} className="relative px-6 py-24 max-md:py-16 md:px-10 md:py-32">
       <style>{`
 .ts-bg {
   background-image:
@@ -278,27 +278,31 @@ export default function TechStack() {
         />
 
         <div className="mb-8 flex flex-col gap-4 border-y border-black/10 py-4 max-md:mb-6 max-md:gap-3 max-md:py-3 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 md:mb-10">
-          <p className="flex items-center gap-3 font-data text-[11px] uppercase tracking-[0.24em] text-zinc-500 dark:text-zinc-400">
-            <span className="ts-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-            <span className="text-zinc-800 dark:text-zinc-100">{total}</span>
-            <span>{t(UI.technologies)}</span>
-            <span aria-hidden className="text-zinc-300 dark:text-zinc-700">
-              /
+          <p className="flex items-center gap-3 font-data text-xs uppercase tracking-[0.24em] text-zinc-500 max-md:flex-wrap dark:text-zinc-400">
+            <span className="flex items-center gap-3">
+              <span className="ts-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
+              <span className="text-zinc-800 dark:text-zinc-100">{total}</span>
+              <span>{t(UI.technologies)}</span>
             </span>
-            <span className="text-zinc-800 dark:text-zinc-100">{categories.length}</span>
-            <span>{t(UI.disciplines)}</span>
+            <span className="flex items-center gap-3">
+              <span aria-hidden className="text-zinc-300 dark:text-zinc-700">
+                /
+              </span>
+              <span className="text-zinc-800 dark:text-zinc-100">{categories.length}</span>
+              <span>{t(UI.disciplines)}</span>
+            </span>
           </p>
 
           <div
             role="group"
             aria-label={t(UI.filter)}
-            className="no-scrollbar -mx-4 flex items-center gap-1.5 overflow-x-auto px-4 pb-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
+            className="no-scrollbar -mx-6 flex items-center gap-1.5 overflow-x-auto px-6 pb-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
           >
             <button
               type="button"
               aria-pressed={solo === null}
               onClick={() => setSolo(null)}
-              className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:px-3 max-md:py-1 focus-visible:ring-2 focus-visible:ring-accent ${
+              className={`rounded-full border px-3.5 py-1.5 font-data text-xs uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:min-h-11 focus-visible:ring-2 focus-visible:ring-accent ${
                 solo === null
                   ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
                   : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
@@ -313,7 +317,7 @@ export default function TechStack() {
                 type="button"
                 aria-pressed={solo === i}
                 onClick={() => setSolo(solo === i ? null : i)}
-                className={`rounded-full border px-3.5 py-1.5 font-data text-[11px] uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:px-3 max-md:py-1 focus-visible:ring-2 focus-visible:ring-accent ${
+                className={`rounded-full border px-3.5 py-1.5 font-data text-xs uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:min-h-11 focus-visible:ring-2 focus-visible:ring-accent ${
                   solo === i
                     ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
                     : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
@@ -357,7 +361,7 @@ export default function TechStack() {
                     >
                       {t(cat.title)}
                     </h3>
-                    <span className="ms-auto font-data text-[11px] text-zinc-400 dark:text-zinc-500">
+                    <span className="ms-auto font-data text-xs text-zinc-400 dark:text-zinc-500">
                       {String(cat.items.length).padStart(2, "0")}
                     </span>
                   </header>

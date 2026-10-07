@@ -27,7 +27,7 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
         <ol className="relative">
           <span
             aria-hidden="true"
-            className="absolute left-0 top-2 hidden h-[calc(100%-1rem)] w-px bg-white/10 md:block"
+            className="absolute left-0 top-2 h-[calc(100%-1rem)] w-px bg-white/10"
           />
 
           {items.map((item, i) => {
@@ -43,12 +43,12 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
             );
 
             return (
-              <li key={item.id} className="relative md:pl-10">
+              <li key={item.id} className="relative pl-8 md:pl-10">
                 <Reveal delay={i * 70}>
                   <article className="mb-10 border-b border-white/10 pb-8 last:mb-0 last:border-0 last:pb-0">
                     <span
                       aria-hidden="true"
-                      className={`absolute left-[-3.5px] top-2 hidden h-2 w-2 rounded-full md:block ${
+                      className={`absolute left-[-3.5px] top-2 h-2 w-2 rounded-full ${
                         item.current ? "bg-accent" : "bg-gray-600"
                       }`}
                     />
@@ -70,7 +70,7 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
 
                     <p className="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-gray-300">
                       {item.current && !periodSaysCurrent && (
-                        <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-[10px] uppercase tracking-widest text-accent">
+                        <span className="rounded-full border border-accent/40 bg-accent/10 px-2 py-0.5 text-xs uppercase tracking-widest text-accent">
                           {t(experienceSection.present)}
                         </span>
                       )}

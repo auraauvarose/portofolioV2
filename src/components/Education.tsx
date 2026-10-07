@@ -11,7 +11,7 @@ import {
 } from "motion/react";
 import Reveal from "@/components/Reveal";
 import ScrollWordReveal from "@/components/ScrollWordReveal";
-import Tilt3D from "@/components/Tilt3D";
+import MobileCarousel from "@/components/MobileCarousel";
 import { useLanguage } from "@/components/providers";
 import { useSiteContent } from "@/components/site-content-provider";
 import { litMask, nodeFractions } from "@/lib/spine";
@@ -19,37 +19,6 @@ import { litMask, nodeFractions } from "@/lib/spine";
 const CURRENT_WORDS = ["present", "sekarang", "now", "kini", "saat ini"];
 const readsCurrent = (period: string) =>
   CURRENT_WORDS.some((w) => period.toLowerCase().includes(w));
-
-const FIELD_ICONS = [
-  <svg
-    key="design"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.5"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-6 w-6"
-  >
-    <path d="M12 19l7-7 3 3-7 7-3-3z" />
-    <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
-    <path d="M2 2l7.586 7.586" />
-    <circle cx="11" cy="11" r="2" />
-  </svg>,
-  <svg
-    key="code"
-    viewBox="0 0 24 24"
-    fill="none"
-    stroke="currentColor"
-    strokeWidth="1.7"
-    strokeLinecap="round"
-    strokeLinejoin="round"
-    className="h-6 w-6"
-  >
-    <path d="m16 18 6-6-6-6" />
-    <path d="m8 6-6 6 6 6" />
-  </svg>,
-];
 
 export default function Education() {
   const { education } = useSiteContent();
@@ -60,6 +29,7 @@ export default function Education() {
   const reduceMotion = useReducedMotion();
   const [touch, setTouch] = useState(false);
   const [active, setActive] = useState(0);
+  const [slide, setSlide] = useState(0);
   const [lit, setLit] = useState<boolean[]>([]);
   const fractionsRef = useRef<number[]>([]);
 
@@ -182,7 +152,7 @@ export default function Education() {
             />
           </div>
 
-          <div className="flex flex-wrap items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-gray-500">
+          <div className="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.3em] text-gray-500">
             <span>
               {String(items.length).padStart(2, "0")}{" "}
               {t({ en: "Entries", id: "Entri" })}
@@ -191,7 +161,10 @@ export default function Education() {
               <>
                 <span aria-hidden="true" className="h-3 w-px bg-white/15" />
                 <span className="inline-flex items-center gap-2 text-accent">
-                  <span aria-hidden="true" className="edu-pulse" />
+                  <span
+                    aria-hidden="true"
+                    className="h-1.5 w-1.5 rounded-full bg-accent"
+                  />
                   {t({ en: "In progress", id: "Sedang berjalan" })}
                 </span>
               </>
@@ -199,15 +172,15 @@ export default function Education() {
           </div>
         </div>
 
-        <div ref={cardsRef} className="relative space-y-8 md:space-y-12 md:pl-14">
-          <span
-            ref={railRef}
-            aria-hidden="true"
-            className="absolute left-[7px] top-4 hidden h-[calc(100%-2rem)] w-px bg-white/10 md:block"
-          />
+        {/* Desktop: daftar vertikal dengan garis waktu yang menyala saat discroll.
+            Di HP daftar ini tidak dirender sama sekali — lihat blok carousel di
+            bawah — supaya pengukuran spine tidak pernah melihat elemen tersembunyi
+            yang tinggi dan lebarnya nol. */}
+        <div ref={cardsRef} className="edu-list relative hidden md:block md:pl-14">
+          <span ref={railRef} aria-hidden="true" className="edu-rail" />
           <motion.span
             aria-hidden="true"
-            className="absolute left-[7px] top-4 hidden h-[calc(100%-2rem)] w-px origin-top bg-accent md:block"
+            className="edu-rail edu-rail-fill"
             style={reduceMotion || touch ? undefined : { scaleY: spineScale }}
           />
 
@@ -225,6 +198,35 @@ export default function Education() {
               }}
             />
           ))}
+        </div>
+
+        {/* Mobile: satu entri per slide, geser kiri/kanan. */}
+        <div className="edu-slides md:hidden">
+          {items.length > 0 &&
+            (() => {
+              const idx = Math.min(slide, items.length - 1);
+              return (
+                <MobileCarousel
+                  total={items.length}
+                  idx={idx}
+                  onSlide={setSlide}
+                  revealClassName="h-auto"
+                >
+                  <EducationCard
+                    index={idx}
+                    item={items[idx]}
+                    t={t}
+                    /* Sengaja false: penanda posisi di HP sudah dibawa progress
+                       rail carousel, jadi border bawah kartu tidak perlu ikut
+                       menyala — dua penanda oranye berdekatan hanya jadi riuh. */
+                    active={false}
+                    current={readsCurrent(items[idx].period)}
+                    lit
+                    entrance={false}
+                  />
+                </MobileCarousel>
+              );
+            })()}
         </div>
       </div>
     </section>
@@ -249,6 +251,7 @@ function EducationCard({
   active,
   current,
   lit,
+  entrance = true,
   ref,
 }: {
   index: number;
@@ -257,98 +260,49 @@ function EducationCard({
   active: boolean;
   current: boolean;
   lit: boolean;
-  ref: (node: HTMLDivElement | null) => void;
+  /** Animasi masuk saat discroll. Dimatikan di carousel HP, karena perpindahan
+   *  slide sudah dianimasikan oleh MobileCarousel — dua animasi masuk pada satu
+   *  elemen membuat teks sempat tak terlihat. */
+  entrance?: boolean;
+  ref?: (node: HTMLDivElement | null) => void;
 }) {
   const reduceMotion = useReducedMotion();
   const number = String(index + 1).padStart(2, "0");
-  const icon = FIELD_ICONS[index % FIELD_ICONS.length];
+  const animate = entrance && !reduceMotion;
 
   return (
     <motion.div
       ref={ref}
       data-idx={index}
-      initial={
-        reduceMotion ? undefined : { opacity: 0, y: 56, rotateX: 7, scale: 0.96 }
-      }
-      whileInView={
-        reduceMotion ? undefined : { opacity: 1, y: 0, rotateX: 0, scale: 1 }
-      }
-      viewport={{ once: true, margin: "0px 0px -10% 0px" }}
-      transition={
-        reduceMotion ? undefined : { duration: 0.9, ease: [0.16, 1, 0.3, 1] }
-      }
-      style={reduceMotion ? undefined : { transformPerspective: 1000 }}
-      className="relative"
+      initial={animate ? { opacity: 0, y: 20 } : undefined}
+      whileInView={animate ? { opacity: 1, y: 0 } : undefined}
+      viewport={animate ? { once: true, margin: "0px 0px -10% 0px" } : undefined}
+      transition={animate ? { duration: 0.6, ease: [0.16, 1, 0.3, 1] } : undefined}
+      className={`edu-row${active ? " is-focus" : ""}`}
     >
       <span
         aria-hidden="true"
-        className={`edu-node hidden md:flex ${active ? "is-current" : ""} ${
-          lit ? "is-done" : ""
+        className={`edu-node${lit ? " is-done" : ""}${
+          current ? " is-current" : ""
         }`}
-      >
-        <span />
-      </span>
+      />
 
-      <Tilt3D
-        className="h-full"
-        max={9}
-        scale={1.02}
-        lift={16}
-        glare
-        glareClassName="rounded-[1.75rem]"
-        innerClassName="edu-stack"
-      >
-        <span aria-hidden="true" className="edu-panel" />
-
-        <span
-          aria-hidden="true"
-          className="edu-ghost-wrap tilt-layer"
-          style={{ "--tz": "16px" } as React.CSSProperties}
-        >
-          <span className="edu-ghost">{number}</span>
+      <div className="edu-meta">
+        <span className="edu-index-mark">{number}</span>
+        <span className={`edu-period${current ? " is-current" : ""}`}>
+          {item.period}
         </span>
+        <span className="edu-loc">{t(item.location)}</span>
+      </div>
 
-        <article
-          className="edu-body tilt-layer"
-          style={{ "--tz": "30px" } as React.CSSProperties}
-        >
-          <div className="grid gap-6 md:grid-cols-[210px_1fr] md:gap-10">
-            <div className="md:border-r md:border-white/10 md:pr-8">
-              <span className="edu-chip" aria-hidden="true">
-                {icon}
-              </span>
-
-              <p className="mt-5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-medium text-accent">
-                <span className="edu-index-mark">{number}</span>
-                {current && <span aria-hidden="true" className="edu-pulse" />}
-                <span>{item.period}</span>
-              </p>
-              <p className="mt-1 text-sm text-gray-400">{t(item.location)}</p>
-            </div>
-
-            <div>
-              <ScrollWordReveal
-                as="h3"
-                text={t(item.degree)}
-                baseOpacity={0.2}
-                className="text-display text-2xl uppercase text-white md:text-3xl"
-              />
-              <p className="mt-2 text-sm uppercase tracking-widest text-gray-400">
-                {item.school}
-              </p>
-              <p className="mt-3 inline-block rounded-full border border-accent/30 bg-accent/10 px-3 py-1 text-xs font-medium text-accent">
-                {t(item.detail)}
-              </p>
-              <ScrollWordReveal
-                as="p"
-                text={t(item.description)}
-                baseOpacity={0.2}
-                className="mt-4 leading-relaxed text-gray-300"
-              />
-            </div>
-          </div>
-        </article>
-      </Tilt3D>
+      <div>
+        <h3 className="text-display text-2xl uppercase text-white md:text-3xl">
+          {t(item.degree)}
+        </h3>
+        <p className="edu-school">{item.school}</p>
+        <span className="edu-detail">{t(item.detail)}</span>
+        <p className="edu-desc">{t(item.description)}</p>
+      </div>
     </motion.div>
   );
 }

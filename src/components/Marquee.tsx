@@ -75,16 +75,16 @@ export default function Marquee({
         className="flex items-center gap-8 whitespace-nowrap"
       >
         <span
-          className="text-comico text-5xl uppercase text-outline md:text-8xl"
+          className="text-comico text-5xl uppercase text-outline max-md:text-6xl md:text-8xl"
           style={{ lineHeight: 1 }}
         >
           {label}
         </span>
         <span
-          className="inline-flex shrink-0 translate-y-[-0.09em] items-center justify-center text-5xl md:text-8xl"
+          className="inline-flex shrink-0 translate-y-[-0.09em] items-center justify-center text-5xl max-md:text-6xl md:text-8xl"
           style={{ lineHeight: 1 }}
         >
-          <span className="text-3xl leading-none text-accent md:text-5xl ">
+          <span className="text-3xl leading-none text-accent max-md:text-4xl md:text-5xl ">
 
           </span>
         </span>

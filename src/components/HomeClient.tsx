@@ -192,7 +192,7 @@ export default function HomeClient({
       <ScrollProgress />
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />
 
-      <Magnetic className="fixed right-6 bottom-8 z-[95] lg:right-12" strength={0.3}>
+      <Magnetic className="m-scroll-btn fixed right-6 bottom-8 z-[95] lg:right-12" strength={0.3}>
       <button
         type="button"
         onClick={() => {
@@ -209,7 +209,7 @@ export default function HomeClient({
           }
         }}
         aria-label={atBottom ? "Scroll ke atas" : "Scroll ke bawah"}
-        className={`flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out ${
+        className={`flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out max-md:min-h-11 max-md:min-w-11 max-md:justify-center ${
           atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0 pointer-events-none"
         }`}
       >
@@ -242,7 +242,7 @@ export default function HomeClient({
 
       <Nav />
       <SiteConstellation />
-      <div className="sticky top-0 z-0 h-screen">
+      <div className="sticky top-0 z-0 h-screen max-md:h-[100dvh]">
         <Hero />
       </div>
 

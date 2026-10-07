@@ -29,25 +29,6 @@ function ruleBody(selector: string): string | null {
   return hits.length ? hits[hits.length - 1].body : null;
 }
 
-type Rgba = { r: number; g: number; b: number; a: number };
-
-function colors(body: string): Rgba[] {
-  const out: Rgba[] = [];
-  const re = /rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)\s*(?:,\s*([\d.]+)\s*)?\)/g;
-  let m: RegExpExecArray | null;
-  while ((m = re.exec(body))) {
-    out.push({
-      r: Number(m[1]),
-      g: Number(m[2]),
-      b: Number(m[3]),
-      a: m[4] === undefined ? 1 : Number(m[4]),
-    });
-  }
-  return out;
-}
-
-const isOrange = (c: Rgba) => c.a > 0.02 && c.r > c.g + 30 && c.r > c.b + 40;
-
 describe("lapisan backdrop Education (.edu-aura) sudah DIHAPUS", () => {
   test("tidak ada rule .edu-aura lagi di globals.css", () => {
     assert.equal(
@@ -84,23 +65,21 @@ describe("lapisan backdrop Education (.edu-aura) sudah DIHAPUS", () => {
 });
 
 describe("aksen foreground Education tetap terracotta", () => {
-  test(".edu-chip masih pakai accent", () => {
-    const body = ruleBody(".edu-chip");
-    assert.ok(body, "rule .edu-chip hilang");
-    const hasOrange = colors(body).some(isOrange);
-    const usesToken = /var\(--color-accent\)/.test(body);
-    assert.ok(hasOrange || usesToken, ".edu-chip kehilangan warna accent-nya");
+  test(".edu-detail memakai accent", () => {
+    const body = ruleBody(".edu-detail");
+    assert.ok(body, "rule .edu-detail hilang");
+    assert.match(body, /var\(--color-accent\)/, ".edu-detail kehilangan accent");
   });
 
-  test(".edu-pulse masih pakai accent", () => {
-    const body = ruleBody(".edu-pulse");
-    assert.ok(body, "rule .edu-pulse hilang");
-    assert.match(body, /var\(--color-accent\)/, ".edu-pulse kehilangan accent");
+  test(".edu-rail-fill memakai accent", () => {
+    const body = ruleBody(".edu-rail-fill");
+    assert.ok(body, "rule .edu-rail-fill hilang");
+    assert.match(body, /var\(--color-accent\)/, "fill garis kehilangan accent");
   });
 
-  test(".edu-node.is-done masih pakai accent", () => {
-    const body = ruleBody(".edu-node.is-done > span");
-    assert.ok(body, "rule .edu-node.is-done > span hilang");
+  test(".edu-node.is-done memakai accent", () => {
+    const body = ruleBody(".edu-node.is-done");
+    assert.ok(body, "rule .edu-node.is-done hilang");
     assert.match(body, /var\(--color-accent\)/, "node selesai kehilangan accent");
   });
 
@@ -108,12 +87,54 @@ describe("aksen foreground Education tetap terracotta", () => {
     assert.ok(ruleBody(".edu-index-mark"), "rule .edu-index-mark hilang");
   });
 
-  test("wash di permukaan kartu (.edu-panel) sengaja DIBIARKAN", () => {
-    const body = ruleBody(".edu-panel");
-    assert.ok(body, "rule .edu-panel hilang");
-    assert.ok(
-      colors(body).some(isOrange),
-      "wash orange di permukaan kartu terhapus — di luar scope yang disetujui",
+  test(".edu-period.is-current memakai accent", () => {
+    const body = ruleBody(".edu-period.is-current");
+    assert.ok(body, "rule .edu-period.is-current hilang");
+    assert.match(body, /var\(--color-accent\)/, "periode berjalan kehilangan accent");
+  });
+});
+
+describe("Education tidak lagi memakai wadah kartu", () => {
+  const removed = [
+    ".edu-panel",
+    ".edu-chip",
+    ".edu-pulse",
+    ".edu-ghost",
+    ".edu-ghost-wrap",
+    ".edu-body",
+    ".edu-stack",
+  ];
+
+  for (const sel of removed) {
+    test(`rule ${sel} sudah dihapus`, () => {
+      assert.equal(
+        ruleBody(sel),
+        null,
+        `${sel} masih ada — wadah kartu belum dibersihkan`,
+      );
+    });
+  }
+
+  test("markup Education tidak merender wadah kartu itu", () => {
+    for (const cls of ["edu-panel", "edu-chip", "edu-pulse", "edu-ghost"]) {
+      assert.doesNotMatch(
+        EDU,
+        new RegExp(cls),
+        `${cls} masih dirender di Education.tsx`,
+      );
+    }
+  });
+
+  test("node adalah satu elemen, bukan pembungkus dengan anak", () => {
+    assert.equal(
+      ruleBody(".edu-node > span"),
+      null,
+      "node masih memakai struktur pembungkus > span",
+    );
+    assert.match(
+      EDU,
+      /className=\{`edu-node/,
+      "node tidak lagi dirender langsung sebagai elemen tunggal",
     );
   });
 });

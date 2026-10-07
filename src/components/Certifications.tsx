@@ -91,7 +91,7 @@ export default function Certifications({
           style={{ "--tz": "52px" } as React.CSSProperties}
         >
           <div className="mb-3 flex flex-col items-start gap-1 md:flex-row md:items-center md:justify-between">
-            <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
+            <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-accent">
               {t(certifications.categories[cert.category] ?? {
                 en: cert.category,
                 id: cert.category,
@@ -138,7 +138,7 @@ export default function Certifications({
         <Reveal className="mb-10 flex flex-wrap gap-3">
           <button
             onClick={() => setActive("all")}
-            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors ${
+            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
               active === "all"
                 ? "bg-accent text-black"
                 : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
@@ -150,7 +150,7 @@ export default function Certifications({
             <button
               key={cat}
               onClick={() => setActive(cat)}
-              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors ${
+              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
                 active === cat
                   ? "bg-accent text-black"
                   : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
@@ -256,7 +256,7 @@ export default function Certifications({
             )}
             <div className="px-5 py-5 md:px-6 md:py-6">
               <div className="mb-3 flex items-center justify-between">
-                <span className="rounded-full bg-accent/10 px-3 py-1 text-[11px] font-medium uppercase tracking-widest text-accent">
+                <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-accent">
                   {t(certifications.categories[selected.category] ?? {
                     en: selected.category,
                     id: selected.category,

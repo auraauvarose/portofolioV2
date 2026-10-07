@@ -91,7 +91,7 @@ export default function Contact() {
             {[contact.line1, contact.line2, contact.line3].map((line, i) => (
               <span key={i} aria-hidden="true" className="block overflow-hidden">
                 <span
-                  className={`block text-[clamp(3rem,12vw,9rem)] ${i === 1 ? "text-outline" : ""} ${i === 2 ? "text-accent" : ""}`}
+                  className={`block text-[clamp(3rem,15vw,9rem)] ${i === 1 ? "text-outline" : ""} ${i === 2 ? "text-accent" : ""}`}
                   style={{
                     transform: "translateY(115%)",
                     transition: "transform 0.95s cubic-bezier(0.16, 1, 0.3, 1)",
@@ -120,7 +120,7 @@ export default function Contact() {
               </p>
               <a
                 href={`mailto:${profile.email}`}
-                className="break-words text-base font-medium text-white transition-colors hover:text-accent sm:text-lg"
+                className="break-words text-base font-medium text-white transition-colors hover:text-accent max-md:inline-flex max-md:min-h-11 max-md:items-center sm:text-lg"
               >
                 {profile.email}
               </a>
@@ -128,7 +128,7 @@ export default function Contact() {
                 <Magnetic strength={0.25}>
                   <a
                     href="/komentar"
-                    className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-accent transition-all duration-300 hover:bg-accent hover:text-black"
+                    className="group relative inline-flex items-center gap-2.5 overflow-hidden rounded-full border border-accent/40 bg-accent/10 px-5 py-2.5 text-xs font-bold uppercase tracking-widest text-accent transition-all duration-300 hover:bg-accent hover:text-black max-md:min-h-11"
                   >
                     <svg
                       width="14"
@@ -174,12 +174,12 @@ export default function Contact() {
                     href={s.href}
                     target="_blank"
                     rel="noreferrer"
-                    className="group relative inline-block overflow-hidden text-lg text-white transition-colors hover:text-accent"
+                    className="group relative inline-block overflow-hidden text-lg text-white transition-colors hover:text-accent max-md:flex max-md:min-h-11 max-md:items-center"
                   >
                     <span className="inline-block transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:-translate-y-[110%]">
                       {s.label}
                     </span>
-                    <span className="absolute left-0 top-0 inline-block translate-y-[110%] text-serif-accent text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0">
+                    <span className="absolute left-0 top-0 inline-block translate-y-[110%] text-serif-accent text-accent transition-transform duration-500 ease-[cubic-bezier(0.23,1,0.32,1)] group-hover:translate-y-0 max-md:hidden">
                       {s.label}
                     </span>
                   </a>

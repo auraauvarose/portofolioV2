@@ -39,12 +39,12 @@ export default function Nav() {
 
   return (
     <>
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-[5] flex px-6 py-6 md:px-12 md:py-8">
+      <div className="m-topbar pointer-events-none fixed inset-x-0 top-0 z-[5] flex px-6 py-6 md:px-12 md:py-8">
         <button
           type="button"
           onClick={() => setProfileOpen(true)}
           aria-label="View profile photo"
-          className="pointer-events-auto group relative h-10 w-10 overflow-hidden rounded-full border border-white/15 bg-ink shadow-lg transition-transform hover:scale-105 md:h-14 md:w-14"
+          className="pointer-events-auto group relative h-10 w-10 overflow-hidden rounded-full border border-white/15 bg-ink shadow-lg transition-transform hover:scale-105 max-md:h-11 max-md:w-11 md:h-14 md:w-14"
         >
           { }
           <img
@@ -57,7 +57,7 @@ export default function Nav() {
         </button>
       </div>
 
-      <header className="pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-end px-6 py-6 md:px-12 md:py-8">
+      <header className="m-topbar pointer-events-none fixed inset-x-0 top-0 z-[100] flex items-center justify-end px-6 py-6 md:px-12 md:py-8">
         <nav className="pointer-events-auto hidden flex-col items-end gap-1 md:flex">
           {nav.map((item, i) => {
             const anchor = ANCHORS[i] ?? "#";
@@ -136,7 +136,7 @@ export default function Nav() {
         <div className="menu-fade-in mt-10 flex items-center gap-4" style={open ? { animationDelay: `${nav.length * 70 + 160}ms` } : undefined}>
           <button
             onClick={() => setLang("en")}
-            className={`text-sm font-bold uppercase tracking-widest transition-colors ${
+            className={`inline-flex items-center justify-center px-3 text-sm font-bold uppercase tracking-widest transition-colors max-md:min-h-11 ${
               lang === "en" ? "text-accent" : "text-gray-400 hover:text-accent dark:text-gray-400"
             }`}
           >
@@ -145,7 +145,7 @@ export default function Nav() {
           <span className="h-4 w-px bg-white/20" />
           <button
             onClick={() => setLang("id")}
-            className={`text-sm font-bold uppercase tracking-widest transition-colors ${
+            className={`inline-flex items-center justify-center px-3 text-sm font-bold uppercase tracking-widest transition-colors max-md:min-h-11 ${
               lang === "id" ? "text-accent" : "text-gray-400 hover:text-accent dark:text-gray-400"
             }`}
           >
@@ -155,7 +155,7 @@ export default function Nav() {
           <button
             onClick={toggleTheme}
             aria-label="Toggle theme"
-            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-white transition-colors hover:border-accent hover:text-accent"
+            className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-4 py-1.5 text-sm text-white transition-colors hover:border-accent hover:text-accent max-md:min-h-11"
           >
             {theme === "dark" ? (
               <>

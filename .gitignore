@@ -70,3 +70,7 @@ ANALISIS-WEBSITE.md
 
 # screenshot verifikasi
 /.artifacts/
+
+# state tooling lokal (hook mimosa, video-agent kit) — bukan bagian proyek
+.mimosa/
+.video_agent/

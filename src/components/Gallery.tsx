@@ -180,7 +180,7 @@ export default function Gallery({
                   key={cat}
                   onClick={() => setActive(cat)}
                   aria-pressed={isActive}
-                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-widest transition-colors duration-300 ${
+                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-widest transition-colors duration-300 max-md:min-h-11 ${
                     isActive
                       ? "bg-accent text-black"
                       : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
@@ -360,7 +360,7 @@ export default function Gallery({
               </div>
 
               <button
-                className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent max-md:min-h-11 md:hidden"
                 onClick={(e) => {
                   e.stopPropagation();
                   rotateToLandscape();

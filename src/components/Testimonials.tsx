@@ -74,7 +74,7 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
                           href={item.link}
                           target="_blank"
                           rel="noreferrer"
-                          className="block truncate text-sm font-semibold text-white transition-colors hover:text-accent"
+                          className="block truncate text-sm font-semibold text-white transition-colors hover:text-accent max-md:py-3"
                         >
                           {item.author}
                         </a>
