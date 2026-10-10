@@ -831,37 +831,21 @@ html.js .reveal {
   position: relative;
 }
 
-/* Garis pemisah: satu-satunya pemisah antar entri. Warnanya naik saat pitanya
-   sedang dibaca, jadi posisi baca terbaca dari garis — bukan dari kotak. */
-.edu-band-rule {
-  height: 1px;
-  background: rgba(255, 255, 255, 0.09);
-  transition: background-color 0.5s ease;
+/* Entri dipisahkan jarak, bukan garis. Garis pemisah selebar layar di atas dan
+   bawah tiap entri membentuk tepi yang terbaca sebagai kotak — wadah yang
+   persis ingin dihindari di section ini. Jarak vertikal memisahkan tanpa
+   menggambar apa pun. */
+.edu-band + .edu-band {
+  margin-top: 3rem;
 }
-:root:not(.dark) .edu-band-rule {
-  background: rgba(13, 14, 19, 0.11);
-}
-.edu-band.is-active > .edu-band-rule {
-  background: linear-gradient(
-    to right,
-    rgba(235, 89, 57, 0.75),
-    rgba(235, 89, 57, 0.12) 62%,
-    transparent
-  );
-}
-:root:not(.dark) .edu-band.is-active > .edu-band-rule {
-  background: linear-gradient(
-    to right,
-    rgba(176, 58, 13, 0.7),
-    rgba(176, 58, 13, 0.12) 62%,
-    transparent
-  );
+@media (min-width: 768px) {
+  .edu-band + .edu-band {
+    margin-top: 4.5rem;
+  }
 }
 
 .edu-band-stage {
   transform-origin: center top;
-  /* Pita ber-transform mempromosikan keturunannya jadi layer sendiri. Tanpa
-     petunjuk ini, tepi garis 1px bergetar selama animasi masuk berjalan. */
   backface-visibility: hidden;
 }
 @media (prefers-reduced-motion: reduce) {

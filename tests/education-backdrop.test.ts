@@ -67,13 +67,28 @@ describe("aksen foreground Education tetap terracotta", () => {
     assert.match(body, /var\(--color-accent\)/, ".edu-detail kehilangan accent");
   });
 
-  test(".edu-band-rule memakai accent saat pitanya aktif", () => {
-    const body = ruleBody(".edu-band.is-active > .edu-band-rule");
-    assert.ok(body, "rule .edu-band.is-active > .edu-band-rule hilang");
+  test(".edu-band-ghost memakai accent saat pitanya aktif", () => {
+    const body = ruleBody(".edu-band.is-active .edu-band-ghost");
+    assert.ok(body, "rule .edu-band.is-active .edu-band-ghost hilang");
     assert.match(
       body,
       /rgba\(235,\s*89,\s*57/,
-      "garis pita aktif kehilangan accent",
+      "angka latar pita aktif kehilangan accent",
+    );
+  });
+
+  test("tidak ada garis pemisah selebar layar di Education", () => {
+    const hits = RULES.filter((r) => r.sel.includes("edu-band-rule"));
+    assert.deepEqual(
+      hits.map((h) => h.sel),
+      [],
+      "garis pemisah penuh lebar di atas & bawah tiap entri membentuk tepi " +
+        "yang terbaca sebagai kotak; pemisah harus dibawa jarak, bukan garis",
+    );
+    assert.doesNotMatch(
+      EDU,
+      /edu-band-rule/,
+      "elemen garis pemisah masih dirender di Education.tsx",
     );
   });
 

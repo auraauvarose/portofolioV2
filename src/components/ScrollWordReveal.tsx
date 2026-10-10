@@ -103,9 +103,14 @@ export default function ScrollWordReveal({
 }: ScrollWordRevealProps) {
   const reduceMotion = useReducedMotion();
   const rootRef = useRef<HTMLSpanElement>(null);
+  // The scrub window ends at the reading line (55% viewport height), not at
+  // the top edge (14%). Ending at 14% kept the last word blurred until the
+  // heading had passed the middle of the screen — exactly while it was being
+  // read, so the blur outlasted its welcome. Ending at 55% makes every word
+  // sharp right as the heading arrives at the reading position.
   const { scrollYProgress } = useScroll({
     target: rootRef,
-    offset: ["start 0.86", "start 0.14"],
+    offset: ["start 0.86", "start 0.55"],
   });
   const scrubProgress = useSpring(scrollYProgress, {
     stiffness: 150,

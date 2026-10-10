@@ -97,9 +97,10 @@ export default function Education() {
         </div>
       </div>
 
-      {/* Pita entri. Sengaja tidak berada di dalam kontainer berlebar maksimum:
-          garis pemisahnya harus berjalan dari tepi ke tepi layar, sementara
-          isinya tetap sejajar dengan judul section di atasnya. */}
+      {/* Entri berurutan tanpa satu pun garis pemisah. Garis penuh lebar di
+          atas dan bawah tiap entri membentuk tepi yang terbaca sebagai kotak —
+          persis yang ingin dihindari. Pemisah antar entri dibawa jarak dan
+          ukuran huruf, bukan garis. */}
       <div className="mt-14 md:mt-20">
         {items.map((item, i) => (
           <EducationBand
@@ -121,7 +122,6 @@ export default function Education() {
             }}
           />
         ))}
-        <span aria-hidden="true" className="edu-band-rule block" />
       </div>
     </section>
   );
@@ -198,8 +198,6 @@ function EducationBand({
       data-idx={index}
       className={`edu-band${active ? " is-active" : ""}`}
     >
-      <span aria-hidden="true" className="edu-band-rule block" />
-
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Perspektif ditulis di elemen yang sama karena tidak ada leluhur
             ber-perspektif di sini — perspektif Tilt3D letaknya di dalam dan
@@ -221,8 +219,6 @@ function EducationBand({
             max={3}
             scale={1.004}
             lift={0}
-            glare
-            glareClassName="rounded-2xl"
             disabled={still}
           >
             <div className="edu-band-inner">
