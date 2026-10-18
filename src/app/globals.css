@@ -2045,10 +2045,38 @@ summary {
     padding-right: max(24px, env(safe-area-inset-right));
   }
 
-  /* Tombol scroll di kanan bawah. */
+  /* Tombol scroll di tengah bawah. Tetap menetap di layar (fixed), tapi
+     z-index-nya diturunkan ke bawah section konten (z-10) supaya saat halaman
+     di-scroll ia tertutup section berikutnya, bukan melayang di atasnya.
+     left/right 0 + margin auto dipakai supaya tidak bentrok dengan transform
+     magnetik (masih hidup di layar sempit yang pointer-nya halus). */
   .m-scroll-btn {
-    right: max(24px, env(safe-area-inset-right));
+    position: fixed;
+    z-index: 1;
+    left: max(0px, env(safe-area-inset-left));
+    right: max(0px, env(safe-area-inset-right));
+    width: fit-content;
+    margin-inline: auto;
     bottom: max(32px, env(safe-area-inset-bottom));
+  }
+
+  /* Tulisan SCROLL/TOP di HP: hitam saat dark mode. */
+  :root.dark .m-scroll-btn button > span:first-of-type {
+    color: #000;
+  }
+
+  /* Di HP tombol ini tidak beranimasi: selalu terlihat selama hero tampil,
+     seperti label statis. Blok ini di luar @layer, jadi menang atas utility
+     opacity-0 / pointer-events-none / transition-opacity dari JSX. */
+  .m-scroll-btn button {
+    opacity: 1;
+    pointer-events: auto;
+    transition: none;
+  }
+
+  /* Panahnya juga berhenti memantul di HP. */
+  .m-scroll-btn button > span:last-of-type {
+    animation: none;
   }
 
   /* Panel menu menutupi layar penuh, jadi ia yang harus menghindari notch. */

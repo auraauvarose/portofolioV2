@@ -209,8 +209,10 @@ export default function HomeClient({
           }
         }}
         aria-label={atBottom ? "Scroll ke atas" : "Scroll ke bawah"}
-        className={`flex cursor-pointer flex-col items-center gap-3 transition-all duration-500 ease-out max-md:min-h-11 max-md:min-w-11 max-md:justify-center ${
-          atTop || atBottom ? "translate-x-0 opacity-100" : "translate-x-6 opacity-0 pointer-events-none"
+        className={`flex cursor-pointer flex-col items-center gap-3 transition-opacity max-md:min-h-11 max-md:min-w-11 max-md:justify-center ${
+          atTop || atBottom
+            ? "opacity-100 duration-300 ease-out"
+            : "opacity-0 duration-150 ease-out pointer-events-none"
         }`}
       >
           <span className="text-[13px] uppercase tracking-[0.4em] text-[#6b6b6b] [writing-mode:vertical-rl] dark:text-[#b7ab98]">

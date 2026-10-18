@@ -81,7 +81,6 @@ export const config = {
     "/api/reorder",
     "/api/comments",
     "/api/analytics",
-    "/api/contact",
-    
+    "/api/contact",  
   ],
 };
