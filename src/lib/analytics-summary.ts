@@ -66,6 +66,7 @@ function visitEntries(value: unknown): VisitLogEntry[] {
       path: item.path as string,
       device: item.device as string,
       location: item.location as string,
+      ip: typeof item.ip === "string" ? item.ip : "—",
       time: item.time as string,
     }));
 }

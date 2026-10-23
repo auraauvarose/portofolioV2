@@ -244,7 +244,7 @@ export default function HomeClient({
 
       <Nav />
       <SiteConstellation />
-      <div className="sticky top-0 z-0 h-screen max-md:h-[100dvh]">
+      <div className="sticky top-0 z-0 h-screen max-md:h-[100svh]">
         <Hero />
       </div>
 

@@ -2,6 +2,7 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   formatWibTime,
+  formatIp,
   visitLogEntry,
   deviceLabel,
 } from "../src/lib/visit-log";
@@ -91,4 +92,36 @@ test("visitLogEntry: device/lokasi kosong → fallback '—'", () => {
   assert.equal(e.device, "—");
   assert.equal(e.location, "—");
   assert.equal(e.time, "14:32 WIB · 12 Feb");
+});
+
+test("visitLogEntry: IP perangkat ikut disertakan apa adanya", () => {
+  const e = visitLogEntry({
+    path: "/",
+    device: "mobile",
+    city: "Jakarta",
+    country: "ID",
+    ip: "103.28.14.77",
+    created_at: "2026-02-12T07:32:00Z",
+  });
+  assert.equal(e.ip, "103.28.14.77");
+});
+
+test("formatIp: baris lama tanpa IP & 'unknown' → '—'", () => {
+  assert.equal(formatIp(null), "—");
+  assert.equal(formatIp(undefined), "—");
+  assert.equal(formatIp(""), "—");
+  assert.equal(formatIp("  "), "—");
+  assert.equal(formatIp("unknown"), "—");
+  assert.equal(formatIp("2001:db8::1"), "2001:db8::1");
+});
+
+test("visitLogEntry: tanpa kolom ip → ip = '—' (data lama tetap valid)", () => {
+  const e = visitLogEntry({
+    path: "/",
+    device: "desktop",
+    city: null,
+    country: null,
+    created_at: "2026-02-12T07:32:00Z",
+  });
+  assert.equal(e.ip, "—");
 });

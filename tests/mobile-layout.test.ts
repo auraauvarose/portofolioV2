@@ -227,12 +227,12 @@ describe("Mobile — target sentuh minimal 44px", () => {
 });
 
 describe("Mobile — tinggi viewport nyata", () => {
-  test("hero memakai dvh di HP supaya tidak terpotong URL bar", () => {
-    assert.ok(src("src/components/Hero.tsx").includes("max-md:h-[100dvh]"));
+  test("hero memakai svh di HP supaya tinggi tidak ikut URL bar", () => {
+    assert.ok(src("src/components/Hero.tsx").includes("max-md:h-[100svh]"));
   });
 
-  test("pembungkus sticky hero ikut memakai dvh", () => {
-    assert.ok(src("src/components/HomeClient.tsx").includes("max-md:h-[100dvh]"));
+  test("pembungkus sticky hero ikut memakai svh", () => {
+    assert.ok(src("src/components/HomeClient.tsx").includes("max-md:h-[100svh]"));
   });
 });
 

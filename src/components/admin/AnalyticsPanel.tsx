@@ -503,6 +503,11 @@ export default function AnalyticsPanel() {
                     <span className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
                       {v.time}
                     </span>
+                    {v.ip !== "—" && (
+                      <code className="a-data shrink-0 text-xs text-[var(--color-a-dim)]">
+                        ip {v.ip}
+                      </code>
+                    )}
                     <code className="a-data ml-auto truncate text-[11px] text-[var(--color-a-faint)]">
                       {v.path}
                     </code>

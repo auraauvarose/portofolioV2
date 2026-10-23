@@ -113,7 +113,7 @@ export default function Hero() {
       ref={heroRef}
       id="top"
       onMouseMove={onMove}
-      className="relative flex h-screen w-full items-center justify-center overflow-hidden px-4 text-ecru max-md:h-[100dvh]"
+      className="relative flex h-screen w-full items-center justify-center overflow-hidden px-4 text-ecru max-md:h-[100svh]"
       style={{ "--mx": "-200px", "--my": "-200px", "--hero-dim": 0 } as React.CSSProperties}
     >
       <div

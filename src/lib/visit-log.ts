@@ -2,6 +2,7 @@ export type VisitLogEntry = {
   path: string;
   device: string;
   location: string;
+  ip: string;
   time: string;
 };
 
@@ -10,6 +11,7 @@ export type VisitLogRow = {
   device: string | null;
   country: string | null;
   city: string | null;
+  ip?: string | null;
   created_at: string | null;
 };
 
@@ -44,11 +46,22 @@ export function formatLocation(city: string | null, country: string | null): str
   return "—";
 }
 
+/**
+ * IP klien untuk ditampilkan. `clientIp()` mengembalikan "unknown" saat header
+ * Cloudflare tidak ada (mis. request dari jaringan lokal), dan baris lama
+ * belum punya IP sama sekali — keduanya jadi "—" supaya log tetap rapi.
+ */
+export function formatIp(ip: string | null | undefined): string {
+  const t = typeof ip === "string" ? ip.trim() : "";
+  return !t || t === "unknown" ? "—" : t;
+}
+
 export function visitLogEntry(row: VisitLogRow): VisitLogEntry {
   return {
     path: row.path,
     device: deviceLabel(row.device),
     location: formatLocation(row.city, row.country),
+    ip: formatIp(row.ip),
     time: formatWibTime(row.created_at),
   };
 }

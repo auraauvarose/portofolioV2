@@ -126,6 +126,7 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     [
       {
         ...base,
+        ip,
         device: parseDevice(ua),
         browser: parseBrowser(ua),
         phone_brand: parsePhoneBrand(ua),
@@ -134,9 +135,14 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
       },
       {
         ...base,
+        ip,
         device: parseDevice(ua),
         country: geo.country,
         city: geo.city,
+      },
+      {
+        ...base,
+        ip,
       },
       base,
     ],
@@ -168,11 +174,13 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     phone_brand?: string | null;
     country?: string | null;
     city?: string | null;
+    ip?: string | null;
     created_at: string;
   };
 
   const { ok, data, error } = await withFallback<string, Row[]>(
     [
+      "path,referrer,visitor_hash,device,browser,phone_brand,country,city,ip,created_at",
       "path,referrer,visitor_hash,device,browser,phone_brand,country,city,created_at",
       "path,referrer,visitor_hash,device,country,city,created_at",
       "path,referrer,visitor_hash,created_at",
@@ -285,6 +293,7 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
         device: r.device ?? null,
         country: r.country ?? null,
         city: r.city ?? null,
+        ip: r.ip ?? null,
         created_at: r.created_at,
       }),
     ),
