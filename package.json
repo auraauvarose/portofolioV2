@@ -22,13 +22,13 @@
     "aws4fetch": "^1.0.20",
     "lenis": "^1.3.26",
     "motion": "^13.1.0",
-    "next": "^15.1.0",
+    "next": "^15.5.28",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.7",
-    "@opennextjs/cloudflare": "^1.20.2",
+    "@opennextjs/cloudflare": "^1.20.13",
     "@tailwindcss/postcss": "^4.0.0",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
@@ -38,6 +38,6 @@
     "tailwindcss": "^4.0.0",
     "tsx": "^4.23.13",
     "typescript": "^5.7.0",
-    "wrangler": "^4.125.0"
+    "wrangler": "^4.152.0"
   }
 }
