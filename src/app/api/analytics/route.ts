@@ -5,6 +5,7 @@ import { parseBrowser, parseDevice, parsePhoneBrand } from "@/lib/device";
 import { visitLogEntry } from "@/lib/visit-log";
 import { withFallback } from "@/lib/db-fallback";
 import { clientIp } from "@/lib/client-ip";
+import { notifyVisit } from "@/lib/visitor-notify";
 
 export const dynamic = "force-dynamic";
 
@@ -150,6 +151,21 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   );
 
   if (!ok) console.warn("analytics insert:", error);
+
+  // Notifikasi Telegram. Tanpa env token, `notifyVisit` langsung return tanpa
+  // network call. Dibatasi timeout 5 detik di dalam fungsi itu, jadi request
+  // pengunjung tidak bisa menggantung.
+  await notifyVisit({
+    ip,
+    path,
+    device: parseDevice(ua),
+    browser: parseBrowser(ua),
+    phoneBrand: parsePhoneBrand(ua),
+    country: geo.country,
+    city: geo.city,
+    createdAt: new Date().toISOString(),
+  });
+
   return NextResponse.json({ ok: true });
 });
 
