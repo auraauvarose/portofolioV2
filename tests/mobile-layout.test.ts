@@ -317,7 +317,7 @@ describe("Mobile — aksen ekspresif", () => {
   test("judul hero memakai ruang yang benar-benar tersedia, bukan hanya yang sekarang", () => {
     const H = src("src/components/Hero.tsx");
     assert.equal(
-      count(H, "text-[clamp(3rem,18vw,6rem)]"),
+      count(H, "text-[clamp(3rem,21vw,6rem)]"),
       2,
       "judul hero dan salinan depth-nya harus sama-sama naik skala",
     );

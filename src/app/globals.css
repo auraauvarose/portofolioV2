@@ -1495,6 +1495,15 @@ summary {
     -webkit-font-smoothing: auto;
   }
 }
+/* Di HP judul hero pakai Bevellier 700 — lebih tinggi dan lebih padat
+   daripada Tanker, jadi bisa naik ukuran tanpa melewati lebar layar. */
+@media (max-width: 639px) {
+  .hero-title-3d__heading {
+    font-family: var(--font-bevellier), sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   .hero-title-3d__depth,
   .hero-title-3d__heading,
