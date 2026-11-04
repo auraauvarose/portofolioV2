@@ -44,3 +44,24 @@ export function certificateRequestMessage(
     `IP     : ${v.ip}`,
   ].join("\n");
 }
+
+/** Subject penanda di `contact_messages` untuk permintaan izin sertifikat. */
+export const CERT_SUBJECT = "Minta izin lihat sertifikat";
+
+/** Cookie per-perangkat: berisi id baris permintaan milik pengunjung. */
+export const CERT_COOKIE = "cert_request";
+
+export type CertificateAccess = "approved" | "denied" | "pending" | "none";
+
+/**
+ * Status akses dari baris `contact_messages`: admin menekan "Setuju" →
+ * status `replied`, "Tidak" → `archived`.
+ */
+export function certificateAccess(
+  row: { subject: string | null; status: string } | null | undefined,
+): CertificateAccess {
+  if (!row || row.subject !== CERT_SUBJECT) return "none";
+  if (row.status === "replied") return "approved";
+  if (row.status === "archived") return "denied";
+  return "pending";
+}

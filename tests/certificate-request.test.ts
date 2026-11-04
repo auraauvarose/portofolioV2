@@ -2,8 +2,10 @@ import { test, describe } from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  CERT_SUBJECT,
   MAX_NAME,
   MAX_PURPOSE,
+  certificateAccess,
   certificateRequestMessage,
   parseCertificateRequest,
 } from "../src/lib/certificate-request.ts";
@@ -52,5 +54,36 @@ describe("certificateRequestMessage", () => {
     assert.match(text, /Budi/);
     assert.match(text, /Verifikasi lamaran kerja/);
     assert.match(text, /1\.2\.3\.4/);
+  });
+});
+
+describe("certificateAccess", () => {
+  test("tanpa baris / bukan permintaan sertifikat → none", () => {
+    assert.equal(certificateAccess(null), "none");
+    assert.equal(certificateAccess(undefined), "none");
+    assert.equal(
+      certificateAccess({ subject: "Halo", status: "replied" }),
+      "none",
+    );
+  });
+
+  test("status replied = disetujui, archived = ditolak", () => {
+    assert.equal(
+      certificateAccess({ subject: CERT_SUBJECT, status: "replied" }),
+      "approved",
+    );
+    assert.equal(
+      certificateAccess({ subject: CERT_SUBJECT, status: "archived" }),
+      "denied",
+    );
+  });
+
+  test("status new/read masih menunggu", () => {
+    for (const status of ["new", "read"]) {
+      assert.equal(
+        certificateAccess({ subject: CERT_SUBJECT, status }),
+        "pending",
+      );
+    }
   });
 });

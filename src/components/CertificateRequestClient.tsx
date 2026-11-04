@@ -100,10 +100,16 @@ export default function CertificateRequestClient() {
             >
               <p className="text-sm leading-relaxed text-[#22c55e]">
                 {t({
-                  en: "Request sent. Wait for the owner to reply.",
-                  id: "Permintaan terkirim. Tunggu balasan dari pemilik situs ya.",
+                  en: "Request sent. Once the owner approves, the certificates unlock automatically on this device only.",
+                  id: "Permintaan terkirim. Kalau pemilik situs menyetujui, sertifikat otomatis terbuka di perangkat ini saja.",
                 })}
               </p>
+              <Link
+                href="/"
+                className="inline-flex items-center text-xs uppercase tracking-widest text-accent transition-colors hover:text-accent-soft max-md:min-h-11"
+              >
+                {t({ en: "Back to home", id: "Kembali ke beranda" })}
+              </Link>
               <button
                 type="button"
                 onClick={() => setStatus("idle")}

@@ -3,6 +3,9 @@ import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { clientIp } from "@/lib/client-ip";
 import { sendTelegram } from "@/lib/telegram";
 import {
+  CERT_COOKIE,
+  CERT_SUBJECT,
+  certificateAccess,
   certificateRequestMessage,
   parseCertificateRequest,
 } from "@/lib/certificate-request";
@@ -53,15 +56,19 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   }
 
   const supabase = await createSupabaseAdmin();
-  const { error } = await supabase.from("contact_messages").insert({
-    name,
-    // Form ini tidak meminta email; kolomnya NOT NULL jadi diisi penanda.
-    email: "—",
-    subject: "Minta izin lihat sertifikat",
-    message: purpose,
-    status: "new",
-    ip_hash: null,
-  });
+  const { data, error } = await supabase
+    .from("contact_messages")
+    .insert({
+      name,
+      // Form ini tidak meminta email; kolomnya NOT NULL jadi diisi penanda.
+      email: "—",
+      subject: CERT_SUBJECT,
+      message: purpose,
+      status: "new",
+      ip_hash: null,
+    })
+    .select("id")
+    .maybeSingle();
 
   if (error) {
     console.error("certificate request insert failed:", error.message);
@@ -73,5 +80,34 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
 
   await sendTelegram(certificateRequestMessage({ name, purpose, ip }));
 
-  return NextResponse.json({ ok: true }, { status: 201 });
+  const res = NextResponse.json({ ok: true }, { status: 201 });
+  // Id baris = token perangkat: admin menyetujui baris ini → perangkat ini
+  // saja yang sertifikatnya terbuka (cookie httpOnly, tak bisa dibaca JS).
+  if (data?.id) {
+    res.cookies.set({
+      name: CERT_COOKIE,
+      value: data.id,
+      httpOnly: true,
+      sameSite: "lax",
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      maxAge: 60 * 60 * 24 * 365,
+    });
+  }
+  return res;
+});
+
+/** Cek status izin untuk perangkat ini (dipanggil halaman sertifikat). */
+export const GET = withJsonErrors(async function GET(req: NextRequest) {
+  const id = req.cookies.get(CERT_COOKIE)?.value ?? "";
+  if (!id) return NextResponse.json({ status: "none" });
+
+  const supabase = await createSupabaseAdmin();
+  const { data } = await supabase
+    .from("contact_messages")
+    .select("subject,status")
+    .eq("id", id)
+    .maybeSingle();
+
+  return NextResponse.json({ status: certificateAccess(data) });
 });

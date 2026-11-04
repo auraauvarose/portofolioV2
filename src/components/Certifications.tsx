@@ -24,7 +24,37 @@ export default function Certifications({
   const [selected, setSelected] = useState<Certification | null>(null);
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
+  const [unlocked, setUnlocked] = useState(false);
   const modalRef = useFocusTrap<HTMLDivElement>(selected !== null);
+
+  // Izin disimpan di cookie perangkat ini. Dicek saat halaman dibuka dan saat
+  // tab kembali aktif, jadi begitu admin menekan "Setuju" sertifikat terbuka
+  // tanpa reload.
+  useEffect(() => {
+    let alive = true;
+    const check = async () => {
+      try {
+        const res = await fetch("/api/certificate-request", {
+          cache: "no-store",
+        });
+        const data = await res.json().catch(() => ({}));
+        if (alive && data?.status === "approved") setUnlocked(true);
+      } catch {
+        // offline / jaringan gagal → tetap terkunci
+      }
+    };
+    void check();
+    const onWake = () => {
+      if (document.visibilityState === "visible") void check();
+    };
+    document.addEventListener("visibilitychange", onWake);
+    window.addEventListener("focus", check);
+    return () => {
+      alive = false;
+      document.removeEventListener("visibilitychange", onWake);
+      window.removeEventListener("focus", check);
+    };
+  }, []);
 
   useEffect(() => {
     setSlide(0);
@@ -72,11 +102,11 @@ export default function Certifications({
             <img
               src={cert.image_url}
               alt={cert.alt_text || cert.title_en}
-              className="h-full w-full scale-105 object-cover blur-lg"
+              className={`h-full w-full scale-105 object-cover transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
               loading="lazy"
               decoding="async"
             />
-            <LockOverlay />
+            {!unlocked && <LockOverlay />}
           </div>
         ) : (
           <div
@@ -245,10 +275,10 @@ export default function Certifications({
                 <img
                   src={selected.image_url}
                   alt={selected.alt_text || selected.title_en || "Certification"}
-                  className="max-h-[58vh] w-auto max-w-full scale-105 object-contain blur-lg"
+                  className={`max-h-[58vh] w-auto max-w-full scale-105 object-contain transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
                   decoding="async"
                 />
-                <LockOverlay large />
+                {!unlocked && <LockOverlay large />}
               </div>
             ) : (
               <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">

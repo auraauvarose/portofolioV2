@@ -20,7 +20,17 @@ import {
   SearchIcon,
   CheckIcon,
 } from "@/components/admin/icons";
+import { CERT_SUBJECT } from "@/lib/certificate-request";
 import type { ContactMessage, ContactStatus } from "@/types";
+
+// Permintaan izin sertifikat memakai status yang sama: Setuju = replied,
+// Tidak = archived.
+const CERT_STATUS_LABEL: Record<ContactStatus, string> = {
+  new: "Menunggu izin",
+  read: "Menunggu izin",
+  replied: "Disetujui",
+  archived: "Ditolak",
+};
 
 const STATUS_LABEL: Record<ContactStatus, string> = {
   new: "Baru",
@@ -320,7 +330,9 @@ export default function MessagesManager() {
                           {m.name}
                         </p>
                         <Chip tone={STATUS_TONE[m.status]}>
-                          {STATUS_LABEL[m.status]}
+                          {m.subject === CERT_SUBJECT
+                            ? CERT_STATUS_LABEL[m.status]
+                            : STATUS_LABEL[m.status]}
                         </Chip>
                         {m.budget && (
                           <Chip tone="neutral">{m.budget}</Chip>
@@ -339,6 +351,26 @@ export default function MessagesManager() {
                   </button>
 
                   <div className="flex shrink-0 items-center gap-1.5">
+                    {m.subject === CERT_SUBJECT && (
+                      <>
+                        <button
+                          type="button"
+                          onClick={() => setStatus(m, "replied")}
+                          disabled={busy || m.status === "replied"}
+                          className="a-btn a-btn-primary"
+                        >
+                          Setuju
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setStatus(m, "archived")}
+                          disabled={busy || m.status === "archived"}
+                          className="a-btn a-btn-ghost"
+                        >
+                          Tidak
+                        </button>
+                      </>
+                    )}
                     <a
                       href={mailtoReply(m)}
                       title="Balas lewat email"
