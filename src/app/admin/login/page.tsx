@@ -49,7 +49,7 @@ function LoginForm() {
           href="/"
           className="text-display text-sm uppercase tracking-[0.14em] transition-colors hover:text-[var(--color-a-accent)] lg:text-base"
         >
-          Aura <span className="text-[var(--color-a-accent)]">Auvarose</span>
+          AU<span className="text-[var(--color-a-accent)]">ROSE</span>
         </Link>
         <span className="a-key">Panel admin</span>
       </header>

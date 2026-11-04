@@ -249,7 +249,7 @@ export default function HomeClient({
       </div>
 
       <div className="relative z-[10] bg-ink">
-        <Marquee label="AURA AUVAROSE" />
+        <Marquee label="AUROSE" />
 
         <div className="relative z-10 -mt-4 w-full rounded-t-[2rem] bg-ink shadow-[0_-40px_80px_rgba(0,0,0,0.5)] dark:shadow-[0_-40px_80px_rgba(255,255,255,0.5)] [clip-path:inset(-130px_0_0_0)]">
           <About />

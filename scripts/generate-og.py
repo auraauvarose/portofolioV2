@@ -184,7 +184,7 @@ def main() -> None:
 
     # --- wordmark (right) ---
     mark_font = ImageFont.truetype(str(switzer_600), 21)
-    mark = "AURA AUVAROSE"
+    mark = "AUROSE"
     mtrack = 3.0
     mw = tracked_width(draw, mark, mark_font, mtrack)
     draw_tracked(
@@ -205,7 +205,7 @@ def main() -> None:
     # --- display name: pick ONE size for both lines that satisfies
     #     (a) horizontal fit and (b) the vertical block budget. ---
     max_text_w = W - MARGIN * 2
-    line1, line2 = "AURA", "AUVAROSE"
+    line1, line2 = "AU", "ROSE"
     name_track = 2.0
 
     by_width = min(

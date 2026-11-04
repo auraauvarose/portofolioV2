@@ -135,7 +135,7 @@ export const metadata: Metadata = {
   authors: [{ name: SITE_NAME, url: absoluteUrl("/") }],
   creator: SITE_NAME,
   keywords: [
-    "Aura Auvarose",
+    "Aurose",
     "full stack developer",
     "web developer Indonesia",
     "React developer",

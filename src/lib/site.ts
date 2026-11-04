@@ -14,7 +14,7 @@ export function absoluteUrl(path = "/"): string {
   return `${base}${path.startsWith("/") ? path : `/${path}`}`;
 }
 
-export const SITE_NAME = "Aura Auvarose";
-export const SITE_TITLE = "Aura Auvarose — Full Stack Developer";
+export const SITE_NAME = "Aurose";
+export const SITE_TITLE = "Aurose — Full Stack Developer";
 export const SITE_DESCRIPTION =
-  "Aura Auvarose — full stack developer & IT student based in Indonesia, building polished, high-performance web and mobile applications.";
+  "Aurose — full stack developer & IT student based in Indonesia, building polished, high-performance web and mobile applications.";

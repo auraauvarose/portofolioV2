@@ -7,7 +7,7 @@ export const revalidate = 120;
 
 const title = "Komentar";
 const description =
-  "Tinggalkan komentar, sapaan, atau jejak kunjunganmu di halaman buku tamu Aura Auvarose.";
+  "Tinggalkan komentar, sapaan, atau jejak kunjunganmu di halaman buku tamu Aurose.";
 
 export const metadata: Metadata = {
   title,

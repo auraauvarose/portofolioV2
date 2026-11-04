@@ -1,4 +1,4 @@
-# Portfolio V2 — Aura Auvarose
+# Portfolio V2 — Aurose
 
 A dark, terracotta-accented (**`#eb5939`**) personal portfolio — a full-stack
 Next.js app with an admin panel for managing **projects, certifications, and a
@@ -17,7 +17,7 @@ photo gallery**. Bilingual **EN / ID** with a language toggle.
 ## Table of Contents
 
 
-- [Portfolio V2 — Aura Auvarose](#portfolio-v2--aura-auvarose)
+- [Portfolio V2 — Aurose](#portfolio-v2--aurose)
   - [Table of Contents](#table-of-contents)
   - [Features](#features)
   - [Project structure](#project-structure)

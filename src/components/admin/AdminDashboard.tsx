@@ -118,8 +118,7 @@ export default function AdminDashboard() {
                 href="/"
                 className="text-display shrink-0 text-sm uppercase tracking-[0.14em] transition-colors hover:text-[var(--color-a-accent)] lg:text-base"
               >
-                Aura{" "}
-                <span className="text-[var(--color-a-accent)]">Auvarose</span>
+                AU<span className="text-[var(--color-a-accent)]">ROSE</span>
               </Link>
               <span
                 aria-hidden="true"

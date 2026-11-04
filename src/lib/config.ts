@@ -3,7 +3,7 @@ import type { Localized } from "@/types";
 export const MAX_UPLOAD_BYTES = 50 * 1024 * 1024;
 
 export const profile = {
-  name: "Aura Auvarose",
+  name: "Aurose",
   email: "auraauvaroseendica@gmail.com",
   location: {
     en: "Indonesia",
@@ -36,11 +36,11 @@ export const about = {
   kicker: { en: "About Me", id: "Tentang Saya" },
   paragraphs: [
     {
-      en: "Hi! I'm Aura Auvarose, a first-semester Informatics student carving my path in the tech world. My journey isn't about ease — it's about persistence through limitations.",
-      id: "Hai! Saya Aura Auvarose, seorang mahasiswa Informatika semester 1 yang sedang meniti jalan di dunia teknologi. Perjalanan saya bukan tentang kemudahan, melainkan tentang ketekunan di tengah keterbatasan.",
+      en: "Hi! I'm Aurose, a first-semester Informatics student carving my path in the tech world. My journey isn't about ease — it's about persistence through limitations.",
+      id: "Hai! Saya Aurose, seorang mahasiswa Informatika semester 1 yang sedang meniti jalan di dunia teknologi. Perjalanan saya bukan tentang kemudahan, melainkan tentang ketekunan di tengah keterbatasan.",
       highlight: {
-        en: ["Aura", "Auvarose"],
-        id: ["Aura", "Auvarose"],
+        en: ["Aurose"],
+        id: ["Aurose"],
       },
     },
     {

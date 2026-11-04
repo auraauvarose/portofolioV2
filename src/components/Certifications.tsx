@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
 import SectionHeading from "@/components/SectionHeading";
@@ -71,10 +72,11 @@ export default function Certifications({
             <img
               src={cert.image_url}
               alt={cert.alt_text || cert.title_en}
-              className="h-full w-full object-cover"
+              className="h-full w-full scale-105 object-cover blur-lg"
               loading="lazy"
               decoding="async"
             />
+            <LockOverlay />
           </div>
         ) : (
           <div
@@ -238,14 +240,15 @@ export default function Certifications({
             onClick={(e) => e.stopPropagation()}
           >
             {selected.image_url ? (
-              <div className="flex w-full items-center justify-center bg-black/40">
+              <div className="relative flex w-full items-center justify-center overflow-hidden bg-black/40">
                 { }
                 <img
                   src={selected.image_url}
                   alt={selected.alt_text || selected.title_en || "Certification"}
-                  className="max-h-[58vh] w-auto max-w-full object-contain"
+                  className="max-h-[58vh] w-auto max-w-full scale-105 object-contain blur-lg"
                   decoding="async"
                 />
+                <LockOverlay large />
               </div>
             ) : (
               <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
@@ -303,4 +306,44 @@ function chunk<T>(arr: T[], size: number): T[][] {
   const out: T[][] = [];
   for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
   return out;
+}
+
+/**
+ * Gembok di atas foto sertifikat. Fotonya tetap di-blur karena sertifikat
+ * memuat nama lengkap; pengunjung harus minta izin dulu lewat /izin-sertifikat.
+ */
+function LockOverlay({ large = false }: { large?: boolean }) {
+  const { t } = useLanguage();
+  return (
+    <div className="absolute inset-0 z-10 flex flex-col items-center justify-center gap-3 bg-ink/60 px-4 text-center backdrop-blur-[2px]">
+      <svg
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className={large ? "h-10 w-10 text-accent" : "h-7 w-7 text-accent"}
+      >
+        <rect x="3" y="11" width="18" height="11" rx="2" />
+        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+      </svg>
+      <p className={large ? "text-sm text-gray-200" : "text-xs text-gray-200 md:text-sm"}>
+        {t({
+          en: "Request permission to view",
+          id: "Meminta izin untuk melihat",
+        })}
+      </p>
+      <Link
+        href="/izin-sertifikat"
+        onClick={(e) => e.stopPropagation()}
+        className={`inline-flex items-center justify-center rounded-full bg-accent font-medium uppercase tracking-widest text-black transition-colors hover:bg-accent-soft ${
+          large ? "min-h-11 px-6 text-sm" : "min-h-9 px-4 text-xs"
+        }`}
+      >
+        {t({ en: "Permission", id: "Izin" })}
+      </Link>
+    </div>
+  );
 }
