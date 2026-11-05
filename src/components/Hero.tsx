@@ -187,7 +187,7 @@ export default function Hero() {
               className="hero-title-3d__depth text-hero text-[15vw] uppercase leading-[1] md:text-[13vw] md:leading-[0.9]"
               aria-hidden="true"
             >
-              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+              <div className="grid grid-cols-2 gap-0 md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
                   <span className="hero-title-3d__line">{title1L}</span>
                   <br />
@@ -201,7 +201,7 @@ export default function Hero() {
               </div>
             </div>
             <h1 className="hero-title-3d__heading text-hero text-[15vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
-              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+              <div className="grid grid-cols-2 gap-0 md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
                   <span>{title1L}</span>
                   <br />
@@ -253,7 +253,7 @@ export default function Hero() {
               {eyebrow}
             </p>
             <div className="text-hero text-[15vw] uppercase leading-[1] text-black md:text-[13vw] md:leading-[0.9]">
-              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+              <div className="grid grid-cols-2 gap-0 md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
                   <span>{lens1L}</span>
                   <br />
