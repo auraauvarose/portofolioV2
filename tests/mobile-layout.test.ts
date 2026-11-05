@@ -314,12 +314,17 @@ describe("Mobile — penanda kelas kait CSS", () => {
 // kedua bahasa (Indonesia "Pengunjung" = 4.098em) masih muat sampai 76px di
 // lebar 360px, jadi seluruh skala di bawah ini punya sisa ruang.
 describe("Mobile — aksen ekspresif", () => {
-  test("judul hero memakai ruang yang benar-benar tersedia, bukan hanya yang sekarang", () => {
+  test("judul hero dipecah dua kolom yang mengapit karakter, bukan satu blok", () => {
     const H = src("src/components/Hero.tsx");
     assert.equal(
-      count(H, "text-[clamp(3rem,21vw,6rem)]"),
-      2,
-      "judul hero dan salinan depth-nya harus sama-sama naik skala",
+      count(H, "gap-[24vw] dark:md:gap-[36vw]"),
+      3,
+      "kolom kiri/kanan harus dipasang di heading, salinan depth, dan teks lensa",
+    );
+    assert.equal(
+      count(H, "text-[15vw]"),
+      3,
+      "judul hero, salinan depth, dan teks lensa harus sama-sama naik skala",
     );
   });
 

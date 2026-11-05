@@ -1,19 +1,19 @@
 # Doublecheck spec
 
 ## Goal
-Log kunjungan di panel admin menampilkan alamat IP penuh setiap perangkat yang mengunjungi situs.
+Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga posisinya sejajar dengan judul di mode terang maupun gelap.
 
 ## Scope
-In-scope: supabase/tahap6.sql (kolom baru), src/app/api/analytics/route.ts (insert + select), src/lib/visit-log.ts (tipe + mapping), src/lib/analytics-summary.ts (normalisasi), src/components/admin/AnalyticsPanel.tsx (tampilan), tests/visit-log.test.ts (test baru). Out-of-scope: perubahan pada visitorHash/throttle, UI lain, migrasi lama.
+Hanya blok teks lensa di src/components/Hero.tsx: pakai splitHalf untuk lensLine1/2 dan render dua kolom dengan kelas jarak + ukuran font identik dengan judul. Tidak mengubah judul, warna, animasi scale, atau posisi disc.
 
 ## Acceptance criteria
-1) `npm run typecheck` exit 0. 2) `npm test` lulus termasuk test baru visitLogEntry yang memuat field ip. 3) Payload insert POST /api/analytics memuat `ip` dari clientIp(req). 4) GET memilih kolom ip dan mengirimkannya ke visitLogEntry. 5) Panel admin merender IP di log kunjungan.
+1) Markup lensa memakai `gap-[24vw] dark:md:gap-[36vw]` dan `text-[15vw] ... md:text-[13vw]` (string sama dengan judul). 2) `npx tsc --noEmit` exit 0, `npx eslint src/components/Hero.tsx` exit 0, `npm test` 521 pass 0 fail. 3) Screenshot paksa-tampil disc: huruf di disc segaris dengan judul di belakangnya, light maupun dark.
 
 ## Failure modes
-- Kolom ip belum ada di DB → withFallback harus turun ke select tanpa ip agar GET tetap jalan (tidak 500). - clientIp mengembalikan "unknown" → tampilkan "—". - Baris lama tanpa ip (NULL) → tampilkan "—", tidak crash. - Normalizer analytics-summary harus menerima objek tanpa ip agar data lama tetap valid.
+Lensa memakai kata berbeda (SOFTWARE/ENGINEER) sehingga tidak bisa persis menimpa FULLSTACK/DEVELOPER — yang dituntut hanya susunan & posisi sama. Bila kelas jarak/ukuran beda sedikit, huruf disc akan bergeser dari judul.
 
 ## Priorities
-Prioritas: (1) GET tidak boleh gagal walau migrasi belum dijalankan, (2) tampilan rapi, (3) minimal diff. Opsional: pemformatan/penyamaran IP.
+Kesegarisan posisi > kata yang ditampilkan (tetap lensLine). Jangan ubah perilaku hover/scale atau warna disc.
 
 ## Non-goals
-Tidak menyimpan user-agent mentah, tidak menambah cookie/ID pelacak, tidak mengubah RLS, tidak backfill baris lama, tidak mengubah desain panel di luar kolom IP.
+Bukan mengganti teks lensa, bukan menghapus lensa, bukan menyentuh globals.css, bukan mengubah breakpoint mobile.

@@ -8,6 +8,12 @@ import Tilt3D from "@/components/Tilt3D";
 const DISC = 280;
 const clamp = (value: number, min: number, max: number) =>
   Math.min(max, Math.max(min, value));
+/* Judul dipecah dua supaya sisi kiri & kanan mengapit siluet karakter. */
+const splitHalf = (text: string) => {
+  const chars = Array.from(text);
+  const cut = Math.ceil(chars.length / 2);
+  return [chars.slice(0, cut).join(""), chars.slice(cut).join("")];
+};
 
 export default function Hero() {
   const { profile, hero } = useSiteContent();
@@ -17,8 +23,11 @@ export default function Hero() {
   const title2 = t(hero.titleLine2);
   const lens1 = t(hero.lensLine1);
   const lens2 = t(hero.lensLine2);
+  const [title1L, title1R] = splitHalf(title1);
+  const [title2L, title2R] = splitHalf(title2);
+  const [lens1L, lens1R] = splitHalf(lens1);
+  const [lens2L, lens2R] = splitHalf(lens2);
   const [active, setActive] = useState(false);
-  const [backgroundHovered, setBackgroundHovered] = useState(false);
   const scrollRAF = useRef(0);
   const lastDim = useRef(0);
   const heroRef = useRef<HTMLElement>(null);
@@ -138,7 +147,7 @@ export default function Hero() {
         max={10}
         scale={1.05}
         innerClassName="hero-tilt-inner"
-        className="absolute inset-0 animate-hero-float motion-reduce:animate-none"
+        className="pointer-events-none absolute inset-0 z-[1] animate-hero-float motion-reduce:animate-none md:z-[2]"
       >
         <img
           aria-hidden="true"
@@ -156,17 +165,7 @@ export default function Hero() {
         />
       </Tilt3D>
 
-      <div
-        aria-hidden="true"
-        onMouseEnter={() => setBackgroundHovered(true)}
-        onMouseLeave={() => setBackgroundHovered(false)}
-        className={`absolute -left-40 top-1/4 h-[40rem] w-[40rem] rounded-full bg-accent/10 hero-blur transition-[transform,background-color] duration-700 ease-out ${
-          backgroundHovered ? "scale-110 bg-accent/20" : ""
-        }`}
-      />
-      <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-accent/5 hero-blur transition-[transform,background-color] duration-700 ease-out hover:scale-110 hover:bg-accent/10" />
-
-      <div className="relative z-10 flex w-full flex-col items-center justify-center px-4 text-center">
+      <div className="relative z-[2] flex w-full flex-col items-center justify-center px-4 text-center md:z-[1]">
         <div
           className="hero-title-3d relative"
           onPointerMove={onTitleMove}
@@ -185,17 +184,35 @@ export default function Hero() {
 
           <div className="hero-title-3d__stage relative">
             <div
-              className="hero-title-3d__depth text-hero text-center text-[clamp(3rem,21vw,6rem)] uppercase leading-[1] sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]"
+              className="hero-title-3d__depth text-hero text-[15vw] uppercase leading-[1] md:text-[13vw] md:leading-[0.9]"
               aria-hidden="true"
             >
-              <span className="hero-title-3d__line">{title1}</span>
-              <br />
-              <span className="hero-title-3d__line">{title2}</span>
+              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+                <div className="text-right">
+                  <span className="hero-title-3d__line">{title1L}</span>
+                  <br />
+                  <span className="hero-title-3d__line">{title2L}</span>
+                </div>
+                <div className="text-left">
+                  <span className="hero-title-3d__line">{title1R}</span>
+                  <br />
+                  <span className="hero-title-3d__line">{title2R}</span>
+                </div>
+              </div>
             </div>
-            <h1 className="hero-title-3d__heading text-hero text-center text-[clamp(3rem,21vw,6rem)] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
-              <span>{title1}</span>
-              <br />
-              <span>{title2}</span>
+            <h1 className="hero-title-3d__heading text-hero text-[15vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
+              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+                <div className="text-right">
+                  <span>{title1L}</span>
+                  <br />
+                  <span>{title2L}</span>
+                </div>
+                <div className="text-left">
+                  <span>{title1R}</span>
+                  <br />
+                  <span>{title2R}</span>
+                </div>
+              </div>
             </h1>
           </div>
         </div>
@@ -235,11 +252,20 @@ export default function Hero() {
             <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-black sm:text-base md:mb-8 md:text-xl">
               {eyebrow}
             </p>
-            <p className="text-hero text-center text-[clamp(3.4rem,16vw,4.75rem)] uppercase leading-[1] text-black sm:text-8xl md:text-[9.5rem] md:leading-[0.9] lg:text-[11.5rem]">
-              {lens1}
-              <br />
-              {lens2}
-            </p>
+            <div className="text-hero text-[15vw] uppercase leading-[1] text-black md:text-[13vw] md:leading-[0.9]">
+              <div className="grid grid-cols-2 gap-[24vw] dark:md:gap-[36vw]">
+                <div className="text-right">
+                  <span>{lens1L}</span>
+                  <br />
+                  <span>{lens2L}</span>
+                </div>
+                <div className="text-left">
+                  <span>{lens1R}</span>
+                  <br />
+                  <span>{lens2R}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>

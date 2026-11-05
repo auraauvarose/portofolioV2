@@ -3,22 +3,35 @@
 > Verdict: **green**
 
 ## Spec
-- Goal: Log kunjungan di panel admin menampilkan alamat IP penuh setiap perangkat yang mengunjungi situs.
-- Scope: In-scope: supabase/tahap6.sql (kolom baru), src/app/api/analytics/route.ts (insert + select), src/lib/visit-log.ts (tipe + mapping), src/lib/analytics-summary.ts (normalisasi), src/components/admin/AnalyticsPanel.tsx (tampilan), tests/visit-log.test.ts (test baru). Out-of-scope: perubahan pada visitorHash/throttle, UI lain, migrasi lama.
-- Acceptance criteria: 1) `npm run typecheck` exit 0. 2) `npm test` lulus termasuk test baru visitLogEntry yang memuat field ip. 3) Payload insert POST /api/analytics memuat `ip` dari clientIp(req). 4) GET memilih kolom ip dan mengirimkannya ke visitLogEntry. 5) Panel admin merender IP di log kunjungan.
-- Failure modes: - Kolom ip belum ada di DB → withFallback harus turun ke select tanpa ip agar GET tetap jalan (tidak 500). - clientIp mengembalikan "unknown" → tampilkan "—". - Baris lama tanpa ip (NULL) → tampilkan "—", tidak crash. - Normalizer analytics-summary harus menerima objek tanpa ip agar data lama tetap valid.
-- Priorities: Prioritas: (1) GET tidak boleh gagal walau migrasi belum dijalankan, (2) tampilan rapi, (3) minimal diff. Opsional: pemformatan/penyamaran IP.
-- Non-goals: Tidak menyimpan user-agent mentah, tidak menambah cookie/ID pelacak, tidak mengubah RLS, tidak backfill baris lama, tidak mengubah desain panel di luar kolom IP.
+- Goal: Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga posisinya sejajar dengan judul di mode terang maupun gelap.
+- Scope: Hanya blok teks lensa di src/components/Hero.tsx: pakai splitHalf untuk lensLine1/2 dan render dua kolom dengan kelas jarak + ukuran font identik dengan judul. Tidak mengubah judul, warna, animasi scale, atau posisi disc.
+- Acceptance criteria: 1) Markup lensa memakai `gap-[24vw] dark:md:gap-[36vw]` dan `text-[15vw] ... md:text-[13vw]` (string sama dengan judul). 2) `npx tsc --noEmit` exit 0, `npx eslint src/components/Hero.tsx` exit 0, `npm test` 521 pass 0 fail. 3) Screenshot paksa-tampil disc: huruf di disc segaris dengan judul di belakangnya, light maupun dark.
+- Failure modes: Lensa memakai kata berbeda (SOFTWARE/ENGINEER) sehingga tidak bisa persis menimpa FULLSTACK/DEVELOPER — yang dituntut hanya susunan & posisi sama. Bila kelas jarak/ukuran beda sedikit, huruf disc akan bergeser dari judul.
+- Priorities: Kesegarisan posisi > kata yang ditampilkan (tetap lensLine). Jangan ubah perilaku hover/scale atau warna disc.
+- Non-goals: Bukan mengganti teks lensa, bukan menghapus lensa, bukan menyentuh globals.css, bukan mengubah breakpoint mobile.
 
 ## Test evidence
 - failing runs: 0
-- passing runs: 4
+- passing runs: 11
 
-- [spec] Log kunjungan di panel admin menampilkan alamat IP penuh setiap perangkat yang mengunjungi situs.
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -25
-- [green] cd /home/auraauvarose/portofolioV2 && npm test > /tmp/t.log 2>&1; echo "EXIT=$?"; grep -E "^# (pass|fail)|not ok" /tmp/t…
-- [green] cd /home/auraauvarose/portofolioV2 && npm test > .t.log 2>&1; echo "EXIT=$?"; grep -E "^ℹ (tests|pass|fail)" .t.log; rm …
-- [green] cd /home/auraauvarose/portofolioV2 && npm run typecheck 2>&1 | tail -3; echo "TC=${PIPESTATUS[0]}" && npm test > .t.log …
+- [spec] Di mode desktop, baris kontrol carousel (counter + tombol ‹ ›) tampil di tengah; carousel bisa digeser dengan klik kiri …
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -25; echo "npm test exit=${PIPESTATUS[0]}"
+- [spec] Di desktop, tombol panah carousel pindah ke tepi kiri & kanan (vertikal di tengah area kartu), counter nomor tetap di at…
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -8; echo "npm test exit=${PIPESTATUS[0]}"; git diff --stat --…
+- [spec] Tombol panah samping carousel dibuat jelas terlihat: lingkaran putih solid dengan chevron hitam + shadow, kontras di tem…
+- [green] cd /home/auraauvarose/portofolioV2 && npx tsc --noEmit; echo "tsc exit=$?"; npx eslint src/components/MobileCarousel.tsx…
+- [spec] Judul hero FULLSTACK/DEVELOPER tampil melintasi tengah dan bagian tengahnya tertutup siluet karakter (efek menembus di b…
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -12
+- [spec] Judul hero terlihat terpisah jelas kiri/kanan di sekitar siluet karakter seperti referensi: tiap sisi menyisakan ±4 huru…
+- [green] cd /home/auraauvarose/portofolioV2 && rm -rf .shots && npx tsc --noEmit && npx eslint src/components/Hero.tsx && npm tes…
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -E "^(ℹ|not ok|# )|failing|✖" | head -30
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -E "^ℹ (tests|suites|pass|fail)"
+- [spec] Di mode terang, dua blok judul hero duduk lebih dekat ke siluet karakter (tidak melayang jauh), sedangkan mode gelap tid…
+- [green] cd /home/auraauvarose/portofolioV2 && rm -f public/_light.html && rm -rf .shots && npx tsc --noEmit && npx eslint src/co…
+- [spec] Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga po…
+- [green] cd /home/auraauvarose/portofolioV2 && ls public/_light.html .shots 2>&1 | head -2; npx tsc --noEmit && npx eslint src/co…
+- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -A6 "✖ failing tests" | head -20
+- [green] cd /home/auraauvarose/portofolioV2 && npx eslint tests/mobile-layout.test.ts && npm test 2>&1 | grep -E "^ℹ (tests|suite…
 
 ## Adversary review
 No adversary review ran for this session.
@@ -27,4 +40,4 @@ No adversary review ran for this session.
 Not run.
 
 ## Delivery
-- implementation edits: 11
+- implementation edits: 19
