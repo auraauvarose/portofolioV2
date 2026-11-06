@@ -1,19 +1,19 @@
 # Doublecheck spec
 
 ## Goal
-Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga posisinya sejajar dengan judul di mode terang maupun gelap.
+Di HP saja, ukuran judul hero dibuat sebesar referensi FULLLSTACK.png: teks mengisi lebar layar dan terpecah 4 baris (FULL/STACK/DEVEL/OPER), bukan 2 baris kecil seperti sekarang; desktop tidak berubah.
 
 ## Scope
-Hanya blok teks lensa di src/components/Hero.tsx: pakai splitHalf untuk lensLine1/2 dan render dua kolom dengan kelas jarak + ukuran font identik dengan judul. Tidak mengubah judul, warna, animasi scale, atau posisi disc.
+Hanya src/components/Hero.tsx (markup blok mobile + ukuran font h1 mobile) dan tests/hero-mobile-title.test.ts. Desktop, CSS media query, dan aset lain di luar scope.
 
 ## Acceptance criteria
-1) Markup lensa memakai `gap-[24vw] dark:md:gap-[36vw]` dan `text-[15vw] ... md:text-[13vw]` (string sama dengan judul). 2) `npx tsc --noEmit` exit 0, `npx eslint src/components/Hero.tsx` exit 0, `npm test` 521 pass 0 fail. 3) Screenshot paksa-tampil disc: huruf di disc segaris dengan judul di belakangnya, light maupun dark.
+Screenshot 390x844: judul hero 4 baris besar (FULL/STACK/DEVEL/OPER), tiap baris mengisi lebar layar (≈ full-bleed). Full test suite 530 pass, tsc exit 0. Screenshot 1440x900 identik dengan baseline desktop (2 kolom + layer 3D oranye utuh).
 
 ## Failure modes
-Lensa memakai kata berbeda (SOFTWARE/ENGINEER) sehingga tidak bisa persis menimpa FULLSTACK/DEVELOPER — yang dituntut hanya susunan & posisi sama. Bila kelas jarak/ukuran beda sedikit, huruf disc akan bergeser dari judul.
+Kata terpotong keluar viewport di 390px → ukuran turun; judul menutupi eyebrow/scScroll; efek desktop berubah karena kelas md tertimpa; test warna h1 regresi.
 
 ## Priorities
-Kesegarisan posisi > kata yang ditampilkan (tetap lensLine). Jangan ubah perilaku hover/scale atau warna disc.
+1) ukuran/jumlah baris sesuai referensi 2) tidak ada kata terpotong 3) desktop tidak tersentuh 4) diff minimal.
 
 ## Non-goals
-Bukan mengganti teks lensa, bukan menghapus lensa, bukan menyentuh globals.css, bukan mengubah breakpoint mobile.
+Tidak mengubah font, warna, animasi, tilt, lensa kursor, config.ts, atau layout desktop. Tidak membuat file baru selain memperbarui test yang ada.

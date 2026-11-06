@@ -33,12 +33,22 @@ describe("Hero HP — FULLSTACK rata kiri, DEVELOPER rata kanan, desktop utuh", 
     assert.ok(!/text-white\//.test(heading![1]), "jangan pakai text-white/ — pakai bracket-form");
   });
 
-  test("HP: satu kata per baris, FULLSTACK kiri lalu DEVELOPER di ujung kanan", () => {
+  test("HP: judul 4 baris besar — FULL/STACK rata kiri, DEVE/OPER rata kanan", () => {
     assert.ok(mobileBlock, "blok mobile (span flex w-full flex-col … + div hidden grid-cols-2) tidak ketemu");
     assert.match(mobileBlock![1], /(?:^|\s)md:hidden(?:\s|$)/, "blok mobile harus md:hidden");
-    assert.match(mobileBlock![2], /\{title1\}<\/span>\s*<span className="self-end">\{title2\}/,
-      "urutan harus title1 (kiri) lalu title2 (self-end/kanan)");
-    assert.match(mobileBlock![1], /items-start/, "baris pertama harus rata kiri");
+    assert.match(mobileBlock![1], /(?:^|\s)text-left(?:\s|$)/, "baris FULL/STACK harus rata kiri (parent text-center)");
+    assert.match(
+      mobileBlock![2],
+      /\{title1L\}<\/span>\s*<span>\{title1R\}<\/span>\s*<span className="self-end text-right">\{title2L\}<\/span>\s*<span className="self-end text-right">\{title2R\}<\/span>/,
+      "urutan harus FULL kiri, STACK kiri, DEVE kanan, OPER kanan",
+    );
+  });
+
+  test("ukuran judul HP minimal 30vw supaya memenuhi lebar layar", () => {
+    const vw = Number(heading![1].match(/(?:^|\s)max-md:text-\[(\d+)vw\]/)?.[1]);
+    assert.ok(vw >= 30, `font-size HP harus besar (≥30vw), sekarang ${vw}vw`);
+    assert.match(heading![1], /(?:^|\s)text-\[15vw\](?:\s|$)/, "skala dasar 15vw harus tetap (kontrak mobile-layout)");
+    assert.match(heading![1], /(?:^|\s)md:text-\[13vw\]/, "desktop harus tetap 13vw");
   });
 
   test("desktop: dua kolom mengapit siluet, kiri rata kanan & kanan rata kiri", () => {

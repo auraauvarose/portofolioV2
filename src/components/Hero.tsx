@@ -200,10 +200,12 @@ export default function Hero() {
                 </div>
               </div>
             </div>
-            <h1 className="hero-title-3d__heading text-hero text-[15vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
-              <span className="flex w-full flex-col items-start md:hidden">
-                <span>{title1}</span>
-                <span className="self-end">{title2}</span>
+            <h1 className="hero-title-3d__heading text-hero text-[15vw] max-md:text-[32vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
+              <span className="flex w-full flex-col text-left md:hidden">
+                <span>{title1L}</span>
+                <span>{title1R}</span>
+                <span className="self-end text-right">{title2L}</span>
+                <span className="self-end text-right">{title2R}</span>
               </span>
               <div className="hidden grid-cols-2 gap-0 md:grid md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
