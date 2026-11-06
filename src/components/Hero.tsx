@@ -167,7 +167,7 @@ export default function Hero() {
 
       <div className="relative z-[2] flex w-full flex-col items-center justify-center px-4 text-center md:z-[1]">
         <div
-          className="hero-title-3d relative"
+          className="hero-title-3d relative max-md:w-full max-md:self-stretch"
           onPointerMove={onTitleMove}
           onPointerDown={onTitlePointerDown}
           onPointerUp={onTitlePointerUp}
@@ -182,7 +182,7 @@ export default function Hero() {
             {eyebrow}
           </p>
 
-          <div className="hero-title-3d__stage relative">
+          <div className="hero-title-3d__stage relative max-md:w-full">
             <div
               className="hero-title-3d__depth text-hero text-[15vw] uppercase leading-[1] md:text-[13vw] md:leading-[0.9]"
               aria-hidden="true"
@@ -201,7 +201,11 @@ export default function Hero() {
               </div>
             </div>
             <h1 className="hero-title-3d__heading text-hero text-[15vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
-              <div className="grid grid-cols-2 gap-0 md:gap-[24vw] dark:md:gap-[36vw]">
+              <span className="flex w-full flex-col items-start md:hidden">
+                <span>{title1}</span>
+                <span className="self-end">{title2}</span>
+              </span>
+              <div className="hidden grid-cols-2 gap-0 md:grid md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
                   <span>{title1L}</span>
                   <br />
