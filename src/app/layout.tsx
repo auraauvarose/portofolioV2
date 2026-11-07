@@ -179,8 +179,8 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: "/icon.png",
-    apple: "/icon.png",
+    icon: "/profile-logo.png",
+    apple: "/profile-logo.png",
   },
 };
 

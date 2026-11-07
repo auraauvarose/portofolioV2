@@ -1,19 +1,19 @@
 # Doublecheck spec
 
 ## Goal
-Di HP saja, ukuran judul hero dibuat sebesar referensi FULLLSTACK.png: teks mengisi lebar layar dan terpecah 4 baris (FULL/STACK/DEVEL/OPER), bukan 2 baris kecil seperti sekarang; desktop tidak berubah.
+Favicon/logo situs auraauvarose.my.id menampilkan foto profil baru (dari public/profile.webp), bukan logo lama.
 
 ## Scope
-Hanya src/components/Hero.tsx (markup blok mobile + ukuran font h1 mobile) dan tests/hero-mobile-title.test.ts. Desktop, CSS media query, dan aset lain di luar scope.
+Hanya metadata `icons` di src/app/layout.tsx + satu aset gambar di public/. Tidak menyentuh og.png, Nav.tsx, JSON-LD, atau komponen lain.
 
 ## Acceptance criteria
-Screenshot 390x844: judul hero 4 baris besar (FULL/STACK/DEVEL/OPER), tiap baris mengisi lebar layar (≈ full-bleed). Full test suite 530 pass, tsc exit 0. Screenshot 1440x900 identik dengan baseline desktop (2 kolom + layer 3D oranye utuh).
+1) `npm run typecheck` exit 0. 2) HTML hasil build memuat <link rel="icon" href="/profile-logo.png">. 3) URL favicon baru (bukan /icon.png) sehingga cache immutable 1 tahun lama tidak terpakai.
 
 ## Failure modes
-Kata terpotong keluar viewport di 390px → ukuran turun; judul menutupi eyebrow/scScroll; efek desktop berubah karena kelas md tertimpa; test warna h1 regresi.
+- src/app/icon.png masih ada → Next auto-discovery menang dan tetap memakai logo lama (sudah dihapus). - URL sama seperti sebelumnya → browser tetap pakai cache immutable 1 tahun (diatasi dengan nama file baru). - Crop persegi memotong wajah → dicek visual sebelum build.
 
 ## Priorities
-1) ukuran/jumlah baris sesuai referensi 2) tidak ada kata terpotong 3) desktop tidak tersentuh 4) diff minimal.
+Favicon benar > cache busting > kerapian kode. Perubahan minimal diutamakan.
 
 ## Non-goals
-Tidak mengubah font, warna, animasi, tilt, lensa kursor, config.ts, atau layout desktop. Tidak membuat file baru selain memperbarui test yang ada.
+Tidak mendesain ulang logo, tidak mengubah og.png, tidak menyentuh admin panel, tidak menambah dependency.
