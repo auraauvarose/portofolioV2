@@ -43,6 +43,10 @@ next-env.d.ts
 .pnpm-store/
 
 # temporary/debug files
+.b2-investigation.txt
+doublecheck-spec.md
+doublecheck-report.md
+.wrangler-home/
 .abruntimedir/
 .chrome-profile/
 .raf-test.mjs
@@ -57,7 +61,6 @@ ANALISIS-WEBSITE.md
 .design/
 .dsh-vision-router/
 .deepseek-harness/
-.deepseek-harness
 
 # scratch dir for scripts/generate-og.py (decompressed fonts)
 .ogtmp/
