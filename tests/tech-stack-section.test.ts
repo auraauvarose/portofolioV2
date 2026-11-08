@@ -245,7 +245,7 @@ describe("E. layer konstelasi dekoratif", () => {
       /pointer-events-none/,
       "layer dekoratif tidak boleh menadah klik/hover pengguna",
     );
-    assert.match(SC_CODE, /nodes\.map/, "titik konstelasi harus dirender dari daftar titik");
+    assert.match(SC_CODE, /<canvas/, "latar kontur dirender lewat canvas");
   });
 });
 

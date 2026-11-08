@@ -3,35 +3,22 @@
 > Verdict: **green**
 
 ## Spec
-- Goal: Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga posisinya sejajar dengan judul di mode terang maupun gelap.
-- Scope: Hanya blok teks lensa di src/components/Hero.tsx: pakai splitHalf untuk lensLine1/2 dan render dua kolom dengan kelas jarak + ukuran font identik dengan judul. Tidak mengubah judul, warna, animasi scale, atau posisi disc.
-- Acceptance criteria: 1) Markup lensa memakai `gap-[24vw] dark:md:gap-[36vw]` dan `text-[15vw] ... md:text-[13vw]` (string sama dengan judul). 2) `npx tsc --noEmit` exit 0, `npx eslint src/components/Hero.tsx` exit 0, `npm test` 521 pass 0 fail. 3) Screenshot paksa-tampil disc: huruf di disc segaris dengan judul di belakangnya, light maupun dark.
-- Failure modes: Lensa memakai kata berbeda (SOFTWARE/ENGINEER) sehingga tidak bisa persis menimpa FULLSTACK/DEVELOPER — yang dituntut hanya susunan & posisi sama. Bila kelas jarak/ukuran beda sedikit, huruf disc akan bergeser dari judul.
-- Priorities: Kesegarisan posisi > kata yang ditampilkan (tetap lensLine). Jangan ubah perilaku hover/scale atau warna disc.
-- Non-goals: Bukan mengganti teks lensa, bukan menghapus lensa, bukan menyentuh globals.css, bukan mengubah breakpoint mobile.
+- Goal: Ganti latar titik homepage dengan kontur topografi seperti referensi yang melengkung mengikuti kursor tanpa mengubah isi atau layout.
+- Scope: src/components/SiteConstellation.tsx sebagai satu owner latar yang sudah dipasang HomeClient; src/app/globals.css untuk warna/blending dan mengganti pola titik; src/components/TechStack.tsx hanya pola titik lokal; tests/site-constellation.test.ts dan tests/site-backdrop.test.ts untuk kontrak baru. HomeClient, Hero, konten, struktur section, API, dan dependency di luar lingkup.
+- Acceptance criteria: Satu canvas kontur menutup viewport dan terlihat sepanjang homepage. Pola memakai garis topografi tipis, netral, berkontras rendah; bentuk berubah di dekat kursor dan berevolusi pelan saat diam. Titik global serta titik TechStack tidak lagi dirender. Tema terang/gelap, gambar Hero, teks, klik, dan struktur section tetap. Tes terarah untuk medan kontur dan lifecycle serta tsc --noEmit harus exit 0; tidak menjalankan build atau deploy.
+- Failure modes: Canvas/context tidak tersedia: efek dilewati, konten tetap tampil. Perangkat touch atau prefers-reduced-motion: pola statis tanpa animasi kursor. Tab tersembunyi: requestAnimationFrame dihentikan. Resize memperbarui ukuran canvas; pergantian tema memperbarui warna. Unmount membatalkan frame dan melepas listener/observer.
+- Priorities: Kelancaran, keterbacaan, aksesibilitas, dan diff owner-local lebih penting daripada kesamaan pixel-identik. Gunakan Canvas native dan dependency yang sudah ada; animasi dekoratif boleh statis di HP/reduced-motion.
+- Non-goals: Tidak mengganti gambar Hero, tidak mengubah layout/section, tidak menambah dependency, efek klik/ripple, menu pengaturan, server baru, build, atau deploy; tidak menjanjikan salinan pixel-identik.
 
 ## Test evidence
 - failing runs: 0
-- passing runs: 11
+- passing runs: 3
 
-- [spec] Di mode desktop, baris kontrol carousel (counter + tombol ‹ ›) tampil di tengah; carousel bisa digeser dengan klik kiri …
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -25; echo "npm test exit=${PIPESTATUS[0]}"
-- [spec] Di desktop, tombol panah carousel pindah ke tepi kiri & kanan (vertikal di tengah area kartu), counter nomor tetap di at…
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -8; echo "npm test exit=${PIPESTATUS[0]}"; git diff --stat --…
-- [spec] Tombol panah samping carousel dibuat jelas terlihat: lingkaran putih solid dengan chevron hitam + shadow, kontras di tem…
-- [green] cd /home/auraauvarose/portofolioV2 && npx tsc --noEmit; echo "tsc exit=$?"; npx eslint src/components/MobileCarousel.tsx…
-- [spec] Judul hero FULLSTACK/DEVELOPER tampil melintasi tengah dan bagian tengahnya tertutup siluet karakter (efek menembus di b…
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | tail -12
-- [spec] Judul hero terlihat terpisah jelas kiri/kanan di sekitar siluet karakter seperti referensi: tiap sisi menyisakan ±4 huru…
-- [green] cd /home/auraauvarose/portofolioV2 && rm -rf .shots && npx tsc --noEmit && npx eslint src/components/Hero.tsx && npm tes…
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -E "^(ℹ|not ok|# )|failing|✖" | head -30
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -E "^ℹ (tests|suites|pass|fail)"
-- [spec] Di mode terang, dua blok judul hero duduk lebih dekat ke siluet karakter (tidak melayang jauh), sedangkan mode gelap tid…
-- [green] cd /home/auraauvarose/portofolioV2 && rm -f public/_light.html && rm -rf .shots && npx tsc --noEmit && npx eslint src/co…
-- [spec] Teks di dalam lingkaran lensa hover ikut memakai susunan dua kolom yang sama (kiri/kanan mengapit karakter), sehingga po…
-- [green] cd /home/auraauvarose/portofolioV2 && ls public/_light.html .shots 2>&1 | head -2; npx tsc --noEmit && npx eslint src/co…
-- [green] cd /home/auraauvarose/portofolioV2 && npm test 2>&1 | grep -A6 "✖ failing tests" | head -20
-- [green] cd /home/auraauvarose/portofolioV2 && npx eslint tests/mobile-layout.test.ts && npm test 2>&1 | grep -E "^ℹ (tests|suite…
+- [spec] Ganti latar titik homepage dengan kontur topografi seperti referensi yang melengkung mengikuti kursor tanpa mengubah isi…
+- [green] npm test 2>&1 | tail -25; echo "TEST_EXIT=${PIPESTATUS[0]}"
+- [green] npm test > /tmp/pt-test.log 2>&1; echo "TEST_EXIT=$?"; grep -E "^ℹ (tests|pass|fail)" /tmp/pt-test.log; sed -n '225,265p…
+- [green] npm test > /tmp/pt-test2.log 2>&1; echo "TEST_EXIT=$?"; node -e '
+const t=require("fs").readFileSync("/tmp/pt-test2.log"…
 
 ## Adversary review
 No adversary review ran for this session.
@@ -40,4 +27,4 @@ No adversary review ran for this session.
 Not run.
 
 ## Delivery
-- implementation edits: 19
+- implementation edits: 9

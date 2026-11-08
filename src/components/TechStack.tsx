@@ -162,9 +162,7 @@ export default function TechStack() {
     <section ref={sectionRef} className="relative px-6 py-24 max-md:py-16 md:px-10 md:py-32">
       <style>{`
 .ts-bg {
-  background-image:
-    radial-gradient(rgba(127,127,127,0.22) 1px, transparent 1px);
-  background-size: 26px 26px;
+  background-image: none;
 }
 .ts-dim {
   opacity: 0.22;

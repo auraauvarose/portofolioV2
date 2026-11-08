@@ -17,3 +17,5 @@ Favicon benar > cache busting > kerapian kode. Perubahan minimal diutamakan.
 
 ## Non-goals
 Tidak mendesain ulang logo, tidak mengubah og.png, tidak menyentuh admin panel, tidak menambah dependency.
+
+## Non-prs
