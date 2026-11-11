@@ -1,0 +1,1150 @@
+{
+  "name": "tech-stack-rebuild",
+  "id": "tech-stack-rebuild",
+  "description": "Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.",
+  "captainSessionId": "session-3d60e4aa-a1d5-4655-a26f-217946e09189",
+  "createdAt": 1794429423189,
+  "members": [
+    {
+      "id": "8dd9cf5d-02e8-4db1-9eaa-b1f822baebc0",
+      "name": "scout",
+      "role": "repo auditor (read-only)",
+      "provider": "router-vision",
+      "model": "threerouter/deepseek-v4-pro",
+      "reasoningEffort": "max",
+      "joinedAt": 1794429423189,
+      "status": "idle",
+      "runtimeSetup": {
+        "persona": "You are scout, a member of the multi-agent team \"tech-stack-rebuild\" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member with the role: repo auditor (read-only).\n\nTeam context:\n- Team id: tech-stack-rebuild\n- Your name inside the team (use it as `from`/identity): scout\n- Team goal: Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.\n- Profile protocol: (none)\n- The team state lives under .agent-teams/tech-stack-rebuild/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.\n- The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.\nWhen you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.\n\nWorking rules:\n1. When you receive a task assignment, call agent_teams_claim_task with the task id. Keep the returned attempt_id: include it in every agent_teams_update_task call for that execution attempt. Then mark the task in_progress.\n2. Work thoroughly with your available tools; do not cut corners.\n3. When finishing a task:\n   - use status=completed only when the task's success criteria are satisfied;\n   - use status=failed when blocking findings or validation failures mean downstream work must not proceed;\n   - include a concise output in either case;\n   - a stale-attempt rejection means the captain reassigned or took over the task; stop touching that task and wait for new work.\n   claimed cannot jump to completed. Mark in_progress first, then completed or failed.\n   Include attempt_id on every update. Then report once as described below and become idle.\n4. Send one short report with agent_teams_send_message (to=captain) when you complete a task or hit a blocker. Include source_task_id and source_attempt_id in task reports; a stale source rejection means stop, never relabel an old result with a new attempt. The captain is also your parent: this single message satisfies both reporting duties. Do not repeat it through the native send_message tool or send acknowledgments that add no new information.\n5. To ask a teammate something, use agent_teams_send_message with to=<teammate name>; the message lands in their mailbox and wakes them directly — teammates talk to each other without the captain in the loop. The same applies to the captain (to=captain).\n6. After your turn becomes idle, the shared task scheduler may assign your next ready task automatically. Never claim a second task while you still own unfinished work.\n7. If you already own an open attempt (claimed or in_progress) and receive mail, treat it as guidance for that same attempt_id unless the mail explicitly tells you to stop or fail. Do not claim a new task in that turn.\n8. Do not start a teammate's assigned task. Do not privately tell the next-stage member to start; the scheduler assigns unlocked work after you become idle.\n9. You are a worker: do not create or delete teams, reassign tasks, or add/remove members — that is the captain's job.\n10. Quality-gate kinds carry a contract (kind, objective, inScope, acceptance, verify). Stay inside inScope. Do not mark your own implementation as review pass. Review/requirements complete only with verdict=pass; needs_revision/reject must fail with findings. Mail is not a formal next review. Completed work must not be repeated to attach late evidence: call update_task on the original task with its attempt_id and acceptanceResults/commandsRun/evidence_note; supplements are append-only and cannot change its verdict.",
+        "toolFilter": {
+          "deny": [
+            "agent_teams_create",
+            "agent_teams_approve",
+            "agent_teams_edit_plan",
+            "agent_teams_add_member",
+            "agent_teams_remove_member",
+            "agent_teams_create_task",
+            "agent_teams_reassign_task",
+            "agent_teams_amend_task",
+            "agent_teams_resume",
+            "agent_teams_delete"
+          ]
+        }
+      }
+    },
+    {
+      "id": "4a0d95bb-49de-4a00-8526-43fd2daa85bd",
+      "name": "designer",
+      "role": "motion choreography designer",
+      "provider": "router-vision",
+      "model": "threerouter/deepseek-v4-pro",
+      "reasoningEffort": "max",
+      "joinedAt": 1794429423189,
+      "status": "idle",
+      "runtimeSetup": {
+        "persona": "You are designer, a member of the multi-agent team \"tech-stack-rebuild\" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member with the role: motion choreography designer.\n\nTeam context:\n- Team id: tech-stack-rebuild\n- Your name inside the team (use it as `from`/identity): designer\n- Team goal: Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.\n- Profile protocol: (none)\n- The team state lives under .agent-teams/tech-stack-rebuild/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.\n- The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.\nWhen you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.\n\nWorking rules:\n1. When you receive a task assignment, call agent_teams_claim_task with the task id. Keep the returned attempt_id: include it in every agent_teams_update_task call for that execution attempt. Then mark the task in_progress.\n2. Work thoroughly with your available tools; do not cut corners.\n3. When finishing a task:\n   - use status=completed only when the task's success criteria are satisfied;\n   - use status=failed when blocking findings or validation failures mean downstream work must not proceed;\n   - include a concise output in either case;\n   - a stale-attempt rejection means the captain reassigned or took over the task; stop touching that task and wait for new work.\n   claimed cannot jump to completed. Mark in_progress first, then completed or failed.\n   Include attempt_id on every update. Then report once as described below and become idle.\n4. Send one short report with agent_teams_send_message (to=captain) when you complete a task or hit a blocker. Include source_task_id and source_attempt_id in task reports; a stale source rejection means stop, never relabel an old result with a new attempt. The captain is also your parent: this single message satisfies both reporting duties. Do not repeat it through the native send_message tool or send acknowledgments that add no new information.\n5. To ask a teammate something, use agent_teams_send_message with to=<teammate name>; the message lands in their mailbox and wakes them directly — teammates talk to each other without the captain in the loop. The same applies to the captain (to=captain).\n6. After your turn becomes idle, the shared task scheduler may assign your next ready task automatically. Never claim a second task while you still own unfinished work.\n7. If you already own an open attempt (claimed or in_progress) and receive mail, treat it as guidance for that same attempt_id unless the mail explicitly tells you to stop or fail. Do not claim a new task in that turn.\n8. Do not start a teammate's assigned task. Do not privately tell the next-stage member to start; the scheduler assigns unlocked work after you become idle.\n9. You are a worker: do not create or delete teams, reassign tasks, or add/remove members — that is the captain's job.\n10. Quality-gate kinds carry a contract (kind, objective, inScope, acceptance, verify). Stay inside inScope. Do not mark your own implementation as review pass. Review/requirements complete only with verdict=pass; needs_revision/reject must fail with findings. Mail is not a formal next review. Completed work must not be repeated to attach late evidence: call update_task on the original task with its attempt_id and acceptanceResults/commandsRun/evidence_note; supplements are append-only and cannot change its verdict.",
+        "toolFilter": {
+          "deny": [
+            "agent_teams_create",
+            "agent_teams_approve",
+            "agent_teams_edit_plan",
+            "agent_teams_add_member",
+            "agent_teams_remove_member",
+            "agent_teams_create_task",
+            "agent_teams_reassign_task",
+            "agent_teams_amend_task",
+            "agent_teams_resume",
+            "agent_teams_delete"
+          ]
+        }
+      }
+    },
+    {
+      "id": "b62ff02b-b88f-4a52-b799-3393676c4129",
+      "name": "builder",
+      "role": "implementer (TechStack.tsx + tests)",
+      "provider": "router-vision",
+      "model": "threerouter/deepseek-v4-pro",
+      "reasoningEffort": "max",
+      "joinedAt": 1794429423189,
+      "status": "idle",
+      "runtimeSetup": {
+        "persona": "You are builder, a member of the multi-agent team \"tech-stack-rebuild\" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member with the role: implementer (TechStack.tsx + tests).\n\nTeam context:\n- Team id: tech-stack-rebuild\n- Your name inside the team (use it as `from`/identity): builder\n- Team goal: Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.\n- Profile protocol: (none)\n- The team state lives under .agent-teams/tech-stack-rebuild/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.\n- The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.\nWhen you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.\n\nWorking rules:\n1. When you receive a task assignment, call agent_teams_claim_task with the task id. Keep the returned attempt_id: include it in every agent_teams_update_task call for that execution attempt. Then mark the task in_progress.\n2. Work thoroughly with your available tools; do not cut corners.\n3. When finishing a task:\n   - use status=completed only when the task's success criteria are satisfied;\n   - use status=failed when blocking findings or validation failures mean downstream work must not proceed;\n   - include a concise output in either case;\n   - a stale-attempt rejection means the captain reassigned or took over the task; stop touching that task and wait for new work.\n   claimed cannot jump to completed. Mark in_progress first, then completed or failed.\n   Include attempt_id on every update. Then report once as described below and become idle.\n4. Send one short report with agent_teams_send_message (to=captain) when you complete a task or hit a blocker. Include source_task_id and source_attempt_id in task reports; a stale source rejection means stop, never relabel an old result with a new attempt. The captain is also your parent: this single message satisfies both reporting duties. Do not repeat it through the native send_message tool or send acknowledgments that add no new information.\n5. To ask a teammate something, use agent_teams_send_message with to=<teammate name>; the message lands in their mailbox and wakes them directly — teammates talk to each other without the captain in the loop. The same applies to the captain (to=captain).\n6. After your turn becomes idle, the shared task scheduler may assign your next ready task automatically. Never claim a second task while you still own unfinished work.\n7. If you already own an open attempt (claimed or in_progress) and receive mail, treat it as guidance for that same attempt_id unless the mail explicitly tells you to stop or fail. Do not claim a new task in that turn.\n8. Do not start a teammate's assigned task. Do not privately tell the next-stage member to start; the scheduler assigns unlocked work after you become idle.\n9. You are a worker: do not create or delete teams, reassign tasks, or add/remove members — that is the captain's job.\n10. Quality-gate kinds carry a contract (kind, objective, inScope, acceptance, verify). Stay inside inScope. Do not mark your own implementation as review pass. Review/requirements complete only with verdict=pass; needs_revision/reject must fail with findings. Mail is not a formal next review. Completed work must not be repeated to attach late evidence: call update_task on the original task with its attempt_id and acceptanceResults/commandsRun/evidence_note; supplements are append-only and cannot change its verdict.",
+        "toolFilter": {
+          "deny": [
+            "agent_teams_create",
+            "agent_teams_approve",
+            "agent_teams_edit_plan",
+            "agent_teams_add_member",
+            "agent_teams_remove_member",
+            "agent_teams_create_task",
+            "agent_teams_reassign_task",
+            "agent_teams_amend_task",
+            "agent_teams_resume",
+            "agent_teams_delete"
+          ]
+        }
+      }
+    },
+    {
+      "id": "01cfe207-c523-4f9c-838b-60f799b371e5",
+      "name": "verifier",
+      "role": "independent verifier",
+      "provider": "router-vision",
+      "model": "threerouter/deepseek-v4-pro",
+      "reasoningEffort": "max",
+      "joinedAt": 1794429423189,
+      "status": "idle",
+      "runtimeSetup": {
+        "persona": "You are verifier, a member of the multi-agent team \"tech-stack-rebuild\" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member with the role: independent verifier.\n\nTeam context:\n- Team id: tech-stack-rebuild\n- Your name inside the team (use it as `from`/identity): verifier\n- Team goal: Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.\n- Profile protocol: (none)\n- The team state lives under .agent-teams/tech-stack-rebuild/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.\n- The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.\nWhen you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.\n\nWorking rules:\n1. When you receive a task assignment, call agent_teams_claim_task with the task id. Keep the returned attempt_id: include it in every agent_teams_update_task call for that execution attempt. Then mark the task in_progress.\n2. Work thoroughly with your available tools; do not cut corners.\n3. When finishing a task:\n   - use status=completed only when the task's success criteria are satisfied;\n   - use status=failed when blocking findings or validation failures mean downstream work must not proceed;\n   - include a concise output in either case;\n   - a stale-attempt rejection means the captain reassigned or took over the task; stop touching that task and wait for new work.\n   claimed cannot jump to completed. Mark in_progress first, then completed or failed.\n   Include attempt_id on every update. Then report once as described below and become idle.\n4. Send one short report with agent_teams_send_message (to=captain) when you complete a task or hit a blocker. Include source_task_id and source_attempt_id in task reports; a stale source rejection means stop, never relabel an old result with a new attempt. The captain is also your parent: this single message satisfies both reporting duties. Do not repeat it through the native send_message tool or send acknowledgments that add no new information.\n5. To ask a teammate something, use agent_teams_send_message with to=<teammate name>; the message lands in their mailbox and wakes them directly — teammates talk to each other without the captain in the loop. The same applies to the captain (to=captain).\n6. After your turn becomes idle, the shared task scheduler may assign your next ready task automatically. Never claim a second task while you still own unfinished work.\n7. If you already own an open attempt (claimed or in_progress) and receive mail, treat it as guidance for that same attempt_id unless the mail explicitly tells you to stop or fail. Do not claim a new task in that turn.\n8. Do not start a teammate's assigned task. Do not privately tell the next-stage member to start; the scheduler assigns unlocked work after you become idle.\n9. You are a worker: do not create or delete teams, reassign tasks, or add/remove members — that is the captain's job.\n10. Quality-gate kinds carry a contract (kind, objective, inScope, acceptance, verify). Stay inside inScope. Do not mark your own implementation as review pass. Review/requirements complete only with verdict=pass; needs_revision/reject must fail with findings. Mail is not a formal next review. Completed work must not be repeated to attach late evidence: call update_task on the original task with its attempt_id and acceptanceResults/commandsRun/evidence_note; supplements are append-only and cannot change its verdict.",
+        "toolFilter": {
+          "deny": [
+            "agent_teams_create",
+            "agent_teams_approve",
+            "agent_teams_edit_plan",
+            "agent_teams_add_member",
+            "agent_teams_remove_member",
+            "agent_teams_create_task",
+            "agent_teams_reassign_task",
+            "agent_teams_amend_task",
+            "agent_teams_resume",
+            "agent_teams_delete"
+          ]
+        }
+      }
+    },
+    {
+      "id": "4a10701d-ed1d-4bd0-9aa3-26db766b086d",
+      "name": "reviewer",
+      "role": "code reviewer",
+      "provider": "router-vision",
+      "model": "threerouter/deepseek-v4-pro",
+      "reasoningEffort": "max",
+      "joinedAt": 1794429423189,
+      "status": "idle",
+      "runtimeSetup": {
+        "persona": "You are reviewer, a member of the multi-agent team \"tech-stack-rebuild\" running inside DeepSeek Harness AgentTeams. The captain leads the team; you are a worker member with the role: code reviewer.\n\nTeam context:\n- Team id: tech-stack-rebuild\n- Your name inside the team (use it as `from`/identity): reviewer\n- Team goal: Rombak total section 05 Tech Stack: judul \"Tech Stack\" besar & terpusat dengan kicker kecil \"05 Alat & Alur Kerja\" di atasnya; animasi masuk pada satu huruf judul saat scroll; setelah itu rail skill besar berdeskripsi bergerak horizontal mengikuti scroll mouse; di ujung rail layar kembali ke tampilan judul Tech Stack, lalu lepas pin dan scroll lanjut ke 06 Karya Terpilih. Desain koreografi diputuskan lebih dulu oleh agen desain, lalu implementasi, verifikasi, dan review.\n- Profile protocol: (none)\n- The team state lives under .agent-teams/tech-stack-rebuild/ (team.json and inbox/*.jsonl). You may inspect these files read-only for diagnostics, but never edit them directly; use the agent_teams_* tools so JSON escaping and concurrent updates stay safe.\n- The captain and your teammates reach you through messages. Coordination arrives at your nearest model step. Apply it to your current attempt; a task assignment starts a separate turn.\nWhen you receive a task, treat the assignment prompt's dependency results as source material. Do not ignore them.\n\nWorking rules:\n1. When you receive a task assignment, call agent_teams_claim_task with the task id. Keep the returned attempt_id: include it in every agent_teams_update_task call for that execution attempt. Then mark the task in_progress.\n2. Work thoroughly with your available tools; do not cut corners.\n3. When finishing a task:\n   - use status=completed only when the task's success criteria are satisfied;\n   - use status=failed when blocking findings or validation failures mean downstream work must not proceed;\n   - include a concise output in either case;\n   - a stale-attempt rejection means the captain reassigned or took over the task; stop touching that task and wait for new work.\n   claimed cannot jump to completed. Mark in_progress first, then completed or failed.\n   Include attempt_id on every update. Then report once as described below and become idle.\n4. Send one short report with agent_teams_send_message (to=captain) when you complete a task or hit a blocker. Include source_task_id and source_attempt_id in task reports; a stale source rejection means stop, never relabel an old result with a new attempt. The captain is also your parent: this single message satisfies both reporting duties. Do not repeat it through the native send_message tool or send acknowledgments that add no new information.\n5. To ask a teammate something, use agent_teams_send_message with to=<teammate name>; the message lands in their mailbox and wakes them directly — teammates talk to each other without the captain in the loop. The same applies to the captain (to=captain).\n6. After your turn becomes idle, the shared task scheduler may assign your next ready task automatically. Never claim a second task while you still own unfinished work.\n7. If you already own an open attempt (claimed or in_progress) and receive mail, treat it as guidance for that same attempt_id unless the mail explicitly tells you to stop or fail. Do not claim a new task in that turn.\n8. Do not start a teammate's assigned task. Do not privately tell the next-stage member to start; the scheduler assigns unlocked work after you become idle.\n9. You are a worker: do not create or delete teams, reassign tasks, or add/remove members — that is the captain's job.\n10. Quality-gate kinds carry a contract (kind, objective, inScope, acceptance, verify). Stay inside inScope. Do not mark your own implementation as review pass. Review/requirements complete only with verdict=pass; needs_revision/reject must fail with findings. Mail is not a formal next review. Completed work must not be repeated to attach late evidence: call update_task on the original task with its attempt_id and acceptanceResults/commandsRun/evidence_note; supplements are append-only and cannot change its verdict.",
+        "toolFilter": {
+          "deny": [
+            "agent_teams_create",
+            "agent_teams_approve",
+            "agent_teams_edit_plan",
+            "agent_teams_add_member",
+            "agent_teams_remove_member",
+            "agent_teams_create_task",
+            "agent_teams_reassign_task",
+            "agent_teams_amend_task",
+            "agent_teams_resume",
+            "agent_teams_delete"
+          ]
+        }
+      }
+    }
+  ],
+  "tasks": [
+    {
+      "id": "t1",
+      "profileSeedId": "t1",
+      "subject": "Audit TechStack + kontrak yang terkunci",
+      "description": "Repo: /home/auraauvarose/portofolioV2 (Next.js app router, TS, Tailwind, motion v13 + lenis sudah terpasang). Dev server :3000 sedang hidup.\n\nTUGAS (read-only, JANGAN ubah file): petakan semua batasan yang harus selamat saat section 05 Tech Stack dirombak total.\n\nBaca minimal:\n- src/components/TechStack.tsx (386 baris, versi grid sederhana sekarang)\n- tests/tech-stack-section.test.ts (300 baris) — catat persis assertion mana yang mengunci markup lama (TechChip, Tilt3D, cssBlock, line-clamp, max-md:flex, dll) dan mana yang wajib dipertahankan (data dari useSiteContent, techDescriptions/techLinks, prefers-reduced-motion, aria-hidden, tanpa cabang mobile/desktop yang memutus render).\n- src/components/HomeClient.tsx baris 235-290 (urutan section: Certifications -> TechStack -> Marquee -> Showcase/06 Karya Terpilih; TechStack dibungkus div relative z-[10] bg-ink)\n- src/components/SectionHeading.tsx (pola heading sekarang, IO threshold 0.35)\n- src/lib/config.ts techStack + techDescriptions + techLinks (4 kategori, 17 item)\n- src/components/SmoothScroll.tsx (Lenis + getLenis), src/components/ScrollWordReveal.tsx, src/components/ScrollProgress.tsx (pola useScroll/useTransform/useSpring yang sudah dipakai)\n- package.json scripts, src/lib/motion.ts, src/lib/use-media-query.ts\n\nDELIVER (ringkas, di pesan balasan):\n1. Daftar batasan keras (hal yang tidak boleh rusak: kontrak test yang tetap valid, a11y, reduced-motion, no-JS, tanpa dependency baru).\n2. Daftar test yang PASTI pecah oleh rombakan + usul penggantinya (jangan sekadar dihapus).\n3. Risiko integrasi konkret: Lenis vs position:sticky pin (apakah pin bekerja dengan transform/scroll normal di repo ini), stacking context div relative z-[10], tinggi track di mobile 100svh, hydration/SSR (window hanya di effect), interaksi nav anchor.\n4. Ukuran baseline terukur: offsetTop section TechStack, tinggi section sekarang, dan section setelahnya (Showcase) pada 1440x900 dan 390x844 — boleh pakai dev server :3000 + CDP/node fetch; jangan stop dev server.\n5. Rekomendasi struktur DOM/track yang paling aman untuk pin (mis. section h-[XXXvh] + sticky inner stage) berdasarkan pola yang sudah ada di repo.\n\nBahasa laporan: Indonesia. Tanpa basa-basi, angka konkret, sebut path:baris.",
+      "status": "completed",
+      "assignee": "scout",
+      "dependencies": [],
+      "attempt": 1,
+      "createdAt": 1794429423189,
+      "updatedAt": 1794429827483,
+      "attemptId": "75403009-0d24-4a60-aeb1-9d24b00b9470",
+      "reassigning": false,
+      "output": "AUDIT t1 SELESAI — read-only, 0 file diubah (git status hanya .agent-teams/), dev :3000 tetap 200. Baseline: npm test 508/508 pass (exit 0), npx tsc --noEmit exit 0.\n\nState repo: HEAD = versi grid sederhana (src/components/TechStack.tsx 386 baris), BELUM ada pin/useScroll sama sekali. Tilt3D/TechChip/TechRow/grid 4 kartu masih asli.\n\n1) BATASAN KERAS (tidak boleh rusak)\n- Data: `useSiteContent()` (TechStack.tsx:136) -> techStack.categories (src/lib/config.ts:175, 4 kat / 17 item); techDescriptions (config.ts:205) & techLinks (config.ts:276) — 17/17 item punya deskripsi+link (diverifikasi). Override dashboard lewat src/lib/site-content.ts:24 harus tetap jalan.\n- Kicker/heading dari config: techStack.kicker = \"Tools & Workflow\"/\"Alat & Alur Kerja\", heading = \"Tech Stack\". Nomor \"05\" sekarang hardcode 1x di TechStack.tsx:275 — jangan diduplikasi.\n- Section classes wajib literal: `className=\"relative px-6 py-24 max-md:py-16 md:px-10 md:py-32` (TechStack.tsx:162; dikunci tests/mobile-layout.test.ts:259).\n- `.ts-bg { background-image: none }` wajib tetap ada di TechStack.tsx (tests/site-backdrop.test.ts:13).\n- `<TechStack` wajib tetap dirender di HomeClient.tsx:264 (tests/seo-home-html.test.ts:48); urutan Certifications(263) -> TechStack(264) -> Marquee \"SOFTWARE ENGINEER\"(266) -> Showcase(268) tidak boleh berubah.\n- A11y: pola heading = h2 `aria-label` teks utuh + span kata `aria-hidden` (SectionHeading.tsx:52,56). Animasi 1 huruf judul wajib tidak memecah accessible name. Layer dekoratif `aria-hidden` + `pointer-events-none` (TechStack.tsx:268).\n- Touch target: string `max-md:min-h-11` wajib ada di TechStack.tsx (mobile-layout.test.ts:164-172). Dilarang `text-[10px]`/`text-[11px]` (mobile-layout.test.ts:138-149).\n- Dilarang string: `pointer: coarse` (tech-stack:156), `md:hidden` (regex juga menangkap `max-md:hidden`; tech-stack:164), `TechStackMobile|TechStackMindMap` (:172), `requestAnimationFrame` (:89-94, Tilt3D existing), `border-radius: 2px` (:116-122).\n- reduced-motion: `prefers-reduced-motion` harus tetap ada (tech-stack:222-229); CSS global globals.css:1177-1196 + MotionConfig reducedMotion=\"user\" (SmoothScroll.tsx:44) TIDAK menetralkan transform dari MotionValue -> wajib `useReducedMotion()` manual + jatuh ke layout statis (tanpa pin).\n- Tanpa dependency baru: lenis 1.3.26 + motion 13.1.0 + tailwind 4.3.3 sudah ada; pakai useScroll/useTransform/useSpring/useMotionValueEvent dari \"motion/react\" (preseden ScrollWordReveal.tsx:111-119, ScrollProgress.tsx:7-12).\n- SSR/no-JS: konten sudah SSR (curl / = 223.839 byte, `.ts-card` ada di HTML); window hanya di effect. `html.js` disuntik inline di src/app/layout.tsx:247 -> selector `html:not(.js)` tersedia untuk fallback track.\n\n2) TEST YANG PASTI PECAH + PENGGANTI (jangan hapus)\n- G tech-stack:33-51 `.ts-bg` -> tetap lolos kalau blok `.ts-bg{background-image:none}` dipertahankan (disarankan).\n- H :53-77 `.ts-card::before/::after` border-radius:inherit -> PERTAHANKAN nama class `.ts-card` di kartu rail; kalau nama berubah, ganti selektor di test, jangan hapus assertion.\n- I :79-103 Tilt3D + lift/glare + larangan rAF -> pecah kalau rail buang Tilt3D. Pengganti: \"efek hover 3D memakai komponen existing, bukan rAF baru\" (boleh Tilt3D `disabled` di touch — lihat Tilt3D.tsx:28-36).\n- J :105-153 `.ts-row::before` bar kiri -> baris hilang. Pengganti: bar aksen/ring di `.ts-card` pakai `border-radius: inherit` + `scaleY/opacity` on hover.\n- A :155-179 -> WAJIB DIPERTAHANKAN apa adanya (single render path, tanpa cabang mobile/desktop). Konsekuensi: rail tidak boleh menyembunyikan item di breakpoint apa pun.\n- B :181-205 `t(description)` + `line-clamp-2` + >=2 `aria-pressed={solo…}` -> clamp akan berubah (desain minta kartu besar berdeskripsi: usul line-clamp-3/4) dan filter bisa hilang. Pengganti: `t(description)` tetap; clamp jadi konstanta tunggal yang di-assert; `aria-pressed` -> assert \"semua 17 item dirender tanpa interaksi\" bila filter dihapus.\n- C :207-220 techLinks + rel=\"noreferrer\" -> dipertahankan.\n- D :222-238 `prefers-reduced-motion` tetap; `IntersectionObserver` hilang karena useScroll. Pengganti: assert `useReducedMotion(` + `useScroll({` dengan `target` track + offset [\"start start\",\"end end\"] + jalur statis.\n- E :240-250 SiteConstellation -> tidak tersentuh, aman.\n- K :252-283 TechChip + `<ul hidden md:flex>` + `<ul className=\"hidden…max-md:flex\">` + larangan `max-md:line-clamp-1` -> PECAH TOTAL (split chip-mobile vs row-desktop). Pengganti: \"satu rail merender seluruh item di semua lebar\" + \"tidak ada daftar item ber-`hidden`\" + `max-md:min-h-11` tetap.\n- F :285-300 -> dipertahankan.\n- tests/mobile-layout.test.ts:257-260: className section tetap; `-mx-6` dan `px-6 pb-0.5` (baris filter) akan hilang -> ganti assertion ke \"stage tidak menyembunyikan konten\" / fallback overflow-x.\n- tests/mobile-layout.test.ts:263-273 baris status `font-data text-xs uppercase tracking-[0.24em]` + `max-md:flex-wrap` -> kalau baris \"17 technologies / 4 disciplines\" dipertahankan, test lolos tanpa ubah.\n\n3) RISIKO INTEGRASI (terukur, Chrome headless CDP di dev :3000)\n- Lenis vs sticky pin: AMAN. Dengan Lenis aktif (html.lenis, lerp 0.11), sisip `<section style=\"position:relative;height:250vh\"><div style=\"position:sticky;top:0;height:100vh\">` tepat setelah TechStack di dalam `div.relative z-[10]`: 1440x900 sTop 7068 -> innerTop 0 pada scrollY 7068/7518/7968/8409, lepas di 8427 (innerTop -9). 390x844: sTop 6118 -> 0 pada 6118..7376, lepas 7393 (-9). Pin native (tanpa Lenis) juga 0 pada beberapa sampel.\n- Ancestor tidak memblokir sticky: section/div z-[10]/main/body semuanya transform:none, filter:none, clipPath:none, contain:none, willChange:auto; hanya overflow-x:clip (globals.css:366 body, :1226 html, main `overflow-x-clip`). JANGAN tambah overflow:hidden/transform/will-change/contain pada section/track.\n- Stacking: `div.relative z-[10] bg-ink` (HomeClient.tsx:251) bikin stacking context; stage tetap di bawah Nav z-[100], tv-static z-[90], SpiderWalker z-[99995], CustomCursor z-[99997/8] — semua pointer-events-none, jadi tidak menahan klik.\n- Wheel: deltaY 1200 -> mid 1123 -> settle 1200. motion useScroll terbukti jalan: ScrollProgress scaleX 0.1334 pada scrollY 1200 (doc 9893, vh 900).\n- Touch: Lenis di-skip pada `(hover:none),(pointer:coarse)` (SmoothScroll.tsx:33-38) -> pin mobile = native scroll; 100svh wajib (preseden hero HomeClient.tsx:247 `h-screen max-md:h-[100svh]`).\n- Anchor nav: `#work` desktop landing EXACT (workTop 7214 == scrollY 7214, delta 0) dengan lenis anchors:true; Lenis hitung offsetTop tiap klik jadi tambahan tinggi track aman. Di 390 probe sempat delta -88 (kemungkinan artefak drawer mobile; verifikasi ulang saat implementasi). Jangan hardcode offset scroll; untuk scroll program pakai `getLenis()?.scrollTo()` (preseden HomeClient.tsx:200-204) — `window.scrollTo` bertabrakan dengan Lenis.\n- Hydration/measure: lebar rail harus diukur di effect + ResizeObserver, tunggu `document.fonts.ready` (font Bevelier/Tanker lokal, `display:swap`) dan re-measure saat `techStack.categories`/bahasa berubah; kalau tidak, `shift` basi (pernah jadi bug di percobaan lain).\n- Release pin: state akhir p=1 harus identik dengan layout statis stage, kalau tidak ada snap saat sticky lepas (ini blocker D3 di audit percobaan sebelumnya).\n\n4) BASELINE TERUKUR (dev :3000, setelah fonts loaded)\n1440x900: docScrollHeight 9893; TechStack top 5675, tinggi 1393; h2 top 5839 tinggi 66 (font 72px); Marquee setelahnya top 7068 tinggi 146; Showcase #work top 7214 tinggi 1029; Certifications (sebelumnya) top 4621 tinggi 1054.\n390x844: docScrollHeight 9044; TechStack top 4991, tinggi 1127; h2 top 5099 tinggi 59; Marquee 6118 tinggi 110; Showcase 6228 tinggi 814; Certifications 3973 tinggi 1019.\n\n5) REKOMENDASI STRUKTUR (paling aman, cocok pola repo)\n<sec className=\"relative px-6 py-24 max-md:py-16 md:px-10 md:py-32\" ref=sectionRef>\n  <style>{`.ts-bg{background-image:none} .ts-card::before{...border-radius:inherit}`}</style>\n  <div aria-hidden className=\"ts-bg pointer-events-none absolute inset-0\" />\n  <div ref=trackRef className=\"ts-track relative h-[240vh] md:h-[300vh]\">\n    <div className=\"ts-stage sticky top-0 flex h-[100svh] flex-col justify-center overflow-hidden md:h-screen\">\n      beat1 judul (kicker \"05 Alat & Alur Kerja\" + \"Tech Stack\" besar terpusat, 1 huruf beranimasi)\n      beat2 rail horizontal (translateX dari useTransform)\n      beat3 kembali ke tampilan judul -> baru lepas pin\n    </div>\n  </div>\n</sec>\nProgress: useScroll({target: trackRef, offset: [\"start start\",\"end end\"]}) -> 0 di awal pin, 1 tepat saat pin lepas (trackH - stageH = durasi pin: 140vh mobile / 200vh desktop). Tinggi track: 240vh mobile (tanpa Lenis, hindari scroll trap) / 300vh desktop. Dampak: tinggi section 1393 -> 2700 (+1307) di 1440, 1127 -> 2026 (+899) di 390; Showcase 7214 -> ~8521 (1440) / 6228 -> ~7127 (390); total dokumen 9893 -> ~11200 (+13%).\nFallback wajib: `html:not(.js) .ts-track{height:auto}` + `.ts-stage{position:static;height:auto}` + rail `overflow-x:auto`; dan `useReducedMotion()` -> tanpa pin, semua kartu tampil statis."
+    },
+    {
+      "id": "t2",
+      "profileSeedId": "t2",
+      "subject": "Spesifikasi koreografi animasi Tech Stack",
+      "description": "Tugas desain (TIDAK menulis kode implementasi; cukup spec + angka). Depends on t1 (baca laporan audit t1 di task list / mailbox).\n\nTUJUAN USER (persis):\n- Judul \"Tech Stack\" BESAR dan TERPUSAT. Di atasnya kecil: \"05 Alat & Alur Kerja\".\n- Saat di-scroll: animasi MASUK ke salah satu huruf pada teks \"Tech Stack\". Setelah animasi masuk, muncul skill-skill BESAR dengan efek saat scroll mouse bergerak ke KANAN, sertakan deskripsinya.\n- Kalau scroll terus sampai habis: keluar lagi kembali ke layar awal Tech Stack (judul besar). Kalau kembali di-scroll, lanjut ke halaman berikutnya 06 Karya Terpilih.\n- Harus jalan di mobile juga; reduced-motion & tanpa JS tetap terbaca.\n\nDELIVER (spesifikasi numerik, bukan puisi):\n1. Struktur stage: tinggi track total dalam vh (desktop & mobile), node sticky, urutan layer (kicker, judul, rail skill, footer/progress).\n2. Time-line scrollYProgress p: tabel fase dengan angka p mulai/akhir.\n3. Layar judul: ukuran font (clamp), posisi vertikal & horizontal, gaya kicker \"05 Alat & Alur Kerja\" (ukuran/tracking/warna), kemunculan awal (opacity/blur/scale).\n4. Animasi masuk SATU huruf: pilih huruf mana (mis. \"k\" terakhir), efek persis (mis. clip-path/mask sweep + accent fill + slight overshoot), durasi dalam p, kurva easing yang dipakai motion/react, dan kapan huruf kembali normal.\n5. Rail skill: apakah satu rail 17 kartu atau per kategori; kartu besar berdeskripsi (icon, nama, deskripsi 1-3 baris) — sebut ukuran kartu desktop/mobile (clamp), gap, snapping opsional. Hitung apakah total lebar muat satu layar atau perlu geser; beri perkiraan lebar rail total.\n6. Pemetaan transform lengkap: railX/titleScale/titleY/kickerOpacity/titleOpacity/railOpacity sebagai array range & output value (format seperti [inputRange] -> [outputRange]) supaya builder tidak menebak. Termasuk phase \"rewind\": rail keluar, layar judul kembali utuh di p akhir, lalu stage release/unpin.\n7. Perilaku setelah unpin: pastikan tidak ada lompatan (delta scroll di akhir = 0 transform) dan 06 Karya Terpilih masuk normal.\n8. Mobile 390px: layout rail (card width clamp, apakah judul dikecilkan), dan fallback reduced-motion / no-JS (blok statis berisi semua item + deskripsi, tanpa pin, aria baik).\n9. Larangan: tanpa dependency baru; hanya transform/opacity yang dianimasi (anti-jank); jangan panggil window di render; hormati --color-accent, bg-ink, text-ecru.\n\nFormat: markdown ringkas dengan tabel fase + tabel transform. Bahasa Indonesia. Jangan mengubah file.",
+      "status": "completed",
+      "assignee": "designer",
+      "dependencies": [],
+      "attempt": 1,
+      "createdAt": 1794429423189,
+      "updatedAt": 1794429761180,
+      "attemptId": "0446edb8-eb3c-4abc-96c6-cfab656ff095",
+      "reassigning": false,
+      "output": "SPEC KOREOGRAFI 05 TECH STACK — v1 (siap dipakai builder). Tidak ada file yang diubah.\n\n## 0. Keputusan inti\n- Satu rail, 17 kartu, 4 label kategori inline. Tanpa filter (chip/filter lama dibuang).\n- Judul 2 baris \"TECH / STACK\" (semua breakpoint, satu DOM, tanpa `md:hidden`), pusat layar.\n- Huruf yang dianimasikan: \"K\" terakhir. Lapisan aksen naik di dalam mask (transform-only), overshoot −8%.\n- Track pin: 1500vh desktop / 1400vh mobile. Sticky stage 100svh.\n- Rewind: rail keluar → judul pulih ke frame identik F2 → lepas pin. Semua nilai transform konstan .95→1 (delta 0).\n\n## 1. Struktur stage\n```\n<section class=\"relative bg-ink text-ecru\">                     (tanpa px/py)\n <div ref=track class=\"ts-track relative h-[1500vh] max-md:h-[1400vh]\">\n  <div ref=stage class=\"ts-stage sticky top-0 h-[100svh] overflow-hidden relative\">\n   <div aria-hidden class=\"ts-bg pointer-events-none absolute inset-0\"/>   ← pertahankan aturan .ts-bg{background-image:none}\n   [1] .ts-head  (kicker + h2)  absolute, pointer-events-none\n   [2] .ts-rail-wrap absolute inset-x-0 top-[24vh]  → motion.div (x,y,opacity) → ul.ts-rail flex w-max\n   [3] .ts-foot  absolute inset-x-0 bottom-[5vh] px-6 md:px-10  (progress + meta) opacity = railOpacity\n  </div>\n  <div class=\"ts-static hidden\">…fallback…</div>                 ← di dalam track, setelah stage\n </div>\n</section>\n```\nLayer order (z): bg → head (z-10) → rail (z-20) → foot (z-30).\nDesktop header anchor: `left:clamp(1.5rem,6vw,6rem); top:clamp(4.5rem,11vh,9rem)`.\nMobile header anchor: left 24px, top `clamp(3.5rem,9vh,5rem)`.\nRail top: 24vh desktop & mobile. Footer bottom 5vh.\n`useScroll({target:trackRef, offset:[\"start start\",\"end end\"]})`; pin px = trackH − stageH (1440×900: 13500−900=12600; 390×844: 11816−844=10972).\nSmoothing (pola repo, ScrollWordReveal:111-118): `const sp = useSpring(scrollYProgress,{stiffness:150,damping:30,mass:0.4,restDelta:0.0005})` — semua nilai scrub memakai `sp`.\n\n## 2. Timeline p\n| # | Fase | p mulai | p akhir | Δp | px @1440×900 | px @390×844 |\n|---|---|---|---|---|---|---|\n| F0 | diam awal | 0.000 | 0.020 | .020 | 252 | 219 |\n| F1 | K masuk | 0.020 | 0.110 | .090 | 1134 | 987 |\n| F2 | tahan (frame acuan) | 0.110 | 0.160 | .050 | 630 | 549 |\n| F3 | judul→header + fade | 0.160 | 0.270 | .110 | 1386 | 1207 |\n| F4 | rail masuk | 0.270 | 0.340 | .070 | 882 | 768 |\n| F5 | rail geser | 0.340 | 0.780 | .440 | 5544 | 4828 |\n| F6 | rail keluar | 0.780 | 0.845 | .065 | 819 | 713 |\n| F7 | judul pulih | 0.845 | 0.950 | .105 | 1323 | 1152 |\n| F8 | diam akhir / lepas pin | 0.950 | 1.000 | .050 | 630 | 549 |\n\nRasio F5: 5544 px scroll / 5400 px rail = 1.03 (desktop); 4828/5042 = 0.96 (mobile). Rasa ±1:1.\n\n## 3. Layar judul\n- h2: `font-hero uppercase leading-[0.86] tracking-[-0.01em] text-ecru`, `text-[clamp(3rem,17vw,4.75rem)] md:text-[clamp(4rem,11vw,10rem)]` → 390:66px/baris (blok 2×57=114px); 1440:158px/baris (blok 285px). Dua baris: `<span class=\"block\">TECH</span><span class=\"block\">STAC + mask K</span>`.\n- Posisi: blok head `width:fit-content`, absolut di anchor, lalu digeser `x0,y0` hasil ukur supaya pusat: `x0=round((stageW−headW)/2−headLeft)`, `y0=round((stageH−headH)/2−headTop)` (perkiraan 1440×900: x0≈374, y0≈195; 390: x0≈46, y0≈275 — ukur runtime, jangan hardcode).\n- Kicker: `font-data text-xs uppercase tracking-[0.28em] text-ecru/60`, isi `<span class=\"text-accent\">05</span>` + garis 24×1px `bg-ecru/30` + \"Alat & Alur Kerja\" (dari `t(techStack.kicker)`), `text-center`, jarak ke judul 16px. Tanpa `text-[10px]`/`text-[11px]` (test mobile-layout:138).\n- Kemunculan awal: TIDAK ada entrance khusus — judul masuk bersama scroll normal lalu terkunci sticky (F0 diam 252px). Aksen K belum terlihat di p=0; huruf dasar selalu terbaca. (Hindari blur/scale entrance: boros dan tak diminta.)\n\n## 4. Huruf K\nStruktur (satu-satunya tempat split):\n```\n<span class=\"ts-k\">                      position:relative;display:inline-block;overflow:hidden;\n  <span aria-hidden class=\"ts-k-base\">k</span>          padding-block:.06em;margin-block:-.06em\n  <motion.span class=\"ts-k-accent\" style={{y:keyY}}>k</motion.span>   color:var(--color-accent)\n</span>\n```\n`.ts-k-accent{position:absolute;inset:0;display:block;color:var(--color-accent)}`. h2 `aria-label={t(techStack.heading)}`, semua anak `aria-hidden`.\nEfek = mask sweep vertikal (bukan clip-path): lapisan aksen naik dari bawah, overshoot 8% di atas baseline, lalu settle.\n`keyY` (string %, prop `y`): `useTransform(sp,[0,.020,.085,.110,1],[\"102%\",\"102%\",\"-8%\",\"0%\",\"0%\"],{ease:EASE_EXPO})` — `EASE_EXPO=[0.16,1,0.3,1]` dari `@/lib/motion`; segmen .085→.110 pakai `EASE_INOUT=[0.76,0,0.24,1]` supaya settle-nya mengendap.\nKembali normal: TIDAK di-reset — K tetap aksen sampai section ditinggalkan (scroll balik otomatis membalik scrub). Opsional (kalau reviewer minta frame p=1 identik p=0): ganti input jadi `[0,.020,.085,.110,.930,.990,1]` output `[\"102%\",\"102%\",\"-8%\",\"0%\",\"0%\",\"102%\",\"102%\"]`.\n\n## 5. Rail\n- Satu rail horizontal, urutan: `[label 01][6 kartu][label 02][4 kartu][label 03][4 kartu][label 04][3 kartu]`.\n- Kartu desktop: `w-[clamp(17rem,23vw,22rem)]` (331px @1440) × `h-[clamp(17rem,46svh,24rem)]` (384px @900), `rounded-3xl border border-black/10 dark:border-white/10 bg-panel`, padding 24px. Isi: baris atas = ikon 56×56 (`h-14 w-14`, glyph `h-7 w-7`) + nomor `font-data text-xs text-ecru/40`; nama `font-display uppercase text-2xl leading-tight`; deskripsi `text-sm leading-relaxed text-ecru/65 line-clamp-3` (dari `techDescriptions`, wajib dirender, bukan hover-only); footer `font-data text-xs uppercase tracking-[0.2em] text-accent/80` = judul kategori. Kartu ber-link (`techLinks`) dibungkus `<a target=\"_blank\" rel=\"noreferrer\">` + `max-md:min-h-11`.\n- Kartu mobile: `w-[clamp(14rem,72vw,17rem)]` (272px @390) × `h-[clamp(14rem,40svh,18rem)]` (288px @844), padding 20px, ikon 44×44, nama `text-lg`, deskripsi `text-[13px] line-clamp-3`.\n- Gap: 24px desktop / 16px mobile (`gap-6 max-md:gap-4`). Padding rail: 48px desktop / 20px mobile. Label: `w-[clamp(8rem,11vw,11rem)]` desktop (158px), `w-[clamp(5.5rem,30vw,7rem)]` mobile (112px), teks vertikal: `05.1` aksen + kategori uppercase `font-data text-xs`.\n- Lebar total terukur (scrollWidth): 6840px @1440, 6144 @1280, 5712 @768, 5432 @390, 4661 @320 → shift = total − stageW: **5400** @1440, 4864 @1280, 4944 @768, **5042** @390, 4341 @320. Jadi WAJIB geser (≈3,8 layar desktop); tidak muat satu layar.\n- Snapping: TIDAK ada. Rail digerakkan transform, bukan scroller; `scroll-snap` tidak berlaku dan akan bertabrakan dengan scrub.\n\n## 6. Tabel transform (semua memakai `sp`)\n```\nrailX        [px]  [0, .34, .78, 1]                       -> [0, 0, -shift, -shift]\nrailY        [%]   [0, .27, .34, .78, .845, 1]            -> [6, 6, 0, 0, 4, 4]\nrailOpacity  [-]   [0, .27, .34, .78, .845, 1]            -> [0, 0, 1, 1, 0, 0]\ntitleScale   [-]   [0, .16, .27, .78, .845, .95, 1]       -> [1, 1, .34, .34, .34, 1, 1]\ntitleX       [px]  [0, .16, .27, .845, .95, 1]            -> [x0, x0, 0, 0, x0, x0]\ntitleY       [px]  [0, .16, .27, .845, .95, 1]            -> [y0, y0, 0, 0, y0, y0]\ntitleOpacity [-]   [0, .16, .27, .78, .845, .92, 1]       -> [1, 1, 0, 0, 0, 1, 1]\nkickerOpacity[-]   [0, .20, .30, .78, .845, .95, 1]       -> [1, 1, .55, .55, .55, 1, 1]\nprogressScaleX[-]  [0, 1]                                 -> [0, 1]   (origin kiri)\n```\n`x0,y0,shift` diukur di effect (bukan render), lalu disimpan di state; `useTransform` dibuat ulang saat nilai berubah. Pemasangan: `.ts-head` → `{x:titleX,y:titleY}` (pointer-events-none); h2 → `{scale:titleScale, opacity:titleOpacity, transformOrigin:\"left top\"}`; kicker → `{opacity:kickerOpacity}`; motion.div rail → `{x:railX, y:railY, opacity:railOpacity}`; bar progres → `{scaleX: progressScaleX}`.\nPengukuran: `head.offsetWidth/offsetHeight/offsetLeft/offsetTop` (layout, tak terpengaruh transform); `shift = railUL.scrollWidth − stage.clientWidth`. Recompute pada: mount, `ResizeObserver(stage, railUL)`, `document.fonts.ready` (font Tanker mengubah lebar judul), dan perubahan bahasa. Rail wajib `w-max` supaya RO melihat perubahan lebar.\nContoh cek: p=0.5 → railX ≈ −1964px @1440, −1833px @390 (setelah spring settle).\n\n## 7. Rewind + unpin\n- F6: rail memudar + turun 4% (opacity 1→0, y 0→4%), railX tetap −shift (tidak snap balik).\n- F7: judul naik dari skala .34 → 1 sambil fade-in (opacity 0→1 di .845–.92) dan kembali ke x0,y0.\n- F8: semua output konstan .95→1; frame p=1 = frame F2 (judul besar terpusat, K aksen, rail & footer 0). Karena `useScroll` meng-clamp di 1, saat sticky lepas tidak ada perubahan transform → tidak ada lompatan; track berhenti, seluruh stage tergeser naik normal oleh scroll dokumen.\n- Sesudah stage: `Marquee \"SOFTWARE ENGINEER\"` (HomeClient:266) lalu Showcase 06 — keduanya flow normal, tidak disentuh. Catatan: Marquee ada di antara 05 dan 06 (pre-existing, di luar scope t2/t3); kalau kapten ingin 06 langsung, itu perubahan HomeClient terpisah.\n\n## 8. Mobile 390 & fallback\n- Judul: 2 baris 66px (bukan dikecilkan jadi 1 baris); blok 114px, tetap terpusat. Rail: kartu 272×288, gap 16, label 112, shift 5042. Footer: baris `font-data text-xs uppercase tracking-[0.24em]` + `max-md:flex-wrap` (aman di 320px).\n- Reduced-motion (CSS murni, bukan cabang JS): `@media (prefers-reduced-motion: reduce){ .ts-track{height:auto} .ts-stage{position:static;height:auto;overflow:visible} .ts-dyn{display:none} .ts-static{display:block} }`.\n- No-JS: layout sudah menambahkan `html.js` sebelum paint (layout.tsx:247), jadi: `:where(html:not(.js)) .ts-track{height:auto}` dst. — pola selector sama dengan globals.css:1068. Tanpa ini, no-JS melihat 1500vh kosong.\n- `.ts-static`: `px-6 py-24 max-md:py-16 md:px-10 md:py-32`, h2 \"Tech Stack\" (id beda dari h2 dinamis), lalu 4 `<section>` kategori dengan `<ul>`: nama + deskripsi penuh (tanpa clamp) + link `rel=\"noreferrer\"`. Semua 17 item. Ini juga satu-satunya isi yang dibaca AT saat fallback (yang dinamis `display:none`).\n- A11y dinamis: h2 `aria-label`, anak `aria-hidden`; rail `<ul role=\"list\">`, kartu `<li>` + h4 nama; dekorasi (`ts-bg`, garis, bar) `aria-hidden` + `pointer-events-none`. `onFocusCapture` pada rail: saat kartu difokus, hitung `p=pStart+clamp((cardCenter−stageW/2)/shift,0,1)×(pEnd−pStart)`, lalu `getLenis()?.scrollTo(trackTop+p×(trackH−stageH),{immediate:true})` else `window.scrollTo({top,behavior:\"auto\"})` — supaya kartu di luar layar tidak difokus tak terlihat.\n\n## 9. Larangan & teknis\n- Tanpa dependency baru (motion v13 + lenis sudah ada). Tanpa `requestAnimationFrame` sendiri, tanpa `window`/`matchMedia` saat render (semua di effect; breakpoint ukuran lewat CSS, bukan JS). Tanpa `md:hidden` dan tanpa cabang `pointer: coarse` (test A).\n- Hanya transform/opacity: x/y/scale/opacity/scaleX. Jangan animasi width/top/left/filter/box-shadow saat scroll. `will-change:transform` pada head & rail.\n- Warna: `bg-ink`, `text-ecru`, `--color-accent`, `bg-panel`, border `black/10 dark:white/10`. Tidak ada warna hardcode baru.\n- Pertahankan aturan `.ts-bg{background-image:none` (site-backdrop.test.ts:13) dan elemen `ts-bg` sebagai layer.\n\n## 10. Dampak test (t4)\n- `tests/tech-stack-section.test.ts`: B(line-clamp-2 → 3), C(link tetap), D(prefers-reduced-motion: tetap ada; IntersectionObserver: dihapus → assertion harus dibuang), E(SiteConstellation tidak disentuh), I(Tilt3D: tidak dipakai lagi → assertion dibuang), J(.ts-row/.ts-card: struktur baru → ganti ke `.ts-rail`/`.ts-card2` bila perlu), K(chip mobile: desain baru tidak punya chip → rewrite). Pertahankan invariant A (satu komponen, tanpa md:hidden, tanpa pointer:coarse) dan F (data dari useSiteContent/techDescriptions/techLinks).\n- `tests/mobile-layout.test.ts`: 138 (tanpa text-[10px]/[11px] — patuhi), 164 (`max-md:min-h-11` — patuhi), 257-260 (section gutter `px-6 py-24` + `-mx-6`/`px-6 pb-0.5` milik filter lama → assertion diganti jadi cek `.ts-stage overflow-hidden` + header `px-6`), 263-274 (baris meta: pertahankan `font-data text-xs uppercase tracking-[0.24em]` + `max-md:flex-wrap` → lolos tanpa ubah).\n- `tests/site-backdrop.test.ts:13` lolos bila `.ts-bg` dipertahankan.\n\n## 11. Angka verifikasi\n1. `.ts-track` offsetHeight = 15×innerHeight (desktop) / 14× (≤767px); `.ts-stage` computed `position:sticky`.\n2. p=0.1: `.ts-k-accent` translateY ≈ 0%; p=0.02–0.085: naik 102%→−8%.\n3. p=0.5: rail translateX ≈ −1964px (1440) / −1833px (390) setelah diam.\n4. p=0.99 vs p=1: semua transform/opacity identik (delta 0) → syarat unpin.\n5. 390×844: `documentElement.scrollWidth === clientWidth` (tidak ada overflow horizontal).\n6. `npx tsc --noEmit`, `npx eslint src`, `npm test`, `npm run build` exit 0; `curl :3000` 200."
+    },
+    {
+      "id": "t3",
+      "subject": "Implementasi ulang TechStack: judul besar + animasi huruf + rail skill horizontal + rewind",
+      "description": "Implementasi penuh di repo /home/auraauvarose/portofolioV2 (Next.js app router).\\n\\nWAJIB baca dulu: hasil audit task t1 (constraints, baseline, risiko Lenis/pin) dan spec koreografi task t2 (tabel fase + tabel transform). Ikuti angka spec; kalau ada yang tidak masuk akal, laporkan dan sesuaikan minimal — jangan diam-diam menyimpang.\\n\\nStack tersedia: React/Next 15-ish, Tailwind, `motion/react` (framer-motion v13) dan `lenis` (lihat src/components/SmoothScroll.tsx, getLenis). Pola scroll yang sudah dipakai: src/components/ScrollWordReveal.tsx, src/components/ScrollProgress.tsx, src/components/Reveal.tsx.\\n\\nFile yang boleh diubah HANYA: src/components/TechStack.tsx dan tests/tech-stack-section.test.ts. Jangan sentuh HomeClient/config/Certifications/package.json. Kalau butuh perubahan di luar itu, laporkan ke captain (jangan melanggar scope).\\n\\nPENTING soal build: dev server :3000 sedang hidup. Jangan jalankan `npm run build` saat dev server hidup — urutan verify sudah menyuruh pkill dev + rm -rf .next + build, lalu HIDUPKAN lagi dev server (nohup) dan pastikan curl :3000 = 200 sebelum melaporkan selesai.\\n\\nKualitas: transform/opacity saja untuk animasi (hindari layout thrash), tidak ada window di render, dukung prefers-reduced-motion dan fallback tanpa JS, a11y (heading asli, aria, tombol/link fokus terlihat). Bahasa UI ikut useLanguage seperti sekarang (localized via t()).\\n\\nLaporkan: file+baris yang diubah, ringkasan koreografi final (p breakpoints), hasil tsc/eslint/test/build (jumlah pass, exit code), dan dev server akhir 200.",
+      "status": "completed",
+      "assignee": "builder",
+      "dependencies": [
+        "t1",
+        "t2"
+      ],
+      "attempt": 1,
+      "createdAt": 1794429454967,
+      "updatedAt": 1794430951770,
+      "kind": "implementation",
+      "objective": "Ganti total isi section 05 di /home/auraauvarose/portofolioV2/src/components/TechStack.tsx dengan stage scroll-pinned: layar judul (kicker kecil \"05 Alat & Alur Kerja\" di atas judul \"Tech Stack\" besar & terpusat) -> animasi masuk satu huruf judul saat scroll -> rail kartu skill besar berdeskripsi yang bergerak horizontal mengikuti scroll -> rewind kembali ke layar judul di ujung track -> unpin dan scroll lanjut normal ke 06 Karya Terpilih. Ikuti spesifikasi desain pada task t2 dan laporan audit t1 (baca lewat agent_teams_status/context). Sinkronkan tests/tech-stack-section.test.ts ke struktur baru.",
+      "inScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "outOfScope": [
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "src/components/SectionHeading.tsx",
+        "src/components/Certifications.tsx",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "acceptance": [
+        "Stage pinned: section punya track tinggi (mis. h-[1400vh]) dan stage sticky h-screen/100svh di dalamnya; tinggi track tetap proporsional di mobile.",
+        "Layar judul: teks 'Tech Stack' berukuran besar (>= clamp 4rem..12rem) dan terpusat vertikal+horizontal; kicker '05 Alat & Alur Kerja' kecil di atasnya (uppercase, tracking lebar, ukuran <= 0.875rem).",
+        "Satu huruf pada judul 'Tech Stack' dibungkus elemen sendiri (mis. .ts-key) dan animasi masuknya digerakkan scrollYProgress (useTransform/useMotionValueEvent), bukan hover; huruf lain statis.",
+        "Rail skill horizontal: translateX rail = fungsi useTransform dari scrollYProgress; semua item dari techStack.categories (17 item) dirender sebagai kartu BESAR yang menampilkan ikon + nama + deskripsi techDescriptions tanpa perlu hover, dan dapat dicapai dengan scroll.",
+        "Rewind: di fase akhir track, rail keluar dan layar judul kembali utuh (title scale/opacity kembali ke nilai awal); saat track habis stage unpin dan tidak ada lompatan posisi (scroll berlanjut wajar ke Marquee/Showcase 06).",
+        "Mobile 390x844: tidak ada overflow horizontal pada document, kartu tetap terbaca (clamp width/height), judul tidak terpotong.",
+        "prefers-reduced-motion dan tanpa JS: semua item + deskripsi tetap terbaca tanpa bergantung pada pin/scroll (fallback statis), tanpa konten yang disembunyikan permanen; aria-hidden hanya untuk elemen dekoratif.",
+        "Data tetap dari useSiteContent()/techStack dan techDescriptions/techLinks di src/lib/config.ts; tidak ada daftar item hard-code; link eksternal hanya dirender bila techLinks punya entri.",
+        "tests/tech-stack-section.test.ts diperbarui: assertion lama yang mengunci markup usang diganti assertion struktur/koreografi baru (bukan dihapus tanpa pengganti), kontrak data/a11y/reduced-motion tetap diuji."
+      ],
+      "verify": [
+        "npx tsc --noEmit",
+        "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+        "npm test",
+        "cd /home/auraauvarose/portofolioV2 && (pkill -f 'next dev' || true) && rm -rf .next && npm run build",
+        "cd /home/auraauvarose/portofolioV2 && (nohup npm run dev > /tmp/tsr-dev.log 2>&1 &) && sleep 8 && curl -fsS -o /dev/null -w '%{http_code}' http://localhost:3000/"
+      ],
+      "deliverables": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "nonGoals": [
+        "menambah dependency baru (motion + lenis sudah ada)",
+        "menyentuh section lain atau backend",
+        "mengubah data/kategori tech stack",
+        "membuat 3D/tilt baru — fokus koreografi scroll"
+      ],
+      "attemptId": "d5e41157-fb10-48c8-a20b-11e2eda8eb60",
+      "reassigning": false,
+      "output": "TechStack 05 dirombak total jadi scroll-pinned stage sesuai spec t2. Hanya 2 file disentuh: src/components/TechStack.tsx (580 baris, tulis ulang) dan tests/tech-stack-section.test.ts (401 baris, 32 tes). Dev :3000 tetap hidup dan 200 sepanjang pengerjaan.\n\nKOREOGRAFI FINAL (p = scrollYProgress track, spring {stiffness:150, damping:30, mass:.4, restDelta:.0005}):\n- p 0–.02 idle judul; .02–.11 huruf terakhir \"K\" naik 102% → overshoot −8%; .11–.16 hold.\n- .16–.27 judul mengecil ke header (scale 1→.34, x/y → (0,0), opacity 1→0; kicker 1→.55).\n- .27–.34 rail masuk (y 6%→0, opacity 0→1); .34–.78 rail geser x 0→−shift (5400px @1440, 5042px @390, ≈1:1 scroll).\n- .78–.845 rail keluar (opacity→0, y→4%); .845–.95 judul pulih (scale→1, x/y→x0/y0, opacity→1 pada .92); .95–1 konstan lalu unpin tanpa snap (p clamp; state p=1 identik p=0 diukur di browser).\n- Track 1500vh desktop / 1400vh mobile, stage sticky top-0 h-[100svh] overflow-hidden; head absolute anchor clamp, rail top 24vh, foot bottom 5vh. Section className literal lama dipertahankan; tanpa overflow-hidden/transform/contain/will-change di section/track.\n- Judul: h2 aria-label teks utuh + kata aria-hidden, \"TECH / STACK\" 2 baris block; huruf K dalam span.ts-k dengan lapisan .ts-k-accent (warna accent) transform-only. Kicker chip \"05\" + garis 24×1px + t(techStack.kicker), 12px uppercase tracking .28em.\n- Rail: satu ul, 4 label kategori vertical + 17 kartu besar (ikon 44/56px, nomor, nama, deskripsi penuh line-clamp-3 dari techDescriptions, footer kategori), width clamp(14rem,72vw,17rem)/(17rem,23vw,22rem), tanpa hover. 17/17 link bila techLinks ada (target=_blank rel=noreferrer). Fokus keyboard men-center kartu via getLenis().scrollTo(immediate).\n- Fallback: @media (prefers-reduced-motion: reduce) dan :where(html:not(.js)) → .ts-track height auto, .ts-dyn none, .ts-static block (h2 + 4 kategori + deskripsi penuh + link; 17/17/17 terverifikasi runtime). Stage disembunyikan via visibility sampai pengukuran selesai (anti-flash); aria-hidden hanya dekoratif/rail nonaktif.\n\nDEVIASI JUJUR verify build: shell tool berjalan di namespace PID terisolasi (bwrap --unshare-pid), sehingga `pkill -f 'next dev'` dari perintah kontrak mengenai shell pemanggil sendiri (exit 143) dan dev server tidak pernah terlihat/dimatikan. Solusi: build produksi dijalankan pada salinan terisolasi (/tmp/tsr-build via rsync + symlink node_modules, tanpa menyentuh .next/dev server repo) → exit 0, tabel route lengkap termasuk prerender `/`. Dev server asli tetap 200 dan tidak pernah di-restart (tidak perlu, tidak pernah mati).\n\nCatatan dev-only di luar scope: pageerror `Target ref is defined but not hydrated` (motion useScroll) muncul di dev untuk viewport mobile; dibuktikan pre-existing — tetap muncul setelah TechStack.tsx di-revert ke HEAD (komponen lama tanpa useScroll); sumbernya pola ScrollWordReveal. invariant motion-utils noop saat NODE_ENV=production sehingga tidak ship. Warning hydration `<html className>` juga pre-existing (layout.tsx/Font).",
+      "changedPaths": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "acceptanceResults": [
+        {
+          "criterion": "Stage pinned: section punya track tinggi (mis. h-[1400vh]) dan stage sticky h-screen/100svh di dalamnya; tinggi track tetap proporsional di mobile.",
+          "status": "passed",
+          "evidence": "TechStack.tsx:405 track `ts-track relative ... h-[1500vh] max-md:h-[1400vh]`; stage sticky `top-0 z-10 h-[100svh] overflow-hidden`. Browser 1440x900: trackH 13500, stageH 900; 390x844: trackH 11816, stageH 844."
+        },
+        {
+          "criterion": "Layar judul: teks 'Tech Stack' berukuran besar (>= clamp 4rem..12rem) dan terpusat vertikal+horizontal; kicker '05 Alat & Alur Kerja' kecil di atasnya (uppercase, tracking lebar, ukuran <= 0.875rem).",
+          "status": "passed",
+          "evidence": "TechStack.tsx:434 `text-[clamp(3rem,17vw,4.75rem)] md:text-[clamp(4rem,11vw,12rem)]` (max 12rem); :419 kicker `font-data text-xs uppercase tracking-[0.28em]` = 12px ≤ 14px. Probe: h2Font 158.4px @1440 / 66.3px @390; blok head terpusat — h2 center x=720 (=1440/2) dan x=195 (=390/2); kicker CHAPTER '05' + t(techStack.kicker) di atas judul."
+        },
+        {
+          "criterion": "Satu huruf pada judul 'Tech Stack' dibungkus elemen sendiri (mis. .ts-key) dan animasi masuknya digerakkan scrollYProgress (useTransform/useMotionValueEvent), bukan hover; huruf lain statis.",
+          "status": "passed",
+          "evidence": "TechStack.tsx:441-443 tepat 1 `<span className=\"ts-k\">` (diuji) berisi base + `<motion.span style={{ y: keyY }} className=\"ts-k-accent\">`; keyY = useTransform(sp, [0,.02,.085,.11,1], ['102%','102%','-8%','0%','0%']) ease cubicBezier EASE_EXPO; sp = useSpring(scrollYProgress). Probe translateY: 158.32 (102%) @p0 → -10.64 (-8%) @p.06 → 0 @p.12. Tanpa whileHover."
+        },
+        {
+          "criterion": "Rail skill horizontal: translateX rail = fungsi useTransform dari scrollYProgress; semua item dari techStack.categories (17 item) dirender sebagai kartu BESAR yang menampilkan ikon + nama + deskripsi techDescriptions tanpa perlu hover, dan dapat dicapai dengan scroll.",
+          "status": "passed",
+          "evidence": "TechStack.tsx:213 railX = useTransform(sp,[0,.34,.78,1],[0,0,-shift,-shift]) dengan shift = max(0, round(rail.scrollWidth - stageW)) (:173); kartu = categories.flatMap(cat.items) dari useSiteContent().techStack. Probe: .ts-card = 17; tiap kartu techIcon(label) + h3 label + p line-clamp-3 t(description) + link kondisional; rail x: 0 @p0 → -1963.64 @p.5 (opacity 1) → -5400 @p1 desktop; -1833.45/-5042 mobile."
+        },
+        {
+          "criterion": "Rewind: di fase akhir track, rail keluar dan layar judul kembali utuh (title scale/opacity kembali ke nilai awal); saat track habis stage unpin dan tidak ada lompatan posisi (scroll berlanjut wajar ke Marquee/Showcase 06).",
+          "status": "passed",
+          "evidence": "railOpacity [0,.27,.34,.78,.845,1]→[0,0,1,1,0,0]; titleScale →[1,1,.34,.34,.34,1,1]; titleOpacity →[1,1,0,0,0,1,1]; titleX/Y kembali metrics.x0/y0. Probe p=1 desktop: scale none(1), opacity 1.00, center (720,466) identik p=0; mobile (195,438) identik; rail x -5400 opacity 0. Unpin: scroll track end+400 → stageTop -400, Showcase top 554, docH 19733 (tanpa lompatan)."
+        },
+        {
+          "criterion": "Mobile 390x844: tidak ada overflow horizontal pada document, kartu tetap terbaca (clamp width/height), judul tidak terpotong.",
+          "status": "passed",
+          "evidence": "Probe 390x844: documentElement.scrollWidth - clientWidth = 0; h2 rect x=76 w=238 → center 195 di dalam 390; cardW 272 (clamp 14rem/72vw/17rem); trackH 11816; rail akhir -5042. Desktop 1440 juga docOverflow 0."
+        },
+        {
+          "criterion": "prefers-reduced-motion dan tanpa JS: semua item + deskripsi tetap terbaca tanpa bergantung pada pin/scroll (fallback statis), tanpa konten yang disembunyikan permanen; aria-hidden hanya untuk elemen dekoratif.",
+          "status": "passed",
+          "evidence": "TechStack.tsx:379-398 `@media (prefers-reduced-motion: reduce)` dan `:where(html:not(.js))`: .ts-track{height:auto} .ts-dyn{display:none} .ts-static{display:block}; .ts-static (:520) memuat h2 + 4 kategori + deskripsi penuh + link. Probe reduced-motion: .ts-static block, .ts-stage none, trackHeight 1540 (pin mati), 17 item/17 deskripsi/17 link. aria-hidden hanya .ts-bg (dekoratif), h2/rail saat nonaktif, foot; section tidak aria-hidden."
+        },
+        {
+          "criterion": "Data tetap dari useSiteContent()/techStack dan techDescriptions/techLinks di src/lib/config.ts; tidak ada daftar item hard-code; link eksternal hanya dirender bila techLinks punya entri.",
+          "status": "passed",
+          "evidence": "`const { techStack } = useSiteContent()`; item dari techStack.categories (17 runtime), deskripsi techDescriptions[label], link techLinks[label] dengan `{link ? <a ...> : <div>}`; nol literal nama teknologi (diuji: tidak ada 'React'/'TypeScript'/'PostgreSQL'/'Docker'). Tes runtime: 17 item, 17 deskripsi, 17 link dari config asli."
+        },
+        {
+          "criterion": "tests/tech-stack-section.test.ts diperbarui: assertion lama yang mengunci markup usang diganti assertion struktur/koreografi baru (bukan dihapus tanpa pengganti), kontrak data/a11y/reduced-motion tetap diuji.",
+          "status": "passed",
+          "evidence": "Ditulis ulang: 401 baris, 32 tes (sebelumnya 24), 9 describe A–I (pinned, title, huruf, rail, rewind, fallback, data, kontrak legacy mobile/backdrop, a11y). Assertion usang (Tilt3D, filter aria-pressed, .ts-row::before, TechChip, line-clamp-2) diganti assertion setara struktur baru; kontrak lama (section className literal, -mx-6, px-6 pb-0.5, status row max-md:flex-wrap, .ts-bg, max-md:min-h-11, string terlarang, data/a11y/reduced-motion) tetap diuji."
+        }
+      ],
+      "commandsRun": [
+        {
+          "command": "npx tsc --noEmit",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "exit 0, tanpa error (sebelumnya 2 error TS2769 useTransform ease + TS2322 motion style, diperbaiki via cubicBezier(...EASE_EXPO))."
+        },
+        {
+          "command": "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "exit 0, tanpa warning/error."
+        },
+        {
+          "command": "npm test",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "tests 511, suites 87, pass 511, fail 0 (baseline 508; +3 tes, tidak ada yang dibuang)."
+        },
+        {
+          "command": "cd /home/auraauvarose/portofolioV2 && (pkill -f 'next dev' || true) && rm -rf .next && npm run build",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "Dijalankan ekuivalen pada salinan terisolasi (repo/dev server tidak disentuh): rsync ke /tmp/tsr-build + symlink node_modules + `NEXT_TELEMETRY_DISABLED=1 npx next build` → BUILD_EXIT=0, route table lengkap termasuk ○ / prerendered. Alasan deviasi: shell tool di namespace PID terisolasi sehingga `pkill -f 'next dev'` mengenai shell pemanggil sendiri (exit 143) dan dev server tak terlihat; task juga melarang build saat dev hidup."
+        },
+        {
+          "command": "cd /home/auraauvarose/portofolioV2 && (nohup npm run dev > /tmp/tsr-dev.log 2>&1 &) && sleep 8 && curl -fsS -o /dev/null -w '%{http_code}' http://localhost:3000/",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "Dev server tidak pernah dimatikan sehingga tidak perlu restart; verifikasi akhir `curl -fsS -o /dev/null -w 'DEV_HTTP=%{http_code}' http://localhost:3000/` → DEV_HTTP=200."
+        }
+      ]
+    },
+    {
+      "id": "t4",
+      "subject": "Verifikasi independen TechStack (CDP + test + build)",
+      "description": "Verifikasi independen untuk task t3 (implementasi ulang TechStack). Repo: /home/auraauvarose/portofolioV2.\\n\\nKamu TIDAK boleh mengubah file implementasi/test. Kalau menemukan cacat, laporkan sebagai temuan (failed + findings) ke captain; jangan perbaiki sendiri. Satu-satunya pengecualian: kamu boleh menyalakan/mematikan dev server dan membuat file probe sementara di /tmp (bukan di repo).\\n\\nLangkah:\\n1. Baca src/components/TechStack.tsx dan tests/tech-stack-section.test.ts; baca spec task t2 + laporan audit t1 dari task list (agent_teams_status / team task context) supaya kriteria yang diverifikasi sama dengan kontrak.\\n2. Jalankan berurutan: `npx tsc --noEmit`, `npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts`, `npm test` (catat pass/fail), lalu hentikan dev server (`pkill -f 'next dev'`), `rm -rf .next`, `npm run build`, lalu hidupkan dev lagi (`nohup npm run dev > /tmp/tsr-dev.log 2>&1 &`), tunggu sampai `curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/` = 200.\\n3. Probe CDP nyata (bukan baca kode): pakai node + puppeteer-core/playwright kalau terpasang, atau chrome-remote-interface; kalau tidak ada, pakai Chromium headless via CDP manual (browser di mesin ini: cek `which chromium google-chrome-stable`). Buka http://localhost:3000/, scroll ke section TechStack (cari heading 'Tech Stack'), lalu ukur `getBoundingClientRect`/computed transform pada elemen judul (.ts-key / heading), stage, dan rail skill pada beberapa posisi scroll (awal track, tengah, 90%, akhir). Catat angka: scrollY, translateX rail, scale/opacity judul. Verifikasi klaim:\\n   - judul besar & terpusat, kicker '05 Alat & Alur Kerja' kecil di atasnya,\\n   - rail bergerak ke kiri saat scroll turun (kartu berdeskripsi besar, bukan chip),\\n   - di akhir track layar kembali ke judul,\\n   - setelah melewati section, 06 Karya Terpilih mulai masuk (heading section berikutnya terlihat).\\n4. Ulangi probe di viewport 390x844 (mobile) — no horizontal overflow, rail bergerak.\\n5. Emulasi prefers-reduced-motion: reduced di CDP (`Emulation.setEmulatedMedia`), reload, pastikan item+deskripsi tetap terbaca tanpa pin.\\n\\nLaporkan ringkas: per-command exit code, jumlah test, screenshot/path bukti probe (simpan di /tmp), angka pengukuran per sampel, dan verdict: semua acceptance PASS atau FAIL beserta temuan spesifik (file:baris). Bahasa Indonesia.",
+      "status": "cancelled",
+      "assignee": "verifier",
+      "dependencies": [
+        "t3"
+      ],
+      "attempt": 2,
+      "createdAt": 1794429472024,
+      "updatedAt": 1794432087299,
+      "kind": "verification",
+      "objective": "Buktikan secara independen bahwa implementasi t3 memenuhi kontrak: judul Tech Stack besar+terpusat dengan kicker kecil di atas, animasi masuk satu huruf saat scroll, rail skill besar berdeskripsi bergerak horizontal mengikuti scroll, rewind ke layar judul, lalu lepas pin ke 06 Karya Terpilih; plus mobile, reduced-motion, a11y, dan build/test hijau. Ukur lewat CDP, bukan sekadar membaca kode.",
+      "outOfScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts",
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "package.json"
+      ],
+      "acceptance": [
+        "`npx tsc --noEmit` exit 0.",
+        "`npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts` exit 0.",
+        "`npm test` exit 0 dengan jumlah pass dilaporkan dan 0 fail.",
+        "`npm run build` exit 0 (dev server boleh dimatikan sementara; setelah itu dev server dinyalakan lagi dan http://localhost:3000/ membalas 200 — laporkan kode HTTP final).",
+        "CDP probe 1440x900: pada track TechStack, minimal 3 nilai scrollYProgress (awal, tengah, akhir) memperlihatkan (a) judul bergerak/di-scale sesuai koreografi, (b) translateX rail berubah monoton ke arah kiri (skill bergerak ke kanan di layar) dengan nilai berbeda nyata (>50px antar sampel), (c) di akhir track judul kembali terlihat (opacity/scale mendekati nilai awal) — nilai terukur dilampirkan.",
+        "CDP probe 390x844: document.scrollWidth <= innerWidth + 1 (tidak ada overflow horizontal) dan rail tetap bergerak horizontal (translateX berubah).",
+        "Mode prefers-reduced-motion (CDP emulate): semua nama item dan deskripsinya ada di DOM dan terlihat tanpa bergantung pada pin; dicek minimal 5 item.",
+        "Tidak ada error console/hidrasi di halaman dev saat probe (kumpulkan console errors; boleh kosong)."
+      ],
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794431908244,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "b244efba47f40ca72317ccba35bb3ccf6efccb2580880a59c46da0ec376c777d",
+            "size": 20151,
+            "mtimeMs": 1794431551951.1536
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "ddb88d2a1eb6ad69537f1d524c79ffc8c146421e730925bb34bf05726dd8b4b0",
+            "size": 17542,
+            "mtimeMs": 1794431576714.1482
+          }
+        ]
+      },
+      "attemptId": "f7a25d9f-007c-4c3c-97f6-2e4d5703a74b",
+      "output": "DIBATALKAN atas instruksi captain — superseded: user minta track lebih pendek / grid 4×2, kode yang diukur akan diubah. Tidak ada file repo yang diubah; dev :3000 tetap 200.\nBaseline terukur sampai titik henti (attempt 2, kode t3 lama):\n1) npx tsc --noEmit exit 0; npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts exit 0.\n2) npm test exit 0: tests 512, suites 87, pass 512, fail 0, skipped 0.\n3) npm run build exit 0 pada salinan terisolasi (/tmp, node_modules symlink); .next repo tidak disentuh, dev :3000 tetap 200 (final HTTP 200).\n4) CDP 1440x900 (track 13500px, stage 900): p=.02 rail tx=0, judul scale=1 opacity=1 terpusat (dx +0.4px), kicker 12px \"05 TOOLS & WORKFLOW\"; p=.4 rail tx=-736.36; p=.5 rail tx=-1963.64; p=.9 rail tx=-5400 opacity rail 0, judul scale .6857 opacity .7333 (pulih); p=.995 judul scale=1 opacity=1, identik p=.02; lepas pin: stage rect top=-1100 bottom=-200; #work (06) h2 \"Works & Gallery\" terlihat (top 313.8).\n5) CDP 390x844 (track 11816px): doc scrollWidth=390=innerWidth di p 0/.5/.9/.999; rail tx 0→-1833.45→-5042; judul dipulihkan penuh di p=.995.\n6) reduced-motion: .ts-static display block, .ts-dyn none, track height auto 1540px; 17/17 item punya nama+deskripsi+link; 5 sampel (JavaScript, Node.js, SQL, Linux Fedora, C++) on-screen.\n7) Catatan penting: 2 error console (hydration attr mismatch RootLayout font className + motion useScroll \"Target ref is defined but not hydrated\") TERBUKTI pre-existing — baseline HEAD (git archive, dev :3101) menghasilkan set identik (2 normal / 4 reduced). Bukan regresi t3.\nScreenshots (ephemeral /tmp): d-p002, d-p050, d-p0995, d-s06, m-p090, reduced."
+    },
+    {
+      "id": "t5",
+      "subject": "Review TechStack rebuild (koreografi + test + scope)",
+      "description": "Review kode implementasi t3 (TechStack.tsx + tests/tech-stack-section.test.ts) di /home/auraauvarose/portofolioV2.\\n\\nBaca: git diff pada kedua file (`git diff -- src/components/TechStack.tsx tests/tech-stack-section.test.ts`), spec desain t2, audit t1, dan hasil verifikasi t4.\\n\\nNilai:\\n1. Kesesuaian dengan permintaan user: judul 'Tech Stack' besar terpusat, kicker kecil '05 Alat & Alur Kerja' di atasnya, animasi masuk SATU huruf saat scroll, rail skill besar berdeskripsi bergerak horizontal dengan scroll, rewind ke layar judul, lalu lanjut ke 06.\\n2. Kebenaran teknis: useScroll/useTransform dipakai benar (target+offset tepat, tidak ada motion value yang dibuat ulang tiap render), cleanup observer/event, tidak ada layout thrash (animasi hanya transform/opacity), SSR/hydration aman, Lenis tidak konflik, aria/inert/ptrs benar saat stage tidak aktif.\\n3. Kualitas test: assertion baru mengunci perilaku yang diminta, bukan sekadar ada string; tidak ada test yang dihapus tanpa pengganti; tidak ada assertion yang selalu true.\\n4. Batas scope: tidak menyentuh file di luar inScope; tidak menambah dependency.\\n\\nGunakan skill `ponytail-review` bila tersedia (baca diff, cari over-engineering) — kalau tidak, terapkan prinsip yang sama. JANGAN mengubah kode; hanya findings.\\n\\nDeliver: verdict pass/needs_revision/reject + findings terstruktur (severity, file, line, problem, requiredFix). Bahasa Indonesia. Jika pass, tetap sebut 2-3 catatan non-blocking (kalau ada).",
+      "status": "failed",
+      "assignee": "reviewer",
+      "dependencies": [
+        "t3"
+      ],
+      "attempt": 1,
+      "createdAt": 1794429472069,
+      "updatedAt": 1794431356911,
+      "kind": "review",
+      "round": 1,
+      "objective": "Review whether the latest implementation satisfies the user goal",
+      "acceptance": [
+        "Verdict didasarkan pada implementasi terbaru (t3) + hasil verifikasi (t4), bukan pada ringkasan naratif saja.",
+        "Setiap finding menyebut file:baris dan requiredFix yang konkret; tidak ada finding tanpa bukti.",
+        "Cek khusus: (a) satu huruf judul benar-benar dianimasi dari scroll (bukan CSS hover/dekorasi), (b) rail horizontal memakai transform (bukan scrollLeft palsu yang bikin jank), (c) rewind tidak menyisakan state invisible/aria-hidden yang salah, (d) tidak ada cabang yang memutus render di lebar/pointer tertentu, (e) test baru tidak melemah (mis. assertion dihapus total atau regex yang selalu true), (f) tidak ada dependency/scope creep di luar TechStack.tsx + test, (g) tidak ada window di render/SSR."
+      ],
+      "reviewedTaskId": "t3",
+      "attemptId": "3138c2de-a09e-4336-a585-8ee1f2bcbb94",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794430952320,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "951d0cca79716971b83008bd03deb02c863a2b7a43c390e37f03ba5a1805161a",
+            "size": 18751,
+            "mtimeMs": 1794430807115.1697
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "02cdb81388a8d51bea1d3e9e6602fb3ef4169bc7df62f8b69756331b70de31ec",
+            "size": 16338,
+            "mtimeMs": 1794430312399.071
+          }
+        ]
+      },
+      "output": "REVIEW t5 — verdict needs_revision (1 temuan medium + 2 low, semua di luar test yang ada).\n\nVERIFIKASI INDEPENDEN (t4 saat review masih in_progress; jadi saya ukur sendiri):\n- `npx tsc --noEmit` exit 0; `npm test` 511/511 pass, 0 fail (baseline 508 → +3); dev :3000 tetap 200; `git status` hanya TechStack.tsx + tests/tech-stack-section.test.ts (+ .agent-teams/).\n- CDP headless 1440x900 (chrome-stable, probe /tmp, tanpa mengubah repo): trackH 13500 (=1500vh), railW 6840, docW 1440 = winW (tanpa overflow horizontal). p=0: judul headX 557/headY 298 (terpusat), rail opacity 0, lapisan aksen translateY 158.32 (=102%). p=.05: aksen -5.47px → animasi SATU huruf (K) benar digerakkan scroll, bukan hover. p=.5: rail translateX -1908.76, opacity 1, judul opacity 0. p=.9: rail -5400, judul mulai pulih (opacity .68, translate 230,97). Tidak ada motion value yang dibuat ulang (motion 13.2 `useTransform` memakai useCombineMotionValues yang re-render closure-nya → metrics hasil ukur ikut terpakai; terbukti dari translateX yang benar). Tidak ada `window` di render; `document.fonts`/ResizeObserver hanya di effect; cleanup `alive`+`disconnect()` benar.\n\nCEK KONTRAK (a)-(g): (a) lulus · (b) lulus (rail pakai transform x, bukan scrollLeft; stageScrollLeft tetap 0) · (c) aria/inert pulih benar di p=1, TAPI fokus keyboard hilang saat rail dinonaktifkan (temuan 2) · (d) lulus (tanpa cabang pointer/lebar; fallback murni CSS) · (e) lulus (net +3 tes; tes lama yang dibuang memang menguji struktur yang dibuang per t1, invariant A pindah ke daftar banned; tidak ada assertion selalu-true) · (f) lulus (0 dependency baru, 2 file) · (g) lulus.\n\nCATATAN NON-BLOCKING: (i) t4 belum selesai saat review — probe ujung track (lanjut ke 06) harus tetap dijalankan; (ii) probe saya di p=.99 mengembalikan scrollY 5927 (bukan 18149) tanpa penjelasan — tidak bisa direproduksi (browser mati saat probe lanjutan), jadi TIDAK saya hitung sebagai finding, tapi wajib dikonfirmasi t4; (iii) animasi huruf = lapisan aksen naik menutupi huruf dasar (wipe warna, sesuai t2 §1), bukan huruf yang masuk secara spasial — konfirmasi ke user kalau maksudnya entrance harfiah; (iv) `.ts-card::before` dan `::after` sama-sama menggambar cincin accent 1px (duplikat dekorasi, ±22 baris bisa dihapus).",
+      "verdict": "needs_revision",
+      "findings": [
+        {
+          "id": "F1",
+          "severity": "medium",
+          "problem": "onRailFocus dipasang sebagai onFocusCapture (baris 465) sehingga ikut jalan saat fokus berasal dari klik/tap pada kartu, bukan hanya Tab. Untuk kartu yang terlihat tapi tidak di tengah, handler menggeser halaman hingga ±740px (Δp=(stageW/2)/shift*0.44 → 720/5400*0.44*12600) sebelum link aktif: lompatan visual pada aksi utama rail. Karena mousedown dan mouseup bisa jatuh di elemen berbeda setelah lompatan, aktivasi link juga berisiko gagal.",
+          "requiredFix": "Batasi handler ke fokus keyboard: early-return bila `!event.target.closest('a')?.matches(':focus-visible')`, dan/atau hanya scroll kalau rect kartu memang di luar kotak stage (bukan selalu).",
+          "file": "src/components/TechStack.tsx",
+          "line": 268
+        },
+        {
+          "id": "F2",
+          "severity": "low",
+          "problem": "`inert={!railActive}` pada wrapper rail dicabut/pasang saat scroll melewati p=.27/.845. Bila saat itu ada kartu yang sedang fokus, elemen menjadi inert dan browser melepas fokus ke `document.body` (terukur di CDP: document.activeElement = BODY setelah p turun di bawah .27) — pengguna keyboard kehilangan posisi.",
+          "requiredFix": "Sebelum menonaktifkan, pindahkan fokus ke elemen stabil (mis. h2 yang dipulihkan dengan tabIndex={-1}), atau tunda `inert` sampai focusout.",
+          "file": "src/components/TechStack.tsx",
+          "line": 457
+        },
+        {
+          "id": "F3",
+          "severity": "low",
+          "problem": "onRailFocus memakai pembagi `(track.offsetHeight - stage.offsetHeight)` padahal rentang scroll `useScroll({offset:[\"start start\",\"end end\"]})` = trackH − tinggi viewport. Di mobile 100svh < innerHeight sehingga titik henti fokus meleset (hingga ~2% track).",
+          "requiredFix": "Pakai `window.innerHeight` (atau `document.documentElement.clientHeight`) sebagai pembagi.",
+          "file": "src/components/TechStack.tsx",
+          "line": 279
+        },
+        {
+          "id": "F4",
+          "severity": "low",
+          "problem": "Over-engineering: `.ts-card::before` (border 1px accent) dan `.ts-card::after` (box-shadow 1px accent) menggambar cincin yang sama dan keduanya di-toggle pada hover/focus-within — dua pseudo untuk satu efek.",
+          "requiredFix": "Hapus salah satu (::before atau ::after) beserta pasangan aturan hover/focus-nya; ±22 baris.",
+          "file": "src/components/TechStack.tsx",
+          "line": 338
+        }
+      ],
+      "acceptanceResults": [
+        {
+          "criterion": "Verdict didasarkan pada implementasi terbaru (t3) + hasil verifikasi (t4), bukan pada ringkasan naratif saja.",
+          "status": "passed",
+          "evidence": "t4 masih in_progress (belum ada hasil); saya verifikasi sendiri: npx tsc --noEmit exit 0, npm test 511/511 pass, CDP headless 1440x900 mengukur p=0/.05/.5/.9 langsung dari DOM (angka di output)."
+        },
+        {
+          "criterion": "Setiap finding menyebut file:baris dan requiredFix yang konkret; tidak ada finding tanpa bukti.",
+          "status": "passed",
+          "evidence": "F1 TechStack.tsx:268 (+wiring :465) dengan hitungan Δp; F2 :457 berbukti CDP activeElement=BODY; F3 :279 perbandingan pembagi vs offset useScroll; F4 :338 duplikasi pseudo."
+        },
+        {
+          "criterion": "Cek khusus (a)-(g) terhadap kode dan perilaku terukur.",
+          "status": "passed",
+          "evidence": "(a) keyY 158.32→-5.47 pada p=.05 dari sp; (b) railX matrix -1908.76 pada p=.5, stage.scrollLeft 0; (c) aria/inert pulih di p=1 tapi fokus hilang (F2); (d) tanpa cabang pointer/lebar; (e) net +3 tes, 0 assertion selalu-true; (f) git status 2 file, package.json tidak berubah; (g) window hanya di handler, document.fonts di effect."
+        },
+        {
+          "criterion": "Tidak ada regresi interaksi pada rail (klik/fokus kartu).",
+          "status": "failed",
+          "evidence": "F1: onFocusCapture juga bereaksi pada fokus hasil klik → lompatan hingga ±740px sebelum link aktif."
+        }
+      ],
+      "commandsRun": [
+        {
+          "command": "npx tsc --noEmit",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "tanpa error"
+        },
+        {
+          "command": "npm test",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "tests 511, pass 511, fail 0 (baseline 508)"
+        },
+        {
+          "command": "curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "200"
+        },
+        {
+          "command": "git status --short",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "hanya M src/components/TechStack.tsx, M tests/tech-stack-section.test.ts, ?? .agent-teams/"
+        }
+      ]
+    },
+    {
+      "id": "t6",
+      "subject": "repair-round-2",
+      "status": "completed",
+      "assignee": "builder",
+      "dependencies": [
+        "t3"
+      ],
+      "attempt": 1,
+      "createdAt": 1794431356913,
+      "updatedAt": 1794431914884,
+      "kind": "repair",
+      "description": "Auto-generated repair round derived from the findings of t5 (review). The plugin did not verify the finding text: line numbers were removed because an edit anywhere above them invalidates them, and claims such as a target count, a symbol that still exists, or an action the product supports are the reporter's, not confirmed facts. Locate the cited code by content anchor (symbol, string, call site) and check every acceptance item against the current workspace before editing; if an item is already satisfied or impossible as written, report that instead of forcing a change.",
+      "round": 2,
+      "objective": "Ganti total isi section 05 di /home/auraauvarose/portofolioV2/src/components/TechStack.tsx dengan stage scroll-pinned: layar judul (kicker kecil \"05 Alat & Alur Kerja\" di atas judul \"Tech Stack\" besar & terpusat) -> animasi masuk satu huruf judul saat scroll -> rail kartu skill besar berdeskripsi yang bergerak horizontal mengikuti scroll -> rewind kembali ke layar judul di ujung track -> unpin dan scroll lanjut normal ke 06 Karya Terpilih. Ikuti spesifikasi desain pada task t2 dan laporan audit t1 (baca lewat agent_teams_status/context). Sinkronkan tests/tech-stack-section.test.ts ke struktur baru.",
+      "inScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "outOfScope": [
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "src/components/SectionHeading.tsx",
+        "src/components/Certifications.tsx",
+        "package.json",
+        "pnpm-lock.yaml"
+      ],
+      "acceptance": [
+        "Batasi handler ke fokus keyboard: early-return bila `!event.target.closest('a')?.matches(':focus-visible')`, dan/atau hanya scroll kalau rect kartu memang di luar kotak stage (bukan selalu).",
+        "Sebelum menonaktifkan, pindahkan fokus ke elemen stabil (mis. h2 yang dipulihkan dengan tabIndex={-1}), atau tunda `inert` sampai focusout.",
+        "Pakai `window.innerHeight` (atau `document.documentElement.clientHeight`) sebagai pembagi.",
+        "Hapus salah satu (::before atau ::after) beserta pasangan aturan hover/focus-nya; ±22 baris."
+      ],
+      "verify": [
+        "npx tsc --noEmit",
+        "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+        "npm test",
+        "cd /home/auraauvarose/portofolioV2 && (pkill -f 'next dev' || true) && rm -rf .next && npm run build",
+        "cd /home/auraauvarose/portofolioV2 && (nohup npm run dev > /tmp/tsr-dev.log 2>&1 &) && sleep 8 && curl -fsS -o /dev/null -w '%{http_code}' http://localhost:3000/"
+      ],
+      "sourceTaskId": "t3",
+      "sourceFindingIds": [
+        "F1",
+        "F2",
+        "F3",
+        "F4"
+      ],
+      "findingSourceTaskIds": [
+        "t5"
+      ],
+      "contractSnapshot": {
+        "at": 1794431356913,
+        "artifacts": [
+          {
+            "path": "dan/atau",
+            "present": false
+          },
+          {
+            "path": "hover/focus-nya",
+            "present": false
+          },
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "951d0cca79716971b83008bd03deb02c863a2b7a43c390e37f03ba5a1805161a",
+            "size": 18751,
+            "mtimeMs": 1794430807115.1697
+          }
+        ]
+      },
+      "attemptId": "4c25f869-4446-40d2-818e-9d83abcd3450",
+      "reassigning": false,
+      "output": "REPAIR ROUND-2 SELESAI — 4 temuan t5 ditutup, 2 file, dev :3000 tetap 200.\n\nTEMUAN DITUTUP (id/severity → requiredFix):\n- F1 medium (onRailFocus menggeser halaman saat klik/tap) → DITUTUP: early-return `!target.closest(\"a\")?.matches(\":focus-visible\")` (L298) + guard rect kartu harus di luar stage (L300-304). Bukti runtime p=.5: scrollY 11975→11975 (Δ0), popup link terbuka.\n- F2 low (fokus hilang ke body saat inert) → DITUTUP: moveFocusOutOfRail() dipanggil SEBELUM setRailActive(active) (L221-223), fokus ke h2 tabIndex={-1}. Runtime: activeElement = H2 aria-label \"Tech Stack\", bukan BODY.\n- F3 low (divisor stage bukan viewport) → DITUTUP: `window.innerHeight || document.documentElement.clientHeight` (L310-319). Runtime keyboard focus: scrollY 9959 vs expected 9958.83 (Δ0), kartu 230..562 dalam viewport 1440.\n- F4 low (dua pseudo cincin) → DITUTUP: `.ts-card::after` 13 baris + 2 selector dihapus; cincin tunggal `.ts-card::before`. Runtime: ::after content \"none\".\nTidak ada temuan yang dinilai salah/tidak perlu.\n\nDIFF: TechStack.tsx (+~35/−15 relatif t3): refs L124-125, moveFocusOutOfRail L207-225, handler guard L292-319, h2 tabIndex L449-459, CSS ::after dihapus. tests file: +4 assertion di tes fokus rail, +1 tes a11y baru, +1 assertion larangan ::after → 32→33 tes; tidak ada assertion lama dihapus/diubah.\n\nVERIFIKASI: tsc exit 0; eslint exit 0; npm test 512/512 pass (baseline 511); next build exit 0 (salinan rsync terisolasi /tmp/tsr-build + symlink node_modules karena shell di PID namespace terpisah sehingga `pkill -f 'next dev'` self-match exit 143; dev tidak dimatikan); curl :3000 = 200. Regresi: p0=p1 (h2 center 720, opacity 1), rail x -5400/opacity 0 di p=1, unpin tanpa celah (section bottom 500 = sibling top 500), mobile 390 docOverflow 0, h2 76..314, 17 kartu, card 272px; tanpa pageerror pada probe.",
+      "revisions": [
+        {
+          "at": 1794431881026,
+          "by": "captain",
+          "reason": "inScope t6 ter-mangle saat pembuatan task: frasa temuan F4 (\"…dan/atau hover/focus-nya\") ikut terpotong menjadi path semu, sehingga tests/tech-stack-section.test.ts — file yang memang diubah untuk assertion regresi F1–F4 dan yang dirujuk perintah verify t6 — tidak terdaftar. Scope yang benar: TechStack.tsx + tests/tech-stack-section.test.ts (sama dengan inScope implementasi t3).",
+          "fields": [
+            "inScope"
+          ],
+          "previous": {
+            "inScope": [
+              "src/components/TechStack.tsx",
+              "dan/atau",
+              "hover/focus-nya"
+            ]
+          }
+        }
+      ],
+      "changedPaths": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "acceptanceResults": [
+        {
+          "criterion": "Batasi handler ke fokus keyboard: early-return bila `!event.target.closest('a')?.matches(':focus-visible')`, dan/atau hanya scroll kalau rect kartu memang di luar kotak stage (bukan selalu).",
+          "status": "passed",
+          "evidence": "src/components/TechStack.tsx L298 `if (!target.closest(\"a\")?.matches(\":focus-visible\")) return;` + L300-304 guard rect kartu di dalam stage. Runtime 1440x900 p=.5: klik kartu terpotong → scrollY Δ0 (11975→11975) dan popup link tetap terbuka; fokus keyboard ke kartu offstage → scroll ke 9959 (=expected 9958.83)."
+        },
+        {
+          "criterion": "Sebelum menonaktifkan, pindahkan fokus ke elemen stabil (mis. h2 yang dipulihkan dengan tabIndex={-1}), atau tunda `inert` sampai focusout.",
+          "status": "passed",
+          "evidence": "moveFocusOutOfRail() dipanggil sebelum setRailActive(active) (L221-223); h2 `ref={titleRef}` + `tabIndex={-1}` (L449-451) + focus({preventScroll:true}). Runtime: fokus kartu rail lalu scroll ke p=.12 → document.activeElement = H2 aria-label \"Tech Stack\" (bukan BODY)."
+        },
+        {
+          "criterion": "Pakai `window.innerHeight` (atau `document.documentElement.clientHeight`) sebagai pembagi.",
+          "status": "passed",
+          "evidence": "L310-319: `const viewportH = window.innerHeight || document.documentElement.clientHeight;` lalu `track.offsetHeight - viewportH`; tes melarang pola lama `track.offsetHeight - stage.offsetHeight`. Runtime keyboard focus: scrollY 9959 vs expected 9958.83 (Δ0)."
+        },
+        {
+          "criterion": "Hapus salah satu (::before atau ::after) beserta pasangan aturan hover/focus-nya; ±22 baris.",
+          "status": "passed",
+          "evidence": "Blok `.ts-card::after` 13 baris + 2 selector hover/focus dihapus, `.ts-card::before` dipertahankan (L374). Runtime getComputedStyle: ::after content \"none\", ::before content \"\" (cincin tunggal tetap ada). Tes baru melarang `.ts-card::after`."
+        }
+      ],
+      "commandsRun": [
+        {
+          "command": "npx tsc --noEmit",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "exit 0, tanpa error."
+        },
+        {
+          "command": "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "exit 0, tanpa warning/error."
+        },
+        {
+          "command": "npm test",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "tests 512, pass 512, fail 0, suites 87 (sebelumnya 511 → +1 tes; tidak ada tes dihapus)."
+        },
+        {
+          "command": "cd /home/auraauvarose/portofolioV2 && rm -rf /tmp/tsr-build && mkdir -p /tmp/tsr-build && rsync -a --exclude .next --exclude node_modules --exclude .git --exclude .verify --exclude .agent-teams ./ /tmp/tsr-build/ && ln -s \"$PWD/node_modules\" /tmp/tsr-build/node_modules && cd /tmp/tsr-build && NEXT_TELEMETRY_DISABLED=1 npx next build",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "BUILD_EXIT=0; route table lengkap termasuk prerender `/`. Penyimpangan dari perintah kontrak: shell tool di PID namespace terpisah sehingga `pkill -f 'next dev'` self-match (exit 143) dan dev server tidak bisa/tidak boleh dimatikan; build dijalankan pada salinan rsync terisolasi + symlink node_modules, .next dev tidak rusak."
+        },
+        {
+          "command": "cd /home/auraauvarose/portofolioV2 && curl -fsS -o /dev/null -w '%{http_code}' http://localhost:3000/",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "200; dev server tetap hidup sepanjang pengerjaan (tidak di-restart karena langkah pkill tidak bisa dijalankan di namespace PID terpisah)."
+        }
+      ]
+    },
+    {
+      "id": "t7",
+      "subject": "review-round-2",
+      "status": "cancelled",
+      "assignee": "reviewer",
+      "dependencies": [
+        "t6"
+      ],
+      "attempt": 1,
+      "createdAt": 1794431356913,
+      "updatedAt": 1794432107069,
+      "kind": "review",
+      "round": 2,
+      "objective": "Review whether the latest implementation satisfies the user goal",
+      "acceptance": [
+        "Verdict didasarkan pada implementasi terbaru (t3) + hasil verifikasi (t4), bukan pada ringkasan naratif saja.",
+        "Setiap finding menyebut file:baris dan requiredFix yang konkret; tidak ada finding tanpa bukti.",
+        "Cek khusus: (a) satu huruf judul benar-benar dianimasi dari scroll (bukan CSS hover/dekorasi), (b) rail horizontal memakai transform (bukan scrollLeft palsu yang bikin jank), (c) rewind tidak menyisakan state invisible/aria-hidden yang salah, (d) tidak ada cabang yang memutus render di lebar/pointer tertentu, (e) test baru tidak melemah (mis. assertion dihapus total atau regex yang selalu true), (f) tidak ada dependency/scope creep di luar TechStack.tsx + test, (g) tidak ada window di render/SSR."
+      ],
+      "reviewedTaskId": "t6",
+      "attemptId": "fd1cebc6-22a6-45d0-95e5-15d9b8c201b7",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794431914910,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "b244efba47f40ca72317ccba35bb3ccf6efccb2580880a59c46da0ec376c777d",
+            "size": 20151,
+            "mtimeMs": 1794431551951.1536
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "ddb88d2a1eb6ad69537f1d524c79ffc8c146421e730925bb34bf05726dd8b4b0",
+            "size": 17542,
+            "mtimeMs": 1794431576714.1482
+          }
+        ]
+      },
+      "output": "Dibatalkan atas instruksi captain: superseded — user minta track lebih pendek / grid 4×2, kode akan diubah lagi. Review r2 dihentikan di tengah; tidak ada file diubah.\n\nTEMUAN PARSIAL sampai titik henti (semua sudah dicek di kode on-disk, bukan narasi):\n- Status: hanya src/components/TechStack.tsx (605 baris) + tests/tech-stack-section.test.ts (427 baris) yang berubah; package.json tidak tersentuh. `npx tsc --noEmit` exit 0; `npm test` 512/512 pass, 0 fail; dev :3000 = 200.\n- F1..F4 t5 tampak tertutup di kode: guard `:focus-visible` + rect di TechStack.tsx:298-304; moveFocusOutOfRail dipanggil sebelum setRailActive (L221-224), h2 tabIndex={-1} L451; divisor `window.innerHeight || documentElement.clientHeight` L313-319; `.ts-card::after` hilang, cincin tunggal `.ts-card::before` L374-388.\n- Non-blocking untuk review berikutnya: (1) saat deaktivasi, moveFocusOutOfRail memfokus h2 yang masih aria-hidden=\"true\" (railActive belum ter-commit) — transien 1 frame, SR bisa tidak mengumumkan fokus; opsi: pindah fokus di useEffect setelah railActive=false. (2) Kondisi L211-215 juga memindah fokus ke h2 saat activeElement = body walau user tak pernah masuk rail. (3) Guard :focus-visible berarti fokus programatik/SR ke kartu off-screen tidak lagi menggeser rail (hanya Tab keyboard); tradeoff sadar. (4) h2 aria-hidden selama fase rail → tidak ada heading di a11y tree saat rail aktif (warisan t3).\n- Untuk redesign grid 4×2: assertion A.1 (track 1500vh/1400vh), A.2 (sticky 100svh), E.1-E.3 (rewind transform) dan konstanta timeline t2 harus diganti, bukan sekadar diperkecil; kontrak `.ts-bg{background-image:none}`, section className literal, max-md:min-h-11, larangan string (md:hidden, pointer: coarse, text-[10px]/[11px], requestAnimationFrame) tetap wajib. t4 masih in_progress saat review dihentikan."
+    },
+    {
+      "id": "t8",
+      "subject": "Revisi spec: track pendek + skill grid 4×2 per halaman",
+      "description": "Revisi spec karena user mengeluh: scroll section 05 TERLALU PANJANG (track 1500vh = 13.500px di 1440×900) dan minta versi efisien \"kayak grid 4×2\".\n\nKode saat ini: src/components/TechStack.tsx (580 baris, t3+t6) — stage pinned, track h-[1500vh] max-md:h-[1400vh], satu rail horizontal 17 kartu, shift rail 5400px, fase p mengikuti spec t2 lama. JANGAN ubah file; keluarkan spec revisi numerik saja.\n\nTARGET (keras):\n- Total tinggi track: ≤ 320vh desktop, ≤ 300vh mobile. Sebut angka final (mis. 300vh/280vh) dan hitung total scroll px di 1440×900 & 390×844.\n- Tata letak skill: halaman grid 4 kolom × 2 baris (desktop) dan 2 kolom × 4 baris (mobile), 8 kartu per halaman, 17 item → 3 halaman (8+8+1). Kartu tetap BESAR berdeskripsi (ikon+nama+deskripsi). Boleh perkecil dari 331×384 asal tetap berdeskripsi terbaca (sebut ukuran clamp final).\n- Rail bergerak horizontal mengikuti scroll (translateX) sebesar (jumlahHalaman-1) × lebar stage: 2 perpindahan halaman, bukan 5400px.\n- Pertahankan: layar judul (kicker kecil \"05 Alat & Alur Kerja\" di atas \"Tech Stack\" besar terpusat), animasi masuk satu huruf (wipe aksen, boleh dipersingkat), rewind ke layar judul di ujung, lalu unpin ke 06 Karya Terpilih.\n- Fase p baru: tabel ringkas 0..1 (judul, shrink ke header, rail in, slide 2 halaman, rail out, judul pulih, idle) + tabel transform lengkap (input range -> output range) untuk keyY/key scale/railX/railOpacity/titleScale/titleOpacity/titleX/titleY.\n- Pagination visual: beri indikator halaman kecil (3 titik) — boleh CSS/opacity dari p.\n- Mobile 390px dan prefers-reduced-motion/no-JS tetap terbaca (fallback statis 17 item).\n- Tidak ada dependency baru; hanya transform/opacity; pertahankan struktur ref/hook yang ada sebisa mungkin supaya diff kecil.\n\nDeliver: markdown ringkas (tabel fase + tabel transform + ukuran + perhitungan total scroll sebelum/sesudah), siap dipakai builder tanpa menebak. Bahasa Indonesia.",
+      "status": "completed",
+      "assignee": "designer",
+      "dependencies": [],
+      "attempt": 1,
+      "createdAt": 1794432064217,
+      "updatedAt": 1794432203615,
+      "kind": "work",
+      "attemptId": "afb61995-856a-4bc3-a032-e7a5efe26be5",
+      "reassigning": false,
+      "output": "# SPEC REVISI 05 TECH STACK — track pendek + grid 4×2 per halaman (v2)\n\nTidak ada file yang diubah. Angka siap dipakai builder. Basis kode: `src/components/TechStack.tsx` 605 baris (t3+t6).\n\n## 0. Ringkasan perubahan vs spec lama\n| | Sebelum (t2/v1) | Sesudah (v2) |\n|---|---|---|\n| Track desktop | 1500vh = 13500px @900 | **320vh = 2880px** (−78.7%) |\n| Track mobile | 1400vh = 11816px @844 | **280vh = 2363px** (−80.0%) |\n| Jarak pin (scroll di dalam stage) | 12600 / 10972px | **1980 / 1519px** |\n| Konten | 1 rail, 17 kartu + 4 label kategori, total 6840px | **3 halaman grid**, 8+8+1 kartu, total 4320px @1440 (3×1440) |\n| Geser horizontal | 5400px | **2 × lebar stage** = 2880px @1440 / 780px @390 |\n| Kartu | 331×384 | **321×270** @1440 (desktop), 169×135 @390 (mobile) |\n\nTotal scroll dokumen yang dipakai section 05 turun dari 13500px → 2880px (desktop) dan 11816px → 2363px (mobile).\n\n## 1. Struktur (tetap, diff minimal)\n```\n<section relative bg-ink text-ecru>                       ← TIDAK berubah\n <div ref=track class=\"ts-track ... h-[320vh] max-md:h-[280vh]\">   ← GANTI tinggi\n  <div ref=stage class=\"ts-stage ts-dyn sticky top-0 h-[100svh] overflow-hidden bg-ink\">\n   .ts-bg\n   .ts-head  (kicker + h2 + K mask)                     ← TIDAK berubah\n   motion.div rail-wrap  absolute inset-x-0 top-[23vh] max-md:top-[17vh] z-20\n     ul.ts-rail flex w-full                              ← GANTI w-max → w-full\n       li.ts-page  w-full shrink-0 flex flex-col justify-center px-5 lg:px-12\n         div grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5\n           TechCard × 8\n   motion.div .ts-foot (teks + 3 titik halaman + progress bar again)  ← TAMBAH 3 titik\n  .ts-static (fallback)                                  ← TIDAK berubah\n```\nStage, head, keyY, kicker, `.ts-static`, CSS fallback (reduced-motion + `html:not(.js)`) **tidak disentuh** — semuanya sudah `height:auto`/`display:none` berbasis kelas, jadi otomatis ikut track baru.\n\n## 2. Fase scroll (pin 1980px desktop / 1519px mobile)\n| # | Fase | p mulai | p akhir | Δp | px @1440×900 | px @390×844 |\n|---|---|---|---|---|---|---|\n| F0 | idle awal | .000 | .020 | .020 | 40 | 30 |\n| F1 | K masuk (wipe, dipersingkat) | .020 | .090 | .070 | 139 | 106 |\n| F2 | tahan (frame acuan) | .090 | .120 | .030 | 59 | 46 |\n| F3 | judul mengecil ke header | .120 | .210 | .090 | 178 | 137 |\n| F4 | rail masuk | .210 | .260 | .050 | 99 | 76 |\n| F5a | halaman 1 → 2 | .260 | .500 | .240 | 475 | 365 |\n| F5b | tahan di halaman 2 | .500 | .540 | .040 | 79 | 61 |\n| F5c | halaman 2 → 3 | .540 | .780 | .240 | 475 | 365 |\n| F6 | rail keluar | .780 | .840 | .060 | 119 | 91 |\n| F7 | judul pulih (rewind) | .840 | .960 | .120 | 238 | 182 |\n| F8 | idle akhir / lepas pin | .960 | 1.000 | .040 | 79 | 61 |\n\nKonstanta lama (`RAIL_SCROLL = [0.34, 0.78]`) diganti:\n```\nconst RAIL_IN    = [0.21, 0.26] as const;\nconst PAGE_MOVE  = [[0.26, 0.50], [0.54, 0.78]] as const;   // 2 halaman, 1 jeda\nconst RAIL_OUT   = [0.78, 0.84] as const;\nconst TITLE_OUT  = [0.12, 0.21] as const;\nconst TITLE_RESTORE = [0.84, 0.96] as const;\nconst KEY_IN = 0.02, KEY_END = 0.09;\n```\nRasio geser: desktop 1440px konten per 475px scroll = **3.03×** (terasa seperti \"flip halaman\"); mobile 390px per 365px = **1.07×** (~1:1, natural). Ini konsekuensi langsung dari track pendek — jangan diberi easing tambahan (linear) supaya tidak tersentak; jeda F5b 79px memberi beat \"halaman berhenti\".\n\n## 3. Ukuran kartu & grid (final)\n| | Desktop ≥1024px | Mobile/tablet <1024px |\n|---|---|---|\n| Grid per halaman | 4 kolom × 2 baris | 2 kolom × 4 baris |\n| Padding halaman | `px-12` (48px) | `px-5` (20px) |\n| Gap | `gap-5` (20px) | `gap-2.5` (10px) |\n| Lebar kartu (otomatis grid) | 321px @1440, 281 @1280, 217 @1024 | 169px @390, 134 @320 |\n| Tinggi kartu | `h-[clamp(13rem,30svh,17rem)]` → 270px @900 | `h-[clamp(7rem,16svh,11rem)]` → 135px @844 |\n| Padding kartu | `p-5` | `p-3.5` |\n| Ikon | `h-11 w-11`, glyph `h-6 w-6` | `h-8 w-8`, glyph `h-4 w-4` |\n| Nama | `text-xl` | `text-[13px] leading-tight` |\n| Deskripsi | `text-sm line-clamp-3` | `text-[12px] line-clamp-2` |\n| Label kategori | tampil | `hidden` (hemat tinggi; kategori tetap ada di urutan halaman + fallback statis) |\n| Radius | `rounded-3xl` (tetap) | sama |\n\nCARD constant baru (pengganti baris 55-56; `w-[...]` dibuang → `w-full`):\n```\nconst CARD =\n  \"ts-card group/card relative flex h-[clamp(7rem,16svh,11rem)] w-full flex-col rounded-3xl border border-black/10 bg-panel p-3.5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] lg:h-[clamp(13rem,30svh,17rem)] lg:p-5 dark:border-white/10\";\n```\nTinggi 270px desktop: ikon 44 + gap 16 + nama 24 + gap 8 + deskripsi 3×22=66 + gap 16 + label 14 + padding 40 = 228px → sisa 42px, aman. Mobile 135px: padding 28 + ikon 32 + gap 4 + nama 2 baris 34 + gap 4 + deskripsi 2×16=32 = 134px → pas (pakai `justify-between`/`mt-auto` untuk label).\n\nPembagian halaman (data flat `items[]` hasil `flatMap` kategori, urutan tetap):\n- Halaman 1: item 1–8 (JS, TS, React, Next, Node, Python, Supabase, PostgreSQL)\n- Halaman 2: item 9–16 (SQL, Express, Docker, Git & GitHub, Linux Fedora, Bash CLI, VS Code, Arch Linux)\n- Halaman 3: item 17 (C++) + panel meta\n\nHalaman 3 (layout khusus, tetap pakai grid yang sama):\n```\ndiv grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5\n  TechCard (div pembungkus lg:col-start-2)\n  div meta col-span-2 lg:col-span-2 lg:col-start-3\n      \"17 technologies\" + \"4 disciplines\" + 1 baris hint scroll\n```\nMobile: kartu tetap 169px di kolom 1, panel meta `col-span-2` di bawahnya.\n\nLebar rail total: **3 × stageW** = 4320px @1440 / 1170 @390 (dulu 6840/5432). Tidak ada `w-max` lagi → `shift` tidak perlu diukur dari `scrollWidth`.\n\n## 4. Tabel transform (semua dari `sp`, spring tidak berubah)\n```\nkeyY           [%]  [0, .020, .060, .090, 1]                      -> [\"102%\",\"102%\",\"-8%\",\"0%\",\"0%\"]\ntitleScale     [-]  [0, .12, .21, .84, .96, 1]                    -> [1, 1, .34, .34, 1, 1]\ntitleX         [px] [0, .12, .21, .84, .96, 1]                    -> [x0, x0, 0, 0, x0, x0]\ntitleY         [px] [0, .12, .21, .84, .96, 1]                    -> [y0, y0, 0, 0, y0, y0]\ntitleOpacity   [-]  [0, .12, .21, .84, .92, 1]                    -> [1, 1, 0, 0, 1, 1]\nkickerOpacity  [-]  [0, .18, .27, .84, .96, 1]                    -> [1, 1, .55, .55, 1, 1]\nrailOpacity    [-]  [0, .21, .26, .78, .84, 1]                    -> [0, 0, 1, 1, 0, 0]\nrailY          [%]  [0, .21, .26, .78, .84, 1]                    -> [6, 6, 0, 0, 4, 4]\nrailX          [px] [0, .26, .50, .54, .78, 1]                    -> [0, 0, -pageW, -pageW, -2*pageW, -2*pageW]\nprogressScaleX [-]  [0, 1]                                        -> [0, 1]\ndot1Opacity    [-]  [0, .26, .495, .54, 1]                        -> [1, 1, 1, .3, .3]\ndot2Opacity    [-]  [0, .26, .495, .54, .775, .82, 1]             -> [.3, .3, 1, 1, .3, .3, .3]\ndot3Opacity    [-]  [0, .26, .495, .54, .775, 1]                  -> [.3, .3, .3, .3, 1, 1]\n```\nCatatan implementasi:\n- `keyY` tetap `{ ease: cubicBezier(...EASE_EXPO) }` (pola baris 227-232), tetap 5 titik supaya regex/struktur lama mirip.\n- railX kini 6 titik (ada jeda F5b) → `PAGE_MOVE` array, bukan `RAIL_SCROLL`.\n- `metrics` berubah dari `{x0,y0,shift}` → `{x0,y0,pageW}`; pengukuran: `pageW = stage.clientWidth`, `x0/y0` rumus lama (baris 173-175) **tidak berubah**. Hapus `rail.scrollWidth - stageW` → hilangkan ketergantungan pada `w-max`.\n- `useTransform` bergantung pada `metrics.pageW`; karena `pageW` = lebar stage, RO yang sudah ada (stage/head) cukup. RO pada `railRef` boleh dibiarkan (no-op) atau dibuang.\n- Titik halaman: 3 `<span>` 6×6px `rounded-full`, aktif `bg-accent` opacity 1, non-aktif `bg-ecru/25` opacity .3, `src` opacity dari tabel; container `aria-hidden` + `pointer-events-none`, diletakkan di `.ts-foot` di atas progress bar (`mt-4 flex gap-2`), ikut `railOpacity`.\n- Tidak ada `scale` tambahan di dot (cukup opacity) supaya tabel transform tetap 1:1.\n\n## 5. Rewind, unpin, fokus\n- F6: rail fade + turun 4%, `railX` tetap −2·pageW (tidak snap balik).\n- F7: judul .34 → 1 + fade-in (.84–.92) kembali ke `x0,y0`; kicker naik ke 1.\n- F8: semua output konstan .96→1 → **delta transform 0** saat sticky lepas; tidak ada lompatan; 06 Karya Terpilih lanjut flow normal.\n- Fokus keyboard (formula baru, ganti baris 306-319):\n```\nconst pageW = metrics.pageW || stage.clientWidth;\nconst pageIndex = Math.min(2, Math.max(0, Math.floor(card.offsetLeft / pageW)));\nconst ratio = pageIndex / 2;                       // 3 halaman → 2 perpindahan\nconst p = RAIL_IN[0] + ratio * (RAIL_OUT[0] - RAIL_IN[0]);   // .21 .. .78\n```\nSisanya (Lenis `scrollTo(..., {immediate:true})`, fallback `window.scrollTo`) tidak berubah. `railActive` window tetap `RAIL_IN[0] .. RAIL_OUT[1]` (.21–.84) pada `useMotionValueEvent`.\n\n## 6. Mobile 390px & fallback\n- 390×844: judul tetap 2 baris 66px (tidak diubah), rail top `17vh` (143px), 4 baris × 135 + 3×10 = 570 → berakhir 713px; footer 5vh (42) + tinggi ~44 → aman. 390×700: kartu 112px, 4×112+30=478 → berakhir 597; footer top 621 → aman.\n- 320px: kartu 134px lebar; nama `text-[13px]` masih terbaca, deskripsi 12px `line-clamp-2`.\n- `documentElement.scrollWidth === clientWidth` wajib (tidak ada overflow horizontal; rail overflow dipotong `overflow-hidden` stage).\n- Reduced-motion & no-JS: **nol perubahan CSS** — `.ts-track{height:auto}`, `.ts-dyn{display:none}`, `.ts-static{display:block}` sudah menangani track baru; `.ts-static` tetap memuat 17 item + deskripsi + link `rel=\"noreferrer\"`.\n\n## 7. Daftar edit (8 titik, diff kecil)\n1. `KEY_IN/KEY_END/TITLE_OUT` + ganti `RAIL_SCROLL` → `PAGE_MOVE`, `RAIL_IN/RAIL_OUT` angka baru (baris 39-46).\n2. `CARD` (55-56): buang `w-[...]`, tinggi `h-[...] lg:h-[...]`, padding, teks.\n3. TechCard body (74-101): ukuran ikon/nama/deskripsi/label responsif; `line-clamp-2 lg:line-clamp-3` (string `line-clamp-3` tetap ada untuk test).\n4. Buang `ts-cat` li + `Fragment` (493-504) → `flatItems = categories.flatMap(...)`, `pages = [slice(0,8), slice(8,16), slice(16)]`.\n5. `ul.ts-rail` `w-max` → `w-full`; tambah `li.ts-page` pembungkus grid (baris 491-515).\n6. `metrics.shift` → `metrics.pageW` (150, 175) + railX 6 titik (233-237).\n7. `onFocusCapture` index halaman (306-319).\n8. Titik halaman di `.ts-foot` (523-540).\nTidak berubah: track/stage refs, `useScroll`/`useSpring`, `keyY`, `titleX/Y/Scale/Opacity`, `kickerOpacity`, `railY/Opacity`, `railActive` + `moveFocusOutOfRail`, seluruh `<style>`, `.ts-static`, section wrapper.\n\n## 8. Dampak test (untuk t4 melalui kapten)\nAssertion yang **pasti patah** karena sengaja diubah:\n- `tests/tech-stack-section.test.ts:39-41` — `h-[1500vh]` / `max-md:h-[1400vh]` → ganti ke `h-[320vh]` / `max-md:h-[280vh]`.\n- `:147` regex railX (`RAIL_SCROLL`, `-metrics.shift`) → pola baru `PAGE_MOVE`/`-metrics.pageW`/6 titik.\n- `:152` ukur `rail.scrollWidth - stageW` → `pageW: stage.clientWidth`.\n- `:264` output akhir `-metrics.shift` → `-2 * metrics.pageW` (atau `-2 * pageW`).\n- Assertion yang menyebut `ts-cat`/`w-max`/17 kartu satu baris (bila ada) → ganti ke `ts-page` ×3 / 8 kartu per halaman.\nTetap lolos tanpa ubah: `line-clamp-3` (masih ada di `lg:`), `.ts-card::before`, `.ts-card` hover, `max-md:min-h-11`, meta baris `font-data text-xs uppercase tracking-[0.24em]` + `max-md:flex-wrap`, `.ts-bg{background-image:none`, fallback strings.\n\n## 9. Angka verifikasi\n1. `track.offsetHeight` = 3.2×innerHeight (desktop ≥768) / 2.8× (<768) → 2880 / 2363.\n2. `pin = trackH − innerHeight` = 1980 / 1519; `p=.99 ≡ p=1` (semua transform identik, delta 0).\n3. p=.5: `railX ≈ −1440` (halaman 2 di tengah, setelah spring settle); p=.78–.84: railOpacity 0.\n4. p=.26 & p=.54: `railX` di −0 dan −2·pageW; hanya 2 perpindahan.\n5. 390×844: `scrollWidth === clientWidth`; 8 kartu per halaman terlihat penuh tanpa scroll internal.\n6. `npx tsc --noEmit`, `npx eslint src`, `npm test`, `npm run build` exit 0; :3000 tetap hidup."
+    },
+    {
+      "id": "t9",
+      "subject": "Implementasi track pendek + grid skill 4×2 per halaman",
+      "description": "Revisi src/components/TechStack.tsx sesuai spec t8: user komplain scroll terlalu panjang (track 1500vh = 13.500px @1440×900), minta versi efisien grid 4×2.\n\nWAJIB ikuti angka fase/transform dari t8 (tabel fase + tabel transform), jangan mengarang. Ringkas target:\n1. Track dipendekkan ke angka t8 (target ≤320vh desktop / ≤300vh mobile). Total scroll section di 1440×900 harus turun drastis dari 13.500px (target ≤2.900px) — sebut angka aktual di laporan.\n2. Skills jadi halaman grid 4 kolom × 2 baris (desktop) / 2 kolom × 4 baris (mobile), 8 kartu per halaman, 17 item → 3 halaman (8+8+1). Kartu tetap besar berikon + nama + deskripsi (techDescriptions), boleh ukuran baru dari t8.\n3. Rail bergerak horizontal via translateX sebesar (halaman−1) × lebar stage, jadi 2 perpindahan halaman (bukan shift 5400px). Indikator halaman 3 titik (opacity/transform dari p).\n4. Pertahankan: kicker kecil \"05 Alat & Alur Kerja\" di atas judul \"Tech Stack\" besar terpusat; animasi masuk satu huruf (wipe aksen keyY) sesuai t8; shrink judul ke header saat rail masuk; rewind ke layar judul di ujung; unpin tepat ke 06 Karya Terpilih tanpa gap.\n5. Mobile 390: tanpa overflow horizontal dokumen; reduced-motion & no-JS: fallback statis terbaca 17 item + deskripsi + link.\n6. Data tetap dari useSiteContent/config (techStack/techDescriptions/techLinks), tanpa dependency baru, hanya transform/opacity. Pertahankan perbaikan t6 (F1 focus-visible guard, F2 moveFocusOutOfRail + h2 tabIndex, F3 window.innerHeight, F4 cincin tunggal) — jangan regresi.\n7. Perbarui tests/tech-stack-section.test.ts agar kontrak baru terkunci (track height angka t8, 3 halaman/8 kartu per halaman, shift = 2×stage, p=1 identik p=0, rewind, unpin, fallback statis, mobile). Tes lama yang mengunci 1500vh/5400px/rail tunggal wajib diganti, bukan dihapus tanpa pengganti.\n\nBatasan file: HANYA src/components/TechStack.tsx dan tests/tech-stack-section.test.ts. JANGAN sentuh HomeClient.tsx, src/lib/config.ts, SectionHeading.tsx, Certifications.tsx, package.json. Jangan ubah urutan/nomor section lain.\n\nVerify (jalankan, laporkan exit code): `npx tsc --noEmit`; `npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts`; `npm test` (tidak boleh ada tes yang turun dari baseline 512); `next build` di salinan rsync /tmp/tsr-build + symlink node_modules (JANGAN build di repo karena dev :3000 hidup); `curl -s -o /dev/null -w '%{http_code}' localhost:3000` = 200. Ukur dengan playwright/CDP: trackH baru, total scroll px, railX di p=.5 dan p=1, p=1 identik p=0 (judul pulih + posisi), 17 kartu, 390 docOverflow=0, fallback reduced-motion. Laporkan angka nyata sebelum vs sesudah.",
+      "status": "completed",
+      "assignee": "builder",
+      "dependencies": [
+        "t8"
+      ],
+      "attempt": 1,
+      "createdAt": 1794432112489,
+      "updatedAt": 1794432740666,
+      "kind": "implementation",
+      "objective": "Tech Stack memakai track pendek (sesuai t8) dengan skill grid 4×2 per halaman, horizontal 3 halaman, tetap ada animasi judul + rewind + unpin ke 06; tanpa regresi perbaikan t6.",
+      "inScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "outOfScope": [
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "src/components/SectionHeading.tsx",
+        "src/components/Certifications.tsx",
+        "package.json",
+        "src/app"
+      ],
+      "acceptance": [
+        "Track baru sesuai angka t8 (≤320vh desktop / ≤300vh mobile) dan total scroll section di 1440×900 turun dari 13.500px (target ≤2.900px), dibuktikan angka trackH terukur.",
+        "Skill tampil sebagai halaman grid 4×2 desktop / 2×4 mobile, 8 kartu per halaman, 17 item lengkap = 3 halaman (8+8+1), kartu berikon+nama+deskripsi.",
+        "Rail horizontal bergeser (halaman−1) × lebar stage (2 perpindahan), bukan shift 5400px; ada indikator 3 halaman.",
+        "Kicker kecil '05 Alat & Alur Kerja' di atas judul 'Tech Stack' besar terpusat; huruf dianimasi saat scroll; judul mengecil jadi header saat rail masuk.",
+        "Rewind ke layar judul di ujung lalu unpin tepat ke 06 tanpa gap; p=1 identik p=0 (judul center 720, rail posisi awal, opacity 0).",
+        "Mobile 390 tanpa overflow dokumen; reduced-motion & no-JS fallback statis terbaca 17 item + deskripsi + link.",
+        "Perbaikan t6 tidak regresi (F1 focus-visible guard, F2 moveFocusOutOfRail + h2 tabIndex=-1, F3 window.innerHeight, F4 cincin tunggal); test diperbarui untuk kontrak baru tanpa mengurangi baseline 512.",
+        "Data tetap dari techStack/techDescriptions/techLinks; tidak ada dependency baru; hanya file inScope yang berubah."
+      ],
+      "verify": [
+        "npx tsc --noEmit",
+        "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+        "npm test",
+        "rsync salinan ke /tmp/tsr-build lalu next build",
+        "curl -s -o /dev/null -w '%{http_code}' localhost:3000"
+      ],
+      "attemptId": "2851c099-4f8c-42f0-aef9-7a2b817e51aa",
+      "reassigning": false,
+      "output": "t9 selesai — track dipendekkan + skill grid 4×2 per halaman, semua kontrak t8 terpasang dan terukur.\n\nPerubahan (src/components/TechStack.tsx, 605→~660 baris; tests/tech-stack-section.test.ts 427→~520 baris, 33→35 tes):\n- track h-[1500vh]/max-md:h-[1400vh] → h-[320vh]/max-md:h-[280vh]; pin 12600→1980 px desktop, 10972→1519 px mobile.\n- rail: satu baris 17 kartu + 4 label kategori (w-max, shift 5400px) → 3 halaman grid (li.ts-page w-full shrink-0), 8+8+1 kartu, grid grid-cols-2 lg:grid-cols-4; PAGE_SIZE=8; halaman 3 = kartu C++ (lg:col-start-2) + panel meta (lg:col-span-2 lg:col-start-2→col-start-3).\n- railX 6 titik [0, PAGE_MOVE[0], PAGE_MOVE[1], 1] → 2 perpindahan = -metrics.pageW / -2*metrics.pageW; metrik shift→pageW (stage.clientWidth), tidak ada lagi scrollWidth.\n- fase baru: KEY_IN .02, KEY_END .09, TITLE_OUT [.12,.21], RAIL_IN [.21,.26], PAGE_MOVE [[.26,.50],[.54,.78]], RAIL_OUT [.78,.84], TITLE_RESTORE [.84,.96]; titleScale 6 titik [1,1,.34,.34,1,1], titleOpacity [1,1,0,0,1,1], kicker [1,1,.55,.55,1,1] mengikuti tabel t8 §4.\n- indikator 3 titik di .ts-foot (opacity dot1/2/3 dari sp), ikut railOpacity.\n- kartu baru: h-[clamp(7rem,16svh,11rem)] w-full p-3.5 lg:h-[clamp(13rem,30svh,17rem)] lg:p-5; ikon 32/44px, nama 13px/xl, deskripsi line-clamp-2 lg:line-clamp-3; label kategori hidden di mobile.\n- tech-cat/li kategori dibuang; flatMap kategori + pages slice; numbering 01..17 tetap dari data.\n- Tak berubah: header/kicker/keyY wipe, useScroll/useSpring, .ts-static, seluruh CSS fallback, section wrapper.\n- t6 dijaga: F1 :focus-visible + rect guard, F2 moveFocusOutOfRail + h2 tabIndex=-1, F3 window.innerHeight, F4 hanya .ts-card::before.\n\nAngka terukur (playwright, spring settle 1.6s):\n- desktop 1440×900: trackH 13500→2880 (−78.7%), pin 12600→1980, docH 19733→11380; railX p0 0 → p.5 -1440 → p≥.78 -2880 (2 perpindahan); kartu 321×270; 3 halaman 8/8/1, baris×kolom page1 = 2×4; railOpacity 0→1→0; dots 1/.3/.3 → .92/1/.3 → .3/.3/1; p=.99 ≡ p=1 persis (railX -2880, y 22.4, title transform matrix(1,0,0,1,471,199)); p0 vs p1 judul center 720, transform & opacity identik, rail opacity 0.\n- mobile 390×844: trackH 11816→2363 (−80%), pin 10972→1519, docH 10281; railX -390/-780; kartu 170×135; grid 4 baris×2 kolom; judul center 195; docOverflow 0.\n- unpin: desktop stageTop -400, sectionBottom 500 = nextTop 500; mobile -399 / 445 = 445 → tanpa gap.\n- reduced-motion: trackH auto 1540, .ts-dyn none, .ts-static block, 17 item/17 deskripsi/17 link, docOverflow 0.\n- regresi t6 dicek runtime: F1 klik kartu p=.5 scrollY 6665→6665 (Δ0) popup true; F2 fokus kartu halaman 3 → scroll ke 7219 (= p .78), lalu p=.12 activeElement H2 aria-label \"Tech Stack\" (bukan body); F3 hitungan fokus memakai innerHeight.\n\nVerify: tsc 0, eslint 0, npm test 514/514 pass (baseline 512, +2), next build exit 0 di /tmp/tsr-build (symlink node_modules), dev :3000 = 200 (tidak pernah dimatikan). Catatan: git status juga menunjukkan Hero.tsx + tests/hero-mobile-title.test.ts modified bukan dari saya (pekerjaan lain di workspace yang sama) — tidak disentuh.",
+      "changedPaths": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "acceptanceResults": [
+        {
+          "criterion": "Track baru sesuai angka t8 (≤320vh desktop / ≤300vh mobile) dan total scroll section di 1440×900 turun dari 13.500px (target ≤2.900px), dibuktikan angka trackH terukur.",
+          "status": "passed",
+          "evidence": "CDP 1440×900: trackH 2880 (sebelum 13500, −78.7%), pinRange 1980, docH 11380 (sebelum 19733). 390×844: trackH 2363 (sebelum 11816), pinRange 1519. Kelas h-[320vh]/max-md:h-[280vh]."
+        },
+        {
+          "criterion": "Skill tampil sebagai halaman grid 4×2 desktop / 2×4 mobile, 8 kartu per halaman, 17 item lengkap = 3 halaman (8+8+1), kartu berikon+nama+deskripsi.",
+          "status": "passed",
+          "evidence": "DOM: .ts-page = 3, pageCounts [8,8,1], total .ts-card 17; page1 unique tops/lefts = 2 baris × 4 kolom @1440 dan 4 × 2 @390; kartu 321×270 @1440 / 170×135 @390, textContent memuat nomor+nama+deskripsi (mis. '01JavaScriptThe programming language…'), ikon via techIcon, deskripsi t(description) line-clamp-2 lg:line-clamp-3."
+        },
+        {
+          "criterion": "Rail horizontal bergeser (halaman−1) × lebar stage (2 perpindahan), bukan shift 5400px; ada indikator 3 halaman.",
+          "status": "passed",
+          "evidence": "railX wrapper: p0 0 → p.5 -1440 → p.78+ -2880 @1440; 0 → -390 → -780 @390 (= pageW & 2×pageW). Tidak ada metrics.shift/scrollWidth (tes menolak). 3 titik indikator opacity: p0 1/.3/.3, p.5 .92/1/.3, p.99 .3/.3/1."
+        },
+        {
+          "criterion": "Kicker kecil '05 Alat & Alur Kerja' di atas judul 'Tech Stack' besar terpusat; huruf dianimasi saat scroll; judul mengecil jadi header saat rail masuk.",
+          "status": "passed",
+          "evidence": "Kicker 12px uppercase tracking-[0.28em] dari t(techStack.kicker) di atas h2 158px (desktop) / 66px (mobile); .ts-k + keyY wipe [102%→-8%→0%] tetap; titleScale 1→.34 saat p≥.21 dan titleOpacity 1→0; p.5 title transform matrix(0.34…) dan head pindah ke anchor header."
+        },
+        {
+          "criterion": "Rewind ke layar judul di ujung lalu unpin tepat ke 06 tanpa gap; p=1 identik p=0 (judul center 720, rail posisi awal, opacity 0).",
+          "status": "passed",
+          "evidence": "p=.99 ≡ p=1 identik seluruh transform (railX -2880 y22.4, title matrix(1,0,0,1,471,199), dots .3/.3/1). p=1 vs p=0: judul center 720 & transform/opacity sama, railOpacity 0. Catatan: railX berakhir -2880 (page 3) sesuai tabel t8 §4/F6 ('tidak snap balik') — rail tak terlihat, jadi rangka visual identik. Unpin: stageTop -400, sectionBottom 500 = sibling top 500 (mobile -399 / 445 = 445) → tanpa gap, scroll lanjut normal."
+        },
+        {
+          "criterion": "Mobile 390 tanpa overflow dokumen; reduced-motion & no-JS fallback statis terbaca 17 item + deskripsi + link.",
+          "status": "passed",
+          "evidence": "390×844: documentElement scrollWidth−clientWidth = 0; judul center 195, tidak terpotong; kartu 170×135. reduced-motion: .ts-dyn display none, .ts-static block, track auto (1540px), 17 item, 17 berdeskripsi, 17 link rel=noreferrer, overflow 0; CSS :where(html:not(.js)) tetap ada."
+        },
+        {
+          "criterion": "Perbaikan t6 tidak regresi (F1 focus-visible guard, F2 moveFocusOutOfRail + h2 tabIndex=-1, F3 window.innerHeight, F4 cincin tunggal); test diperbarui untuk kontrak baru tanpa mengurangi baseline 512.",
+          "status": "passed",
+          "evidence": "Runtime: F1 klik kartu p=.5 scrollY 6665→6665 (Δ0), popup true; F2 fokus kartu halaman 3 → scroll 7219 (p=.78), lalu p=.12 activeElement H2 aria-label 'Tech Stack' (bukan BODY); F3 formula fokus hasil 7219 = trackTop 5674.8 + .78×1980 (memakai innerHeight); F4 .ts-card::after tidak ada (tes). npm test 514 pass (baseline 512, file 35 tes vs 33)."
+        },
+        {
+          "criterion": "Data tetap dari techStack/techDescriptions/techLinks; tidak ada dependency baru; hanya file inScope yang berubah.",
+          "status": "passed",
+          "evidence": "Kode memakai useSiteContent()/techStack.categories + flatMap, techIcon, techDescriptions, techLinks; tidak ada nama tech hard-coded (tes D). package.json/lock tidak tersentuh; git status hanya TechStack.tsx + tests/tech-stack-section.test.ts dari pekerjaan ini (Hero.tsx & tests/hero-mobile-title.test.ts dimodifikasi pihak lain di workspace, tidak disentuh)."
+        }
+      ],
+      "commandsRun": [
+        {
+          "command": "npx tsc --noEmit",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "TSC=0, tanpa error."
+        },
+        {
+          "command": "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "ESLINT=0, tanpa warning/error."
+        },
+        {
+          "command": "npm test",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "ℹ tests 514, suites 87, pass 514, fail 0 (baseline 512; tech-stack-section.test.ts 35 tes)."
+        },
+        {
+          "command": "rsync salinan ke /tmp/tsr-build lalu next build",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "NEXT_TELEMETRY_DISABLED=1 npx next build di /tmp/tsr-build (symlink node_modules ke repo, exclude .next) → BUILD_EXIT=0, route table lengkap termasuk prerender '/'."
+        },
+        {
+          "command": "curl -s -o /dev/null -w '%{http_code}' localhost:3000",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "200; SSR memuat h-[320vh] ×1, max-md:h-[280vh] ×1, .ts-page ×3. Dev server tidak pernah dimatikan."
+        }
+      ],
+      "supplementalEvidence": [
+        {
+          "at": 1794432775734,
+          "by": "builder",
+          "attempt": 1,
+          "attemptId": "2851c099-4f8c-42f0-aef9-7a2b817e51aa",
+          "note": "Green gate re-run setelah semua perubahan: npm test → ℹ tests 514, suites 87, pass 514, fail 0, duration 1922ms, TEST_EXIT=0 (tree: TechStack.tsx + tests/tech-stack-section.test.ts versi final; tidak ada perubahan sumber setelah run ini)."
+        }
+      ]
+    },
+    {
+      "id": "t10",
+      "subject": "Verifikasi kode pendek (320vh + grid 4×2) via CDP",
+      "description": "Verifikasi independen kode final t9 (TechStack track 320vh/280vh + grid 4×2 per halaman) di /home/auraauvarose/portofolioV2. Kamu TIDAK boleh mengubah file implementasi/test; hanya boleh menyalakan/menghentikan dev server dan menaruh probe di /tmp. Kalau ada cacat, laporkan findings (jangan perbaiki).\n\nKonteks yang harus dibandingkan: baseline kode lama (t3+t6) sudah terukur: track 13500px desktop / 11816px mobile, rail −5400/−5042, docH 19733, test 512, dev 200. Spec v2 (t8) menetapkan track 320vh/280vh, 3 halaman grid 4×2 (8+8+1), railX 2×pageW, dot indikator 3 halaman, rewind identik, unpin tanpa gap.\n\nLangkah:\n1. Baca src/components/TechStack.tsx + tests/tech-stack-section.test.ts; baca output t8 & t9 di board untuk angka target. Jangan percaya narasi; ukur ulang.\n2. Jalankan gate: tsc, eslint 2 file, npm test (catat pass/fail), build di salinan rsync /tmp + symlink node_modules (JANGAN `pkill -f 'next dev'` — shell di PID namespace bwrap, self-match exit 143; dev :3000 jangan dimatikan), curl :3000.\n3. Probe CDP/playwright 1440×900 dan 390×844: ukur trackH/docH/pin, railX pada p 0/.5/.78/1, dot opacity per halaman, p=.99 vs p=1 identik, unpin gap, jumlah kartu & ukuran kartu, deskripsi terlihat (computed display/opacity/font-size), overflow mobile.\n4. Emulasi reduced-motion, reload: pastikan 17 item + deskripsi + link terbaca.\n5. Regression runtime t6: F1 klik kartu terpotong Δscroll=0 + link popup; F2 activeElement setelah rail nonaktif = H2; F3 fokus kartu halaman 3 → railX tepat −2·pageW dan scrollY sesuai rumus.\n6. Console errors: bandingkan dengan 2 error pre-existing; laporkan kalau ada yang baru.\n\nDeliver: tabel PASS/FAIL per acceptance + angka terukur (sebelum vs sesudah), path screenshot/probe, exit code tiap command. Bahasa Indonesia.",
+      "status": "cancelled",
+      "assignee": "verifier",
+      "dependencies": [
+        "t9"
+      ],
+      "attempt": 1,
+      "createdAt": 1794432775739,
+      "updatedAt": 1794433047412,
+      "kind": "verification",
+      "objective": "Buktikan independen bahwa kode t9 memenuhi permintaan user versi efisien: track 320vh/280vh (scroll turun ~79%), skill grid 4×2 per halaman dengan 3 halaman + indikator, rail bergeser 2× lebar layar, animasi judul + rewind + unpin ke 06 tanpa gap, mobile 390 tanpa overflow, reduced-motion terbaca, dan tidak ada regresi t6/build/test.",
+      "outOfScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts",
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "package.json"
+      ],
+      "acceptance": [
+        "`npx tsc --noEmit` exit 0; `npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts` exit 0; `npm test` exit 0 dengan ≥514 pass dan 0 fail (laporkan angka).",
+        "`next build` exit 0 pada salinan terisolasi (/tmp + symlink node_modules); repo/.next dan dev :3000 tidak dimatikan; curl http://localhost:3000/ = 200.",
+        "CDP 1440×900: trackH ≈2880px (±2%), document height ≈11380px, pin ≈1980px; ukur sendiri, jangan percaya laporan builder.",
+        "CDP 1440×900: railX = 0 (p .0-.26), −1440 (p .5), −2880 (p ≥.78) — 2 perpindahan halaman; dot indikator 3 halaman berpindah sesuai p.",
+        "CDP: p=.99 dan p=1 identik (judul center x=720, opacity 1, rail opacity 0) dan tanpa gap unpin (section bottom == next section top ±2px); setelah track habis 06 Karya Terpilih terlihat.",
+        "Grid halaman 1 = 4 kolom × 2 baris @1440 dan 2 kolom × 4 baris @390; 17 kartu total; setiap kartu berikon + nama + deskripsi (deskripsi benar-benar terlihat, bukan display:none).",
+        "CDP 390×844: trackH ≈2363px, railX 0/−390/−780, document.scrollWidth <= innerWidth+1 (no overflow), kartu ≈170×135 dan teks deskripsi ≥12px terbaca.",
+        "Reduced-motion (CDP emulate): .ts-static tampil, .ts-dyn none, 17 nama + 17 deskripsi + 17 link ada di DOM dan terlihat.",
+        "Re-check runtime F1/F2/F3 dari t6 pada kode baru: klik kartu terpotong tidak menggeser scroll (Δ0), deaktivasi rail memindahkan fokus ke H2 bukan BODY, fokus kartu halaman 3 menggeser rail tepat ke halaman itu.",
+        "Tidak ada console error baru selain 2 error pre-existing (hydration font RootLayout + motion useScroll ref) yang sudah terbukti ada di baseline HEAD."
+      ],
+      "attemptId": "2980e67d-a781-48d4-8581-72c736f5d2ef",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794432775761,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "3314f4aacd04008b64af05d255c1a5fa47c2510cf522ede4c86881947c71da5e",
+            "size": 22885,
+            "mtimeMs": 1794432350758.061
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "dcec00cece867931e557db8688057a0adf712e1f5fbbc15c8ea1bf90543df843",
+            "size": 19489,
+            "mtimeMs": 1794432387520.8643
+          }
+        ]
+      },
+      "output": "CANCELLED — superseded: user minta animasi lebih lambat + hapus blok meta bar. Verifikasi dihentikan atas instruksi captain; tidak ada file repo yang diubah.\n\nAngka terukur sampai titik henti (Chrome 157 CDP, dev :3000, sebelum revisi):\nGATE: tsc exit 0; eslint exit 0; npm test 514 pass / 0 fail / 87 suite (exit 0); isolated build (rsync /tmp/tsv10 + symlink node_modules) exit 0; curl :3000 = 200; repo .next tidak disentuh.\nDESKTOP 1440x900: trackTop 5674.8, trackH 2880 (320vh), pin 1980, docH 11380. railX: p.02=0, p.25=0, p.5=-1440, p.78=-2878.79 (spring settle), p.9/p.99/p1=-2880. Dots: p0 1/.3/.3, p.5 .922/1/.3, p.9 .3/.3/1. Title scale 1 (p.02) -> .34 (p.25-.78) -> 1 (p.99, cx=720.4, opacity 1); rail opacity 0->1->0. p=.99 vs p=1 identik (scale 1, opacity 1, cx 720.4, railX -2880, opacity 0). Gap unpin section-bottom vs next-top = 0.0px (doc y 8554.8); #work h2 \"Works & Gallery\" terlihat di scrollY 8501.\nRASIO KECEPATAN: rail 2880px ditempuh pada pin 1980px; fase geser .26-.78 = 1029.6px scroll untuk 2 perpindahan -> 1 halaman (1440px rail) per ~515px scroll = 2.80x scroll. Total 3 halaman hanya 1980px scroll.\nGRID: page1 4 kolom x 2 baris @1440 (8 kartu), page2 4x2, page3 1 kartu; 17 kartu total, 321x270 desktop, semua 17 berikon + nama + deskripsi terlihat (min font 14px), 17 link target=_blank.\nMETA BAR: ADA di DOM di halaman ke-3 rail = `li.ts-page` index 2 > div kedua, class `col-span-2 ... lg:col-span-2 lg:col-start-3` (TechStack.tsx:551-566) berisi \"17 teknologi / 4 disiplin / hint\". Duplikat hitungan juga ada di `.ts-foot` (TechStack.tsx:578-588).\nMOBILE 390x844: trackH 2363 (280vh), pin 1519, docH 10281, railX 0/-390/-780, docSW 390 = vw (no overflow di p 0/.3/.5/.9/.999), kartu 170x135, desc 12px, grid 2x4, 17 kartu/icons/links.\nF1: klik kartu terpotong (rect 1371..1692, klik x1381 y342) delta scroll 0.0; link target=_blank (href github). F2: 1x Tab masuk rail, setelah scroll p.9 activeElement = H2 aria \"Tech Stack\" (bukan BODY). F3: 17x Tab ke kartu C++ halaman 3 -> scrollY 7219 vs expected 7219.2, railX -2878.79, dots .3/.3/1.\nCONSOLE: hanya 2 error pre-existing saat load normal (React hydration attr + motion useScroll ref) dan 4 saat reduced-motion (2 + warning reduced-motion + hydration failed) — sama persis dengan baseline HEAD :3101, tidak ada error baru.\nBukti screenshot (ephemeral /tmp/tsprobe10): d-p002.png, d-p050.png, d-p100.png, d-section06.png, f1-clipped.png, f3-page3.png, m-p050.png, m-p090.png, reduced.png."
+    },
+    {
+      "id": "t11",
+      "subject": "Review kode pendek + grid 4×2 (r3)",
+      "description": "Review r3 atas kode final t9 di /home/auraauvarose/portofolioV2: src/components/TechStack.tsx (track pendek + grid 4×2 per halaman) dan tests/tech-stack-section.test.ts.\n\nBaca: `git diff -- src/components/TechStack.tsx tests/tech-stack-section.test.ts` (bandingkan dengan HEAD; abaikan Hero.tsx/hero test yang diubah pihak lain), spec t8, output t9, dan hasil verifikasi t10.\n\nNilai:\n1. Permintaan user: Tech Stack besar terpusat + kicker kecil \"05 Alat & Alur Kerja\" di atas; animasi masuk satu huruf saat scroll; skills besar berdeskripsi bergerak ke kanan saat scroll; di ujung kembali ke layar judul; lanjut ke 06. Plus revisi user: scroll efisien (track 320vh/280vh), grid 4×2 per halaman.\n2. Kebenaran teknis: useScroll/useTransform/useSpring dibersihkan, pageW dinamis, tidak ada angka frame-basi, tidak ada layout thrash (transform/opacity), dot indikator sinkron, rewind/unpin tanpa lompatan, SSR/hydration aman.\n3. Regresi t6: F1 guard :focus-visible, F2 moveFocusOutOfRail + h2 tabIndex, F3 window.innerHeight, F4 cincin tunggal masih ada dan benar.\n4. Kualitas test: assertion mengunci 320vh/280vh, 3 halaman, railX = 2×pageW, p=1==p=0, fallback statis, mobile. Tidak ada test yang dihapus/dilemahkan; tidak ada regex yang selalu true.\n5. Catatan non-blocking review sebelumnya (transien fokus ke h2 yang masih aria-hidden, fokus diambil saat activeElement=body, guard :focus-visible memblokir fokus SR, h2 aria-hidden selama rail) — nilai apakah masih ada dan apakah perlu ditutup sekarang atau cukup dicatat.\n6. Batas scope + ponytail: tidak ada over-engineering baru, tidak ada dependency baru, hanya 2 file.\n\nDeliver: verdict pass/needs_revision/reject + findings terstruktur (severity/file/line/problem/requiredFix) + 2-3 catatan non-blocking bila pass. Bahasa Indonesia.",
+      "status": "cancelled",
+      "assignee": "reviewer",
+      "dependencies": [
+        "t9"
+      ],
+      "attempt": 1,
+      "createdAt": 1794432776551,
+      "updatedAt": 1794433125128,
+      "kind": "review",
+      "round": 3,
+      "objective": "Review whether the latest implementation satisfies the user goal",
+      "acceptance": [
+        "Verdict berdasarkan kode on-disk t9 + hasil verifikasi t10, bukan ringkasan naratif.",
+        "Setiap finding menyebut file:baris + requiredFix konkret; tidak ada finding tanpa bukti.",
+        "Cek khusus: (a) track benar-benar 320vh/280vh dan tidak ada sisa konstanta 1500vh/5400px, (b) grid 4×2 per halaman menghasilkan tepat 3 halaman & semua 17 item tampil, (c) railX memakai pageW dinamis (bukan angka mati) dan 2 perpindahan, (d) rewind/p=1 identik p=0 dan unpin tanpa gap, (e) perbaikan t6 (F1–F4) tidak regresi, (f) test baru mengunci perilaku (bukan regex selalu-true), tidak ada tes turun dari baseline 512, (g) aksesibilitas: heading, aria-hidden/inert, fokus tidak hilang ke BODY, (h) hanya 2 file inScope berubah selain perubahan pihak lain (Hero) yang bukan milik task ini."
+      ],
+      "reviewedTaskId": "t9",
+      "attemptId": "5f38fe21-1de7-4eb7-aa7a-7f30f082e94e",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794432776573,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "3314f4aacd04008b64af05d255c1a5fa47c2510cf522ede4c86881947c71da5e",
+            "size": 22885,
+            "mtimeMs": 1794432350758.061
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "dcec00cece867931e557db8688057a0adf712e1f5fbbc15c8ea1bf90543df843",
+            "size": 19489,
+            "mtimeMs": 1794432387520.8643
+          }
+        ]
+      },
+      "output": "Dibatalkan atas perintah captain: superseded — user minta animasi diperlambat + blok meta \"17 teknologi / 4 disiplin / Gulir untuk menjelajah\" dihapus, jadi kode t9 akan diubah lagi. Tidak ada file diubah; tidak ada verdict. Temuan parsial untuk review berikutnya: (1) gate statis lulus — tsc 0, eslint 0, npm test 514/514 (suite tech-stack 35 tes), dev :3000 200; (2) desktop 1440x900 terukur: trackH 2880, 3 halaman 8/8/1, 17 kartu, railX 0/-1440/-2880, p=1 identik p=0 (head 471,199 scale 1 opacity 1; rail opacity 0), unpin tanpa gap (stageBottom=secBottom=nextTop=8555), klik kartu delta scroll 0, huruf K bergerak 158.32 -> -5.9 antara p0 dan p0.05; (3) mobile 390x844: trackH 2363, grid 170px x2 kolom, railX -390/-780, docW=390; (4) KANDIDAT belum terkonfirmasi: setelah fokus programatik pada link kartu halaman 3 lalu scroll paksa ke p=1, activeElement jatuh ke BODY (bukan H2) meski rail sudah inert — perlu dicek ulang di review berikutnya (kemungkinan artefak probe headless, tapi ini persis gejala F2); (5) catatan non-blocking: railX 2 perpindahan + 3 titik hard-code sementara jumlah halaman dari data yang bisa dioverride dashboard (override dengan jumlah item berbeda -> halaman kosong/dot mismatch); h2 aria-hidden selama fase rail (heading hilang dari a11y tree); onRailFocus memakai closest(\"li\") yang kini halaman, bukan kartu (perilaku masih benar karena granularitas halaman, tapi nama/komentar menyesatkan); (6) scope: hanya TechStack.tsx + test-nya yang relevan; Hero.tsx/tests/hero-mobile-title.test.ts milik pihak lain; package.json tidak berubah."
+    },
+    {
+      "id": "t12",
+      "subject": "Perlambat scroll + hapus meta bar stage",
+      "description": "Revisi kode t9 di /home/auraauvarose/portofolioV2 sesuai feedback user terbaru: (1) animasi scroll terlalu cepat → perlambat; (2) hapus blok meta di ujung stage (\"17 teknologi / 4 disiplin / Gulir untuk menjelajah\") karena jelek.\n\nFile yang boleh diubah HANYA src/components/TechStack.tsx dan tests/tech-stack-section.test.ts.\n\nLangkah konkret:\n1. Cari blok meta tersebut di TechStack.tsx (kemungkinan berisi total item, jumlah kategori/disiplin, dan hint scroll; dekat footer stage). Hapus JSX + CSS/kelas terkait (pointer-events, styles) tanpa menyisakan spacer. Cek juga UI.technologies/UI.disciplines di objek UI — hapus kalau jadi tidak terpakai (lint akan menangkap unused).\n2. Perlambat gerakan: naikkan track ke 460vh desktop / 340vh mobile; panjangkan jendela fase rail sehingga 2 perpindahan halaman memakai ≥62% p (mis. .20–.84 dengan jeda singkat di tengah) dan geser fase judul/shrink lebih awal; lunakkan spring (turunkan stiffness dari 150, naikkan damping dari 30, pertahankan restDelta kecil). Semua gerakan tetap transform/opacity.\n3. Pastikan rasio kecepatan hasil ukur: desktop 1.2–1.6 (railPx per scrollPx), mobile ≤1.1. Kalau belum masuk target, sesuaikan angka track/fase dan ukur lagi.\n4. Perbarui test yang mengunci 320vh/280vh dan yang menyebut meta bar. Tes tidak boleh dikurangi dari 514; jangan hapus test tanpa pengganti.\n5. Ukur dengan playwright/CDP (spring settle): trackH/docH/pin, railX di beberapa p, dot opacity, p=.99 vs p=1, unpin gap, mobile overflow, reduced-motion. Laporkan angka sebelum (320vh/280vh) vs sesudah.\n\nJangan sentuh file lain (Hero.tsx dan hero test yang kotor di git bukan milik task ini). Jangan build di repo — salin rsync ke /tmp/tsr-build + symlink node_modules; jangan matikan dev :3000.",
+      "status": "completed",
+      "assignee": "builder",
+      "dependencies": [],
+      "attempt": 1,
+      "createdAt": 1794433034974,
+      "updatedAt": 1794433422626,
+      "kind": "implementation",
+      "objective": "Perlambat koreografi scroll Tech Stack agar mudah dibaca (track 460vh/340vh, rasio rail 1.2–1.6 desktop) dan hapus total meta bar \"17 teknologi / 4 disiplin / Gulir untuk menjelajah\" tanpa merusak kontrak grid 3 halaman, rewind, unpin, dan perbaikan t6.",
+      "inScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "outOfScope": [
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "src/components/SectionHeading.tsx",
+        "src/components/Certifications.tsx",
+        "package.json",
+        "src/app",
+        "src/components/Hero.tsx"
+      ],
+      "acceptance": [
+        "Blok meta \"17 teknologi / 4 disiplin / Gulir untuk menjelajah\" (beserta count/disiplines/scroll-hint yang menyusunnya) HAPUS TOTAL dari DOM dan CSS; grep TechStack.tsx tidak lagi memuat string 'teknologi', 'disiplin', 'Gulir untuk menjelajah' ataupun UI.technologies/UI.disciplines jika hanya dipakai blok itu. Tata letak stage tetap rapi tanpa blok itu (tidak ada ruang kosong menggantung).",
+        "Scroll diperlambat: track desktop 460vh (±5%) dan mobile 340vh (±5%), pin desktop ≈3240px; rasio kecepatan rail (railPx per scrollPx) diukur dan dilaporkan: desktop 1.2–1.6, mobile ≤1.1 (sebelumnya 3.03× / 1.07×).",
+        "Jendela fase rail diperpanjang: perpindahan 2 halaman menempati ≥62% rentang p (sebelumnya .26–.78 = 52%), dengan jeda antar halaman; spring diperlunak (stiffness lebih rendah / damping lebih tinggi dari 150/30) dan nilai barunya dilaporkan.",
+        "Tidak ada regresi kontrak: 3 halaman grid 4×2 (8+8+1, 17 kartu), railX 0/−pageW/−2·pageW, dot indikator 3 halaman, rewind p=.99≡p=1, unpin tanpa gap ke 06, mobile 390 no overflow, reduced-motion/no-JS 17 item+deskripsi+link, perbaikan t6 (F1–F4) tetap.",
+        "tests/tech-stack-section.test.ts diperbarui: assertion track 320vh/280vh diganti angka baru, assertion meta bar dihapus/dibalik menjadi doesNotMatch, kontrak lain tetap diuji. Baseline tes tidak boleh turun dari 514.",
+        "Gate: npx tsc --noEmit exit 0; npx eslint 2 file exit 0; npm test exit 0 (≥514 pass, 0 fail); next build exit 0 di salinan /tmp (dev :3000 tetap hidup); curl :3000 = 200."
+      ],
+      "verify": [
+        "npx tsc --noEmit",
+        "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+        "npm test",
+        "rsync salinan ke /tmp/tsr-build lalu next build",
+        "curl -s -o /dev/null -w '%{http_code}' localhost:3000"
+      ],
+      "attemptId": "aa39b1c9-e75e-4325-8430-2eac3f395e24",
+      "reassigning": false,
+      "output": "t12 selesai. Scroll diperlambat + meta bar stage dihapus total.\n\nDIFF\n- src/components/TechStack.tsx (-42/+31 net; now 650 baris):\n  * UI: buang `technologies`, `disciplines`, `hint` (sisakan `official`) — alasan hapus.\n  * Fase: KEY_END .09→.08; TITLE_OUT [.12,.21]→[.10,.17]; RAIL_IN [.21,.26]→[.17,.22]; PAGE_MOVE [[.26,.50],[.54,.78]]→[[.22,.53],[.55,.86]]; RAIL_OUT [.78,.84]→[.86,.90]; TITLE_RESTORE [.84,.96]→[.90,.98].\n  * SPRING 150/30/0.4 → 120/34/0.45 (restDelta .0005 tetap).\n  * Track `h-[320vh]`→`h-[460vh]`, `max-md:h-[280vh]`→`max-md:h-[340vh]`.\n  * Hapus useMemo `total` (tidak terpakai), panel meta halaman 3 (`col-span-2 ... lg:col-start-3`, 16 baris), dan duplikat hitungan di `.ts-foot` (total/technologies/categories/disciplines).\n  * Footer label jadi `05 / Tech Stack` (CHAPTER + heading) — class line `font-data text-xs uppercase tracking-[0.24em] ... max-md:flex-wrap` dipertahankan untuk kontrak mobile-layout.\n  * Dot indikator: midpoint halaman .495→.375 dan .775→.705; focus-scroll pakai PAGE_MOVE (.22 + ratio*.64) bukan RAIL_IN/RAIL_OUT.\n- tests/tech-stack-section.test.ts: track 320/280 → 460/340 (strictEqual); assertion panel meta `lg:col-span-2 lg:col-start-3` dibalik jadi doesNotMatch bersama 'teknologi'/'disiplin'/'Gulir untuk menjelajah'/UI.technologies/UI.disciplines; test baru \"jendela 2 perpindahan halaman ≥62% p, spring diperlunak\" (window 64%, stiffness<150, damping>30). 35→36 test di file, tidak ada yang dihapus.\n\nANGKA UKUR (playwright/CDP, spring settle 2.1s; sebelum → sesudah)\n- Desktop 1440×900: trackH 2880→4140 (460vh), pin 1980→3240, docH 11380→12640; scroll window rail .26–.78 (52%, 950px)→.22–.86 (64%, 2074px); rasio rail 3.03×→1.39× (target 1.2–1.6).\n- Mobile 390×844: trackH 2363→2870 (340vh), pin 1519→2026; rasio 1.07×→0.60× (target ≤1.1).\n- railX: p.22 0, p.375 −720, p.53 −1440, p.705 −2160, p.86 −2880 = 0/−pageW/−2pageW; p.99 ≡ p=1 (railX −2880, opacity 0, scale none, title opacity 1).\n- Dot: p≤.22 [1,.3,.3]; p.375 [1,1,.3]; p.53 [.38,1,.3]; p.705 [.3,.3,1].\n- Meta: DOM `hasCounts:false`, `panel:false`, footText \"05/Tech Stack\"; grep TechStack.tsx = 0 match untuk teknologi/disiplin/Gulir; halaman 3 tetap 1 kartu (8+8+1).\n- Unpin: stageTop −400, sectionBottom = nextTop (500 desktop / 444 mobile) → tanpa gap/lompatan.\n- Mobile 390: docOverflow 0, h2 center x=195, font 66px; desktop h2 center 720, font 158px.\n- Reduced-motion: track 1540 (pin mati), .ts-stage none, .ts-static block, 17 item/17 deskripsi/17 link, overflow 0.\n- Tanpa JS (javaScriptEnabled:false): http 200, html tanpa class `js`, static block visible, 17/17/17, overflow 0.\n- t6 F1–F4 tetap: klik kartu tidak menggeser scroll (guard focus-visible), fokus pindah ke h2 sebelum inert, pembagi innerHeight, hanya ::before (::after dihapus).\n\nGATE: tsc exit 0; eslint 2 file exit 0; npm test 515/515 pass 0 fail (baseline 514); next build exit 0 di salinan /tmp/tsr-build + symlink node_modules (dev tidak disentuh); curl :3000 = 200.\nchangedPaths: src/components/TechStack.tsx, tests/tech-stack-section.test.ts.",
+      "changedPaths": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts"
+      ],
+      "acceptanceResults": [
+        {
+          "criterion": "Blok meta \"17 teknologi / 4 disiplin / Gulir untuk menjelajah\" (beserta count/disiplines/scroll-hint yang menyusunnya) HAPUS TOTAL dari DOM dan CSS; grep TechStack.tsx tidak lagi memuat string 'teknologi', 'disiplin', 'Gulir untuk menjelajah' ataupun UI.technologies/UI.disciplines jika hanya dipakai blok itu. Tata letak stage tetap rapi tanpa blok itu (tidak ada ruang kosong menggantung).",
+          "status": "passed",
+          "evidence": "Panel meta halaman 3 (16 baris, lg:col-span-2 lg:col-start-3) + duplikat hitungan di .ts-foot dihapus; UI.technologies/disciplines/hint dihapus; useMemo total dihapus. `grep -c 'teknologi\\|disiplin\\|Gulir untuk menjelajah' src/components/TechStack.tsx` = 0. Probe DOM: meta {hasCounts:false, panel:false, footText:'05/Tech Stack'}, stageTextMeta false. Halaman 3 tetap 1 kartu (8+8+1) tanpa spacer."
+        },
+        {
+          "criterion": "Scroll diperlambat: track desktop 460vh (±5%) dan mobile 340vh (±5%), pin desktop ≈3240px; rasio kecepatan rail (railPx per scrollPx) diukur dan dilaporkan: desktop 1.2–1.6, mobile ≤1.1 (sebelumnya 3.03× / 1.07×).",
+          "status": "passed",
+          "evidence": "Kelas track: h-[460vh] dan max-md:h-[340vh]. Terukur desktop 1440×900: trackH 4140 (=460vh), pin 3240; mobile 390×844: trackH 2870 (=340vh), pin 2026. Rasio rail: desktop 2880px / 2074px scroll = 1.39× (target 1.2–1.6 ✓); mobile 780px / 1297px = 0.60× (≤1.1 ✓)."
+        },
+        {
+          "criterion": "Jendela fase rail diperpanjang: perpindahan 2 halaman menempati ≥62% rentang p (sebelumnya .26–.78 = 52%), dengan jeda antar halaman; spring diperlunak (stiffness lebih rendah / damping lebih tinggi dari 150/30) dan nilai barunya dilaporkan.",
+          "status": "passed",
+          "evidence": "PAGE_MOVE [[.22,.53],[.55,.86]] → jendela .22–.86 = 64% p (≥62%), jeda .53–.55. SPRING baru {stiffness:120, damping:34, mass:0.45, restDelta:0.0005}. Test baru mengunci window ≥.62, stiffness<150, damping>30."
+        },
+        {
+          "criterion": "Tidak ada regresi kontrak: 3 halaman grid 4×2 (8+8+1, 17 kartu), railX 0/−pageW/−2·pageW, dot indikator 3 halaman, rewind p=.99≡p=1, unpin tanpa gap ke 06, mobile 390 no overflow, reduced-motion/no-JS 17 item+deskripsi+link, perbaikan t6 (F1–F4) tetap.",
+          "status": "passed",
+          "evidence": "Probe: pages 3, pageCounts [8,8,1], 17 kartu, grid 4×2 desktop / 4×2 mobile (card 321×270 / 170×135). railX p.22 0, p.375 −720, p.53 −1440, p.705 −2160, p.86 −2880 (pageW 720 / 390). Dot bergilir 1→2→3. p=.99 ≡ p=1 (railX −2880, railOpacity 0, titleScale none, titleOpacity 1). Unpin: stageTop −400, sectionBottom=nextTop 500 (desktop) / 444 (mobile), tanpa gap. Mobile docOverflow 0. Reduced-motion: stage none, static block, 17 item/17 deskripsi/17 link. No-JS http 200: static block, 17/17/17, overflow 0. Test t6 F1–F4 (focus-visible guard, fokus→h2 sebelum inert, innerHeight, ::after dihapus) tetap hijau."
+        },
+        {
+          "criterion": "tests/tech-stack-section.test.ts diperbarui: assertion track 320vh/280vh diganti angka baru, assertion meta bar dihapus/dibalik menjadi doesNotMatch, kontrak lain tetap diuji. Baseline tes tidak boleh turun dari 514.",
+          "status": "passed",
+          "evidence": "Track test: h-[460vh]/max-md:h-[340vh] + strictEqual 460/340; panel meta assertion dibalik jadi loop doesNotMatch ['teknologi','disiplin','Gulir untuk menjelajah','UI.technologies','UI.disciplines','lg:col-span-2 lg:col-start-3']. Test baru untuk window ≥62% + spring lunak. File 35→36 test, npm test 515 pass / 0 fail (baseline 514)."
+        },
+        {
+          "criterion": "Gate: npx tsc --noEmit exit 0; npx eslint 2 file exit 0; npm test exit 0 (≥514 pass, 0 fail); next build exit 0 di salinan /tmp (dev :3000 tetap hidup); curl :3000 = 200.",
+          "status": "passed",
+          "evidence": "tsc exit 0; eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts exit 0; npm test ℹ tests 515, pass 515, fail 0; next build BUILD=0 di /tmp/tsr-build (rsync + symlink node_modules, repo .next tidak disentuh); curl localhost:3000 HTTP=200."
+        }
+      ],
+      "commandsRun": [
+        {
+          "command": "npx tsc --noEmit",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "TSC=0, tanpa error."
+        },
+        {
+          "command": "npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "ESLINT=0, tanpa warning/error."
+        },
+        {
+          "command": "npm test",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "ℹ tests 515, suites 87, pass 515, fail 0 (baseline 514; +1 test baru, tidak ada yang dihapus)."
+        },
+        {
+          "command": "rsync salinan ke /tmp/tsr-build lalu next build",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "BUILD=0; route table lengkap termasuk ○ / prerendered; dev :3000 dan .next repo tidak disentuh."
+        },
+        {
+          "command": "curl -s -o /dev/null -w '%{http_code}' localhost:3000",
+          "status": "passed",
+          "exitCode": 0,
+          "evidence": "HTTP=200."
+        }
+      ]
+    },
+    {
+      "id": "t13",
+      "subject": "Verifikasi t12: meta bar hilang + kecepatan turun",
+      "description": "Verifikasi independen kode t12 (TechStack: track 460vh/340vh, rail diperlambat, meta bar dihapus) di /home/auraauvarose/portofolioV2. Jangan ubah file implementasi/test; probe hanya di /tmp.\n\nKonteks: baseline t9 terukur trackH 2880/2363, pin 1980/1519, rasio 2.80×/1.07×, meta bar ada di TechStack.tsx:551-566 + duplikat .ts-foot:578-588. Builder t12 klaim: trackH 4140, pin 3240, window rail .22–.86 (64%), rasio 1.39× desktop, 0.60× mobile, spring 120/34/0.45, meta bar 0 match, test 515.\n\nLangkah:\n1. Baca TechStack.tsx + test; jalankan gate (tsc, eslint 2 file, npm test, build di rsync /tmp + symlink node_modules, curl :3000). JANGAN pkill next dev.\n2. Ukur CDP/playwright 1440×900 & 390×844: trackH, docH, pin, railX di beberapa p, dot opacity, p=.99 vs p=1, gap unpin, jumlah kartu per halaman (8/8/1), ukuran kartu, deskripsi terlihat, overflow mobile.\n3. Hitung rasio kecepatan sendiri: (railPx yang ditempuh)/(scrollPx pada jendela fase rail). Laporkan rumus + angka.\n4. Cek meta bar hilang: grep file, lalu di DOM render cari teks 'teknologi'/'disiplin'/'Gulir untuk menjelajah' di seluruh stage dan pastikan tidak ada; pastikan halaman 3 tidak menyisakan grid kosong.\n5. Uji kandidat F2: fokus programatik (el.focus()) ke link di halaman 3, lalu paksa scroll ke p=1, ukur document.activeElement (tag + teks). Ulangi tanpa fokus programatik sebagai kontrol. Simpulkan bug atau artefak.\n6. Emulasi reduced-motion; cek console vs baseline.\nDeliver: tabel PASS/FAIL + angka terukur (sebelum/sesudah) + screenshot paths. Bahasa Indonesia.",
+      "status": "in_progress",
+      "assignee": "verifier",
+      "dependencies": [
+        "t12"
+      ],
+      "attempt": 1,
+      "createdAt": 1794433447249,
+      "updatedAt": 1794433486640,
+      "kind": "verification",
+      "objective": "Buktikan independen bahwa t12 benar: meta bar hilang total dari DOM, scroll terasa lebih lambat (rasio desktop 1.2–1.6, mobile ≤1.1), dan semua kontrak (3 halaman, rewind, unpin, mobile, reduced-motion, F1/F3/F4) tetap utuh tanpa error console baru.",
+      "outOfScope": [
+        "src/components/TechStack.tsx",
+        "tests/tech-stack-section.test.ts",
+        "src/components/Hero.tsx",
+        "src/components/HomeClient.tsx",
+        "src/lib/config.ts",
+        "package.json"
+      ],
+      "acceptance": [
+        "Gate: npx tsc --noEmit exit 0; npx eslint src/components/TechStack.tsx tests/tech-stack-section.test.ts exit 0; npm test exit 0 dengan ≥515 pass, 0 fail; next build exit 0 di salinan /tmp; curl :3000 = 200 (dev tidak dimatikan).",
+        "Meta bar benar-benar hilang: grep TechStack.tsx 0 match 'teknologi'/'disiplin'/'Gulir untuk menjelajah'; di DOM render tidak ada teks 'teknologi', 'disiplin', 'Gulir untuk menjelajah' (cek textContent seluruh stage); halaman 3 tetap berisi tepat 1 kartu skill dan tidak ada ruang kosong menggantung.",
+        "Kecepatan: trackH 4140±5% desktop (460vh) dan 2870±5% mobile (340vh); rasio rail:scroll terukur sendiri — desktop 1.2–1.6, mobile ≤1.1; laporkan angka aktual (baseline t9: 2.80× / 1.07×).",
+        "Kontrak tetap: 3 halaman grid 4×2 (8+8+1, 17 kartu), railX 0/−pageW/−2·pageW, dot indikator 3 halaman sinkron, p=.99≡p=1 (judul center 720, opacity 1), unpin tanpa gap ke 06, mobile 390 docW=390, reduced-motion/no-JS 17 item+deskripsi+link.",
+        "Kandidat F2 dikonfirmasi atau dibantah: fokus programatik ke link halaman 3 lalu scroll paksa ke p=1 → ukur activeElement. Kalau BODY, itu bug F2 (harus H2); kalau H2/elemen stabil, nyatakan probe reviewer artefak. Sertakan metode probe.",
+        "F1/F3/F4 tidak regresi: klik kartu terpotong Δscroll 0, hitungan fokus pakai innerHeight, hanya satu cincin accent; console hanya 2 error pre-existing, 0 baru.",
+        "Tidak ada file di luar inScope yang berubah karena task ini (Hero.tsx milik pihak lain bukan urusan verifikasi ini)."
+      ],
+      "attemptId": "5a653abe-31de-49a2-b75b-a34b07a28c1d",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794433447272,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "4ae72d899d16a110fc6b037dc83bb55218ef4e2e516f53862f186b28243ce67c",
+            "size": 21632,
+            "mtimeMs": 1794433169295.4358
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "c61994fff602a40c99a49a7242355d3bf3ff81e1a2bade8b5fe1096540232dee",
+            "size": 20426,
+            "mtimeMs": 1794433185236.328
+          }
+        ]
+      }
+    },
+    {
+      "id": "t14",
+      "subject": "Review kode t12 (perlambatan + hapus meta bar)",
+      "description": "Review r3 atas kode final t12 di /home/auraauvarose/portofolioV2: src/components/TechStack.tsx + tests/tech-stack-section.test.ts.\n\nBaca: `git diff -- src/components/TechStack.tsx tests/tech-stack-section.test.ts` (abaikan Hero.tsx/hero test milik pihak lain), output t12, hasil verifikasi t13, dan catatan review sebelumnya (t11 cancelled: 2 perpindahan + 3 titik hard-code padahal jumlah halaman dari data override; h2 aria-hidden selama fase rail; onRailFocus pakai closest(\"li\") yang kini berarti halaman — komentar menyesatkan).\n\nNilai:\n1. Permintaan user terbaru: animasi tidak terlalu cepat (rasio rail terukur 1.2–1.6 desktop / ≤1.1 mobile) dan blok \"17 teknologi / 4 disiplin / Gulir untuk menjelajah\" hilang total (bukan display:none).\n2. Kontrak tetap: 3 halaman grid 4×2 (8+8+1), railX 2×pageW, rewind p=1≡p=0, unpin tanpa gap, mobile 390, reduced-motion, F1–F4.\n3. Kualitas kode: tidak ada dead code/sisa meta (UI fields, useMemo total, CSS .ts-meta), spring wajar, tidak ada angka mati baru yang rapuh (mis. hard-code 3 halaman) kecuali sudah ada sebelumnya dan masih benar.\n4. Test: mengunci angka baru (460vh/340vh), meta bar doesNotMatch, tidak ada test dihapus/melemah; hitung jumlah tes.\n5. Kandidat F2: putuskan berdasarkan bukti verifikasi (bug nyata vs artefak probe). Kalau bug nyata, finding high dengan requiredFix.\n6. Scope + ponytail: hanya 2 file, tanpa dependency baru, tanpa abstraksi baru.\nDeliver: verdict pass/needs_revision/reject + findings terstruktur + 2-3 catatan non-blocking. Bahasa Indonesia.",
+      "status": "in_progress",
+      "assignee": "reviewer",
+      "dependencies": [
+        "t12"
+      ],
+      "attempt": 1,
+      "createdAt": 1794433448042,
+      "updatedAt": 1794433494298,
+      "kind": "review",
+      "round": 3,
+      "objective": "Review whether the latest implementation satisfies the user goal",
+      "acceptance": [
+        "Verdict berdasarkan diff on-disk t12 + hasil verifikasi t13, bukan narasi builder.",
+        "Setiap finding menyebut file:baris + requiredFix konkret; tanpa bukti bukan finding.",
+        "Cek khusus: (a) meta bar hilang total termasuk CSS/`UI` entry dan tidak ada sisa spacer/kolom kosong di halaman 3; (b) track 460vh/340vh dan jendela fase rail ~64% konsisten dengan rasio terukur; (c) spring 120/34/0.45 tidak menyebabkan lag/overshoot yang mengganggu (nilai wajar, bukan asal angka); (d) test baru mengunci 460vh/340vh + ketiadaan meta bar (doesNotMatch), tidak ada tes dilemahkan; (e) kandidat F2 dinilai dengan hasil verifikasi; (f) F1/F3/F4 tetap; (g) a11y (h2 aria-hidden, inert, fokus) dan tidak ada dependency baru.",
+        "Verdict pass hanya jika tidak ada blocker/high."
+      ],
+      "reviewedTaskId": "t12",
+      "attemptId": "b1db0e60-76d6-48cf-85a4-426b13e7e04f",
+      "reassigning": false,
+      "verdictStartSnapshot": {
+        "at": 1794433448078,
+        "artifacts": [
+          {
+            "path": "src/components/TechStack.tsx",
+            "present": true,
+            "sha256": "4ae72d899d16a110fc6b037dc83bb55218ef4e2e516f53862f186b28243ce67c",
+            "size": 21632,
+            "mtimeMs": 1794433169295.4358
+          },
+          {
+            "path": "tests/tech-stack-section.test.ts",
+            "present": true,
+            "sha256": "c61994fff602a40c99a49a7242355d3bf3ff81e1a2bade8b5fe1096540232dee",
+            "size": 20426,
+            "mtimeMs": 1794433185236.328
+          }
+        ]
+      }
+    }
+  ],
+  "taskSeq": 14
+}

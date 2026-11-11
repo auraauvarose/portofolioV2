@@ -1,180 +1,403 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type FocusEvent } from "react";
+import {
+  cubicBezier,
+  motion,
+  useMotionValueEvent,
+  useScroll,
+  useSpring,
+  useTransform,
+} from "motion/react";
 
-import Reveal from "@/components/Reveal";
-import SectionHeading from "@/components/SectionHeading";
-import Tilt3D from "@/components/Tilt3D";
 import { useLanguage } from "@/components/providers";
 import { useSiteContent } from "@/components/site-content-provider";
+import { getLenis } from "@/components/SmoothScroll";
 import { techIcon } from "@/components/tech-icons";
 import { techDescriptions, techLinks } from "@/lib/config";
+import { EASE_EXPO } from "@/lib/motion";
 import type { Localized } from "@/types";
 
 type TechCategory = { title: Localized; items: readonly string[] };
 
+/* Nomor bab section 05. Ditulis sekali saja di sini. */
+const CHAPTER = "05";
+
 const UI: Record<string, Localized> = {
-  technologies: { en: "technologies", id: "teknologi" },
-  disciplines: { en: "disciplines", id: "disiplin" },
-  all: { en: "All", id: "Semua" },
-  filter: { en: "Filter by discipline", id: "Saring berdasarkan disiplin" },
   official: { en: "Official site", id: "Situs resmi" },
 };
 
-const CHEVRON =
-  "M7 17 17 7M9 7h8v8";
+/* Timeline koreografi (revisi t12: rail lebih lambat, judul keluar lebih awal). */
+const KEY_IN = 0.02;
+const KEY_END = 0.08;
+const TITLE_OUT = [0.1, 0.17] as const;
+const RAIL_IN = [0.17, 0.22] as const;
+/* Dua perpindahan halaman menempati 64% p (.22–.86) dengan jeda .53–.55. */
+const PAGE_MOVE = [
+  [0.22, 0.53],
+  [0.55, 0.86],
+] as const;
+const RAIL_OUT = [0.86, 0.9] as const;
+const TITLE_RESTORE = [0.9, 0.98] as const;
+/* 8 kartu per halaman (grid 4×2 desktop / 2×4 mobile), 17 item → 3 halaman. */
+const PAGE_SIZE = 8;
 
-function TechRow({ label }: { label: string }) {
+const SPRING = {
+  stiffness: 120,
+  damping: 34,
+  mass: 0.45,
+  restDelta: 0.0005,
+} as const;
+
+const CARD =
+  "ts-card group/card relative flex h-[clamp(7rem,16svh,11rem)] w-full flex-col rounded-3xl border border-black/10 bg-panel p-3.5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] lg:h-[clamp(13rem,30svh,17rem)] lg:p-5 dark:border-white/10";
+
+const CARD_BODY =
+  "flex h-full flex-col rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-accent max-md:min-h-11";
+
+function TechCard({
+  label,
+  index,
+  category,
+}: {
+  label: string;
+  index: number;
+  category: string;
+}) {
   const { t } = useLanguage();
   const description = techDescriptions[label];
   const link = techLinks[label];
 
   const body = (
     <>
-      <span className="ts-icon mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-black/[0.03] text-zinc-500 dark:border-white/10 dark:bg-white/[0.03] dark:text-zinc-300">
-        {techIcon(label, "h-4 w-4") ?? (
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-        )}
+      <span className="flex items-start gap-2">
+        <span className="ts-icon flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-ecru/15 bg-ecru/5 text-ecru/80 lg:h-11 lg:w-11">
+          {techIcon(label, "h-4 w-4 lg:h-6 lg:w-6") ?? (
+            <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
+          )}
+        </span>
+        <span className="ms-auto font-data text-xs text-ecru/40">
+          {String(index).padStart(2, "0")}
+        </span>
       </span>
 
-      <span className="min-w-0 flex-1">
-        <span className="block text-sm font-semibold text-zinc-800 transition-colors duration-300 group-hover/row:text-accent dark:text-zinc-100">
-          {label}
-        </span>
-        {description ? (
-          <span className="mt-1 block text-xs leading-relaxed text-zinc-500 line-clamp-2 dark:text-zinc-400">
-            {t(description)}
-          </span>
-        ) : null}
-      </span>
+      <h3 className="mt-2 font-display text-[13px] uppercase leading-tight text-ecru transition-colors duration-300 group-hover/card:text-accent lg:mt-4 lg:text-xl">
+        {label}
+      </h3>
 
-      {link ? (
-        <span className="mt-1 shrink-0 text-zinc-400 opacity-0 transition-opacity duration-300 group-hover/row:opacity-100 dark:text-zinc-500">
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            aria-hidden
-          >
-            <path d={CHEVRON} />
-          </svg>
-          <span className="sr-only"> — {t(UI.official)}</span>
-        </span>
+      {description ? (
+        <p className="mt-1 line-clamp-2 text-[12px] leading-snug text-ecru/65 lg:mt-2 lg:line-clamp-3 lg:text-sm lg:leading-relaxed">
+          {t(description)}
+        </p>
       ) : null}
+
+      <span className="mt-auto hidden pt-3 font-data text-xs uppercase tracking-[0.2em] text-accent/80 lg:block">
+        {category}
+      </span>
     </>
   );
 
   return (
-    <li className="ts-row group/row relative rounded-2xl">
+    <div className={CARD}>
       {link ? (
-        <a
-          href={link}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-start gap-3 px-3 py-2.5 no-underline outline-none focus-visible:ring-2 focus-visible:ring-accent"
-        >
+        <a href={link} target="_blank" rel="noreferrer" className={CARD_BODY}>
           {body}
         </a>
       ) : (
-        <div className="flex items-start gap-3 px-3 py-2.5">{body}</div>
+        <div className={CARD_BODY}>{body}</div>
       )}
-    </li>
-  );
-}
-
-function TechChip({ label }: { label: string }) {
-  const { t } = useLanguage();
-  const description = techDescriptions[label];
-  const link = techLinks[label];
-  const hint = description ? t(description) : label;
-
-  const inner = (
-    <>
-      <span className="ts-icon flex h-5 w-5 shrink-0 items-center justify-center text-zinc-500 dark:text-zinc-400">
-        {techIcon(label, "h-3.5 w-3.5") ?? (
-          <span className="h-1.5 w-1.5 rounded-full bg-current" aria-hidden />
-        )}
-      </span>
-      <span className="ts-label text-[12px] font-medium leading-none text-zinc-700 transition-colors duration-300 dark:text-zinc-200">
-        {label}
-      </span>
-    </>
-  );
-
-  const chip =
-    "ts-chip flex items-center gap-1.5 rounded-full border border-black/10 bg-black/[0.03] py-1.5 pe-3 ps-1.5 no-underline outline-none dark:border-white/10 dark:bg-white/[0.04] focus-visible:ring-2 focus-visible:ring-accent max-md:min-h-11";
-
-  return (
-    <li className="relative">
-      {link ? (
-        <a
-          href={link}
-          target="_blank"
-          rel="noreferrer"
-          title={hint}
-          aria-label={`${label} — ${hint}`}
-          className={chip}
-        >
-          {inner}
-        </a>
-      ) : (
-        <span title={hint} className={chip}>
-          {inner}
-        </span>
-      )}
-    </li>
+    </div>
   );
 }
 
 export default function TechStack() {
   const { t } = useLanguage();
   const { techStack } = useSiteContent();
-  const [solo, setSolo] = useState<number | null>(null);
-  const sectionRef = useRef<HTMLElement | null>(null);
+
+  const trackRef = useRef<HTMLDivElement | null>(null);
+  const stageRef = useRef<HTMLDivElement | null>(null);
+  const headRef = useRef<HTMLDivElement | null>(null);
+  const railRef = useRef<HTMLUListElement | null>(null);
+  const titleRef = useRef<HTMLHeadingElement | null>(null);
+  const lastRailFocus = useRef<Element | null>(null);
 
   const categories = useMemo(
     () => techStack.categories as readonly TechCategory[],
     [techStack.categories],
   );
 
-  const total = useMemo(
-    () => categories.reduce((sum, cat) => sum + cat.items.length, 0),
-    [categories],
+  const offsets = useMemo(() => {
+    let next = 0;
+    return categories.map((cat) => {
+      const start = next;
+      next += cat.items.length;
+      return start;
+    });
+  }, [categories]);
+
+  /* Satu daftar datar berurutan kategori, lalu dipecah 8 kartu per halaman. */
+  const flatItems = useMemo(
+    () =>
+      categories.flatMap((cat, ci) =>
+        cat.items.map((label, ii) => ({
+          label,
+          category: t(cat.title),
+          index: (offsets[ci] ?? 0) + ii + 1,
+        })),
+      ),
+    [categories, offsets, t],
   );
 
+  const pages = useMemo(() => {
+    const out: (typeof flatItems)[] = [];
+    for (let i = 0; i < flatItems.length; i += PAGE_SIZE) {
+      out.push(flatItems.slice(i, i + PAGE_SIZE));
+    }
+    return out;
+  }, [flatItems]);
+
+  const lastPage = pages.length - 1;
+
+  const heading = t(techStack.heading);
+  const words = useMemo(() => heading.split(/\s+/).filter(Boolean), [heading]);
+
+  // x0/y0 = geseran dari anchor ke tengah stage; pageW = lebar satu halaman rail.
+  const [metrics, setMetrics] = useState({ x0: 0, y0: 0, pageW: 0 });
+  const [ready, setReady] = useState(false);
+  const [railActive, setRailActive] = useState(false);
+
+  const { scrollYProgress } = useScroll({
+    target: trackRef,
+    offset: ["start start", "end end"],
+  });
+  const sp = useSpring(scrollYProgress, SPRING);
+
   useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => el.classList.toggle("ts-halt", !entry?.isIntersecting),
-      { rootMargin: "120px 0px" },
+    const stage = stageRef.current;
+    const head = headRef.current;
+    if (!stage || !head) return;
+
+    let alive = true;
+    const measure = () => {
+      if (!alive) return;
+      const stageW = stage.clientWidth;
+      const stageH = stage.clientHeight;
+      setMetrics((prev) => {
+        const next = {
+          x0: Math.round((stageW - head.offsetWidth) / 2 - head.offsetLeft),
+          y0: Math.round((stageH - head.offsetHeight) / 2 - head.offsetTop),
+          pageW: Math.round(stageW),
+        };
+        if (
+          prev.x0 === next.x0 &&
+          prev.y0 === next.y0 &&
+          prev.pageW === next.pageW
+        ) {
+          return prev;
+        }
+        return next;
+      });
+      setReady(true);
+    };
+
+    measure();
+    // Font lokal (Tanker/Cabinet) mengubah lebar judul setelah swap.
+    document.fonts?.ready.then(measure).catch(() => {});
+
+    const observer = new ResizeObserver(measure);
+    observer.observe(stage);
+    observer.observe(head);
+
+    return () => {
+      alive = false;
+      observer.disconnect();
+    };
+  }, [categories, t]);
+
+  /* Rail menjadi inert saat fase scroll bergeser. Fokus dipindah ke judul
+     SEBELUM inert dipasang supaya pengguna keyboard tidak terlempar ke
+     document.body; kalau fokus sudah pindah sendiri, jangan diambil alih. */
+  const moveFocusOutOfRail = () => {
+    const last = lastRailFocus.current;
+    lastRailFocus.current = null;
+    if (!last || !railRef.current?.contains(last)) return;
+    const active = document.activeElement;
+    if (active && active !== document.body && !railRef.current?.contains(active)) {
+      return;
+    }
+    titleRef.current?.focus({ preventScroll: true });
+  };
+
+  const railActiveRef = useRef(false);
+  useMotionValueEvent(sp, "change", (value) => {
+    const active = value >= RAIL_IN[0] && value <= RAIL_OUT[1];
+    if (active === railActiveRef.current) return;
+    if (!active) moveFocusOutOfRail();
+    railActiveRef.current = active;
+    setRailActive(active);
+  });
+
+  const keyY = useTransform(
+    sp,
+    [0, KEY_IN, 0.085, KEY_END, 1],
+    ["102%", "102%", "-8%", "0%", "0%"],
+    { ease: cubicBezier(...EASE_EXPO) },
+  );
+  const railX = useTransform(
+    sp,
+    [
+      0,
+      PAGE_MOVE[0][0],
+      PAGE_MOVE[0][1],
+      PAGE_MOVE[1][0],
+      PAGE_MOVE[1][1],
+      1,
+    ],
+    [0, 0, -metrics.pageW, -metrics.pageW, -2 * metrics.pageW, -2 * metrics.pageW],
+  );
+  const railY = useTransform(
+    sp,
+    [0, RAIL_IN[0], RAIL_IN[1], RAIL_OUT[0], RAIL_OUT[1], 1],
+    ["6%", "6%", "0%", "0%", "4%", "4%"],
+  );
+  const railOpacity = useTransform(
+    sp,
+    [0, RAIL_IN[0], RAIL_IN[1], RAIL_OUT[0], RAIL_OUT[1], 1],
+    [0, 0, 1, 1, 0, 0],
+  );
+  const titleScale = useTransform(
+    sp,
+    [0, TITLE_OUT[0], TITLE_OUT[1], RAIL_OUT[0], TITLE_RESTORE[1], 1],
+    [1, 1, 0.34, 0.34, 1, 1],
+  );
+  const titleX = useTransform(
+    sp,
+    [0, TITLE_OUT[0], TITLE_OUT[1], RAIL_OUT[0], TITLE_RESTORE[1], 1],
+    [metrics.x0, metrics.x0, 0, 0, metrics.x0, metrics.x0],
+  );
+  const titleY = useTransform(
+    sp,
+    [0, TITLE_OUT[0], TITLE_OUT[1], RAIL_OUT[0], TITLE_RESTORE[1], 1],
+    [metrics.y0, metrics.y0, 0, 0, metrics.y0, metrics.y0],
+  );
+  const titleOpacity = useTransform(
+    sp,
+    [0, TITLE_OUT[0], TITLE_OUT[1], RAIL_OUT[0], 0.95, 1],
+    [1, 1, 0, 0, 1, 1],
+  );
+  const kickerOpacity = useTransform(
+    sp,
+    [0, TITLE_OUT[0], TITLE_OUT[1], RAIL_OUT[0], TITLE_RESTORE[1], 1],
+    [1, 1, 0.55, 0.55, 1, 1],
+  );
+  /* Indikator halaman: hanya opacity, satu titik menyala per halaman. */
+  const dot1Opacity = useTransform(
+    sp,
+    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 1],
+    [1, 1, 1, 0.3, 0.3],
+  );
+  const dot2Opacity = useTransform(
+    sp,
+    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 0.705, 0.75, 1],
+    [0.3, 0.3, 1, 1, 0.3, 0.3, 0.3],
+  );
+  const dot3Opacity = useTransform(
+    sp,
+    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 0.705, 1],
+    [0.3, 0.3, 0.3, 0.3, 1, 1],
+  );
+
+  const lastWord = words[words.length - 1] ?? "";
+  const lastChar = lastWord.slice(-1);
+  const lastPrefix = lastWord.slice(0, -1);
+
+  /* Kartu di luar layar tidak boleh difokus tak terlihat: saat fokus keyboard
+     masuk, geser halaman ke progress di mana kartu itu ada di tengah stage.
+     Klik/tap tidak menggeser halaman — kalau bergeser sebelum mouseup, link
+     di bawah kursor berpindah dan aktivasi klik gagal. */
+  const onRailFocus = (event: FocusEvent<HTMLUListElement>) => {
+    const target = event.target as HTMLElement;
+    lastRailFocus.current = target;
+
+    const card = target.closest("li");
+    const track = trackRef.current;
+    const stage = stageRef.current;
+    if (!card || !track || !stage) return;
+    if (!target.closest("a")?.matches(":focus-visible")) return;
+
+    const cardRect = card.getBoundingClientRect();
+    const stageRect = stage.getBoundingClientRect();
+    if (cardRect.left >= stageRect.left && cardRect.right <= stageRect.right) {
+      return;
+    }
+
+    const pageW = metrics.pageW || stage.clientWidth;
+    const pageIndex = Math.min(
+      Math.max(0, pages.length - 1),
+      Math.max(0, Math.floor(card.offsetLeft / Math.max(1, pageW))),
     );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+    const ratio = pageIndex / Math.max(1, pages.length - 1);
+    const pageProgress =
+      PAGE_MOVE[0][0] + ratio * (PAGE_MOVE[1][1] - PAGE_MOVE[0][0]);
+    // Pin useScroll berakhir di (track − tinggi viewport), bukan (track −
+    // stage): di mobile 100svh bisa lebih pendek dari innerHeight.
+    const viewportH =
+      window.innerHeight || document.documentElement.clientHeight;
+    const top =
+      track.getBoundingClientRect().top +
+      window.scrollY +
+      pageProgress * (track.offsetHeight - viewportH);
+
+    const lenis = getLenis();
+    if (lenis) lenis.scrollTo(top, { immediate: true });
+    else window.scrollTo({ top, behavior: "auto" });
+  };
 
   return (
-    <section ref={sectionRef} className="relative px-6 py-24 max-md:py-16 md:px-10 md:py-32">
+    <section className="relative px-6 py-24 max-md:py-16 md:px-10 md:py-32 bg-ink text-ecru">
       <style>{`
 .ts-bg {
   background-image: none;
 }
-.ts-dim {
-  opacity: 0.22;
-  filter: saturate(0.3);
-  transform: scale(0.985);
+/* Judul absolut: anchor kecil di kiri-atas; x0/y0 hasil ukur membawanya ke tengah. */
+.ts-head {
+  left: 24px;
+  top: clamp(3.5rem, 9vh, 5rem);
+}
+@media (min-width: 768px) {
+  .ts-head {
+    left: clamp(1.5rem, 6vw, 6rem);
+    top: clamp(4.5rem, 11vh, 9rem);
+  }
+}
+/* Mask huruf K: garis dasar selalu tampak, lapisan aksen naik dari bawah. */
+.ts-k {
+  position: relative;
+  display: inline-block;
+  overflow: hidden;
+  padding-block: 0.06em;
+  margin-block: -0.06em;
+  vertical-align: bottom;
+}
+.ts-k-base {
+  display: block;
+}
+.ts-k-accent {
+  position: absolute;
+  inset: 0;
+  display: block;
+  color: var(--color-accent);
 }
 .ts-card {
   transition:
-    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.5s cubic-bezier(0.16, 1, 0.3, 1),
     border-color 0.4s ease,
     box-shadow 0.4s ease;
+}
+.ts-card:hover,
+.ts-card:focus-within {
+  transform: translateY(-4px);
+  border-color: var(--color-accent);
 }
 /* Cincin hover: border-radius: inherit membuat garisnya mengikuti
    lengkung kartu (rounded-3xl), bukan garis lurus seperti corner bracket. */
@@ -189,39 +412,9 @@ export default function TechStack() {
   transition: opacity 0.4s ease;
   z-index: 2;
 }
-.ts-card::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: 0 0 0 1px var(--color-accent);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.4s ease;
-  z-index: 1;
-}
 .ts-card:hover::before,
-.ts-card:hover::after,
-.ts-card:focus-within::before,
-.ts-card:focus-within::after {
+.ts-card:focus-within::before {
   opacity: 1;
-}
-.ts-row::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 2px;
-  bottom: 2px;
-  width: 2px;
-  border-radius: 999px;
-  background: var(--color-accent);
-  transform: scaleY(0);
-  transform-origin: center;
-  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
-}
-.ts-row:hover::before,
-.ts-row:focus-within::before {
-  transform: scaleY(1);
 }
 .ts-icon {
   transition:
@@ -229,156 +422,227 @@ export default function TechStack() {
     color 0.3s ease,
     transform 0.3s ease;
 }
-.ts-row:hover .ts-icon,
-.ts-row:focus-within .ts-icon {
+.ts-card:hover .ts-icon,
+.ts-card:focus-within .ts-icon {
   background-color: var(--color-accent);
   color: var(--color-a-on-accent);
   transform: translateY(-1px);
 }
-.ts-chip {
-  transition:
-    border-color 0.3s ease,
-    background-color 0.3s ease,
-    transform 0.3s ease;
-}
-.ts-chip:hover,
-.ts-chip:focus-visible {
-  border-color: var(--color-accent);
-  transform: translateY(-1px);
-}
-.ts-chip:hover .ts-icon,
-.ts-chip:focus-visible .ts-icon,
-.ts-chip:hover .ts-label,
-.ts-chip:focus-visible .ts-label {
-  color: var(--color-accent);
-}
-.ts-pulse {
-  animation: ts-pulse 2.4s ease-in-out infinite;
-}
-@keyframes ts-pulse {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.3; transform: scale(0.82); }
-}
-.ts-halt .ts-pulse { animation-play-state: paused; }
+/* Fallback: pin dilepas total, semua kartu + deskripsi tampil statis. */
 @media (prefers-reduced-motion: reduce) {
-  .ts-pulse { animation: none; }
+  .ts-track {
+    height: auto;
+  }
+  .ts-dyn {
+    display: none;
+  }
+  .ts-static {
+    display: block;
+  }
+}
+:where(html:not(.js)) .ts-track {
+  height: auto;
+}
+:where(html:not(.js)) .ts-dyn {
+  display: none;
+}
+:where(html:not(.js)) .ts-static {
+  display: block;
 }
 `}</style>
 
       <div aria-hidden className="ts-bg pointer-events-none absolute inset-0" />
 
-
-      <div className="relative mx-auto max-w-7xl">
-        <SectionHeading
-          kicker={techStack.kicker}
-          heading={techStack.heading}
-          index="05"
-        />
-
-        <div className="mb-8 flex flex-col gap-4 border-y border-black/10 py-4 max-md:mb-6 max-md:gap-3 max-md:py-3 sm:flex-row sm:items-center sm:justify-between dark:border-white/10 md:mb-10">
-          <p className="flex items-center gap-3 font-data text-xs uppercase tracking-[0.24em] text-zinc-500 max-md:flex-wrap dark:text-zinc-400">
-            <span className="flex items-center gap-3">
-              <span className="ts-pulse h-1.5 w-1.5 rounded-full bg-accent" aria-hidden />
-              <span className="text-zinc-800 dark:text-zinc-100">{total}</span>
-              <span>{t(UI.technologies)}</span>
-            </span>
-            <span className="flex items-center gap-3">
-              <span aria-hidden className="text-zinc-300 dark:text-zinc-700">
-                /
-              </span>
-              <span className="text-zinc-800 dark:text-zinc-100">{categories.length}</span>
-              <span>{t(UI.disciplines)}</span>
-            </span>
-          </p>
-
-          <div
-            role="group"
-            aria-label={t(UI.filter)}
-            className="no-scrollbar -mx-6 flex items-center gap-1.5 overflow-x-auto px-6 pb-0.5 sm:mx-0 sm:flex-wrap sm:overflow-visible sm:px-0 sm:pb-0"
+      <div
+        ref={trackRef}
+        className="ts-track relative -mx-6 -my-16 h-[460vh] max-md:-my-16 md:-mx-10 md:-my-32 max-md:h-[340vh]"
+      >
+        <div
+          ref={stageRef}
+          style={{ visibility: ready ? "visible" : "hidden" }}
+          className="ts-stage ts-dyn sticky top-0 z-10 h-[100svh] overflow-hidden bg-ink"
+        >
+          <motion.div
+            ref={headRef}
+            style={{ x: titleX, y: titleY }}
+            className="ts-head pointer-events-none absolute z-10 w-fit"
           >
-            <button
-              type="button"
-              aria-pressed={solo === null}
-              onClick={() => setSolo(null)}
-              className={`rounded-full border px-3.5 py-1.5 font-data text-xs uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:min-h-11 focus-visible:ring-2 focus-visible:ring-accent ${
-                solo === null
-                  ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
-                  : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
-              }`}
+            <motion.p
+              style={{ opacity: kickerOpacity }}
+              className="flex items-center justify-center gap-3 font-data text-xs uppercase tracking-[0.28em] text-ecru/60"
             >
-              {t(UI.all)}
-            </button>
+              <span className="text-accent">{CHAPTER}</span>
+              <span aria-hidden className="h-px w-6 bg-ecru/30" />
+              <span>{t(techStack.kicker)}</span>
+            </motion.p>
 
-            {categories.map((cat, i) => (
-              <button
-                key={cat.title.en}
-                type="button"
-                aria-pressed={solo === i}
-                onClick={() => setSolo(solo === i ? null : i)}
-                className={`rounded-full border px-3.5 py-1.5 font-data text-xs uppercase tracking-[0.18em] transition-colors duration-300 outline-none max-md:min-h-11 focus-visible:ring-2 focus-visible:ring-accent ${
-                  solo === i
-                    ? "border-accent bg-accent text-[var(--color-a-on-accent)]"
-                    : "border-black/10 text-zinc-500 hover:border-accent/50 hover:text-accent dark:border-white/10 dark:text-zinc-400"
-                }`}
-              >
-                <span className="sr-only">{t(cat.title)}</span>
-                <span aria-hidden>0{i + 1}</span>
-              </button>
-            ))}
-          </div>
+            <motion.h2
+              ref={titleRef}
+              tabIndex={-1}
+              aria-label={heading}
+              aria-hidden={railActive || undefined}
+              style={{
+                scale: titleScale,
+                opacity: titleOpacity,
+                transformOrigin: "left top",
+              }}
+              className="mt-4 text-center font-hero uppercase leading-[0.86] tracking-[-0.01em] text-ecru text-[clamp(3rem,17vw,4.75rem)] md:text-[clamp(4rem,11vw,12rem)] focus-visible:outline-2 focus-visible:outline-offset-8 focus-visible:outline-accent"
+            >
+              {words.map((word, wi) => (
+                <span key={`${word}-${wi}`} aria-hidden className="block">
+                  {wi === words.length - 1 && lastChar ? (
+                    <>
+                      {lastPrefix}
+                      <span className="ts-k">
+                        <span className="ts-k-base">{lastChar}</span>
+                        <motion.span style={{ y: keyY }} className="ts-k-accent">
+                          {lastChar}
+                        </motion.span>
+                      </span>
+                    </>
+                  ) : (
+                    word
+                  )}
+                </span>
+              ))}
+            </motion.h2>
+          </motion.div>
+
+          <motion.div
+            aria-hidden={!railActive}
+            inert={!railActive}
+            style={{ x: railX, y: railY, opacity: railOpacity }}
+            className="ts-rail-wrap absolute inset-x-0 top-[23vh] z-20 max-md:top-[17vh]"
+          >
+            <ul
+              ref={railRef}
+              role="list"
+              onFocusCapture={onRailFocus}
+              className="ts-rail flex w-full items-stretch"
+            >
+              {pages.map((page, pi) => (
+                <li
+                  key={page[0]?.label ?? pi}
+                  className="ts-page flex w-full shrink-0 flex-col justify-center px-5 lg:px-12"
+                >
+                  <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
+                    {page.map((item) => (
+                      <div
+                        key={item.label}
+                        className={
+                          pi === lastPage && page.length === 1
+                            ? "lg:col-start-2"
+                            : undefined
+                        }
+                      >
+                        <TechCard
+                          label={item.label}
+                          index={item.index}
+                          category={item.category}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </motion.div>
+
+          <motion.div
+            aria-hidden={!railActive}
+            style={{ opacity: railOpacity }}
+            className="ts-foot pointer-events-none absolute inset-x-0 bottom-[5vh] z-30 px-6 pb-0.5 md:px-10"
+          >
+            <div className="mx-auto max-w-7xl">
+              <div className="flex items-center gap-4 font-data text-xs uppercase tracking-[0.24em] text-ecru/50 max-md:flex-wrap max-md:gap-2">
+                <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
+                <span className="text-ecru">{CHAPTER}</span>
+                <span aria-hidden className="text-ecru/25">
+                  /
+                </span>
+                <span>{heading}</span>
+              </div>
+              <div aria-hidden className="mt-4 flex gap-2">
+                <motion.span
+                  style={{ opacity: dot1Opacity }}
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                />
+                <motion.span
+                  style={{ opacity: dot2Opacity }}
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                />
+                <motion.span
+                  style={{ opacity: dot3Opacity }}
+                  className="h-1.5 w-1.5 rounded-full bg-accent"
+                />
+              </div>
+              <div aria-hidden className="mt-4 h-px w-full bg-ecru/15">
+                <motion.div
+                  style={{ scaleX: sp }}
+                  className="h-full origin-left bg-accent"
+                />
+              </div>
+            </div>
+          </motion.div>
         </div>
 
-        <div className="grid gap-4 max-md:gap-3 sm:grid-cols-2 lg:grid-cols-12">
-          {categories.map((cat, i) => (
-            <Reveal
-              key={cat.title.en}
-              delay={i * 90}
-              className={i % 2 === 0 ? "lg:col-span-7" : "lg:col-span-5"}
-            >
-              <Tilt3D
-                className="h-full"
-                max={7}
-                scale={1.02}
-                lift={22}
-                glare
-                glareClassName="rounded-3xl"
-              >
+        {/* Fallback statis: satu-satunya isi yang terbaca saat reduced-motion / tanpa JS. */}
+        <div className="ts-static hidden px-6 py-24 max-md:py-16 md:px-10 md:py-32">
+          <div className="mx-auto max-w-7xl">
+            <p className="font-data text-xs uppercase tracking-[0.28em] text-ecru/60">
+              <span className="text-accent">{CHAPTER}</span>
+              <span aria-hidden className="mx-3 inline-block h-px w-6 align-middle bg-ecru/30" />
+              {t(techStack.kicker)}
+            </p>
+            <h2 className="mt-3 font-hero uppercase leading-[0.9] text-ecru text-[clamp(3rem,17vw,4.75rem)] md:text-[clamp(4rem,11vw,12rem)]">
+              {heading}
+            </h2>
+
+            <div className="mt-10 grid gap-6 md:grid-cols-2">
+              {categories.map((cat, ci) => (
                 <section
-                  aria-labelledby={`ts-cat-${i}`}
-                  className={`ts-card relative h-full rounded-3xl border border-black/10 bg-panel p-5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] max-md:rounded-2xl max-md:p-4 md:p-6 dark:border-white/10 dark:shadow-[0_28px_70px_-46px_rgba(0,0,0,0.9)] ${
-                    solo !== null && solo !== i ? "ts-dim" : ""
-                  }`}
+                  key={cat.title.en}
+                  aria-labelledby={`ts-static-cat-${ci}`}
+                  className="rounded-3xl border border-black/10 bg-panel p-6 max-md:p-4 dark:border-white/10"
                 >
-                  <header className="flex items-baseline gap-3 border-b border-black/10 pb-4 max-md:pb-3 dark:border-white/10">
-                    <span className="font-display text-sm text-accent">
-                      0{i + 1}
-                    </span>
-                    <h3
-                      id={`ts-cat-${i}`}
-                      className="text-sm font-semibold uppercase tracking-[0.16em] text-zinc-800 dark:text-zinc-100"
-                    >
-                      {t(cat.title)}
-                    </h3>
-                    <span className="ms-auto font-data text-xs text-zinc-400 dark:text-zinc-500">
-                      {String(cat.items.length).padStart(2, "0")}
-                    </span>
-                  </header>
-
-                  <ul className="hidden max-md:mt-2.5 max-md:flex max-md:flex-wrap max-md:gap-1.5">
-                    {cat.items.map((label) => (
-                      <TechChip key={label} label={label} />
-                    ))}
-                  </ul>
-
-                  <ul className="mt-3 hidden flex-col gap-0.5 md:flex">
-                    {cat.items.map((label) => (
-                      <TechRow key={label} label={label} />
-                    ))}
+                  <h3
+                    id={`ts-static-cat-${ci}`}
+                    className="font-data text-xs uppercase tracking-[0.2em] text-accent"
+                  >
+                    {CHAPTER}.{ci + 1} — {t(cat.title)}
+                  </h3>
+                  <ul className="mt-4 flex flex-col gap-4">
+                    {cat.items.map((label) => {
+                      const description = techDescriptions[label];
+                      const link = techLinks[label];
+                      return (
+                        <li key={label}>
+                          <span className="font-display text-base uppercase text-ecru">
+                            {label}
+                          </span>
+                          {description ? (
+                            <p className="mt-1 text-sm leading-relaxed text-ecru/65">
+                              {t(description)}
+                            </p>
+                          ) : null}
+                          {link ? (
+                            <a
+                              href={link}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="mt-1 inline-flex items-center font-data text-xs uppercase tracking-[0.2em] text-accent/80 underline-offset-4 outline-none hover:underline focus-visible:ring-2 focus-visible:ring-accent max-md:min-h-11"
+                            >
+                              {t(UI.official)}
+                            </a>
+                          ) : null}
+                        </li>
+                      );
+                    })}
                   </ul>
                 </section>
-              </Tilt3D>
-            </Reveal>
-          ))}
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </section>

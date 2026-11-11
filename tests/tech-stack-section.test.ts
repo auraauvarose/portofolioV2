@@ -4,6 +4,12 @@ import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
 
+import {
+  techStack,
+  techDescriptions,
+  techLinks,
+} from "../src/lib/config.ts";
+
 const here = dirname(fileURLToPath(import.meta.url));
 const src = (p: string) => readFileSync(resolve(here, "..", p), "utf8");
 
@@ -15,14 +21,11 @@ const stripComments = (code: string) =>
 
 const CODE = stripComments(TECH);
 
-/* Konstelasi latar dipindah ke komponen bersama, jadi assertion tentang
-   SVG/node/edge harus dibaca dari sana, bukan dari TechStack. */
 const SC_CODE = stripComments(src("src/components/SiteConstellation.tsx"));
 
 /* Isolasi blok CSS lokal komponen: dari .ts-bg sampai penutup terakhir. */
 function cssBlock(selector: string): string | null {
   const esc = selector.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
-  // Aturan CSS di template literal selalu dimulai di awal baris.
   const re = new RegExp(`(?:^|[}\\n])\\s*${esc}\\s*(?:,[^{]*)?\\{([^}]*)\\}`, "g");
   const out: string[] = [];
   let m: RegExpExecArray | null;
@@ -30,271 +33,457 @@ function cssBlock(selector: string): string | null {
   return out.length ? out.join("\n") : null;
 }
 
-describe("G. background bebas orange", () => {
-  test("gradient background tidak memuat warna accent", () => {
-    const bg = cssBlock(".ts-bg");
-    assert.ok(bg, "blok .ts-bg tidak ditemukan");
-    assert.doesNotMatch(
-      bg,
-      /235\s*,\s*89\s*,\s*57/i,
-      `.ts-bg masih memakai rgb(235,89,57) = warna accent: ${bg}`,
-    );
+const items = techStack.categories.flatMap((cat) => cat.items);
+
+describe("A. stage scroll-pinned", () => {
+  test("track 460vh desktop, 340vh mobile (pin ±3240px)", () => {
+    assert.match(CODE, /h-\[460vh\]/, "track desktop 460vh agar scroll lebih lambat");
+    assert.match(CODE, /max-md:h-\[340vh\]/, "track mobile tetap proporsional");
+    const desktop = Number(CODE.match(/h-\[(\d+)vh\]/)?.[1] ?? 0);
+    const mobile = Number(CODE.match(/max-md:h-\[(\d+)vh\]/)?.[1] ?? 0);
+    assert.strictEqual(desktop, 460, "track desktop harus 460vh");
+    assert.strictEqual(mobile, 340, "track mobile harus 340vh");
   });
 
-  test("node konstelasi tidak memakai text-accent", () => {
-    assert.doesNotMatch(
-      SC_CODE,
-      /text-accent/,
-      "node konstelasi masih orange",
+  test("jendela 2 perpindahan halaman ≥62% p, spring diperlunak", () => {
+    const moves = CODE.match(
+      /const PAGE_MOVE = \[\s*\[([\d.]+), ([\d.]+)\],\s*\[([\d.]+), ([\d.]+)\],\s*\]/,
     );
+    assert.ok(moves, "PAGE_MOVE harus literal angka");
+    const [, a, b, c, d] = moves;
+    const window = Number(d) - Number(a);
+    assert.ok(window >= 0.62, `jendela rail hanya ${window.toFixed(2)} dari p`);
+    assert.ok(Number(c) > Number(b), "harus ada jeda singkat antar perpindahan");
+    const spring = CODE.match(/stiffness: (\d+),\s*damping: (\d+)/);
+    assert.ok(spring, "SPRING harus literal angka");
+    assert.ok(Number(spring[1]) < 150, `stiffness harus turun dari 150: ${spring[1]}`);
+    assert.ok(Number(spring[2]) > 30, `damping harus naik dari 30: ${spring[2]}`);
+  });
+
+  test("stage sticky 100svh di dalam track", () => {
+    const stage = CODE.match(/className="[^"]*\bsticky\b[^"]*"/)?.[0] ?? "";
+    assert.ok(stage, "tidak ada stage sticky");
+    assert.match(stage, /\btop-0\b/);
+    assert.match(stage, /h-\[100svh\]/, "stage harus setinggi viewport dinamis");
+    assert.match(stage, /overflow-hidden/, "isi rail tidak boleh meluber ke section lain");
+  });
+
+  test("track & section tidak mematikan sticky lewat overflow/transform", () => {
+    const section = CODE.match(/<section className="[^"]*"/)?.[0] ?? "";
+    const track = CODE.match(/className="ts-track[^"]*"/)?.[0] ?? "";
+    for (const [name, tag] of [
+      ["section", section],
+      ["track", track],
+    ] as const) {
+      assert.doesNotMatch(
+        tag,
+        /overflow-hidden|overflow-clip|\btransform\b|contain-|will-change/,
+        `${name} memakai properti yang mematikan position: sticky: ${tag}`,
+      );
+    }
   });
 });
 
-describe("H. garis hover mengikuti lengkung kartu", () => {
-  test("pseudo-element kartu memakai border-radius: inherit", () => {
-    const before = cssBlock(".ts-card::before");
-    assert.ok(before, "pseudo .ts-card::before tidak ditemukan");
+describe("B. layar judul", () => {
+  test("kicker: nomor bab sekali + label dari config, kecil & uppercase", () => {
+    assert.match(CODE, /const CHAPTER = "05"/, "nomor bab harus satu sumber");
+    assert.equal(
+      TECH.match(/"05"/g)?.length,
+      1,
+      "angka 05 tidak boleh diduplikasi sebagai literal lain",
+    );
+    assert.match(CODE, /t\(techStack\.kicker\)/, "label kicker dari config");
+    const kicker = CODE.match(/className="[^"]*tracking-\[0\.28em\][^"]*"/)?.[0] ?? "";
+    assert.match(kicker, /uppercase/);
+    assert.match(kicker, /text-xs/, "kicker maksimal 0.875rem");
+  });
+
+  test("judul 'Tech Stack' besar & terpusat, dua baris", () => {
     assert.match(
-      before,
-      /border-radius:\s*inherit/,
-      "garis hover harus mewarisi radius kartu, kalau tidak jadi garis lurus",
-    );
-  });
-
-  test("pseudo ::after (ring glow) juga mewarisi radius", () => {
-    const after = cssBlock(".ts-card::after");
-    assert.ok(after, "pseudo .ts-card::after tidak ditemukan");
-    assert.match(after, /border-radius:\s*inherit/);
-  });
-
-  test("corner bracket bersiku sudah dihapus total", () => {
-    assert.doesNotMatch(
       CODE,
-      /border-top-left-radius:\s*6px/,
-      "corner bracket bersiku masih ada — inilah garis lurus yang tidak ikut melengkung",
+      /text-\[clamp\(3rem,17vw,4\.75rem\)\] md:text-\[clamp\(4rem,11vw,12rem\)\]/,
+      "ukuran judul harus clamp 4rem..12rem di desktop",
     );
+    assert.match(CODE, /words\.map/, "judul dipecah per kata untuk dua baris");
+    assert.match(CODE, /className="block"/, "tiap baris judul adalah block (2 baris)");
+  });
+
+  test("heading asli tetap a11y: aria-label utuh + kata aria-hidden", () => {
+    assert.match(CODE, /<motion\.h2[\s\S]{0,120}aria-label=\{heading\}/);
+    assert.match(
+      CODE,
+      /<span key=\{`\$\{word\}-\$\{wi\}`\} aria-hidden className="block">/,
+      "kata pembentuk judul harus aria-hidden agar nama aksesibel tetap utuh",
+    );
+  });
+
+  test("posisi tengah diukur runtime, bukan hard-code", () => {
+    assert.match(
+      CODE,
+      /\(stageW - head\.offsetWidth\) \/ 2 - head\.offsetLeft/,
+      "x0 harus hasil ukur stage vs head",
+    );
+    assert.match(
+      CODE,
+      /\(stageH - head\.offsetHeight\) \/ 2 - head\.offsetTop/,
+      "y0 harus hasil ukur stage vs head",
+    );
+    assert.match(CODE, /document\.fonts\?\.ready\.then\(measure\)/, "ukur ulang setelah font swap");
+    assert.match(CODE, /new ResizeObserver\(measure\)/, "ukur ulang saat ukuran berubah");
   });
 });
 
-describe("I. efek 3D memakai Tilt3D yang sudah ada di repo", () => {
-  test("mengimpor komponen Tilt3D, bukan implementasi 3D baru", () => {
+describe("C. animasi masuk satu huruf digerakkan scroll", () => {
+  test("hanya satu huruf (huruf terakhir) dibungkus .ts-k", () => {
+    assert.equal(
+      (CODE.match(/className="ts-k"/g) ?? []).length,
+      1,
+      "hanya satu huruf judul yang punya mask sendiri",
+    );
+    assert.match(CODE, /const lastChar = lastWord\.slice\(-1\)/, "huruf yang dianimasikan = huruf terakhir");
+    assert.match(CODE, /className="ts-k-base"/);
+    assert.match(CODE, /className="ts-k-accent"/);
+  });
+
+  test("nilai huruf dari scrollYProgress/spring, bukan hover", () => {
+    assert.match(CODE, /useScroll\(\{/, "progress harus dari useScroll");
+    assert.match(CODE, /offset: \["start start", "end end"\]/, "pin penuh sepanjang track");
+    assert.match(CODE, /useSpring\(scrollYProgress, SPRING\)/);
     assert.match(
       CODE,
-      /import Tilt3D from "@\/components\/Tilt3D"/,
-      "efek 3D harus pakai Tilt3D yang sudah dipakai section lain",
+      /const keyY = useTransform\(\s*sp,\s*\[0, KEY_IN, 0\.085, KEY_END, 1\],\s*\["102%", "102%", "-8%", "0%", "0%"\]/,
+      "huruf naik 102% -> -8% -> 0% mengikuti progress",
     );
-  });
-
-  test("Tilt3D tidak dobel mengimplementasi tilt sendiri", () => {
-    assert.doesNotMatch(
-      CODE,
-      /requestAnimationFrame/,
-      "Tilt3D sudah menangani RAF; jangan tulis ulang di sini",
-    );
-  });
-
-  test("kartu dibungkus Tilt3D dengan lift + glare", () => {
-    const tilt = CODE.match(/<Tilt3D[\s\S]*?>/g) ?? [];
-    assert.ok(tilt.length > 0, "tidak ada <Tilt3D> di TechStack");
-    const props = tilt.join("\n");
-    assert.match(props, /lift=\{?\d+/, "3D perlu lift (translateZ) agar terasa-depth");
-    assert.match(props, /glare/, "glare memberi kesan kedalaman saat hover");
+    assert.match(CODE, /style=\{\{ y: keyY \}\}/, "nilai itu dipakai sebagai transform huruf");
+    assert.doesNotMatch(CODE, /whileHover/, "animasi huruf tidak boleh hover-driven");
   });
 });
 
-describe("J. bar aksen kiri baris skill ikut melengkung", () => {
-  test("bar aksen memakai radius kapsul, bukan sudut tajam", () => {
-    const bar = cssBlock(".ts-row::before");
-    assert.ok(bar, "pseudo .ts-row::before tidak ditemukan");
+describe("D. rail skill horizontal: 3 halaman grid", () => {
+  test("translateX rail = (jumlah halaman − 1) × lebar stage, bukan shift 5400px", () => {
     assert.match(
-      bar,
-      /border-radius:\s*999px/,
-      `bar aksen harus melengkung penuh (999px), bukan radius kecil: ${bar}`,
-    );
-  });
-
-  test("radius lama yang menyisakan ujung lurus sudah dihapus", () => {
-    assert.doesNotMatch(
       CODE,
-      /border-radius:\s*2px/,
-      "radius 2px pada bar 2px-wide membuat ujungnya hampir lurus",
+      /const railX = useTransform\(\s*sp,\s*\[[\s\S]*?PAGE_MOVE\[0\]\[0\][\s\S]*?PAGE_MOVE\[1\]\[1\][\s\S]*?\],\s*\[0, 0, -metrics\.pageW, -metrics\.pageW, -2 \* metrics\.pageW, -2 \* metrics\.pageW\]/,
+      "rail bergeser 2× lebar stage (3 halaman)",
     );
-  });
-
-  test("bar tidak keluar dari lengkung baris (inset vertikal >= 2px)", () => {
-    const bar = cssBlock(".ts-row::before") ?? "";
-    const top = bar.match(/top:\s*(\d+)px/);
-    const bottom = bar.match(/bottom:\s*(\d+)px/);
-    assert.ok(top && bottom, "bar harus punya top & bottom eksplisit");
-    assert.ok(
-      Number(top[1]) >= 2 && Number(bottom[1]) >= 2,
-      `inset vertikal bar ${top[1]}px/${bottom[1]}px membuat ujung bar menonjol dari radius baris`,
-    );
-  });
-
-  test("bar tetap punya scaleY agar muncul saat hover", () => {
-    const hover = CODE.match(/\.ts-row:hover::before[\s\S]{0,120}/)?.[0] ?? "";
     assert.match(
-      hover,
-      /scaleY\(1\)/,
-      "bar harus tetap muncul lewat scaleY(1) saat hover",
+      CODE,
+      /pageW: Math\.round\(stageW\)/,
+      "lebar halaman = lebar stage, bukan scrollWidth rail",
+    );
+    assert.doesNotMatch(CODE, /metrics\.shift|scrollWidth/, "tidak ada lagi geseran 5400px");
+  });
+
+  test("konten dipecah 8 kartu per halaman → 3 halaman", () => {
+    assert.match(CODE, /const PAGE_SIZE = 8/, "8 kartu per halaman");
+    assert.match(CODE, /for \(let i = 0; i < flatItems\.length; i \+= PAGE_SIZE\)/);
+    assert.match(CODE, /flatItems\.slice\(i, i \+ PAGE_SIZE\)/);
+    assert.match(CODE, /pages\.map\(\(page, pi\)/, "setiap halaman dirender");
+    assert.match(
+      CODE,
+      /className="ts-page flex w-full shrink-0 flex-col justify-center px-5 lg:px-12"/,
+      "halaman adalah slide selebar stage",
+    );
+    assert.match(CODE, /grid grid-cols-2 gap-2\.5 lg:grid-cols-4 lg:gap-5/);
+    assert.match(CODE, /pi === lastPage && page\.length === 1/, "halaman terakhir berisi 1 kartu");
+    for (const banned of [
+      "teknologi",
+      "disiplin",
+      "Gulir untuk menjelajah",
+      "UI.technologies",
+      "UI.disciplines",
+      "lg:col-span-2 lg:col-start-3",
+    ]) {
+      assert.ok(!CODE.includes(banned), `meta bar harus hilang total: ${banned}`);
+    }
+  });
+
+  test("indikator 3 halaman (titik) digerakkan progress", () => {
+    for (const dot of ["dot1Opacity", "dot2Opacity", "dot3Opacity"]) {
+      assert.match(CODE, new RegExp(`const ${dot} = useTransform\\(`), `${dot} hilang`);
+      assert.match(
+        CODE,
+        new RegExp(`style=\\{\\{ opacity: ${dot} \\}\\}`),
+        `${dot} tidak dipakai di titik halaman`,
+      );
+    }
+    assert.match(CODE, /<div aria-hidden className="mt-4 flex gap-2">/);
+    assert.match(CODE, /h-1\.5 w-1\.5 rounded-full bg-accent/);
+  });
+
+  test("semua item dari techStack.categories dirender, tidak ada daftar hard-code", () => {
+    assert.match(CODE, /flatMap\(\(cat, ci\)/, "kategori diiterasi dari data");
+    assert.match(CODE, /cat\.items\.map\(\(label, ii\)/, "item diiterasi dari data");
+    assert.match(CODE, /useMemo\(\s*\(\) => techStack\.categories/);
+    for (const name of ["React", "TypeScript", "PostgreSQL", "Docker"]) {
+      assert.ok(!CODE.includes(`"${name}"`), `nama teknologi tidak boleh hard-code: ${name}`);
+    }
+  });
+
+  test("kartu besar: ikon + nama + deskripsi tampil tanpa hover", () => {
+    const card = CODE.match(/const CARD =\s*\n?\s*"([^"]*)"/)?.[1] ?? "";
+    assert.match(card, /h-\[clamp\(7rem,16svh,11rem\)\]/, "tinggi kartu mobile");
+    assert.match(card, /lg:h-\[clamp\(13rem,30svh,17rem\)\]/, "tinggi kartu desktop");
+    assert.match(card, /\bw-full\b/, "lebar kartu mengikuti grid");
+    assert.match(CODE, /techIcon\(label,/, "ikon per item");
+    assert.match(CODE, /\{label\}/, "nama item dirender");
+    assert.match(CODE, /t\(description\)/, "deskripsi dirender langsung, bukan hover-only");
+    assert.match(CODE, /lg:line-clamp-3/, "deskripsi dibatasi 3 baris di desktop");
+  });
+
+  test("link eksternal hanya untuk item yang punya entri techLinks", () => {
+    assert.match(CODE, /const link = techLinks\[label\]/);
+    const anchor = CODE.match(/<a href=\{link\}[\s\S]{0,120}/)?.[0] ?? "";
+    assert.match(anchor, /target="_blank"/);
+    assert.match(anchor, /rel="noreferrer"/);
+    assert.match(anchor, /className=\{CARD_BODY\}/, "gaya kartu dipakai bersama isi non-link");
+    assert.match(
+      CODE.match(/const CARD_BODY =[\s\S]*?;/)?.[0] ?? "",
+      /max-md:min-h-11/,
+      "tautan kartu tetap 44px di HP",
     );
   });
 
-  test("elemen .ts-row harus relative — kalau tidak, bar ngumpet ke kartu", () => {
-    const li = CODE.match(/<li className="[^"]*ts-row[^"]*"/)?.[0];
-    assert.ok(li, "elemen <li class=\"ts-row …\"> tidak ditemukan");
+  test("rail bisa difokus: kartu di luar layar digeser ke tengah saat fokus", () => {
+    assert.match(CODE, /onFocusCapture=\{onRailFocus\}/);
+    assert.match(CODE, /getLenis\(\)/, "pakai Lenis yang sudah ada");
+    assert.match(CODE, /scrollTo\(top, \{ immediate: true \}\)/);
     assert.match(
-      li,
-      /\brelative\b/,
-      `bar .ts-row::before itu position:absolute; tanpa "relative" di .ts-row ia diposisikan terhadap .ts-card dan muncul melintasi border kartu: ${li}`,
+      CODE,
+      /\.matches\(":focus-visible"\)/,
+      "klik/tap tidak boleh menggeser halaman sebelum link aktif",
     );
+    assert.match(
+      CODE,
+      /cardRect\.left >= stageRect\.left && cardRect\.right <= stageRect\.right/,
+      "kartu yang sudah utuh terlihat tidak perlu digeser",
+    );
+    assert.match(
+      CODE,
+      /window\.innerHeight \|\| document\.documentElement\.clientHeight/,
+      "rentang pin memakai tinggi viewport, bukan tinggi stage 100svh",
+    );
+    assert.doesNotMatch(CODE, /track\.offsetHeight - stage\.offsetHeight/);
   });
 });
 
-describe("A. B8 — section TechStack tidak boleh hilang di tablet landscape", () => {
-  test("tidak ada cabang JS yangmemutuskan render berdasarkan pointer coarse", () => {
-    assert.doesNotMatch(
+describe("E. rewind ke layar judul lalu lepas pin", () => {
+  test("rail keluar di akhir: opacity 1 -> 0", () => {
+    assert.match(
       CODE,
-      /pointer:\s*coarse/,
-      "TechStack masih bercabang di JS berdasarkan pointer:coarse — inilah akar bug B8",
+      /const railOpacity = useTransform\(\s*sp,\s*\[0, RAIL_IN\[0\], RAIL_IN\[1\], RAIL_OUT\[0\], RAIL_OUT\[1\], 1\],\s*\[0, 0, 1, 1, 0, 0\]/,
+      "rail harus memudar di fase rewind",
     );
   });
 
-  test("tidak ada md:hidden yang menyembunyikan section di lebar >=768px", () => {
-    assert.doesNotMatch(
+  test("judul pulih utuh: scale & posisi kembali ke nilai awal", () => {
+    assert.match(
       CODE,
-      /md:hidden/,
-      "TechStack masih memakai md:hidden — di tablet landscape section ikut hilang",
+      /const titleScale = useTransform\([\s\S]*?\[1, 1, 0\.34, 0\.34, 1, 1\]/,
+      "scale judul harus kembali ke 1 di ujung track",
+    );
+    for (const axis of ["titleX", "titleY"]) {
+      assert.match(
+        CODE,
+        new RegExp(
+          `const ${axis} = useTransform\\([\\s\\S]*?\\[metrics\\.(x0|y0), metrics\\.(x0|y0), 0, 0, metrics\\.(x0|y0), metrics\\.(x0|y0)\\]`,
+        ),
+        `${axis} harus kembali ke titik awal`,
+      );
+    }
+    assert.match(
+      CODE,
+      /const titleOpacity = useTransform\([\s\S]*?\[1, 1, 0, 0, 1, 1\]/,
+      "opacity judul kembali terlihat",
     );
   });
 
-  test("hanya ada satu komponen render, tanpa cabang mobile/desktop", () => {
-    assert.doesNotMatch(
-      CODE,
-      /TechStackMobile|TechStackMindMap/,
-      "masih ada dua cabang komponen; Johannes hanya boleh satu yang responsif",
+  test("tidak ada lompatan saat lepas pin (state akhir konstan)", () => {
+    const outputsOf = (name: string) => {
+      const start = CODE.indexOf(`const ${name} = useTransform(`);
+      assert.ok(start >= 0, `transform ${name} tidak ditemukan`);
+      const block = CODE.slice(start, CODE.indexOf(");", start));
+      const arrays = [...block.matchAll(/\[([^[\]]*)\]/g)].map((m) => m[1]);
+      const last = arrays[arrays.length - 1] ?? "";
+      return last.split(",").map((v) => v.trim());
+    };
+    /* railX/railY memang berakhir di posisi keluar (rail sudah opacity 0);
+       yang wajib sama adalah nilai yang terlihat dan judul yang dipulihkan. */
+    for (const name of ["railOpacity", "titleScale", "titleX", "titleY", "titleOpacity"]) {
+      const outputs = outputsOf(name);
+      assert.ok(outputs.length > 1, `output range ${name} tidak terbaca`);
+      assert.equal(
+        outputs[0],
+        outputs[outputs.length - 1],
+        `${name} berubah nilai antara awal dan akhir track → akan melompat saat unpin`,
+      );
+    }
+    const railXOut = outputsOf("railX");
+    assert.equal(
+      railXOut[railXOut.length - 1],
+      "-2 * metrics.pageW",
+      "rail tetap di halaman 3 saat rewind (tidak snap balik)",
     );
+    const railOpacityOut = outputsOf("railOpacity");
+    assert.equal(railOpacityOut[railOpacityOut.length - 1], "0", "rail tak terlihat saat unpin");
   });
 });
 
-describe("B. konten selalu terbaca tanpa interaksi", () => {
-  test("deskripsi item dirender langsung, bukan hanya saat hover", () => {
-    assert.match(
-      CODE,
-      /t\(description\)/,
-      "deskripsi teknologi harus masuk ke markup, bukan hover-only",
-    );
+describe("F. fallback reduced-motion & tanpa JS", () => {
+  test("prefers-reduced-motion melepas pin dan menampilkan versi statis", () => {
+    const fallback =
+      CODE.match(/@media \(prefers-reduced-motion: reduce\) \{[\s\S]*?\n\}/)?.[0] ?? "";
+    assert.ok(fallback, "blok reduced-motion tidak ditemukan");
+    assert.match(fallback, /\.ts-track\s*\{\s*height:\s*auto/);
+    assert.match(fallback, /\.ts-dyn\s*\{\s*display:\s*none/);
+    assert.match(fallback, /\.ts-static\s*\{\s*display:\s*block/);
   });
 
-  test("deskripsi dibatasi 2 baris supaya kartu tidak melar", () => {
-    assert.match(
-      CODE,
-      /line-clamp-2/,
-      "deskripsi perlu clamp 2 baris",
-    );
+  test("tanpa JS (html:not(.js)) memakai fallback statis yang sama", () => {
+    for (const sel of [".ts-track", ".ts-dyn", ".ts-static"]) {
+      assert.match(
+        CODE,
+        new RegExp(`:where\\(html:not\\(\\.js\\)\\)\\s*${sel.replace(".", "\\.")}\\s*\\{`),
+        `fallback no-JS untuk ${sel} hilang`,
+      );
+    }
   });
 
-  test("tombol filter kategori punya aria-pressed", () => {
-    const pressed = CODE.match(/aria-pressed=\{solo[^}]*\}/g) ?? [];
-    assert.ok(
-      pressed.length >= 2,
-      "tombol filter harus menyorotkan state via aria-pressed",
-    );
-  });
-});
-
-describe("C. item tanpa link tidak jadi <a> palsu", () => {
-  test("link eksternal hanya dirender bila techLinks punya entri", () => {
-    assert.match(
-      CODE,
-      /const link = techLinks\[label\]/,
-      "link harus diambil dari techLinks per item",
-    );
-    assert.match(
-      CODE,
-      /rel="noreferrer"/,
-      "link eksternal wajib rel=noreferrer",
-    );
+  test("fallback statis memuat semua item + deskripsi + link", () => {
+    const staticBlock =
+      CODE.match(/className="ts-static hidden[\s\S]*?\n        <\/div>\n      <\/div>\n    <\/section>/)?.[0] ?? "";
+    assert.ok(staticBlock, "blok .ts-static tidak ditemukan");
+    assert.match(staticBlock, /categories\.map\(/, "semua kategori dirender");
+    assert.match(staticBlock, /cat\.items\.map\(/, "semua item dirender");
+    assert.match(staticBlock, /t\(description\)/);
+    assert.match(staticBlock, /href=\{link\}/);
+    assert.match(staticBlock, /<h2/, "judul tetap heading asli saat tanpa JS");
   });
 });
 
-describe("D. animasi dihormati", () => {
-  test("ada penanganan prefers-reduced-motion", () => {
-    assert.match(
-      CODE,
-      /prefers-reduced-motion/,
-      "animasi harus dinonaktifkan saat user minta reduced motion",
+describe("G. data tetap dari sumber yang sama", () => {
+  test("kategori dibaca dari useSiteContent agar override dashboard tetap jalan", () => {
+    assert.match(CODE, /useSiteContent\(\)/);
+    assert.match(CODE, /\{ techStack \} = useSiteContent\(\)/);
+  });
+
+  test("17 item punya deskripsi & link di config", () => {
+    assert.equal(items.length, 17, "jumlah item techStack berubah");
+    const described = items.filter(
+      (item) => techDescriptions[item as keyof typeof techDescriptions],
     );
+    const linked = items.filter((item) => techLinks[item as keyof typeof techLinks]);
+    assert.equal(described.length, 17, "setiap item butuh deskripsi");
+    assert.equal(linked.length, 17, "setiap item butuh link");
   });
 
-  test(" IntersectionObserver menghentikan animasi di luar viewport", () => {
-    assert.match(
-      CODE,
-      /IntersectionObserver/,
-      "animasi background harus berhenti saat section tak terlihat",
-    );
-  });
-});
-
-describe("E. layer konstelasi dekoratif", () => {
-  test("layer konstelasi dirender sebagai latar", () => {
-    assert.match(SC_CODE, /aria-hidden/, "layer dekoratif wajib aria-hidden");
-    assert.match(
-      SC_CODE,
-      /pointer-events-none/,
-      "layer dekoratif tidak boleh menadah klik/hover pengguna",
-    );
-    assert.match(SC_CODE, /<canvas/, "latar kontur dirender lewat canvas");
-  });
-});
-
-describe("K. mobile ringkas — chip, bukan daftar berdeskripsi", () => {
-  test("ada komponen chip ringkas yang dipakai di render", () => {
-    assert.match(CODE, /function TechChip\(/, "belum ada chip ringkas untuk mobile");
-    assert.match(CODE, /<TechChip/, "chip ringkas belum dirender");
-  });
-
-  /* Tidak boleh memakai `max-md:hidden`: string-nya memuat `md:hidden` yang
-     dijaga test A sebagai akar bug B8. Semantiknya sama lewat hidden + md:flex. */
-  test("daftar baris panjang disembunyikan di mobile", () => {
-    const list = CODE.match(/<ul className="[^"]*"[^>]*>\s*\{cat\.items\.map\(\(label\) => \(\s*<TechRow/)?.[0];
-    assert.ok(list, "daftar <TechRow> tidak ditemukan");
-    assert.match(
-      list,
-      /className="[^"]*\bhidden\b[^"]*\bmd:flex\b/,
-      `daftar baris berdeskripsi masih tampil di mobile — itu yang bikin section panjang: ${list}`,
-    );
-  });
-
-  test("grid chip hanya tampil di mobile (hidden by default, flex < md)", () => {
-    const grid = CODE.match(/<ul className="hidden[^"]*"/)?.[0];
-    assert.ok(grid, "grid chip mobile harus `hidden` di desktop");
-    assert.match(grid, /max-md:flex/, "grid chip harus jadi flex di mobile");
-  });
-
-  test("chip tidak memuat deskripsi per item", () => {
-    assert.doesNotMatch(
-      CODE,
-      /max-md:line-clamp-1/,
-      "deskripsi per item di mobile membuat tiap baris jadi dua baris",
-    );
-  });
-});
-
-describe("F. data tetap dari sumber yang sama", () => {
-  test("kategori tetap dibaca dari useSiteContent, bukan hard-code", () => {
-    assert.match(
-      CODE,
-      /useSiteContent\(\)/,
-      "kategori harus dari useSiteContent agar override dashboard tetap berlaku",
-    );
-  });
-
-  test("techDescriptions & techLinks tetap dari lib/config", () => {
-    assert.match(CODE, /techDescriptions/);
-    assert.match(CODE, /techLinks/);
+  test("techDescriptions & techLinks tetap diekspor lib/config", () => {
+    assert.match(CODE, /import \{ techDescriptions, techLinks \} from "@\/lib\/config"/);
     assert.match(CONFIG, /export const techDescriptions/);
     assert.match(CONFIG, /export const techLinks/);
+  });
+});
+
+describe("H. kontrak lama yang masih berlaku", () => {
+  test("section memakai gutter & padding yang sama", () => {
+    assert.match(CODE, /className="relative px-6 py-24 max-md:py-16/);
+    assert.ok(TECH.includes("-mx-6") && TECH.includes("px-6 pb-0.5"));
+  });
+
+  test("baris status membungkus di HP tersempit", () => {
+    const row =
+      TECH.split("\n").find((l) => l.includes("font-data text-xs uppercase tracking-[0.24em]")) ?? "";
+    assert.ok(row.length > 0, "baris status tidak ditemukan");
+    assert.ok(row.includes("max-md:flex-wrap"), `baris status meluber: ${row.trim()}`);
+  });
+
+  test("latar .ts-bg tetap kontur tanpa gambar", () => {
+    assert.match(TECH, /\.ts-bg\s*\{\s*background-image:\s*none/);
+  });
+
+  test("target sentuh 44px & larangan markup lama", () => {
+    assert.ok(TECH.includes("max-md:min-h-11"));
+    for (const banned of [
+      "text-[10px]",
+      "text-[11px]",
+      "pointer: coarse",
+      "md:hidden",
+      "TechStackMobile",
+      "TechStackMindMap",
+      "requestAnimationFrame",
+      "border-radius: 2px",
+    ]) {
+      assert.ok(!TECH.includes(banned), `markup terlarang muncul lagi: ${banned}`);
+    }
+  });
+
+  test("animasi hanya transform/opacity, tanpa properti layout", () => {
+    const styles = [...CODE.matchAll(/style=\{\{([\s\S]*?)\}\}/g)].map((m) => m[1]);
+    assert.ok(styles.length >= 5, "tidak ada style animasi yang ditemukan");
+    /* visibility hanya dipakai sebagai gerbang anti-flash sebelum ukur;
+       ia tidak memicu layout dan bukan bagian animasi. */
+    const allowed = new Set([
+      "x",
+      "y",
+      "opacity",
+      "scale",
+      "scaleX",
+      "transformOrigin",
+      "visibility",
+    ]);
+    for (const style of styles) {
+      for (const [, key] of style.matchAll(/([A-Za-z]+)\s*:/g)) {
+        assert.ok(
+          allowed.has(key),
+          `style animasi memakai properti non-transform: ${key} (${style.replace(/\s+/g, " ").trim()})`,
+        );
+      }
+    }
+  });
+});
+
+describe("I. a11y rail & dekorasi", () => {
+  test("rail non-aktif tidak bisa difokus/dibaca screen reader", () => {
+    assert.match(CODE, /aria-hidden=\{!railActive\}/);
+    assert.match(CODE, /inert=\{!railActive\}/);
+    assert.match(
+      CODE,
+      /aria-hidden=\{railActive \|\| undefined\}/,
+      "judul disembunyikan saat rail aktif agar tidak dobel dengan kartu",
+    );
+  });
+
+  test("fokus dipindah ke judul sebelum rail dinonaktifkan (inert)", () => {
+    const disable = CODE.indexOf("if (!active) moveFocusOutOfRail();");
+    const setOff = CODE.indexOf("setRailActive(active);");
+    assert.ok(disable > -1, "pemindah fokus dipanggil saat rail mau non-aktif");
+    assert.ok(setOff > disable, "fokus dipindah sebelum inert dipasang");
+    assert.match(CODE, /titleRef\.current\?\.focus\(\{ preventScroll: true \}\)/);
+    assert.match(CODE, /tabIndex=\{-1\}/, "judul bisa menerima fokus programatik");
+  });
+
+  test("layer dekoratif aria-hidden dan tidak menadah klik", () => {
+    const bg = CODE.match(/className="ts-bg[^"]*"/)?.[0] ?? "";
+    assert.match(bg, /pointer-events-none/);
+    assert.match(
+      CODE,
+      /<div aria-hidden className="ts-bg pointer-events-none absolute inset-0"/,
+    );
+    const section = CODE.match(/<section className="[^"]*"/)?.[0] ?? "";
+    assert.doesNotMatch(section, /aria-hidden/, "section asli tidak boleh aria-hidden");
+  });
+
+  test("pseudo kartu tetap melengkung mengikuti radius", () => {
+    const before = cssBlock(".ts-card::before");
+    assert.ok(before, "pseudo .ts-card::before tidak ditemukan");
+    assert.match(before, /border-radius:\s*inherit/);
+    assert.doesNotMatch(CODE, /\.ts-card::after/, "cincin accent hanya satu pseudo");
+  });
+
+  test("latar tidak memakai warna accent dan konstelasi netral", () => {
+    const bg = cssBlock(".ts-bg");
+    assert.ok(bg, "blok .ts-bg tidak ditemukan");
+    assert.doesNotMatch(bg, /235\s*,\s*89\s*,\s*57/i);
+    assert.doesNotMatch(SC_CODE, /text-accent/);
   });
 });

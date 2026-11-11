@@ -33,14 +33,14 @@ describe("Hero HP — FULLSTACK rata kiri, DEVELOPER rata kanan, desktop utuh", 
     assert.ok(!/text-white\//.test(heading![1]), "jangan pakai text-white/ — pakai bracket-form");
   });
 
-  test("HP: judul 4 baris besar — FULL/STACK rata kiri, DEVE/OPER rata kanan", () => {
+  test("HP: judul 4 baris besar — FULLS rata kiri, TACK/DEVEL/LOPER di kolomnya", () => {
     assert.ok(mobileBlock, "blok mobile (span flex w-full flex-col … + div hidden grid-cols-2) tidak ketemu");
     assert.match(mobileBlock![1], /(?:^|\s)md:hidden(?:\s|$)/, "blok mobile harus md:hidden");
-    assert.match(mobileBlock![1], /(?:^|\s)text-left(?:\s|$)/, "baris FULL/STACK harus rata kiri (parent text-center)");
+    assert.match(mobileBlock![1], /(?:^|\s)text-left(?:\s|$)/, "baris depan harus rata kiri (parent text-center)");
     assert.match(
       mobileBlock![2],
-      /\{title1L\}<\/span>\s*<span>\{title1R\}<\/span>\s*<span className="self-end text-right">\{title2L\}<\/span>\s*<span className="self-end text-right">\{title2R\}<\/span>/,
-      "urutan harus FULL kiri, STACK kiri, DEVE kanan, OPER kanan",
+      /\{title1Lm\}<\/span>\s*<span>\{title1Rm\}<\/span>\s*<span className="self-end text-right">\{title2Lm\}<\/span>\s*<span className="self-end text-right">\{title2Rm\}<\/span>/,
+      "urutan harus FULLS kiri, TACK kiri, DEVEL kanan, LOPER kanan",
     );
   });
 

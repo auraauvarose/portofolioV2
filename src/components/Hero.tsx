@@ -14,6 +14,12 @@ const splitHalf = (text: string) => {
   const cut = Math.ceil(chars.length / 2);
   return [chars.slice(0, cut).join(""), chars.slice(cut).join("")];
 };
+/* Di HP huruf terakhir separuh kiri (S pada FULLS, L pada DEVEL) turun ke
+   baris bawah supaya kebaca STACK / LOPER — desktop tetap FULLS/TACK. */
+const splitDropLast = (text: string) => {
+  const [left, right] = splitHalf(text);
+  return [left.slice(0, -1), left.slice(-1) + right];
+};
 
 export default function Hero() {
   const { profile, hero } = useSiteContent();
@@ -25,6 +31,8 @@ export default function Hero() {
   const lens2 = t(hero.lensLine2);
   const [title1L, title1R] = splitHalf(title1);
   const [title2L, title2R] = splitHalf(title2);
+  const [title1Lm, title1Rm] = splitDropLast(title1);
+  const [title2Lm, title2Rm] = splitDropLast(title2);
   const [lens1L, lens1R] = splitHalf(lens1);
   const [lens2L, lens2R] = splitHalf(lens2);
   const [active, setActive] = useState(false);
@@ -202,10 +210,10 @@ export default function Hero() {
             </div>
             <h1 className="hero-title-3d__heading text-hero text-[15vw] max-md:text-[32vw] uppercase leading-[1] text-[#ffffff]/90 transition-colors duration-300 dark:text-[#ffffff]/90 md:text-[13vw] md:leading-[0.9]">
               <span className="flex w-full flex-col text-left md:hidden">
-                <span>{title1L}</span>
-                <span>{title1R}</span>
-                <span className="self-end text-right">{title2L}</span>
-                <span className="self-end text-right">{title2R}</span>
+                <span>{title1Lm}</span>
+                <span>{title1Rm}</span>
+                <span className="self-end text-right">{title2Lm}</span>
+                <span className="self-end text-right">{title2Rm}</span>
               </span>
               <div className="hidden grid-cols-2 gap-0 md:grid md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
