@@ -258,12 +258,8 @@ export default function HomeClient({
           <ExperienceTimeline items={experience} />
         </div>
 
-        <Marquee label="FULLSTACK DEVELOPER" reverse />
-
         <Certifications items={certifications} />
         <TechStack />
-
-        <Marquee label="SOFTWARE ENGINEER" />
 
         <Showcase projects={projects} gallery={gallery} />
         <Testimonials items={testimonials} />
