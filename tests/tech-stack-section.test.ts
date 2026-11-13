@@ -36,24 +36,23 @@ function cssBlock(selector: string): string | null {
 const items = techStack.categories.flatMap((cat) => cat.items);
 
 describe("A. stage scroll-pinned", () => {
-  test("track 460vh desktop, 340vh mobile (pin ±3240px)", () => {
+  test("track 460vh desktop, 240vh mobile (pin ±3240px)", () => {
     assert.match(CODE, /h-\[460vh\]/, "track desktop 460vh agar scroll lebih lambat");
-    assert.match(CODE, /max-md:h-\[340vh\]/, "track mobile tetap proporsional");
+    assert.match(CODE, /max-md:h-\[240vh\]/, "track mobile dipendekkan agar lebih ringan");
     const desktop = Number(CODE.match(/h-\[(\d+)vh\]/)?.[1] ?? 0);
     const mobile = Number(CODE.match(/max-md:h-\[(\d+)vh\]/)?.[1] ?? 0);
     assert.strictEqual(desktop, 460, "track desktop harus 460vh");
-    assert.strictEqual(mobile, 340, "track mobile harus 340vh");
+    assert.strictEqual(mobile, 240, "track mobile harus 240vh");
   });
 
-  test("jendela 2 perpindahan halaman ≥62% p, spring diperlunak", () => {
-    const moves = CODE.match(
-      /const PAGE_MOVE = \[\s*\[([\d.]+), ([\d.]+)\],\s*\[([\d.]+), ([\d.]+)\],\s*\]/,
+  test("satu perpindahan halaman di .22–.46, spring diperlunak", () => {
+    const move = CODE.match(/const PAGE_MOVE = \[([\d.]+), ([\d.]+)\] as const/);
+    assert.ok(move, "PAGE_MOVE harus literal angka");
+    const [, a, b] = move;
+    assert.ok(
+      Number(a) >= 0.2 && Number(b) <= 0.5,
+      `jendela geser halaman ${a}–${b} di luar p .2–.5`,
     );
-    assert.ok(moves, "PAGE_MOVE harus literal angka");
-    const [, a, b, c, d] = moves;
-    const window = Number(d) - Number(a);
-    assert.ok(window >= 0.62, `jendela rail hanya ${window.toFixed(2)} dari p`);
-    assert.ok(Number(c) > Number(b), "harus ada jeda singkat antar perpindahan");
     const spring = CODE.match(/stiffness: (\d+),\s*damping: (\d+)/);
     assert.ok(spring, "SPRING harus literal angka");
     assert.ok(Number(spring[1]) < 150, `stiffness harus turun dari 150: ${spring[1]}`);
@@ -163,8 +162,8 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
   test("translateX rail = (jumlah halaman − 1) × lebar stage, bukan shift 5400px", () => {
     assert.match(
       CODE,
-      /const railX = useTransform\(\s*sp,\s*\[[\s\S]*?PAGE_MOVE\[0\]\[0\][\s\S]*?PAGE_MOVE\[1\]\[1\][\s\S]*?\],\s*\[0, 0, -metrics\.pageW, -metrics\.pageW, -2 \* metrics\.pageW, -2 \* metrics\.pageW\]/,
-      "rail bergeser 2× lebar stage (3 halaman)",
+      /const railX = useTransform\(\s*sp,\s*\[0, PAGE_MOVE\[0\], PAGE_MOVE\[1\], 1\],\s*\[0, 0, -metrics\.pageW, -metrics\.pageW\]/,
+      "rail bergeser 1× lebar stage (2 halaman)",
     );
     assert.match(
       CODE,
@@ -174,8 +173,8 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
     assert.doesNotMatch(CODE, /metrics\.shift|scrollWidth/, "tidak ada lagi geseran 5400px");
   });
 
-  test("konten dipecah 8 kartu per halaman → 3 halaman", () => {
-    assert.match(CODE, /const PAGE_SIZE = 8/, "8 kartu per halaman");
+  test("konten dipecah 8 kartu per halaman → 2 halaman", () => {
+    assert.match(CODE, /const PAGE_SIZE = 8/, "8 kartu per halaman (4 × 2)");
     assert.match(CODE, /for \(let i = 0; i < flatItems\.length; i \+= PAGE_SIZE\)/);
     assert.match(CODE, /flatItems\.slice\(i, i \+ PAGE_SIZE\)/);
     assert.match(CODE, /pages\.map\(\(page, pi\)/, "setiap halaman dirender");
@@ -184,8 +183,13 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
       /className="ts-page flex w-full shrink-0 flex-col justify-center px-5 lg:px-12"/,
       "halaman adalah slide selebar stage",
     );
-    assert.match(CODE, /grid grid-cols-2 gap-2\.5 lg:grid-cols-4 lg:gap-5/);
-    assert.match(CODE, /pi === lastPage && page\.length === 1/, "halaman terakhir berisi 1 kartu");
+    assert.match(CODE, /flex flex-wrap justify-center gap-2\.5 lg:gap-5/, "baris sisa dipusatkan");
+    assert.match(
+      CODE,
+      /w-\[calc\(\(100%-0\.625rem\)\/2\)\] lg:w-\[calc\(\(100%-3\.75rem\)\/4\)\]/,
+      "kartu selebar 1/2 (mobile) dan 1/4 kolom (desktop)",
+    );
+    assert.doesNotMatch(CODE, /pi === lastPage && page\.length === 1/, "cabang kartu tunggal mati");
     for (const banned of [
       "teknologi",
       "disiplin",
@@ -198,8 +202,8 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
     }
   });
 
-  test("indikator 3 halaman (titik) digerakkan progress", () => {
-    for (const dot of ["dot1Opacity", "dot2Opacity", "dot3Opacity"]) {
+  test("indikator 2 halaman (titik) digerakkan progress", () => {
+    for (const dot of ["dot1Opacity", "dot2Opacity"]) {
       assert.match(CODE, new RegExp(`const ${dot} = useTransform\\(`), `${dot} hilang`);
       assert.match(
         CODE,
@@ -207,6 +211,7 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
         `${dot} tidak dipakai di titik halaman`,
       );
     }
+    assert.doesNotMatch(CODE, /dot3Opacity/, "titik halaman ketiga sudah tidak ada");
     assert.match(CODE, /<div aria-hidden className="mt-4 flex gap-2">/);
     assert.match(CODE, /h-1\.5 w-1\.5 rounded-full bg-accent/);
   });
@@ -225,6 +230,7 @@ describe("D. rail skill horizontal: 3 halaman grid", () => {
     assert.match(card, /h-\[clamp\(7rem,16svh,11rem\)\]/, "tinggi kartu mobile");
     assert.match(card, /lg:h-\[clamp\(13rem,30svh,17rem\)\]/, "tinggi kartu desktop");
     assert.match(card, /\bw-full\b/, "lebar kartu mengikuti grid");
+    assert.match(card, /shadow-none md:shadow-/, "bayangan berat hanya di desktop");
     assert.match(CODE, /techIcon\(label,/, "ikon per item");
     assert.match(CODE, /\{label\}/, "nama item dirender");
     assert.match(CODE, /t\(description\)/, "deskripsi dirender langsung, bukan hover-only");
@@ -321,8 +327,8 @@ describe("E. rewind ke layar judul lalu lepas pin", () => {
     const railXOut = outputsOf("railX");
     assert.equal(
       railXOut[railXOut.length - 1],
-      "-2 * metrics.pageW",
-      "rail tetap di halaman 3 saat rewind (tidak snap balik)",
+      "-metrics.pageW",
+      "rail tetap di halaman 2 saat rewind (tidak snap balik)",
     );
     const railOpacityOut = outputsOf("railOpacity");
     assert.equal(railOpacityOut[railOpacityOut.length - 1], "0", "rail tak terlihat saat unpin");
@@ -367,14 +373,14 @@ describe("G. data tetap dari sumber yang sama", () => {
     assert.match(CODE, /\{ techStack \} = useSiteContent\(\)/);
   });
 
-  test("17 item punya deskripsi & link di config", () => {
-    assert.equal(items.length, 17, "jumlah item techStack berubah");
+  test("16 item punya deskripsi & link di config", () => {
+    assert.equal(items.length, 16, "jumlah item techStack berubah");
     const described = items.filter(
       (item) => techDescriptions[item as keyof typeof techDescriptions],
     );
     const linked = items.filter((item) => techLinks[item as keyof typeof techLinks]);
-    assert.equal(described.length, 17, "setiap item butuh deskripsi");
-    assert.equal(linked.length, 17, "setiap item butuh link");
+    assert.equal(described.length, 16, "setiap item butuh deskripsi");
+    assert.equal(linked.length, 16, "setiap item butuh link");
   });
 
   test("techDescriptions & techLinks tetap diekspor lib/config", () => {

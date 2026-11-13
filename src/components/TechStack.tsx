@@ -32,14 +32,12 @@ const KEY_IN = 0.02;
 const KEY_END = 0.08;
 const TITLE_OUT = [0.1, 0.17] as const;
 const RAIL_IN = [0.17, 0.22] as const;
-/* Dua perpindahan halaman menempati 64% p (.22–.86) dengan jeda .53–.55. */
-const PAGE_MOVE = [
-  [0.22, 0.53],
-  [0.55, 0.86],
-] as const;
+/* Satu perpindahan halaman menempati .22–.46; sisanya menahan halaman terakhir. */
+const PAGE_MOVE = [0.22, 0.46] as const;
 const RAIL_OUT = [0.86, 0.9] as const;
 const TITLE_RESTORE = [0.9, 0.98] as const;
-/* 8 kartu per halaman (grid 4×2 desktop / 2×4 mobile), 17 item → 3 halaman. */
+/* 8 kartu per halaman: 4 kolom × 2 baris di desktop (2 × 4 baris di mobile),
+   16 item → 2 halaman 8/8. */
 const PAGE_SIZE = 8;
 
 const SPRING = {
@@ -50,7 +48,7 @@ const SPRING = {
 } as const;
 
 const CARD =
-  "ts-card group/card relative flex h-[clamp(7rem,16svh,11rem)] w-full flex-col rounded-3xl border border-black/10 bg-panel p-3.5 shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] lg:h-[clamp(13rem,30svh,17rem)] lg:p-5 dark:border-white/10";
+  "ts-card group/card relative flex h-[clamp(7rem,16svh,11rem)] w-full flex-col rounded-3xl border border-black/10 bg-panel p-3.5 shadow-none md:shadow-[0_28px_70px_-46px_rgba(0,0,0,0.7)] lg:h-[clamp(13rem,30svh,17rem)] lg:p-5 dark:border-white/10";
 
 const CARD_BODY =
   "flex h-full flex-col rounded-3xl outline-none focus-visible:ring-2 focus-visible:ring-accent max-md:min-h-11";
@@ -156,8 +154,6 @@ export default function TechStack() {
     return out;
   }, [flatItems]);
 
-  const lastPage = pages.length - 1;
-
   const heading = t(techStack.heading);
   const words = useMemo(() => heading.split(/\s+/).filter(Boolean), [heading]);
 
@@ -245,15 +241,8 @@ export default function TechStack() {
   );
   const railX = useTransform(
     sp,
-    [
-      0,
-      PAGE_MOVE[0][0],
-      PAGE_MOVE[0][1],
-      PAGE_MOVE[1][0],
-      PAGE_MOVE[1][1],
-      1,
-    ],
-    [0, 0, -metrics.pageW, -metrics.pageW, -2 * metrics.pageW, -2 * metrics.pageW],
+    [0, PAGE_MOVE[0], PAGE_MOVE[1], 1],
+    [0, 0, -metrics.pageW, -metrics.pageW],
   );
   const railY = useTransform(
     sp,
@@ -293,18 +282,13 @@ export default function TechStack() {
   /* Indikator halaman: hanya opacity, satu titik menyala per halaman. */
   const dot1Opacity = useTransform(
     sp,
-    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 1],
-    [1, 1, 1, 0.3, 0.3],
+    [0, PAGE_MOVE[0], PAGE_MOVE[1], 1],
+    [1, 1, 0.3, 0.3],
   );
   const dot2Opacity = useTransform(
     sp,
-    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 0.705, 0.75, 1],
-    [0.3, 0.3, 1, 1, 0.3, 0.3, 0.3],
-  );
-  const dot3Opacity = useTransform(
-    sp,
-    [0, PAGE_MOVE[0][0], 0.375, PAGE_MOVE[1][0], 0.705, 1],
-    [0.3, 0.3, 0.3, 0.3, 1, 1],
+    [0, PAGE_MOVE[0], PAGE_MOVE[1], 1],
+    [0.3, 0.3, 1, 1],
   );
 
   const lastWord = words[words.length - 1] ?? "";
@@ -337,8 +321,7 @@ export default function TechStack() {
       Math.max(0, Math.floor(card.offsetLeft / Math.max(1, pageW))),
     );
     const ratio = pageIndex / Math.max(1, pages.length - 1);
-    const pageProgress =
-      PAGE_MOVE[0][0] + ratio * (PAGE_MOVE[1][1] - PAGE_MOVE[0][0]);
+    const pageProgress = PAGE_MOVE[0] + ratio * (PAGE_MOVE[1] - PAGE_MOVE[0]);
     // Pin useScroll berakhir di (track − tinggi viewport), bukan (track −
     // stage): di mobile 100svh bisa lebih pendek dari innerHeight.
     const viewportH =
@@ -455,7 +438,7 @@ export default function TechStack() {
 
       <div
         ref={trackRef}
-        className="ts-track relative -mx-6 -my-16 h-[460vh] max-md:-my-16 md:-mx-10 md:-my-32 max-md:h-[340vh]"
+        className="ts-track relative -mx-6 -my-16 h-[460vh] max-md:-my-16 md:-mx-10 md:-my-32 max-md:h-[240vh]"
       >
         <div
           ref={stageRef}
@@ -525,15 +508,11 @@ export default function TechStack() {
                   key={page[0]?.label ?? pi}
                   className="ts-page flex w-full shrink-0 flex-col justify-center px-5 lg:px-12"
                 >
-                  <div className="grid grid-cols-2 gap-2.5 lg:grid-cols-4 lg:gap-5">
+                  <div className="flex flex-wrap justify-center gap-2.5 lg:gap-5">
                     {page.map((item) => (
                       <div
                         key={item.label}
-                        className={
-                          pi === lastPage && page.length === 1
-                            ? "lg:col-start-2"
-                            : undefined
-                        }
+                        className="w-[calc((100%-0.625rem)/2)] lg:w-[calc((100%-3.75rem)/4)]"
                       >
                         <TechCard
                           label={item.label}
@@ -569,10 +548,6 @@ export default function TechStack() {
                 />
                 <motion.span
                   style={{ opacity: dot2Opacity }}
-                  className="h-1.5 w-1.5 rounded-full bg-accent"
-                />
-                <motion.span
-                  style={{ opacity: dot3Opacity }}
                   className="h-1.5 w-1.5 rounded-full bg-accent"
                 />
               </div>

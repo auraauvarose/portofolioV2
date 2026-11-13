@@ -9,6 +9,8 @@ type Props = {
   idx: number;
   onSlide: (i: number) => void;
   revealClassName?: string;
+  /** Di HP, sembunyikan tombol panah; navigasi hanya lewat geser jempol. */
+  swipeOnly?: boolean;
   children: React.ReactNode;
 };
 
@@ -23,6 +25,7 @@ export default function MobileCarousel({
   idx,
   onSlide,
   revealClassName = "h-full",
+  swipeOnly = false,
   children,
 }: Props) {
   const prev = useRef(idx);
@@ -51,7 +54,7 @@ export default function MobileCarousel({
           {String(idx + 1).padStart(2, "0")} /{" "}
           {String(total).padStart(2, "0")}
         </span>
-        {total > 1 && (
+        {total > 1 && !swipeOnly && (
           <div className="flex items-center gap-2 md:hidden">
             <Magnetic strength={0.4}>
               <button

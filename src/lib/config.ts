@@ -193,7 +193,7 @@ export const techStack = {
     },
     {
       title: { en: "DevOps & Cloud", id: "DevOps & Cloud" },
-      items: ["Docker", "Git & GitHub", "Linux Fedora", "Bash CLI"],
+      items: ["Docker", "Git & GitHub", "Linux Fedora"],
     },
     {
       title: { en: "Development Tools", id: "Alat Pengembangan" },
@@ -255,10 +255,6 @@ export const techDescriptions: Record<string, Localized> = {
     en: "My daily Linux distro for development, servers, and shell work.",
     id: "Distro Linux harian saya untuk development, server, dan kerja shell.",
   },
-  "Bash CLI": {
-    en: "Shell scripting and command-line automation for fast, repeatable workflows.",
-    id: "Shell scripting dan otomasi command-line untuk alur kerja cepat dan berulang.",
-  },
   "VS Code": {
     en: "My code editor — extensions, debugging, and Git integration.",
     id: "Editor kode saya — ekstensi, debugging, dan integrasi Git.",
@@ -287,7 +283,6 @@ export const techLinks: Record<string, string> = {
   Docker: "https://www.docker.com/",
   "Git & GitHub": "https://github.com/",
   "Linux Fedora": "https://fedoraproject.org/",
-  "Bash CLI": "https://www.gnu.org/software/bash/manual/bash.html",
   "VS Code": "https://code.visualstudio.com/",
   "Arch Linux": "https://archlinux.org/",
   "C++": "https://isocpp.org/",

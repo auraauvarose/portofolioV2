@@ -8,10 +8,13 @@ export default function SectionHeading({
   kicker,
   heading,
   index,
+  align = "left",
 }: {
   kicker: Localized;
   heading: Localized;
   index?: string;
+  /** "center" menaruh nomor + kicker di tengah, diapit garis kiri dan kanan. */
+  align?: "left" | "center";
 }) {
   const { t } = useLanguage();
   const ref = useRef<HTMLDivElement | null>(null);
@@ -44,6 +47,13 @@ export default function SectionHeading({
       className={`sh mb-12 md:mb-16 ${visible ? "sh-in" : ""}`}
     >
       <div className="flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
+        {align === "center" && (
+          <span
+            aria-hidden
+            className="sh-line h-px flex-1 bg-white/10"
+            style={{ transformOrigin: "right center" }}
+          />
+        )}
         {index && <span className="sh-index font-display text-accent">{index}</span>}
         <span className="sh-kicker">{t(kicker)}</span>
         <span className="sh-line h-px flex-1 bg-white/10" />

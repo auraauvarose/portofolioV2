@@ -80,87 +80,84 @@ export default function Certifications({
   const certCard = (cert: Certification) => (
     <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
       <article
-        role="button"
-        tabIndex={0}
-        aria-haspopup="dialog"
-        onClick={() => setSelected(cert)}
+        role={cert.image_url ? "button" : undefined}
+        tabIndex={cert.image_url ? 0 : undefined}
+        aria-haspopup={cert.image_url ? "dialog" : undefined}
+        onClick={() => cert.image_url && setSelected(cert)}
         onKeyDown={(e) => {
-          if (e.target !== e.currentTarget) return;
+          if (!cert.image_url || e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
             setSelected(cert);
           }
         }}
-        className="group flex h-full cursor-pointer flex-col rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+        className={`group relative flex h-full min-h-[15rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:min-h-72 ${cert.image_url ? "cursor-pointer" : ""}`}
       >
-        {cert.image_url ? (
-          <div
-            className="tilt-layer relative aspect-[4/3] self-stretch overflow-hidden rounded-t-2xl bg-black/40"
-            style={{ "--tz": "34px" } as React.CSSProperties}
-          >
-            { }
-            <img
-              src={cert.image_url}
-              alt={cert.alt_text || cert.title_en}
-              className={`h-full w-full scale-105 object-cover transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
-              loading="lazy"
-              decoding="async"
-            />
-            {!unlocked && <LockOverlay />}
-          </div>
-        ) : (
-          <div
-            className="tilt-layer relative flex aspect-[4/3] items-center justify-center overflow-hidden bg-gradient-to-br from-white/5 to-transparent"
-            style={{ "--tz": "34px" } as React.CSSProperties}
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-14 w-14 text-accent/50">
-              <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
-            </svg>
-          </div>
-        )}
         <div
           className="tilt-layer flex flex-1 flex-col p-5 md:p-6"
           style={{ "--tz": "52px" } as React.CSSProperties}
         >
-          <div className="mb-3 flex flex-col items-start gap-1 md:flex-row md:items-center md:justify-between">
-            <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-accent">
+          <div className="flex items-start justify-between gap-3">
+            <span className="text-xs font-medium uppercase tracking-widest text-accent">
               {t(certifications.categories[cert.category] ?? {
                 en: cert.category,
                 id: cert.category,
               })}
             </span>
             {cert.date && (
-              <span className="text-xs text-gray-500">{cert.date}</span>
+              <span className="shrink-0 text-xs text-gray-500">{cert.date}</span>
             )}
           </div>
-          <h3 className="text-lg font-semibold leading-snug text-white">
+          <h3 className="mt-4 text-lg font-semibold leading-snug text-white md:text-xl">
             {lang_title(cert, t)}
           </h3>
-          {cert.issuer && (
-            <p className="mt-2 text-sm text-gray-400">
-              {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
-            </p>
-          )}
           {cert.description_en && (
-            <p className="mt-3 text-sm leading-relaxed text-gray-400">
+            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-gray-400">
               {t({
                 en: cert.description_en,
                 id: cert.description_id ?? cert.description_en,
               })}
             </p>
           )}
+          {cert.issuer && (
+            <p className="mt-auto border-t border-white/10 pt-3 text-xs uppercase tracking-widest text-gray-500">
+              {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
+            </p>
+          )}
         </div>
+
+        {/* Gambar sertifikat hanya muncul saat kartu disorot / difokus keyboard. */}
+        {cert.image_url && (
+          <div className="tilt-layer absolute inset-0 z-10 flex items-center justify-center bg-black/70 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+            { }
+            <img
+              src={cert.image_url}
+              alt={cert.alt_text || cert.title_en}
+              className={`absolute inset-0 h-full w-full scale-105 object-cover transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
+              loading="lazy"
+              decoding="async"
+            />
+            {!unlocked && <LockOverlay />}
+            {unlocked && (
+              <span className="relative z-20 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/70 px-5 text-xs font-medium uppercase tracking-widest text-white backdrop-blur-sm">
+                {t({ en: "View certificate", id: "Lihat sertifikat" })}
+                <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
+              </span>
+            )}
+          </div>
+        )}
       </article>
     </Tilt3D>
   );
 
   return (
     <section className="relative px-6 py-16 md:px-10 md:py-32">
-      <div className="relative mx-auto max-w-7xl">
+      <div className="relative mx-auto max-w-[96rem]">
         <SectionHeading
           kicker={certifications.kicker}
           heading={certifications.heading}
           index="04"
+          align="center"
         />
 
         <Reveal className="mb-8 max-w-2xl text-gray-400">
@@ -237,6 +234,7 @@ export default function Certifications({
                       total={total}
                       idx={idx}
                       onSlide={setSlide}
+                      swipeOnly
                     >
                       {certCard(current)}
                     </MobileCarousel>
@@ -269,53 +267,18 @@ export default function Certifications({
             className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
             onClick={(e) => e.stopPropagation()}
           >
-            {selected.image_url ? (
+            {selected.image_url && (
               <div className="relative flex w-full items-center justify-center overflow-hidden bg-black/40">
                 { }
                 <img
                   src={selected.image_url}
                   alt={selected.alt_text || selected.title_en || "Certification"}
-                  className={`max-h-[58vh] w-auto max-w-full scale-105 object-contain transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
+                  className={`max-h-[80vh] w-auto max-w-full scale-105 object-contain transition-[filter] duration-500 ${unlocked ? "" : "blur-lg"}`}
                   decoding="async"
                 />
                 {!unlocked && <LockOverlay large />}
               </div>
-            ) : (
-              <div className="flex aspect-[4/3] w-full items-center justify-center bg-gradient-to-br from-white/5 to-transparent">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2" className="h-20 w-20 text-accent/50">
-                  <path d="M9 12l2 2 4-4M5 4h14a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
-                </svg>
-              </div>
             )}
-            <div className="px-5 py-5 md:px-6 md:py-6">
-              <div className="mb-3 flex items-center justify-between">
-                <span className="rounded-full bg-accent/10 px-3 py-1 text-xs font-medium uppercase tracking-widest text-accent">
-                  {t(certifications.categories[selected.category] ?? {
-                    en: selected.category,
-                    id: selected.category,
-                  })}
-                </span>
-                {selected.date && (
-                  <span className="text-xs text-gray-500">{selected.date}</span>
-                )}
-              </div>
-              <h3 className="text-xl font-semibold leading-snug text-white md:text-2xl">
-                {lang_title(selected, t)}
-              </h3>
-              {selected.issuer && (
-                <p className="mt-2 text-sm text-gray-400">
-                  {t({ en: "By:", id: "Oleh:" })} {selected.issuer}
-                </p>
-              )}
-              {selected.description_en && (
-                <p className="mt-4 text-sm leading-relaxed text-gray-400 md:text-base">
-                  {t({
-                    en: selected.description_en,
-                    id: selected.description_id ?? selected.description_en,
-                  })}
-                </p>
-              )}
-            </div>
           </div>
           </div>
           ,
