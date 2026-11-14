@@ -39,11 +39,11 @@ describe("Sertifikasi — kartu teks + pratinjau gambar saat hover", () => {
     );
   });
 
-  test("gambar muncul sebagai overlay hover/focus", () => {
+  test("gambar muncul sebagai overlay hover/focus di desktop", () => {
     assert.match(
       CERT,
-      /group-hover:opacity-100 group-focus-visible:opacity-100/,
-      "overlay gambar belum terikat ke hover/focus",
+      /md:group-hover:opacity-100 md:group-focus-visible:opacity-100/,
+      "overlay gambar desktop belum terikat ke hover/focus",
     );
     assert.ok(
       CERT.includes("absolute inset-0 z-10"),
@@ -115,6 +115,33 @@ describe("Sertifikasi HP — navigasi geser tanpa tombol panah", () => {
         `${other} ikut berubah — seharusnya opt-in`,
       );
     }
+  });
+});
+
+describe("Sertifikasi HP — foto lalu detail saat diketuk", () => {
+  test("gambar menjadi tampilan awal dan ketukan menukar ke detail", () => {
+    assert.match(
+      CERT,
+      /window\.matchMedia\("\(max-width: 767px\)"\)\.matches/,
+      "aktivasi kartu belum dibedakan khusus viewport mobile",
+    );
+    assert.match(
+      CERT,
+      /mobileDetails === cert\.id/,
+      "detail mobile belum dikendalikan per sertifikat",
+    );
+    assert.ok(
+      CERT.includes("max-md:opacity-100"),
+      "gambar sertifikat belum menjadi tampilan awal di HP",
+    );
+  });
+
+  test("detail punya tombol terpisah untuk membuka modal gambar", () => {
+    assert.match(
+      CERT,
+      /setSelected\(cert\)[\s\S]{0,300}md:hidden/,
+      "detail HP belum menyediakan tombol modal terpisah",
+    );
   });
 });
 

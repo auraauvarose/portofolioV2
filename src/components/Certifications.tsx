@@ -22,6 +22,7 @@ export default function Certifications({
   const { t } = useLanguage();
   const [active, setActive] = useState<string>("all");
   const [selected, setSelected] = useState<Certification | null>(null);
+  const [mobileDetails, setMobileDetails] = useState<string | null>(null);
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
@@ -59,6 +60,7 @@ export default function Certifications({
   useEffect(() => {
     setSlide(0);
     setDeskPage(0);
+    setMobileDetails(null);
   }, [active]);
 
   useEffect(() => {
@@ -77,24 +79,33 @@ export default function Certifications({
   const filtered =
     active === "all" ? items : items.filter((c) => c.category === active);
 
+  const activateCert = (cert: Certification) => {
+    if (!cert.image_url) return;
+    if (window.matchMedia("(max-width: 767px)").matches) {
+      setMobileDetails((id) => (id === cert.id ? null : cert.id));
+      return;
+    }
+    setSelected(cert);
+  };
+
   const certCard = (cert: Certification) => (
     <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
       <article
         role={cert.image_url ? "button" : undefined}
         tabIndex={cert.image_url ? 0 : undefined}
         aria-haspopup={cert.image_url ? "dialog" : undefined}
-        onClick={() => cert.image_url && setSelected(cert)}
+        onClick={() => activateCert(cert)}
         onKeyDown={(e) => {
           if (!cert.image_url || e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
             e.preventDefault();
-            setSelected(cert);
+            activateCert(cert);
           }
         }}
         className={`group relative flex h-full min-h-[15rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:min-h-72 ${cert.image_url ? "cursor-pointer" : ""}`}
       >
         <div
-          className="tilt-layer flex flex-1 flex-col p-5 md:p-6"
+          className={`tilt-layer flex flex-1 flex-col p-5 md:p-6 ${cert.image_url && mobileDetails !== cert.id ? "max-md:invisible" : ""}`}
           style={{ "--tz": "52px" } as React.CSSProperties}
         >
           <div className="flex items-start justify-between gap-3">
@@ -124,11 +135,25 @@ export default function Certifications({
               {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
             </p>
           )}
+          {cert.image_url && mobileDetails === cert.id && (
+            <button
+              type="button"
+              onClick={(e) => {
+                e.stopPropagation();
+                setSelected(cert);
+              }}
+              className="mt-4 inline-flex min-h-11 items-center justify-center rounded-full bg-accent px-5 text-xs font-medium uppercase tracking-widest text-black md:hidden"
+            >
+              {t({ en: "View certificate", id: "Lihat sertifikat" })}
+            </button>
+          )}
         </div>
 
-        {/* Gambar sertifikat hanya muncul saat kartu disorot / difokus keyboard. */}
+        {/* Di HP gambar tampil dulu; ketukan kartu menukar ke detail teks. */}
         {cert.image_url && (
-          <div className="tilt-layer absolute inset-0 z-10 flex items-center justify-center bg-black/70 opacity-0 transition-opacity duration-300 group-hover:opacity-100 group-focus-visible:opacity-100 motion-reduce:transition-none">
+          <div
+            className={`tilt-layer absolute inset-0 z-10 flex items-center justify-center bg-black/70 opacity-0 transition-opacity duration-300 md:group-hover:opacity-100 md:group-focus-visible:opacity-100 motion-reduce:transition-none max-md:bg-transparent ${mobileDetails === cert.id ? "max-md:pointer-events-none max-md:opacity-0" : "max-md:opacity-100"}`}
+          >
             { }
             <img
               src={cert.image_url}
@@ -139,7 +164,7 @@ export default function Certifications({
             />
             {!unlocked && <LockOverlay />}
             {unlocked && (
-              <span className="relative z-20 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/70 px-5 text-xs font-medium uppercase tracking-widest text-white backdrop-blur-sm">
+              <span className="relative z-20 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/70 px-5 text-xs font-medium uppercase tracking-widest text-white backdrop-blur-sm max-md:hidden">
                 {t({ en: "View certificate", id: "Lihat sertifikat" })}
                 <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
               </span>
@@ -233,7 +258,10 @@ export default function Certifications({
                     <MobileCarousel
                       total={total}
                       idx={idx}
-                      onSlide={setSlide}
+                      onSlide={(i) => {
+                        setSlide(i);
+                        setMobileDetails(null);
+                      }}
                       swipeOnly
                     >
                       {certCard(current)}
