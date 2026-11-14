@@ -27,13 +27,13 @@ const UI: Record<string, Localized> = {
   official: { en: "Official site", id: "Situs resmi" },
 };
 
-/* Timeline koreografi (revisi t12: rail lebih lambat, judul keluar lebih awal). */
+/* Timeline koreografi: jeda baca seimbang sebelum dan sesudah perpindahan. */
 const KEY_IN = 0.02;
 const KEY_END = 0.08;
 const TITLE_OUT = [0.1, 0.17] as const;
 const RAIL_IN = [0.17, 0.22] as const;
-/* Satu perpindahan halaman menempati .22–.46; sisanya menahan halaman terakhir. */
-const PAGE_MOVE = [0.22, 0.46] as const;
+/* Halaman pertama diam .22–.40, halaman kedua diam .68–.86. */
+const PAGE_MOVE = [0.4, 0.68] as const;
 const RAIL_OUT = [0.86, 0.9] as const;
 const TITLE_RESTORE = [0.9, 0.98] as const;
 /* 8 kartu per halaman: 4 kolom × 2 baris di desktop (2 × 4 baris di mobile),
@@ -438,7 +438,7 @@ export default function TechStack() {
 
       <div
         ref={trackRef}
-        className="ts-track relative -mx-6 -my-16 h-[460vh] max-md:-my-16 md:-mx-10 md:-my-32 max-md:h-[240vh]"
+        className="ts-track relative -mx-6 -my-16 h-[520vh] max-md:-my-16 md:-mx-10 md:-my-32 max-md:h-[420vh]"
       >
         <div
           ref={stageRef}

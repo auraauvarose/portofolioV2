@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useState, type FormEvent } from "react";
 import { useLanguage } from "@/components/providers";
+import Reveal from "@/components/Reveal";
 
 type Status = "idle" | "sending" | "sent" | "error";
 
@@ -61,7 +62,7 @@ export default function CertificateRequestClient() {
           ← {t({ en: "Back", id: "Kembali" })}
         </Link>
 
-        <div className="rounded-2xl border border-white/10 bg-panel p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] md:p-8">
+        <Reveal variant="zoom" className="rounded-2xl border border-white/10 bg-panel p-6 shadow-[0_30px_80px_-30px_rgba(0,0,0,0.8)] md:p-8">
           <div className="mb-6 flex items-start gap-3">
             <svg
               viewBox="0 0 24 24"
@@ -187,7 +188,7 @@ export default function CertificateRequestClient() {
               </button>
             </form>
           )}
-        </div>
+        </Reveal>
       </div>
     </main>
   );

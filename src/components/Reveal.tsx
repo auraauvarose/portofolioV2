@@ -21,13 +21,18 @@ const VARIANT_CLASS: Record<NonNullable<RevealProps["variant"]>, string> = {
   flip: "v-flip",
 };
 
+// ponytail: variasi dari delay; koreografi khusus tetap memakai prop variant.
+const DEFAULT_VARIANTS = ["rise", "left", "right", "flip"] as const;
+
 export default function Reveal({
   children,
   className = "",
   delay = 0,
   as: Tag = "div",
   media = false,
-  variant = "rise",
+  variant = media && delay === 0
+    ? "zoom"
+    : (DEFAULT_VARIANTS[Math.floor(delay / 70) % DEFAULT_VARIANTS.length] ?? "rise"),
   replay = false,
 }: RevealProps) {
   const ref = useRef<HTMLElement | null>(null);
@@ -59,7 +64,7 @@ export default function Reveal({
           }
         }
       },
-      { threshold: 0.12, rootMargin: "0px 0px -40px 0px" },
+      { threshold: 0.01, rootMargin: "0px 0px -24px 0px" },
     );
     observer.observe(node);
     return () => observer.disconnect();

@@ -588,29 +588,55 @@ body {
 html.js .reveal {
   opacity: 0;
 }
+.reveal {
+  --reveal-x: 0px;
+  --reveal-y: 32px;
+  --reveal-scale: 0.985;
+  --reveal-tilt: 0deg;
+  --reveal-duration: 0.9s;
+}
 .reveal.is-visible {
-  animation: reveal-in 0.85s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: reveal-in var(--reveal-duration) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+.reveal.v-left {
+  --reveal-x: -36px;
+}
+.reveal.v-right {
+  --reveal-x: 36px;
+}
+.reveal.v-zoom {
+  --reveal-scale: 0.95;
+  --reveal-y: 18px;
+}
+.reveal.v-flip {
+  --reveal-tilt: -7deg;
+}
+.reveal.replay-from-top {
+  --reveal-y: -32px;
+}
+.reveal.v-flip.replay-from-top {
+  --reveal-tilt: 7deg;
 }
 @keyframes reveal-in {
   from {
     opacity: 0;
-    transform: translateY(44px) scale(0.985);
+    transform: perspective(900px) translate3d(var(--reveal-x), var(--reveal-y), 0) rotateX(var(--reveal-tilt)) scale(var(--reveal-scale));
   }
   to {
     opacity: 1;
     transform: none;
   }
 }
-@media (hover: hover) and (pointer: fine) {
+@media (min-width: 768px) and (hover: hover) and (pointer: fine) {
   .reveal.is-visible {
-    animation-name: reveal-in-blur;
+    animation-name: reveal-in-soft;
   }
 }
-@keyframes reveal-in-blur {
+@keyframes reveal-in-soft {
   from {
     opacity: 0;
-    transform: translateY(44px) scale(0.985);
-    filter: blur(10px);
+    transform: perspective(900px) translate3d(var(--reveal-x), var(--reveal-y), 0) rotateX(var(--reveal-tilt)) scale(var(--reveal-scale));
+    filter: blur(3px);
   }
   to {
     opacity: 1;
@@ -619,120 +645,32 @@ html.js .reveal {
   }
 }
 .reveal-media img {
-  transition: transform 1.15s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 1.05s cubic-bezier(0.22, 1, 0.36, 1);
 }
 .reveal-media:not(.is-visible) img {
-  transform: scale(1.12);
+  transform: scale(1.07);
 }
-
-.reveal.v-left.is-visible:not(.replay-from-top):not(.replay-from-bottom) {
-  animation-name: reveal-in-left;
-}
-@keyframes reveal-in-left {
-  from {
-    opacity: 0;
-    transform: translateX(-48px) translateY(12px);
+@media (max-width: 767px) {
+  .reveal {
+    --reveal-y: 18px;
+    --reveal-scale: 0.99;
+    --reveal-duration: 0.7s;
   }
-  to {
-    opacity: 1;
-    transform: none;
+  .reveal.v-left {
+    --reveal-x: -18px;
   }
-}
-.reveal.replay-from-top.is-visible {
-  animation: reveal-in-from-top 0.85s cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-.reveal.replay-from-bottom.is-visible {
-  animation: reveal-in-from-bottom 0.85s cubic-bezier(0.16, 1, 0.3, 1) both !important;
-}
-@keyframes reveal-in-from-top {
-  from {
-    opacity: 0;
-    transform: translateY(-42px) scale(0.985);
+  .reveal.v-right {
+    --reveal-x: 18px;
   }
-  to {
-    opacity: 1;
-    transform: none;
+  .reveal.v-zoom {
+    --reveal-scale: 0.97;
   }
-}
-@keyframes reveal-in-from-bottom {
-  from {
-    opacity: 0;
-    transform: translateY(42px) scale(0.985);
+  .reveal.replay-from-top {
+    --reveal-y: -18px;
   }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-@media (hover: hover) and (pointer: fine) {
-  .reveal.replay-from-top.is-visible {
-    animation-name: reveal-in-from-top-blur !important;
-  }
-  .reveal.replay-from-bottom.is-visible {
-    animation-name: reveal-in-from-bottom-blur !important;
-  }
-  @keyframes reveal-in-from-top-blur {
-    from {
-      opacity: 0;
-      transform: translateY(-42px) scale(0.985);
-      filter: blur(7px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-      filter: none;
-    }
-  }
-  @keyframes reveal-in-from-bottom-blur {
-    from {
-      opacity: 0;
-      transform: translateY(42px) scale(0.985);
-      filter: blur(7px);
-    }
-    to {
-      opacity: 1;
-      transform: none;
-      filter: none;
-    }
-  }
-}
-.reveal.v-right.is-visible:not(.replay-from-top):not(.replay-from-bottom) {
-  animation-name: reveal-in-right;
-}
-@keyframes reveal-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(48px) translateY(12px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.reveal.v-zoom.is-visible {
-  animation-name: reveal-in-zoom;
-}
-@keyframes reveal-in-zoom {
-  from {
-    opacity: 0;
-    transform: scale(0.88);
-  }
-  to {
-    opacity: 1;
-    transform: none;
-  }
-}
-.reveal.v-flip.is-visible {
-  animation-name: reveal-in-flip;
-}
-@keyframes reveal-in-flip {
-  from {
-    opacity: 0;
-    transform: perspective(900px) rotateX(-14deg) translateY(28px);
-  }
-  to {
-    opacity: 1;
-    transform: none;
+  .reveal.v-flip,
+  .reveal.v-flip.replay-from-top {
+    --reveal-tilt: 0deg;
   }
 }
 
@@ -1063,15 +1001,20 @@ html.js .reveal {
 }
 .sh-word {
   display: inline-block;
-  transition: transform 0.95s cubic-bezier(0.16, 1, 0.3, 1);
+  opacity: 1;
+  transition:
+    opacity 0.65s ease,
+    transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
 }
 :where(html.js) .sh .sh-word,
 :where(html.js) .reveal .sh-word {
-  transform: translateY(125%);
+  opacity: 0;
+  transform: translateY(110%) rotate(3deg);
 }
 .sh.sh-in .sh-word,
 .reveal.is-visible .sh-word {
-  transform: translateY(0);
+  opacity: 1;
+  transform: none;
 }
 .sh-kicker,
 .sh-index {

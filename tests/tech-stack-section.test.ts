@@ -36,23 +36,31 @@ function cssBlock(selector: string): string | null {
 const items = techStack.categories.flatMap((cat) => cat.items);
 
 describe("A. stage scroll-pinned", () => {
-  test("track 460vh desktop, 240vh mobile (pin ±3240px)", () => {
-    assert.match(CODE, /h-\[460vh\]/, "track desktop 460vh agar scroll lebih lambat");
-    assert.match(CODE, /max-md:h-\[240vh\]/, "track mobile dipendekkan agar lebih ringan");
+  test("track 520vh desktop, 420vh mobile memberi waktu baca lebih panjang", () => {
     const desktop = Number(CODE.match(/h-\[(\d+)vh\]/)?.[1] ?? 0);
     const mobile = Number(CODE.match(/max-md:h-\[(\d+)vh\]/)?.[1] ?? 0);
-    assert.strictEqual(desktop, 460, "track desktop harus 460vh");
-    assert.strictEqual(mobile, 240, "track mobile harus 240vh");
+    assert.equal(desktop, 520, "track desktop harus lebih panjang dari 460vh");
+    assert.equal(mobile, 420, "track mobile harus lebih panjang dari 240vh");
   });
 
-  test("satu perpindahan halaman di .22–.46, spring diperlunak", () => {
-    const move = CODE.match(/const PAGE_MOVE = \[([\d.]+), ([\d.]+)\] as const/);
-    assert.ok(move, "PAGE_MOVE harus literal angka");
-    const [, a, b] = move;
-    assert.ok(
-      Number(a) >= 0.2 && Number(b) <= 0.5,
-      `jendela geser halaman ${a}–${b} di luar p .2–.5`,
-    );
+  test("jeda baca kedua halaman seimbang, transisi lebih lambat di kedua ukuran", () => {
+    const range = (name: string) => {
+      const match = CODE.match(new RegExp(`const ${name} = \\[([\\d.]+), ([\\d.]+)\\] as const`));
+      assert.ok(match, `${name} harus literal angka`);
+      return [Number(match[1]), Number(match[2])] as const;
+    };
+    const enter = range("RAIL_IN");
+    const move = range("PAGE_MOVE");
+    const exit = range("RAIL_OUT");
+    const firstHold = move[0] - enter[1];
+    const lastHold = exit[0] - move[1];
+    assert.ok(firstHold >= 0.16, "halaman pertama perlu jeda baca sebelum bergeser");
+    assert.ok(lastHold >= 0.16, "halaman kedua perlu jeda baca sebelum keluar");
+    assert.ok(Math.abs(firstHold - lastHold) < 0.01, "jeda baca harus seimbang");
+    const desktop = Number(CODE.match(/h-\[(\d+)vh\]/)?.[1] ?? 0);
+    const mobile = Number(CODE.match(/max-md:h-\[(\d+)vh\]/)?.[1] ?? 0);
+    assert.ok((desktop - 100) * (move[1] - move[0]) >= 110, "transisi desktop perlu ≥110vh scroll");
+    assert.ok((mobile - 100) * (move[1] - move[0]) >= 85, "transisi mobile perlu ≥85vh scroll");
     const spring = CODE.match(/stiffness: (\d+),\s*damping: (\d+)/);
     assert.ok(spring, "SPRING harus literal angka");
     assert.ok(Number(spring[1]) < 150, `stiffness harus turun dari 150: ${spring[1]}`);
@@ -445,6 +453,23 @@ describe("H. kontrak lama yang masih berlaku", () => {
         );
       }
     }
+  });
+});
+
+describe("J. reveal bersama tetap bervariasi dan ringan", () => {
+  test("replay tidak menimpa varian atau delay, mobile tanpa blur", () => {
+    const css = src("src/app/globals.css");
+    const revealCss = css.slice(css.indexOf("html.js .reveal"), css.indexOf(".spotlight-glow"));
+    assert.doesNotMatch(revealCss, /!important/, "replay tidak boleh mengunci animation");
+    assert.doesNotMatch(revealCss, /:not\(\.replay-from-/, "varian harus tetap berlaku saat replay");
+    assert.match(revealCss, /--reveal-y:\s*-/, "replay ke atas perlu arah masuk negatif");
+    assert.match(revealCss, /@media \(max-width: 767px\)/, "gerakan HP perlu lebih kecil");
+    const mobile = revealCss.match(/@media \(max-width: 767px\)\s*\{[\s\S]*?\n\}/)?.[0] ?? "";
+    assert.doesNotMatch(mobile, /blur\(/, "jangan memakai blur berat di HP");
+    const reveal = src("src/components/Reveal.tsx");
+    assert.match(reveal, /DEFAULT_VARIANTS/, "kartu perlu variasi dari helper bersama");
+    assert.match(reveal, /animationDelay: `\$\{delay\}ms`/, "delay kartu tetap dipertahankan");
+    assert.match(reveal, /threshold: 0\.01/, "blok tinggi harus masuk tanpa menunggu 12% terlihat");
   });
 });
 
