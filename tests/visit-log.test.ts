@@ -41,7 +41,7 @@ test("visitLogEntry: path ikut disertakan, tanpa placeholder", () => {
   });
   assert.equal(e.path, "/tentang");
   assert.equal(e.device, "Ponsel");
-  assert.equal(e.location, "Jakarta, ID");
+  assert.equal(e.location, "ID - Jakarta");
   assert.equal(e.time, "14:32 WIB · 12 Feb");
 });
 
@@ -54,7 +54,7 @@ test("visitLogEntry: device + lokasi (kota, negara) + jam WIB", () => {
     created_at: "2026-02-12T07:32:00Z",
   });
   assert.equal(e.device, "Ponsel");
-  assert.equal(e.location, "Jakarta, ID");
+  assert.equal(e.location, "ID - Jakarta");
   assert.equal(e.time, "14:32 WIB · 12 Feb");
 });
 

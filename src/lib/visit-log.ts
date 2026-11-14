@@ -40,10 +40,7 @@ export function formatWibTime(iso: string | null): string {
 }
 
 export function formatLocation(city: string | null, country: string | null): string {
-  if (city && country) return `${city}, ${country}`;
-  if (country) return country;
-  if (city) return city;
-  return "—";
+  return [country, city].filter(Boolean).join(" - ") || "—";
 }
 
 /**

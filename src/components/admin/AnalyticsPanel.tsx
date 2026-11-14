@@ -363,14 +363,14 @@ export default function AnalyticsPanel() {
 
             <section className="a-panel p-4 sm:p-5">
               <div className="mb-4 flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="a-key">Merek ponsel</h3>
+                <h3 className="a-key">Merek perangkat</h3>
                 <p className="a-meta text-[var(--color-a-faint)]">
-                  Hanya perangkat mobile
+                  Jika tersedia dari browser
                 </p>
               </div>
               {data.byPhoneBrand.length === 0 ? (
                 <p className="text-sm text-[var(--color-a-faint)]">
-                  Belum ada data merek ponsel.
+                  Belum ada data merek perangkat.
                 </p>
               ) : (
                 <ul className="flex flex-col gap-3.5">

@@ -39,24 +39,39 @@ export default function Analytics() {
 
     if (pathname.startsWith("/admin")) return;
 
-    const payload = JSON.stringify({
-      path: pathname.slice(0, 200),
-      referrer: referrerHost(),
-    });
-
-    const sent = navigator.sendBeacon?.(
-      "/api/analytics",
-      new Blob([payload], { type: "application/json" }),
-    );
-
-    if (!sent) {
-      void fetch("/api/analytics", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: payload,
-        keepalive: true,
-      }).catch(() => {});
+    const path = pathname.slice(0, 200);
+    let cancelled = false;
+    const nav = navigator as Navigator & {
+      userAgentData?: { getHighEntropyValues(hints: string[]): Promise<{ model?: string }> };
+    };
+    async function send() {
+      let model: string | null = null;
+      try {
+        model = (await nav.userAgentData?.getHighEntropyValues(["model"]))?.model ?? null;
+      } catch {
+        // Izin ditolak atau browser tanpa Client Hints: tetap catat kunjungan.
+      }
+      if (cancelled) return;
+      const payload = JSON.stringify({
+        path,
+        referrer: referrerHost(),
+        model,
+      });
+      const sent = navigator.sendBeacon?.(
+        "/api/analytics",
+        new Blob([payload], { type: "application/json" }),
+      );
+      if (!sent) {
+        void fetch("/api/analytics", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: payload,
+          keepalive: true,
+        }).catch(() => {});
+      }
     }
+    void send();
+    return () => { cancelled = true; };
   }, [pathname, ready]);
 
   return null;

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { createSupabaseAdmin, withJsonErrors } from "@/lib/supabase/admin";
 import { requireUser } from "@/lib/auth";
 import { parseBrowser, parseDevice, parsePhoneBrand } from "@/lib/device";
-import { visitLogEntry } from "@/lib/visit-log";
+import { formatLocation, visitLogEntry } from "@/lib/visit-log";
 import { withFallback } from "@/lib/db-fallback";
 import { clientIp } from "@/lib/client-ip";
 import { notifyVisit } from "@/lib/visitor-notify";
@@ -34,15 +35,19 @@ function clean(v: unknown, max: number): string | null {
 }
 
 function geoOf(req: NextRequest): { country: string | null; city: string | null } {
-  // OpenNext -> Cloudflare tidak meneruskan `cf` ke NextRequest, jadi
-  // `(req as ...).cf` selalu undefined: jalur lama itu mati. Header yang
-  // benar-benar dikirim Cloudflare adalah `cf-ipcountry` berisi dua huruf
-  // kapital ("ID", "SG"); "XX" (tidak diketahui) dan "T1" (Tor) dianggap null.
-  const raw = (req.headers.get("cf-ipcountry") ?? "").trim().toUpperCase();
+  let cf: ReturnType<typeof getCloudflareContext>["cf"];
+  try {
+    cf = getCloudflareContext().cf;
+  } catch {
+    // next dev tidak memiliki konteks request Cloudflare.
+  }
+  const raw = (clean(cf?.country, 120) ?? req.headers.get("cf-ipcountry") ?? "").trim().toUpperCase();
   const country =
     /^[A-Z]{2}$/.test(raw) && raw !== "XX" && raw !== "T1" ? raw : null;
-  // Cloudflare tidak menyediakan header kota di jalur ini.
-  return { country, city: null };
+  // ponytail: teks provinsi–kota memakai kolom city yang ada; pisah jika perlu filter provinsi.
+  const city = [...new Set([clean(cf?.region, 100), clean(cf?.city, 100)].filter(Boolean))]
+    .join(" - ") || null;
+  return { country, city };
 }
 
 const WIB_OFFSET_MS = 7 * 60 * 60 * 1000;
@@ -117,6 +122,8 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
   const supabase = await createSupabaseAdmin();
   const geo = geoOf(req);
   const ua = req.headers.get("user-agent");
+  const brand = parsePhoneBrand(ua,
+    clean((body as Record<string, unknown>).model, 120) || req.headers.get("sec-ch-ua-model"));
   const base = {
     path,
     referrer,
@@ -130,7 +137,7 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
         ip,
         device: parseDevice(ua),
         browser: parseBrowser(ua),
-        phone_brand: parsePhoneBrand(ua),
+        phone_brand: brand,
         country: geo.country,
         city: geo.city,
       },
@@ -160,7 +167,7 @@ export const POST = withJsonErrors(async function POST(req: NextRequest) {
     path,
     device: parseDevice(ua),
     browser: parseBrowser(ua),
-    phoneBrand: parsePhoneBrand(ua),
+    phoneBrand: brand,
     country: geo.country,
     city: geo.city,
     createdAt: new Date().toISOString(),
@@ -275,8 +282,7 @@ export const GET = withJsonErrors(async function GET(req: NextRequest) {
     }
     hourCount.set(hour, (hourCount.get(hour) ?? 0) + 1);
     if (r.country || r.city) {
-      const loc =
-        r.city && r.country ? `${r.city}, ${r.country}` : (r.country ?? "");
+      const loc = formatLocation(r.city ?? null, r.country ?? null);
       locCount.set(loc, (locCount.get(loc) ?? 0) + 1);
     }
   }

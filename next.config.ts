@@ -17,6 +17,7 @@ const securityHeaders = [
   { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" },
   { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
   { key: "Strict-Transport-Security", value: "max-age=31536000; includeSubDomains" },
+  { key: "Accept-CH", value: "Sec-CH-UA-Model" },
 ];
 
 const nextConfig: NextConfig = {

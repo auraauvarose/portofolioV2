@@ -1,4 +1,4 @@
-import { deviceLabel, formatWibTime } from "./visit-log";
+import { deviceLabel, formatLocation, formatWibTime } from "./visit-log";
 
 /**
  * Notifikasi Telegram saat ada pengunjung baru.
@@ -46,8 +46,8 @@ export function shouldNotify(ip: string, now: number = Date.now()): boolean {
 
 /** Isi pesan notifikasi. Dipisah dari pengiriman supaya bisa dites. */
 export function visitMessage(v: VisitNotifyInput): string {
-  const brand = v.phoneBrand?.trim() || "—";
-  const geo = [v.city, v.country].filter(Boolean).join(", ") || "—";
+  const brand = v.phoneBrand?.trim() || "Tidak terdeteksi";
+  const geo = formatLocation(v.city, v.country);
   const device = deviceLabel(v.device) + (v.browser ? ` · ${v.browser}` : "");
   return [
     "👀 Ada yang membuka website kamu",

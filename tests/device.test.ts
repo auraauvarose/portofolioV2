@@ -157,13 +157,30 @@ describe("parsePhoneBrand", () => {
     assert.equal(parsePhoneBrand(mk("Infinix X6819")), "Infinix");
   });
 
-  test("ponsel tak dikenal → 'Lainnya'", () => {
+  test("ponsel tak dikenal → null, tidak menebak merek", () => {
     assert.equal(
       parsePhoneBrand(
         "Mozilla/5.0 (Linux; Android 13; MerekAneh) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Mobile Safari/537.36",
       ),
-      "Lainnya",
+      null,
     );
+  });
+
+  test("model Client Hints memulihkan merek pada UA Android yang dikurangi", () => {
+    const reduced = "Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 Chrome/142.0.0.0 Mobile Safari/537.36";
+    assert.equal(parsePhoneBrand(reduced, '"SM-A536E"'), "Samsung");
+    assert.equal(parsePhoneBrand(reduced, '"RMX3630"'), "Realme");
+    assert.equal(parsePhoneBrand(reduced, '"Infinix X6819"'), "Infinix");
+    assert.equal(parsePhoneBrand(reduced, '"Pixel 9"'), "Google");
+    assert.equal(parsePhoneBrand(reduced, '""'), null);
+  });
+
+  test("tablet dan Mac tidak dibuang; Windows bukan merek Microsoft", () => {
+    assert.equal(parsePhoneBrand("Mozilla/5.0 (iPad; CPU OS 17_0 like Mac OS X) AppleWebKit/605.1.15 Safari/604.1"), "Apple");
+    assert.equal(parsePhoneBrand("Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 Safari/605.1.15"), "Apple");
+    assert.equal(parsePhoneBrand(UA.samsung.replace("SM-A536E", "SM-X710").replace("Mobile ", "")), "Samsung");
+    assert.equal(parsePhoneBrand(UA.chromeWin), null);
+    assert.equal(parsePhoneBrand(null), null);
   });
 
   test("desktop → null (bukan 'Lainnya' — desktop tidak punya merek)", () => {
