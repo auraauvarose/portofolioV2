@@ -574,6 +574,158 @@ body {
   }
 }
 
+/* ---------------------------------------------------------------------------
+   Tier perangkat. `data-tier` (off|low|high) diset di <html> sebelum paint
+   oleh inline script di layout. Semua blok di sini SENGAJA diletakkan sebelum
+   setiap `@media (prefers-reduced-motion: reduce)` di file ini, dan semua
+   deklarasinya non-`!important`, sehingga dua lapis pengaman berlaku:
+   1) urutan cascade (blok reduce muncul belakangan untuk selector yang sama),
+   2) blok reduce yang benar-benar mematikan gerak memakai `!important`, yang
+      menang atas deklarasi non-important apa pun tanpa peduli spesifisitas.
+   Blok ini tidak menyentuh warna, ukuran, font, spacing, layout, z-index, dan
+   tidak menambah overlay/filter/backdrop-filter/animasi infinite baru.
+   --------------------------------------------------------------------------- */
+
+/* Tier off: gerak dekoratif berbiaya paint besar berhenti, sama semangatnya
+   dengan blok prefers-reduced-motion yang sudah ada. Hanya selector mahal
+   (overlay fullscreen, marquee, teks bergradien, SVG loop) yang diduplikasi. */
+html[data-tier="off"] .grain::before,
+html[data-tier="off"] .tv-static::before,
+html[data-tier="off"] .tv-static::after,
+html[data-tier="off"] .footer-mark.footer-mark-color,
+html[data-tier="off"] .animate-marquee,
+html[data-tier="off"] .animate-marquee-reverse,
+html[data-tier="off"] .animate-spin-slow,
+html[data-tier="off"] .animate-color-cycle,
+html[data-tier="off"] .animate-color-cycle-ink,
+html[data-tier="off"] .animate-hero-float,
+html[data-tier="off"] .animate-ping-soft,
+html[data-tier="off"] .eq-bar,
+html[data-tier="off"] .spider-leg {
+  animation: none !important;
+}
+html[data-tier="off"] {
+  scroll-behavior: auto;
+}
+html[data-tier="off"] .reveal.is-visible,
+html[data-tier="off"] .letter.is-in,
+html[data-tier="off"] .menu-item-in,
+html[data-tier="off"] .admin-fade-up,
+html[data-tier="off"] .slide-in-right,
+html[data-tier="off"] .slide-in-left {
+  animation-duration: 0.01s;
+}
+html[data-tier="off"] .grain::before,
+html[data-tier="off"] .tv-static::before,
+html[data-tier="off"] .tv-static::after,
+html[data-tier="off"] .footer-mark.footer-mark-color,
+html[data-tier="off"] .tilt-inner,
+html[data-tier="off"] .hero-tilt-inner,
+html[data-tier="off"] .theme-panel,
+html[data-tier="off"] .spider-thread,
+html[data-tier="off"] .hero-title-3d__heading,
+html[data-tier="off"] .hero-title-3d__line {
+  will-change: auto;
+}
+
+/* Tier low: gerak tetap jalan tapi dihaluskan — waktu lebih panjang, amplitudo
+   noise/scanline dikecilkan (keyframes sendiri, tekstur & ukuran sama), dan
+   `will-change` permanen dimatikan karena perangkat ini justru paling mahal
+   bila layer-nya dipaksa naik ke GPU terus-menerus. */
+@keyframes grain-soft {
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-1%, -1.5%);
+  }
+  20% {
+    transform: translate(1.5%, 1%);
+  }
+  30% {
+    transform: translate(-0.5%, 2%);
+  }
+  40% {
+    transform: translate(2%, -0.5%);
+  }
+  60% {
+    transform: translate(1%, -2%);
+  }
+  70% {
+    transform: translate(-2%, 0.5%);
+  }
+  80% {
+    transform: translate(0.5%, -1%);
+  }
+  90% {
+    transform: translate(1.5%, 2%);
+  }
+}
+@keyframes scan-jump-soft {
+  0% {
+    transform: translateY(0);
+  }
+  100% {
+    transform: translateY(3px);
+  }
+}
+html[data-tier="low"] .grain::before,
+html[data-tier="low"] .tv-static::before {
+  animation-name: grain-soft;
+  animation-duration: 1.1s;
+}
+html[data-tier="low"] .tv-static::after {
+  animation-name: scan-jump-soft;
+  animation-duration: 0.24s;
+}
+html[data-tier="low"] .footer-mark.footer-mark-color {
+  animation-duration: 16s;
+}
+html[data-tier="low"] .spider-leg {
+  animation-duration: 0.62s;
+}
+html[data-tier="low"] .eq-bar {
+  animation-duration: 1.4s;
+}
+html[data-tier="low"] .reveal {
+  --reveal-duration: 1.05s;
+}
+html[data-tier="low"] .reveal-media img {
+  transition-duration: 1.25s;
+}
+html[data-tier="low"] .grain::before,
+html[data-tier="low"] .tv-static::before,
+html[data-tier="low"] .tv-static::after,
+html[data-tier="low"] .footer-mark.footer-mark-color,
+html[data-tier="low"] .tilt-inner,
+html[data-tier="low"] .hero-tilt-inner,
+html[data-tier="low"] .theme-panel,
+html[data-tier="low"] .spider-thread,
+html[data-tier="low"] .hero-title-3d__heading,
+html[data-tier="low"] .hero-title-3d__line {
+  will-change: auto;
+}
+
+/* Tier high: gerak masuk boleh lebih hidup — hanya durasi yang dipendekkan.
+   Tidak ada overlay, filter, backdrop-filter, animasi infinite, atau
+   will-change baru di blok ini. */
+html[data-tier="high"] .reveal {
+  --reveal-duration: 0.72s;
+}
+html[data-tier="high"] .letter.is-in {
+  animation-duration: 0.42s;
+}
+html[data-tier="high"] .menu-item-in {
+  animation-duration: 0.38s;
+}
+html[data-tier="high"] .admin-fade-up {
+  animation-duration: 0.48s;
+}
+html[data-tier="high"] .reveal-media img {
+  transition-duration: 0.85s;
+}
+
 .marquee-paused {
   animation-play-state: paused !important;
 }
@@ -2072,5 +2224,82 @@ summary {
 
   .tv-static::after {
     animation: none !important;
+  }
+}
+
+/* Lanjutan cabang sentuh: gerak masuk di perangkat sentuh DIPERPANJANG supaya
+   lebih halus. Setiap durasi di bawah ini lebih lama daripada nilai basisnya
+   (`.reveal` 0.9s dan varian seluler 0.7s, `.letter.is-in` 0.55s,
+   `.menu-item-in` 0.5s, `.slide-in-right/left` 0.45s), jadi tidak ada satu pun
+   gerak masuk yang dipercepat — arahnya sama dengan blok tier low. `will-change`
+   permanen juga dimatikan karena di perangkat sentuh tidak lagi berguna.
+   Blok ini murni tambahan; aturan pembekuan .tv-static di atas tidak disentuh
+   dan tidak ada properti tampilan yang berubah. */
+@media (hover: none), (pointer: coarse) {
+  .reveal {
+    --reveal-duration: 1.15s;
+  }
+  .letter.is-in {
+    animation-duration: 0.68s;
+  }
+  .menu-item-in {
+    animation-duration: 0.62s;
+  }
+  .slide-in-right,
+  .slide-in-left {
+    animation-duration: 0.58s;
+  }
+  /* Blok tier high punya spesifisitas lebih tinggi (html[data-tier="high"] …),
+     jadi dua durasi di bawah ini harus ditulis ulang di sini — kalau tidak,
+     perangkat high bersentuh tetap dapat 0.42s/0.38s yang LEBIH PENDEK dari
+     basis (0.55s/0.5s). Nilainya sama dengan penghalusan di atas. */
+  html[data-tier="high"] .letter.is-in {
+    animation-duration: 0.68s;
+  }
+  html[data-tier="high"] .menu-item-in {
+    animation-duration: 0.62s;
+  }
+  .hero-title-3d__heading,
+  .hero-title-3d__line,
+  .hero-title-3d__stage,
+  .tilt-inner,
+  .theme-panel,
+  .spider-thread {
+    will-change: auto;
+  }
+}
+
+/* Penutup cascade tier: apa pun yang dihidupkan oleh blok data-tier di atas,
+   tetap dimatikan bila pengguna meminta reduced motion. Blok ini sengaja
+   diletakkan paling akhir file dan memakai `!important`, jadi
+   prefers-reduced-motion menang atas data-tier="high" lewat dua jalur
+   sekaligus: urutan cascade dan kepentingan deklarasi. */
+@media (prefers-reduced-motion: reduce) {
+  .grain::before,
+  .tv-static::before,
+  .tv-static::after,
+  .footer-mark.footer-mark-color,
+  .eq-bar,
+  .spider-leg,
+  .menu-item-in,
+  .menu-fade-in,
+  .slide-in-right,
+  .slide-in-left,
+  .admin-list > *,
+  .animate-marquee,
+  .animate-marquee-reverse,
+  .animate-spin-slow,
+  .animate-color-cycle,
+  .animate-color-cycle-ink,
+  .animate-hero-float,
+  .animate-ping-soft {
+    animation: none !important;
+  }
+  .reveal,
+  .letter,
+  .reveal-media img,
+  .admin-fade-up {
+    animation: none !important;
+    transition: none !important;
   }
 }

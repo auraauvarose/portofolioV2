@@ -126,6 +126,10 @@ export default function HomeClient({
 
   useEffect(() => {
     const isTouchDevice = window.matchMedia("(hover: none), (pointer: coarse)").matches;
+    // Tier perangkat (data-tier pra-paint) hanya menyetel kehalusan transisi
+    // kelas scroll: tier lemah = jendela lebih panjang supaya tidak berkedip.
+    const tier = document.documentElement.getAttribute("data-tier");
+    const scrollEndDelay = tier === "high" ? 110 : 220;
     const markScrolling = () => {
       if (!isTouchDevice) return;
       document.documentElement.classList.add("is-scrolling");
@@ -133,7 +137,7 @@ export default function HomeClient({
       scrollEndTimer.current = window.setTimeout(() => {
         document.documentElement.classList.remove("is-scrolling");
         scrollEndTimer.current = null;
-      }, 140);
+      }, scrollEndDelay);
     };
 
     const onScroll = (event?: Event) => {

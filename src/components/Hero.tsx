@@ -107,15 +107,28 @@ export default function Hero() {
   useEffect(() => {
     if (window.matchMedia("(hover: none), (pointer: coarse)").matches) return;
 
+    // Tier perangkat (data-tier pra-paint) hanya menyetel kehalusan peredup:
+    // tier lemah konvergen dalam ~8 frame (jangan bebani perangkat lemah dengan
+    // puluhan frame), tier tinggi tetap paling halus. Nilai akhir snap ke target.
+    const tier = document.documentElement.getAttribute("data-tier");
+    const ease = tier === "high" ? 0.35 : 0.6;
     const onScroll = () => {
       if (scrollRAF.current) return;
-      scrollRAF.current = requestAnimationFrame(() => {
+      const step = () => {
         scrollRAF.current = 0;
-        const d = Math.min(1, window.scrollY / window.innerHeight);
-        if (Math.abs(d - lastDim.current) < 0.001) return;
-        lastDim.current = d;
-        heroRef.current?.style.setProperty("--hero-dim", String(d));
-      });
+        const target = Math.min(1, window.scrollY / window.innerHeight);
+        const current = lastDim.current;
+        const next =
+          Math.abs(target - current) < 0.002
+            ? target
+            : current + (target - current) * ease;
+        if (next !== current) {
+          lastDim.current = next;
+          heroRef.current?.style.setProperty("--hero-dim", String(next));
+        }
+        if (next !== target) scrollRAF.current = requestAnimationFrame(step);
+      };
+      scrollRAF.current = requestAnimationFrame(step);
     };
     onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });

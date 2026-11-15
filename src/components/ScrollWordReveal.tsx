@@ -102,6 +102,10 @@ export default function ScrollWordReveal({
   "aria-label": ariaLabel,
 }: ScrollWordRevealProps) {
   const reduceMotion = useReducedMotion();
+  // Tier perangkat (data-tier, di-set pra-paint oleh layout) hanya menyetel
+  // waktu & spring reveal — bukan tampilan. Tier "off" sudah ditangani cabang
+  // reduceMotion di bawah, jadi di sini cukup "high" vs sisanya.
+  const tier = globalThis.document?.documentElement.dataset.tier === "high" ? "high" : "low";
   const rootRef = useRef<HTMLSpanElement>(null);
   // The scrub window ends at the reading line (55% viewport height), not at
   // the top edge (14%). Ending at 14% kept the last word blurred until the
@@ -113,9 +117,10 @@ export default function ScrollWordReveal({
     offset: ["start 0.86", "start 0.55"],
   });
   const scrubProgress = useSpring(scrollYProgress, {
-    stiffness: 150,
-    damping: 28,
-    mass: 0.45,
+    // Tier kuat: spring lebih gesit (hidup). Tier lemah/off: lebih teredam halus.
+    stiffness: tier === "high" ? 165 : 125,
+    damping: tier === "high" ? 26 : 34,
+    mass: tier === "high" ? 0.4 : 0.5,
     restDelta: 0.0005,
   });
   const [isIntersecting, setIsIntersecting] = useState(false);
@@ -219,11 +224,21 @@ export default function ScrollWordReveal({
     );
   }
 
+  // Amplitudo & waktu reveal per tier: high lebih hidup, low lebih halus.
+  const lift = tier === "high" ? 18 : 8;
+  const tilt = tier === "high" ? 1.6 : 0.6;
+  const blurFrom = tier === "high" ? 9 : 5;
+  const revealDuration = tier === "high" ? (replay ? 0.36 : 0.55) : replay ? 0.55 : 0.9;
+
   const container: Variants = {
     hidden: {},
     visible: {
       transition: {
-        staggerChildren: replay ? Math.min(stagger, 0.018) : stagger,
+        staggerChildren: replay
+          ? Math.min(stagger, 0.018)
+          : tier === "high"
+            ? stagger
+            : stagger * 0.6,
       },
     },
   };
@@ -231,15 +246,15 @@ export default function ScrollWordReveal({
   const word: Variants = {
     hidden: {
       opacity: fine ? baseOpacity : 1,
-      y: fine && replay && entryDirection === "from-top" ? -14 : fine ? 14 : 0,
+      y: fine && replay && entryDirection === "from-top" ? -lift : fine ? lift : 0,
       rotateZ:
         fine && replay && entryDirection === "from-top"
-          ? -1.2
+          ? -tilt
           : fine
-            ? 1.2
+            ? tilt
             : 0,
       ...(hasColorRamp ? { color: baseColor } : {}),
-      ...(fine ? { filter: "blur(7px)" } : {}),
+      ...(fine ? { filter: `blur(${blurFrom}px)` } : {}),
     },
     visible: {
       opacity: 1,
@@ -248,7 +263,7 @@ export default function ScrollWordReveal({
       ...(hasColorRamp ? { color: fullColor } : {}),
       ...(fine ? { filter: "blur(0px)" } : {}),
       transition: {
-        duration: replay ? 0.42 : 0.65,
+        duration: revealDuration,
         ease: [0.16, 1, 0.3, 1],
       },
     },

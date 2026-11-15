@@ -244,7 +244,14 @@ export default async function RootLayout({
             // crawler yang tidak menjalankannya — konten tetap terlihat, bukan
             // tersembunyi selamanya karena IntersectionObserver tidak pernah
             // sempat berjalan.
-            __html: `(function(){var r=document.documentElement;r.classList.add('js');try{var t=localStorage.getItem('theme');var dark=t==='light'?false:(t==='dark'?true:true);if(dark){r.classList.add('dark');r.style.colorScheme='dark';}else{r.classList.remove('dark');r.style.colorScheme='light';}}catch(e){}})();`,
+            //
+            // `data-tier` (off|low|high) dihitung di sini — sebelum paint —
+            // agar CSS/komponen animasi tidak berkedip menunggu React. Logika
+            // sengaja diduplikasi dari src/lib/perf-tier.ts (skrip ini jalan
+            // sebelum modul apa pun dimuat). Ditaruh DI LUAR try/catch tema
+            // supaya tetap terpasang saat localStorage diblokir. Tier TIDAK
+            // boleh mengubah tampilan — hanya intensitas gerak.
+            __html: `(function(){var r=document.documentElement;r.classList.add('js');try{var t=localStorage.getItem('theme');var dark=t==='light'?false:(t==='dark'?true:true);if(dark){r.classList.add('dark');r.style.colorScheme='dark';}else{r.classList.remove('dark');r.style.colorScheme='light';}}catch(e){}var mq=function(q){try{return window.matchMedia(q).matches;}catch(e){return false;}};var rm=mq('(prefers-reduced-motion: reduce)');var sd=mq('(prefers-reduced-data: reduce)')||!!(navigator.connection&&navigator.connection.saveData);var tier=rm?'off':sd?'low':((navigator.hardwareConcurrency||4)>=8&&(navigator.deviceMemory||4)>=8)?'high':'low';r.setAttribute('data-tier',tier);})();`,
           }}
         />
         <script

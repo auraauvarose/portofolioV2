@@ -135,7 +135,9 @@ export default function SiteConstellation() {
     };
     const enabled = () => fine.matches && !reduced.matches && !document.hidden;
     // Spring teredam (bukan lerp per frame) supaya bukit meluncur halus.
-    const stiffness = 130, damping = 24;
+    // Tier perangkat menyetel kehalusan/kelincahan saja — geometri tak berubah.
+    const high = document.documentElement.getAttribute("data-tier") === "high";
+    const stiffness = high ? 150 : 118, damping = high ? 22 : 30;
     const frame = (now: number) => {
       raf = 0;
       if (!enabled()) return;
