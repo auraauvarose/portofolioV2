@@ -2362,6 +2362,19 @@ summary {
   }
 }
 
+/* Blur-to-sharp khas "Tentang Saya" dikembalikan untuk HP, tapi sekali jalan:
+   animasi `filter` hanya hidup 0.72s saat kata mulai muncul, lalu properti
+   kembali ke `none` (tanpa fill forwards) sehingga tidak ada layer blur yang
+   menetap dan tidak ada biaya raster selama jari masih menggeser. */
+@keyframes hp-word-blur {
+  from {
+    filter: blur(5px);
+  }
+  to {
+    filter: blur(0);
+  }
+}
+
 /* Cascade kata (ScrollWordReveal) — dipisah supaya reduced motion tidak
    pernah melihat `translate` statis yang memotong kata di dalam mask. */
 @media (prefers-reduced-motion: no-preference) {
@@ -2390,6 +2403,82 @@ summary {
     .sw-cascade.is-revealed .scroll-word-inner {
       opacity: 1;
       translate: 0 0;
+      animation: hp-word-blur 0.72s cubic-bezier(0.16, 1, 0.3, 1) backwards;
+    }
+  }
+}
+
+/* ── Scroll-driven animations — khusus HP ───────────────────────────────
+   Teknologi: CSS scroll-driven animations (`animation-timeline` +
+   `animation-range`, Chrome 115+, Safari 26, Baseline Oct 2026). Animasi
+   menjadi fungsi langsung posisi scroll dan dikerjakan compositor: tanpa
+   scroll listener, tanpa rAF, tanpa layout ulang — jadi tidak ada jank
+   saat jari menggeser layar. Progressive enhancement: browser lama hanya
+   kehilangan dekorasi ini, tidak ada yang rusak.
+   Guard `@supports … (animation-range: entry)` wajib; ada browser yang
+   melaporkan `animation-timeline` padahal rentangnya belum jalan. */
+@keyframes hp-read-progress {
+  from {
+    transform: scaleX(0);
+  }
+  to {
+    transform: scaleX(1);
+  }
+}
+@keyframes hp-hero-exit {
+  from {
+    scale: 1;
+    opacity: 1;
+  }
+  to {
+    scale: 0.94;
+    opacity: 0.3;
+  }
+}
+@keyframes hp-media-settle {
+  from {
+    scale: 1.055;
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@supports ((animation-timeline: scroll()) and (animation-timeline: view()) and (animation-range: entry)) {
+  @media (prefers-reduced-motion: no-preference) {
+    @media (hover: none), (pointer: coarse) {
+      /* 1. Garis progres baca di tepi atas. `scroll(root)` = timeline
+            seluruh halaman, jadi lebarnya persis seberapa jauh sudah digulir. */
+      body::after {
+        content: "";
+        position: fixed;
+        inset: 0 0 auto;
+        height: 2px;
+        z-index: 90;
+        pointer-events: none;
+        background: linear-gradient(90deg, var(--color-accent), #ff7a50);
+        transform-origin: 0 50%;
+        transform: scaleX(0);
+        animation: hp-read-progress linear both;
+        animation-timeline: scroll(root block);
+      }
+      /* 2. Judul hero mundur ke kedalaman saat digulir keluar (0 → 70vh).
+            `scale` longhand (bukan `transform`) supaya tidak menimpa
+            transform 3D milik baris judul. */
+      .hero-title-3d__stage {
+        animation: hp-hero-exit linear both;
+        animation-timeline: scroll(root block);
+        animation-range: 0 70vh;
+      }
+      /* 3. Foto ikut "mendarat": saat masuk viewport ia 5,5% lebih besar,
+            lalu menyusut pas ke bingkainya (view() = timeline elemen itu
+            sendiri). Hanya mengecil, jadi tepi gambar tidak pernah bolong;
+            `scale` longhand jadi tetap bisa jalan bersama zoom reveal. */
+      .reveal-media img {
+        animation: hp-media-settle linear both;
+        animation-timeline: view();
+        animation-range: cover 0% cover 85%;
+      }
     }
   }
 }
