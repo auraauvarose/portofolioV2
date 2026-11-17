@@ -31,7 +31,7 @@ import type {
   Testimonial,
 } from "@/types";
 
-const GREETINGS = ["Hello", "Hola"];
+const GREETINGS = ["Aurose"];
 const GREET_MS = 320;
 const HOLD_MS = 250;
 const INTRO_KEY = "aura:intro-shown";

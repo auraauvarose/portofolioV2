@@ -20,9 +20,6 @@ import type { Localized } from "@/types";
 
 type TechCategory = { title: Localized; items: readonly string[] };
 
-/* Nomor bab section 05. Ditulis sekali saja di sini. */
-const CHAPTER = "05";
-
 const UI: Record<string, Localized> = {
   official: { en: "Official site", id: "Situs resmi" },
 };
@@ -454,8 +451,6 @@ export default function TechStack() {
               style={{ opacity: kickerOpacity }}
               className="flex items-center justify-center gap-3 font-data text-xs uppercase tracking-[0.28em] text-ecru/60"
             >
-              <span className="text-accent">{CHAPTER}</span>
-              <span aria-hidden className="h-px w-6 bg-ecru/30" />
               <span>{t(techStack.kicker)}</span>
             </motion.p>
 
@@ -535,10 +530,6 @@ export default function TechStack() {
             <div className="mx-auto max-w-7xl">
               <div className="flex items-center gap-4 font-data text-xs uppercase tracking-[0.24em] text-ecru/50 max-md:flex-wrap max-md:gap-2">
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-accent" />
-                <span className="text-ecru">{CHAPTER}</span>
-                <span aria-hidden className="text-ecru/25">
-                  /
-                </span>
                 <span>{heading}</span>
               </div>
               <div aria-hidden className="mt-4 flex gap-2">
@@ -565,8 +556,6 @@ export default function TechStack() {
         <div className="ts-static hidden px-6 py-24 max-md:py-16 md:px-10 md:py-32">
           <div className="mx-auto max-w-7xl">
             <p className="font-data text-xs uppercase tracking-[0.28em] text-ecru/60">
-              <span className="text-accent">{CHAPTER}</span>
-              <span aria-hidden className="mx-3 inline-block h-px w-6 align-middle bg-ecru/30" />
               {t(techStack.kicker)}
             </p>
             <h2 className="mt-3 font-hero uppercase leading-[0.9] text-ecru text-[clamp(3rem,17vw,4.75rem)] md:text-[clamp(4rem,11vw,12rem)]">
@@ -584,7 +573,7 @@ export default function TechStack() {
                     id={`ts-static-cat-${ci}`}
                     className="font-data text-xs uppercase tracking-[0.2em] text-accent"
                   >
-                    {CHAPTER}.{ci + 1} — {t(cat.title)}
+                    {ci + 1} — {t(cat.title)}
                   </h3>
                   <ul className="mt-4 flex flex-col gap-4">
                     {cat.items.map((label) => {

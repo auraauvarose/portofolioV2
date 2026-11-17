@@ -27,7 +27,6 @@ export default function WhatIDo() {
     <section id="whatido" className="relative w-full">
       <div className="relative mx-auto flex max-w-6xl flex-col px-6 pt-2 pb-2 md:px-12 lg:px-20 lg:pt-24 lg:pb-24">
         <Reveal variant="left" replay className="mb-10 flex items-center gap-4 text-sm uppercase tracking-[0.4em] text-gray-500 md:mb-14">
-          <span className="font-display text-accent">02</span>
           <span>{t(whatIDo.kicker)}</span>
           <span className="h-px flex-1 bg-black/10 dark:bg-white/10" />
         </Reveal>

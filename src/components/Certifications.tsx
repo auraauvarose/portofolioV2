@@ -181,7 +181,6 @@ export default function Certifications({
         <SectionHeading
           kicker={certifications.kicker}
           heading={certifications.heading}
-          index="04"
           align="center"
         />
 

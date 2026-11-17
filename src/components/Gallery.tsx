@@ -399,7 +399,7 @@ export default function Gallery({
   return (
     <section className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} index="07" />
+        <SectionHeading kicker={gallery.kicker} heading={gallery.heading} />
         {body}
       </div>
       {modal}

@@ -25,7 +25,6 @@ export default function Showcase({
       <div className="relative mx-auto max-w-7xl">
         <Reveal variant="zoom" className="mb-12 md:mb-16">
           <div className="flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
-            <span className="sh-index font-display text-accent">06</span>
             <span className="sh-kicker">{t(showcase.kicker)}</span>
             <span className="sh-line h-px flex-1 bg-white/10" />
           </div>

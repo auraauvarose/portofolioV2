@@ -68,18 +68,9 @@ export default function Contact() {
     <section id="contact" ref={sectionRef} className="relative overflow-hidden px-6 py-16 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-7xl">
         <Reveal variant="left" className="mb-10 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
-          <span className="font-display text-accent">07</span>
           <span>{t(contact.kicker)}</span>
           <span className="h-px flex-1 bg-white/10" />
         </Reveal>
-
-        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#22c55e] animate-color-cycle-ink">
-          <span className="relative flex h-2 w-2">
-            <span className="absolute inline-flex h-full w-full rounded-full bg-[#22c55e] opacity-75 [animation:ping-soft_1.6s_ease-out_infinite,color-cycle_8s_linear_infinite]" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-[#22c55e] animate-color-cycle" />
-          </span>
-          {t(contact.available)}
-        </div>
 
         <Reveal className="mt-2">
           <h2

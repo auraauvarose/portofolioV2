@@ -36,41 +36,19 @@ export const about = {
   kicker: { en: "About Me", id: "Tentang Saya" },
   paragraphs: [
     {
-      en: "Hi! I'm Aurose, a first-semester Informatics student carving my path in the tech world. My journey isn't about ease — it's about persistence through limitations.",
-      id: "Hai! Saya Aurose, seorang mahasiswa Informatika semester 1 yang sedang meniti jalan di dunia teknologi. Perjalanan saya bukan tentang kemudahan, melainkan tentang ketekunan di tengah keterbatasan.",
+      en: "I'm Aurose, a first-semester Informatics student in Indonesia. I started in visual design: layout, typography, color. Moved to code in 2022.",
+      id: "Saya Aurose, mahasiswa semester satu Informatika di Indonesia. Saya mulai dari desain visual: layout, tipografi, warna. Pindah ke kode pada 2022.",
       highlight: {
-        en: ["Aurose"],
-        id: ["Aurose"],
+        en: ["visual", "design"],
+        id: ["desain", "visual"],
       },
     },
     {
-      en: "Currently I'm actively exploring Arch Linux and building this personal portfolio as real proof of my growth. My focus is on mastering strong programming logic and staying consistent — learning every night to reach a professional level.",
-      id: "Saat ini, saya sedang aktif mendalami Arch Linux dan membangun portofolio pribadi sebagai bukti nyata perkembangan saya. Fokus saya saat ini adalah menguasai logika pemrograman yang kuat dan terus konsisten belajar setiap malam demi mencapai level profesional.",
+      en: "I build with Next.js, React, TypeScript, and Supabase. This site is one of those builds: the guestbook, certificate requests, and admin panel all run for real. The rest is on GitHub.",
+      id: "Saya membangun dengan Next.js, React, TypeScript, dan Supabase. Situs ini salah satunya: buku tamu, permintaan sertifikat, dan panel admin benar-benar berjalan. Sisanya ada di GitHub.",
       highlight: {
-        en: [
-          "Arch",
-          "Linux",
-          "consistent",
-          "learning",
-          "every",
-          "night",
-          "to",
-          "reach",
-          "a",
-          "professional",
-          "level",
-        ],
-        id: [
-          "Arch",
-          "Linux",
-          "konsisten",
-          "belajar",
-          "setiap",
-          "malam",
-          "mencapai",
-          "level",
-          "profesional",
-        ],
+        en: ["Next.js", "React", "Supabase"],
+        id: ["Next.js", "Supabase"],
       },
     },
   ],
@@ -84,29 +62,29 @@ export const whatIDo = {
     {
       title: { en: "UI UX", id: "UI UX" },
       description: {
-        en: "I search the internet for visual references and then combine them to create my own work.",
-        id: "Saya mencari referensi visual di internet lalu menggabungkannya untuk menciptakan karya saya sendiri.",
+        en: "Layout, typography, and interaction decided before the first component. References first, then rebuilt until it looks like mine.",
+        id: "Layout, tipografi, dan interaksi diputuskan sebelum komponen pertama. Referensi dulu, lalu dibangun ulang sampai terasa milik sendiri.",
       },
     },
     {
       title: { en: "Website", id: "Website" },
       description: {
-        en: "Building responsive and high-performance websites using the latest technologies.",
-        id: "Membangun website responsif dan berkinerja tinggi menggunakan teknologi terkini.",
+        en: "Next.js, React, and TypeScript. Server-rendered pages, responsive layout, and a build that has to pass typecheck before it ships.",
+        id: "Next.js, React, dan TypeScript. Halaman server-rendered, layout responsif, dan build yang wajib lolos typecheck sebelum rilis.",
       },
     },
     {
       title: { en: "Mobile", id: "Mobile" },
       description: {
-        en: "Crafting intuitive mobile experiences for both iOS and Android platforms.",
-        id: "Merancang pengalaman mobile yang intuitif untuk platform iOS dan Android.",
+        en: "The same interfaces reworked for small screens: touch targets, gestures, and layouts that never depend on hover.",
+        id: "Antarmuka yang sama, dirancang ulang untuk layar kecil: target sentuh, gesture, dan layout yang tidak bergantung pada hover.",
       },
     },
     {
       title: { en: "Backend", id: "Backend" },
       description: {
-        en: "Developing robust server-side logic and scalable database architectures.",
-        id: "Mengembangkan logika server-side yang andal dan arsitektur basis data yang skalabel.",
+        en: "Supabase and PostgreSQL: schema, queries, row-level security, and the API routes in between.",
+        id: "Supabase dan PostgreSQL: skema, query, row-level security, dan API route di antaranya.",
       },
     },
   ],
@@ -151,8 +129,8 @@ export const education = {
         id: "Indonesia",
       },
       description: {
-        en: "Enrolled in a Bachelor of Informatics degree. Actively exploring Arch Linux, mastering strong programming logic, and building real projects to reach a professional level.",
-        id: "Menempuh pendidikan S1 Informatika. Aktif mendalami Arch Linux, menguasai logika pemrograman yang kuat, dan membangun proyek nyata untuk mencapai level profesional.",
+        en: "Bachelor of Informatics. Most of what I use daily comes from self-study: Linux, the shell, and projects that have to actually run.",
+        id: "S1 Informatika. Sebagian besar yang saya pakai sehari-hari datang dari belajar sendiri: Linux, shell, dan proyek yang harus benar-benar jalan.",
       },
     },
   ],
@@ -162,8 +140,8 @@ export const certifications = {
   kicker: { en: "Certifications", id: "Sertifikasi" },
   heading: { en: "Credentials & Courses", id: "Kredensial & Kursus" },
   description: {
-    en: "Certifications and credentials I've earned along the way.",
-    id: "Sertifikasi dan kredensial yang telah saya raih.",
+    en: "Internship certificates, professional courses, and technical exams. Click a card to open the scan.",
+    id: "Sertifikat magang, kursus profesional, dan ujian teknis. Klik kartu untuk membuka hasil pindainya.",
   },
   categories: {
     internship: { en: "Internship", id: "Magang" },
@@ -204,8 +182,8 @@ export const techStack = {
 
 export const techDescriptions: Record<string, Localized> = {
   JavaScript: {
-    en: "The programming language of the web — powers interactive pages and server logic.",
-    id: "Bahasa pemrograman untuk web — menggerakkan halaman interaktif dan logika server.",
+    en: "The language every browser runs. Used here for UI and the API layer.",
+    id: "Bahasa yang dijalankan semua browser. Dipakai di sini untuk UI dan lapisan API.",
   },
   TypeScript: {
     en: "A typed superset of JavaScript that catches errors at compile time.",
@@ -224,16 +202,16 @@ export const techDescriptions: Record<string, Localized> = {
     id: "Runtime JavaScript untuk menjalankan JS di server dan membangun API.",
   },
   Python: {
-    en: "A versatile language for scripting, automation, data processing, and backends.",
-    id: "Bahasa serbaguna untuk scripting, otomasi, pengolahan data, dan backend.",
+    en: "Scripting, automation, data processing, and the occasional backend.",
+    id: "Scripting, otomasi, pengolahan data, dan sesekali backend.",
   },
   Supabase: {
     en: "Open-source Firebase alternative: Postgres database, auth, and storage.",
     id: "Alternatif open-source Firebase: database Postgres, auth, dan storage.",
   },
   PostgreSQL: {
-    en: "A powerful open-source relational database built on SQL.",
-    id: "Database relasional open-source yang kuat, dibangun di atas SQL.",
+    en: "Relational database with SQL. Supabase runs on it.",
+    id: "Database relasional dengan SQL. Supabase berjalan di atasnya.",
   },
   SQL: {
     en: "The standard language for querying and managing relational databases.",
@@ -244,8 +222,8 @@ export const techDescriptions: Record<string, Localized> = {
     id: "Framework Node.js minimal untuk membangun REST API dan web server.",
   },
   Docker: {
-    en: "Containerization — packages apps with their environment for consistent deploys.",
-    id: "Kontainerisasi — mengemas aplikasi beserta lingkungannya agar deploy konsisten.",
+    en: "App plus its environment, packaged as one image.",
+    id: "Aplikasi beserta lingkungannya, dikemas jadi satu image.",
   },
   "Git & GitHub": {
     en: "Version control and collaboration platform for tracking code and teamwork.",
@@ -256,8 +234,8 @@ export const techDescriptions: Record<string, Localized> = {
     id: "Distro Linux harian saya untuk development, server, dan kerja shell.",
   },
   "VS Code": {
-    en: "My code editor — extensions, debugging, and Git integration.",
-    id: "Editor kode saya — ekstensi, debugging, dan integrasi Git.",
+    en: "My editor: extensions, debugging, Git.",
+    id: "Editor saya: ekstensi, debugging, Git.",
   },
   "Arch Linux": {
     en: "A minimal rolling-release distro I use to learn Linux internals and customize everything.",
@@ -300,8 +278,8 @@ export const gallery = {
   kicker: { en: "Gallery", id: "Galeri" },
   heading: { en: "Photo Gallery", id: "Galeri Foto" },
   description: {
-    en: "Moments, events, and behind-the-scenes snapshots.",
-    id: "Momen, acara, dan cuplikan di balik layar.",
+    en: "Photos from events, campus, and build sessions.",
+    id: "Foto dari acara, kampus, dan sesi ngoding.",
   },
   allLabel: { en: "All", id: "Semua" },
   emptyFiltered: {
@@ -326,7 +304,6 @@ export const showcase = {
 
 export const contact = {
   kicker: { en: "Get in Touch", id: "Hubungi Saya" },
-  available: { en: "Available for work", id: "Tersedia untuk bekerja" },
   line1: { en: "LET'S", id: "MARI" },
   line2: { en: "WORK", id: "BEKERJA" },
   line3: { en: "TOGETHER.", id: "BERSAMA." },
@@ -346,8 +323,8 @@ export const comments = {
   kicker: { en: "Guestbook", id: "Buku Tamu" },  index: "08",
   heading: { en: "Visitor Notes", id: "Catatan Pengunjung" },
   description: {
-    en: "Drop a message — say hi, share thoughts, or just leave a trace that you were here.",
-    id: "Tinggalkan pesan — sapa, bagikan pikiran, atau tinggalkan jejak bahwa kamu pernah singgah.",
+    en: "Leave your name and a note. Everything is stored in Supabase.",
+    id: "Tinggalkan nama dan pesan. Semuanya disimpan di Supabase.",
   },
   formTitle: { en: "Leave a Comment", id: "Tinggalkan Komentar" },
   nameLabel: { en: "Name", id: "Nama" },
@@ -397,8 +374,8 @@ export const contactForm = {
   closeLabel: { en: "Close", id: "Tutup" },
   heading: { en: "Contact Privately", id: "Hubungi secara pribadi" },
   description: {
-    en: "Tell me what you're building. I read every message and usually reply within 1–2 days.",
-    id: "Ceritakan apa yang sedang kamu bangun. Saya membaca setiap pesan dan biasanya membalas dalam 1–2 hari.",
+    en: "Messages come straight to my inbox. I reply within 1–2 days.",
+    id: "Pesan langsung masuk ke inbox saya. Saya balas dalam 1–2 hari.",
   },
   nameLabel: { en: "Name", id: "Nama" },
   namePlaceholder: { en: "Your name", id: "Namamu" },

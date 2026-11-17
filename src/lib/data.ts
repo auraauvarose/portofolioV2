@@ -24,9 +24,9 @@ const DEMO_PROJECTS: Project[] = [
     title_en: "Portfolio Dashboard",
     title_id: "Dasbor Portofolio",
     description_en:
-      "A creative and interactive developer portfolio with custom accent synchronization, terminal shells, live committing timeline feeds, and a clean responsive layout architecture.",
+      "The site you are reading. Next.js and Supabase, with a guestbook, certificate requests, and an admin panel.",
     description_id:
-      "Portofolio developer yang kreatif dan interaktif dengan sinkronisasi aksen kustom, shell terminal, umpan timeline komit live, dan arsitektur layout responsif yang bersih.",
+      "Situs yang sedang kamu baca. Next.js dan Supabase, dengan buku tamu, permintaan sertifikat, dan panel admin.",
     category: "professional",
     year: "2025",
     image_url: null,
@@ -46,9 +46,9 @@ const DEMO_PROJECTS: Project[] = [
     title_en: "Retro Game Arcade Hub",
     title_id: "Hub Game Arcade Retro",
     description_en:
-      "An interactive 2D web arcade cabinet hosting Tetris, Snake, and Memory cards. Equipped with a synchronized global leaderboard and robust offline cache fallbacks.",
+      "A 2D arcade with Tetris, Snake, and Memory. Scores go to a shared leaderboard and the games stay playable offline.",
     description_id:
-      "Kabinet arcade web 2D interaktif yang menampilkan game Tetris, Snake, dan Memory. Dilengkapi papan peringkat global yang tersinkronisasi dan fallback cache offline yang andal.",
+      "Arcade 2D berisi Tetris, Snake, dan Memory. Skor masuk ke papan peringkat bersama dan gamenya tetap bisa dimainkan offline.",
     category: "professional",
     year: "2025",
     image_url: null,

@@ -158,8 +158,8 @@ describe("Heading section — varian rata tengah opt-in", () => {
     );
   });
 
-  test("hanya section 04 memakai align center", () => {
-    assert.match(CERT, /index="04"\s+align="center"/, "section 04 belum center");
+  test("hanya Certifications memakai align center", () => {
+    assert.match(CERT, /align="center"/, "Certifications belum center");
     for (const other of [
       "CommentsClient",
       "ExperienceTimeline",

@@ -13,7 +13,6 @@ export default function About() {
     <section id="about" className="relative px-6 py-16 md:px-10 md:py-32">
       <div className="relative mx-auto max-w-7xl">
           <Reveal variant="left" replay className="mb-8 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400">
-            <span className="font-display text-accent">01</span>
             <span>{t(about.kicker)}</span>
             <span className="h-px flex-1 bg-white/10" />
           </Reveal>

@@ -24,7 +24,6 @@ export default function Testimonials({ items }: { items: Testimonial[] }) {
         <SectionHeading
           kicker={testimonialsSection.kicker}
           heading={testimonialsSection.heading}
-          index="06"
         />
 
         <Reveal className="mb-12 max-w-2xl text-gray-400">

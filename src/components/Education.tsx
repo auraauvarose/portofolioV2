@@ -54,7 +54,6 @@ export default function Education() {
   }, [education.items.length]);
 
   const items = education.items;
-  const ongoing = items.some((item) => readsCurrent(item.period));
 
   return (
     <section id="education" className="relative py-16 md:py-28">
@@ -63,7 +62,6 @@ export default function Education() {
           variant="left"
           className="mb-6 flex items-center gap-4 text-sm uppercase tracking-widest text-gray-400"
         >
-          <span className="font-display text-accent">03</span>
           <span>{t(education.kicker)}</span>
           <span className="h-px flex-1 bg-white/10" />
         </Reveal>
@@ -71,7 +69,7 @@ export default function Education() {
         <div className="mb-8">
           <ScrollWordReveal
             as="h2"
-            text={t({ en: "Learning journey", id: "Perjalanan belajar" })}
+            text={t({ en: "Formal and self-taught", id: "Formal dan otodidak" })}
             baseOpacity={0.25}
             className="text-bricolage text-4xl uppercase text-white md:text-6xl"
           />
@@ -82,18 +80,6 @@ export default function Education() {
             {String(items.length).padStart(2, "0")}{" "}
             {t({ en: "Entries", id: "Entri" })}
           </span>
-          {ongoing && (
-            <>
-              <span aria-hidden="true" className="h-3 w-px bg-white/15" />
-              <span className="inline-flex items-center gap-2 text-accent">
-                <span
-                  aria-hidden="true"
-                  className="h-1.5 w-1.5 rounded-full bg-accent"
-                />
-                {t({ en: "In progress", id: "Sedang berjalan" })}
-              </span>
-            </>
-          )}
         </div>
       </div>
 

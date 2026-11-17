@@ -375,7 +375,7 @@ export default function Projects({
   return (
     <section id="work" className="px-6 py-16 md:px-10 md:py-32">
       <div className="mx-auto max-w-7xl">
-        <SectionHeading kicker={work.kicker} heading={work.heading} index="06" />
+        <SectionHeading kicker={work.kicker} heading={work.heading} />
         {body}
       </div>
       {modal}

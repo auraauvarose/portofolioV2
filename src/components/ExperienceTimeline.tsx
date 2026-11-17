@@ -17,7 +17,6 @@ export default function ExperienceTimeline({ items }: { items: Experience[] }) {
         <SectionHeading
           kicker={experienceSection.kicker}
           heading={experienceSection.heading}
-          index="03"
         />
 
         <Reveal className="mb-12 max-w-2xl text-gray-400">

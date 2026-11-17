@@ -92,13 +92,7 @@ describe("A. stage scroll-pinned", () => {
 });
 
 describe("B. layar judul", () => {
-  test("kicker: nomor bab sekali + label dari config, kecil & uppercase", () => {
-    assert.match(CODE, /const CHAPTER = "05"/, "nomor bab harus satu sumber");
-    assert.equal(
-      TECH.match(/"05"/g)?.length,
-      1,
-      "angka 05 tidak boleh diduplikasi sebagai literal lain",
-    );
+  test("kicker: label dari config, kecil & uppercase", () => {
     assert.match(CODE, /t\(techStack\.kicker\)/, "label kicker dari config");
     const kicker = CODE.match(/className="[^"]*tracking-\[0\.28em\][^"]*"/)?.[0] ?? "";
     assert.match(kicker, /uppercase/);
