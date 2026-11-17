@@ -46,6 +46,9 @@ export default function Reveal({
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    // Di HP, -24px membuat banyak kartu sudah selesai beranimasi sebelum
+    // benar-benar terlihat; -40px menahannya sampai elemen masuk layar.
+    const coarse = window.matchMedia("(hover: none), (pointer: coarse)").matches;
     const observer = new IntersectionObserver(
       (entries) => {
         for (const entry of entries) {
@@ -64,7 +67,10 @@ export default function Reveal({
           }
         }
       },
-      { threshold: 0.01, rootMargin: "0px 0px -24px 0px" },
+      {
+        threshold: 0.01,
+        rootMargin: coarse ? "0px 0px -40px 0px" : "0px 0px -24px 0px",
+      },
     );
     observer.observe(node);
     return () => observer.disconnect();

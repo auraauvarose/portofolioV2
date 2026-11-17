@@ -179,6 +179,36 @@ export default function ScrollWordReveal({
     );
   }
 
+  // HP/touch: cascade ringan sekali jalan (opacity + translate per kata).
+  // Sebelumnya cabang ini mengembalikan teks statis tanpa gerak, dan mode
+  // scrub menulis motion value tiap frame — dua-duanya bukan pengalaman HP
+  // yang halus. Cascade menaruh seluruh biaya di compositor.
+  if (!fine) {
+    const revealed = replay ? isIntersecting : hasEntered;
+
+    return (
+      <Component className={className} aria-label={ariaLabel ?? text}>
+        <span
+          ref={rootRef}
+          className={`inline sw-cascade ${revealed ? "is-revealed" : ""}`}
+          style={{ "--sw-base": baseOpacity } as React.CSSProperties}
+        >
+          {words.map((word, i) => (
+            <span key={`${word}-${i}`} aria-hidden="true" className="scroll-word">
+              <span
+                className={`scroll-word-inner ${highlightSet.has(norm(word)) ? highlightClassName : ""}`.trim()}
+                style={{ "--sw-i": Math.min(i, 24) } as React.CSSProperties}
+              >
+                {word}
+                {i < words.length - 1 ? "\u00A0" : ""}
+              </span>
+            </span>
+          ))}
+        </span>
+      </Component>
+    );
+  }
+
   if (scrub) {
     const wordSpan = Math.min(0.7, 6 / words.length);
 
@@ -201,24 +231,6 @@ export default function ScrollWordReveal({
               />
             ))}
           </span>
-        </span>
-      </Component>
-    );
-  }
-
-  if (!fine) {
-    return (
-      <Component className={className} aria-label={ariaLabel ?? text}>
-        <span aria-hidden="true">
-          {words.map((word, i) => (
-            <span
-              key={`${word}-${i}`}
-              className={highlightSet.has(norm(word)) ? highlightClassName : undefined}
-            >
-              {word}
-              {i < words.length - 1 ? " " : ""}
-            </span>
-          ))}
         </span>
       </Component>
     );

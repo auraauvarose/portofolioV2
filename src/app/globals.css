@@ -2269,6 +2269,131 @@ summary {
   }
 }
 
+/* ══ Choreography scroll HP ════════════════════════════════════════════════
+   Semua aturan di blok ini hanya hidup untuk perangkat sentuh; desktop
+   (hover:hover + pointer:fine) tidak tersentuh sedikit pun.
+
+   Tiga teknik yang dipakai (semuanya modern, semuanya gratis di compositor):
+   1. Properti transform individual `translate`/`scale`, bukan matriks
+      `transform` — geser dan "pop" bisa punya easing berbeda tanpa saling
+      membatalkan, dan tiap properti tetap ringan di compositor.
+   2. Dua animasi paralel: geser+opacity expo-out, skala spring halus
+      (overshoot ~4%). Inilah rasa "hidup" khas situs sekarang — tanpa goyang.
+   3. Mask per kata: kata naik dari balik baseline-nya sendiri (overflow
+      hidden), bukan sekadar fade. Tidak ada layer 3D, tidak ada filter
+      blur: `reveal-in` lama memakai perspective()/rotateX() yang membuat
+      Chrome Android meraster ulang teks tiap frame.                         */
+@keyframes reveal-shift-hp {
+  from {
+    opacity: 0;
+    translate: var(--reveal-x, 0px) var(--reveal-y, 22px);
+  }
+  to {
+    opacity: 1;
+    translate: 0 0;
+  }
+}
+@keyframes reveal-pop-hp {
+  from {
+    scale: var(--reveal-scale, 0.97);
+  }
+  to {
+    scale: 1;
+  }
+}
+
+@media (hover: none), (pointer: coarse) {
+  /* Menang atas blok tier low/high (spesifisitas sama, blok ini paling akhir). */
+  html[data-tier] .reveal {
+    --reveal-duration: 0.62s;
+  }
+  .reveal {
+    --reveal-x: 0px;
+    --reveal-y: 22px;
+    --reveal-scale: 0.97;
+    --reveal-tilt: 0deg;
+    --reveal-duration: 0.62s;
+  }
+  .reveal.v-left {
+    --reveal-x: -16px;
+    --reveal-y: 16px;
+  }
+  .reveal.v-right {
+    --reveal-x: 16px;
+    --reveal-y: 16px;
+  }
+  /* Media "zoom-through": kartu mengecil dulu, gambar di dalamnya menyusut
+     dari 1.06 — keduanya bertemu di 1, jadi tidak terasa dua animasi. */
+  .reveal.v-zoom {
+    --reveal-y: 10px;
+    --reveal-scale: 0.94;
+  }
+  .reveal.replay-from-top {
+    --reveal-y: -22px;
+  }
+  .reveal.is-visible {
+    animation:
+      reveal-shift-hp var(--reveal-duration, 0.62s)
+        cubic-bezier(0.16, 1, 0.3, 1) both,
+      reveal-pop-hp calc(var(--reveal-duration, 0.62s) * 1.3)
+        cubic-bezier(0.34, 1.42, 0.64, 1) both;
+  }
+
+  /* Tekstur besar tidak diraster ulang; `transform` di gambar tetap di GPU. */
+  html[data-tier] .reveal-media img {
+    transition-duration: 1.05s;
+    transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1);
+  }
+  .reveal-media:not(.is-visible) img {
+    transform: scale(1.06);
+  }
+
+  /* Judul: mask per kata sudah ada; HP dapat easing naik yang lebih hidup. */
+  .sh-word {
+    transition-duration: 0.72s;
+    transition-timing-function: cubic-bezier(0.22, 1.16, 0.36, 1);
+  }
+  .sh-kicker,
+  .sh-index {
+    transition-duration: 0.6s;
+  }
+  .sh-line {
+    transition-duration: 0.9s;
+  }
+}
+
+/* Cascade kata (ScrollWordReveal) — dipisah supaya reduced motion tidak
+   pernah melihat `translate` statis yang memotong kata di dalam mask. */
+@media (prefers-reduced-motion: no-preference) {
+  @media (hover: none), (pointer: coarse) {
+    .sw-cascade .scroll-word {
+      display: inline-block;
+      overflow: hidden;
+      vertical-align: bottom;
+      padding-bottom: 0.12em;
+      margin-bottom: -0.12em;
+    }
+    /* Kata naik dari balik baseline, lalu opacity menyusul; stagger 18ms
+       (indeks dipotong di 24 oleh komponen). 110% = tinggi baris sendiri,
+       angka yang sama dengan mask judul `.sh-mask`, jadi kata benar-benar
+       hilang sebelum naik. Semua transform/opacity — tidak ada motion value
+       per frame, jadi main thread kosong selama jari menggeser halaman. */
+    .sw-cascade .scroll-word-inner {
+      display: inline-block;
+      opacity: var(--sw-base, 0.25);
+      translate: 0 110%;
+      transition:
+        opacity 0.45s ease,
+        translate 0.68s cubic-bezier(0.16, 1, 0.3, 1);
+      transition-delay: calc(var(--sw-i, 0) * 18ms);
+    }
+    .sw-cascade.is-revealed .scroll-word-inner {
+      opacity: 1;
+      translate: 0 0;
+    }
+  }
+}
+
 /* Penutup cascade tier: apa pun yang dihidupkan oleh blok data-tier di atas,
    tetap dimatikan bila pengguna meminta reduced motion. Blok ini sengaja
    diletakkan paling akhir file dan memakai `!important`, jadi
