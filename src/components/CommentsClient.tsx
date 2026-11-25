@@ -1,137 +1,76 @@
 "use client";
 
 import Link from "next/link";
-import { useEffect, useRef, useState, type FormEvent } from "react";
-import Reveal from "@/components/Reveal";
+import { useState, type FormEvent } from "react";
 import SectionHeading from "@/components/SectionHeading";
 import CustomCursor from "@/components/CustomCursor";
 import SpiderWalker from "@/components/SpiderWalker";
 import ScrollProgress from "@/components/ScrollProgress";
 import SmoothScroll from "@/components/SmoothScroll";
 import PageControls from "@/components/PageControls";
-import { motion, useReducedMotion } from "motion/react";
-import { EASE_EXPO } from "@/lib/motion";
 import { useLanguage } from "@/components/providers";
 import { comments } from "@/lib/config";
 import type { GuestComment } from "@/types";
 
-function relativeTime(iso: string, justNowLabel: string): string {
-  const then = new Date(iso).getTime();
-  if (Number.isNaN(then)) return "";
-  const diff = Date.now() - then;
-  if (diff < 45_000) return justNowLabel;
-  const min = Math.floor(diff / 60_000);
-  if (min < 60) return `${min}m`;
-  const h = Math.floor(min / 60);
-  if (h < 24) return `${h}h`;
-  const d = Math.floor(h / 24);
-  if (d < 30) return `${d}d`;
-  return new Date(iso).toLocaleDateString(undefined, {
+const STAR_PATH =
+  "M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z";
+
+function Star({ filled, size = 14 }: { filled: boolean; size?: number }) {
+  return (
+    <svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill={filled ? "currentColor" : "none"}
+      stroke="currentColor"
+      strokeWidth="1.4"
+      aria-hidden="true"
+      className={filled ? "text-accent" : "text-gray-600 dark:text-gray-400"}
+    >
+      <path d={STAR_PATH} />
+    </svg>
+  );
+}
+
+function Stars({ value }: { value: number }) {
+  return (
+    <span className="inline-flex items-center gap-0.5" aria-label={`${value}/5`}>
+      {Array.from({ length: 5 }, (_, i) => (
+        <Star key={i} filled={i < value} size={12} />
+      ))}
+    </span>
+  );
+}
+
+function formatDate(iso: string, lang: "en" | "id"): string {
+  const date = new Date(iso);
+  if (Number.isNaN(date.getTime())) return "";
+  return date.toLocaleDateString(lang === "id" ? "id-ID" : "en-GB", {
     day: "numeric",
     month: "short",
     year: "numeric",
   });
 }
 
-function initialsOf(name: string): string {
-  const parts = name.trim().split(/\s+/).filter(Boolean);
-  if (parts.length === 0) return "?";
-  if (parts.length === 1) return parts[0].slice(0, 2).toUpperCase();
-  return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
-}
+const inputBase =
+  "w-full rounded-md border border-white/10 bg-white/[0.02] px-3.5 py-3 text-sm text-white outline-none transition-colors duration-300 placeholder:text-gray-600 dark:placeholder:text-gray-400 hover:border-white/25 focus:border-accent focus:bg-white/[0.04]";
 
-const AVATAR_HUES = [16, 32, 205, 258, 150, 340];
-function avatarHue(name: string): number {
-  let h = 0;
-  for (let i = 0; i < name.length; i++) h = (Math.imul(31, h) + name.charCodeAt(i)) | 0;
-  return AVATAR_HUES[Math.abs(h) % AVATAR_HUES.length];
-}
-
-function StarRow({ value, small = false }: { value: number; small?: boolean }) {
-  const size = small ? 12 : 16;
-  return (
-    <span className="inline-flex items-center gap-0.5" aria-label={`${value}/5`}>
-      {Array.from({ length: 5 }, (_, i) => (
-        <svg
-          key={i}
-          width={size}
-          height={size}
-          viewBox="0 0 24 24"
-          fill={i < value ? "currentColor" : "none"}
-          stroke="currentColor"
-          strokeWidth="1.6"
-          className={i < value ? "text-accent" : "text-gray-600 dark:text-gray-400"}
-          aria-hidden="true"
-        >
-          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-        </svg>
-      ))}
-    </span>
-  );
-}
-
-function CommentCard({ c, index, justNowLabel }: { c: GuestComment; index: number; justNowLabel: string }) {
-  const hue = avatarHue(c.name);
-  return (
-    <Reveal
-      delay={Math.min(index, 8) * 70}
-      variant={index % 2 === 0 ? "left" : "right"}
-      className="h-full"
-    >
-      <article className="glass flex h-full flex-col gap-4 rounded-2xl border border-white/10 p-6 transition-[border-color,transform] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:border-accent/50 hover:-translate-y-1">
-          <div className="flex items-start justify-between gap-4">
-            <div className="flex items-center gap-3">
-              <span
-                aria-hidden="true"
-                className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-display text-sm text-black"
-                style={{
-                  backgroundColor: `hsl(${hue} 62% 62%)`,
-                }}
-              >
-                {initialsOf(c.name)}
-              </span>
-              <div className="min-w-0">
-                <p className="truncate font-semibold text-white">{c.name}</p>
-                <p className="text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                  {relativeTime(c.created_at, justNowLabel)}
-                </p>
-              </div>
-            </div>
-            {typeof c.rating === "number" && <StarRow value={c.rating} small />}
-          </div>
-          <p className="whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ecru">
-            {c.message}
-          </p>
-        </article>
-    </Reveal>
-  );
-}
+const labelBase =
+  "mb-1.5 block text-xs uppercase tracking-[0.2em] text-gray-400";
 
 export default function CommentsClient({ initial }: { initial: GuestComment[] }) {
-  const { t } = useLanguage();
-  const reduceMotion = useReducedMotion();
-  const sectionRef = useRef<HTMLElement | null>(null);
+  const { t, lang } = useLanguage();
 
-  const items = initial;
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [message, setMessage] = useState("");
   const [rating, setRating] = useState<number | null>(null);
   const [hoverRating, setHoverRating] = useState<number | null>(null);
   const [website, setWebsite] = useState("");
-  const [status, setStatus] = useState<"idle" | "sending" | "ok" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
 
-  useEffect(() => {
-    const el = sectionRef.current;
-    if (!el) return;
-    const io = new IntersectionObserver(
-      ([entry]) => el.classList.toggle("cycle-halt", !entry?.isIntersecting),
-      { rootMargin: "160px 0px" },
-    );
-    io.observe(el);
-    return () => io.disconnect();
-  }, []);
+  const maxChars = 1000;
 
   async function onSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -150,19 +89,16 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         setStatus("error");
         return;
       }
-      setStatus("ok");
+      setStatus("sent");
       setName("");
       setEmail("");
       setMessage("");
       setRating(null);
-      window.setTimeout(() => setStatus("idle"), 4000);
     } catch {
       setErrorMsg(t(comments.errorGeneric));
       setStatus("error");
     }
   }
-
-  const maxChars = 1000;
 
   return (
     <SmoothScroll>
@@ -172,226 +108,220 @@ export default function CommentsClient({ initial }: { initial: GuestComment[] })
         <ScrollProgress />
         <PageControls />
 
-        <h1 className="sr-only">{t(comments.kicker)}</h1>
+        <h1 className="sr-only">{t(comments.heading)}</h1>
 
-        <section
-          id="comments"
-          ref={sectionRef}
-          className="comments-stage relative overflow-hidden px-6 py-16 md:px-10 md:py-32"
-        >
-          <div className="comments-stage__frame relative mx-auto max-w-7xl">
-            <SectionHeading
-              kicker={comments.kicker}
-              heading={comments.heading}
-            />
+        <section id="comments" className="relative px-6 py-16 md:px-10 md:py-32">
+          <div className="mx-auto max-w-6xl">
+            <SectionHeading kicker={comments.kicker} heading={comments.heading} />
 
-            <Reveal variant="left" className="-mt-6 mb-12 md:mb-16">
-              <p className="max-w-2xl text-lg leading-relaxed text-gray-400">
-                {t(comments.description)}
-              </p>
-            </Reveal>
+            <p className="max-w-2xl text-lg leading-relaxed text-gray-400">
+              {t(comments.description)}
+            </p>
 
-            <Reveal className="mb-12">
-              <div className="inline-flex items-center gap-2 rounded-full border border-[#22c55e]/30 bg-[#22c55e]/10 px-4 py-1.5 text-xs font-medium uppercase tracking-widest text-[#22c55e]">
-                <span className="h-2 w-2 rounded-full bg-[#22c55e]" />
-                {items.length} {t(comments.count)}
-              </div>
-            </Reveal>
-
-            <Reveal variant="zoom" className="mb-16 md:mb-20">
-              <form
-                onSubmit={onSubmit}
-                className="glass rounded-3xl p-6 md:p-10"
-                noValidate
-              >
-                  <div className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
-                    <label>
-                      Website
-                      <input
-                        type="text"
-                        tabIndex={-1}
-                        autoComplete="off"
-                        value={website}
-                        onChange={(e) => setWebsite(e.target.value)}
-                      />
-                    </label>
-                  </div>
-
-                  <h3 className="text-display text-2xl uppercase text-white md:text-3xl">
-                    {t(comments.formTitle)}
-                  </h3>
-
-                  <div className="mt-6 grid gap-5 md:grid-cols-2">
-                    <div>
-                      <label htmlFor="c-name" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        {t(comments.nameLabel)}
-                      </label>
-                      <input
-                        id="c-name"
-                        type="text"
-                        required
-                        maxLength={60}
-                        value={name}
-                        onChange={(e) => setName(e.target.value)}
-                        placeholder={t(comments.namePlaceholder)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-600 outline-none transition-colors duration-300 focus:border-accent"
-                      />
-                    </div>
-                    <div>
-                      <label htmlFor="c-email" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                        {t(comments.emailLabel)}
-                      </label>
-                      <input
-                        id="c-email"
-                        type="email"
-                        maxLength={120}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder={t(comments.emailPlaceholder)}
-                        className="w-full rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-600 outline-none transition-colors duration-300 focus:border-accent"
-                      />
-                    </div>
-                  </div>
-
-                  <div className="mt-5">
-                    <label htmlFor="c-message" className="mb-2 block text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                      {t(comments.messageLabel)}
-                    </label>
-                    <textarea
-                      id="c-message"
-                      required
-                      rows={5}
-                      maxLength={maxChars}
-                      value={message}
-                      onChange={(e) => setMessage(e.target.value)}
-                      placeholder={t(comments.messagePlaceholder)}
-                      className="w-full resize-none rounded-xl border border-white/10 bg-white/5 px-4 py-3 text-white placeholder:text-gray-600 outline-none transition-colors duration-300 focus:border-accent"
-                    />
-                    <p className="mt-1 text-right text-xs text-gray-600 dark:text-gray-400">
-                      {message.length}/{maxChars}
-                    </p>
-                  </div>
-
-                  <div className="mt-2">
-                    <p className="mb-2 text-xs uppercase tracking-widest text-gray-500 dark:text-gray-400">
-                      {t(comments.ratingLabel)}
-                    </p>
-                    <div className="flex items-center gap-1.5" onMouseLeave={() => setHoverRating(null)}>
-                      {Array.from({ length: 5 }, (_, i) => i + 1).map((v) => {
-                        const active = (hoverRating ?? rating ?? 0) >= v;
-                        return (
-                          <button
-                            key={v}
-                            type="button"
-                            aria-label={`${v}/5`}
-                            onMouseEnter={() => setHoverRating(v)}
-                            onClick={() => setRating(rating === v ? null : v)}
-                            className="touch-active p-0.5 transition-transform duration-200 hover:scale-110 active:scale-90"
-                          >
-                            <svg
-                              width="26"
-                              height="26"
-                              viewBox="0 0 24 24"
-                              fill={active ? "currentColor" : "none"}
-                              stroke="currentColor"
-                              strokeWidth="1.6"
-                              className={`transition-colors duration-200 ${active ? "text-accent" : "text-gray-600 dark:text-gray-400 hover:text-accent"}`}
-                              aria-hidden="true"
-                            >
-                              <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                            </svg>
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  <div className="mt-8 flex flex-wrap items-center gap-4">
-                    <button
-                      type="submit"
-                      disabled={status === "sending"}
-                      className="group relative inline-flex items-center gap-3 overflow-hidden rounded-full bg-accent px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-black transition-all duration-300 hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-60"
-                    >
-                      {status === "sending" ? t(comments.sending) : t(comments.submit)}
+            <div className="mt-12 grid gap-14 lg:grid-cols-[minmax(0,24rem)_1fr] lg:gap-16">
+              <div>
+                {status === "sent" ? (
+                  <div
+                    role="status"
+                    aria-live="polite"
+                    className="flex flex-col items-start gap-3 border-y border-[#22c55e]/30 bg-[#22c55e]/[0.06] px-5 py-6"
+                  >
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full border border-[#22c55e]/40 bg-[#22c55e]/10 text-[#22c55e]">
                       <svg
                         width="16"
                         height="16"
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        strokeWidth="2.5"
-                        className="transition-transform duration-300 group-hover:translate-x-1"
+                        strokeWidth="2.2"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         aria-hidden="true"
                       >
-                        <path d="M5 12h14M13 6l6 6-6 6" />
+                        <path d="M20 6 9 17l-5-5" />
                       </svg>
+                    </span>
+                    <p className="text-sm leading-relaxed text-[#22c55e]">
+                      {t(comments.success)}
+                    </p>
+                    <button
+                      type="button"
+                      onClick={() => setStatus("idle")}
+                      className="inline-flex items-center text-xs uppercase tracking-widest text-gray-400 transition-colors hover:text-accent max-md:min-h-11"
+                    >
+                      {t(comments.again)}
                     </button>
-
-                    {status === "ok" && (
-                      <motion.p
-                        initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.5, ease: EASE_EXPO }}
-                        className="text-sm font-medium text-[#22c55e]"
-                        role="status"
-                      >
-                        ✓ {t(comments.success)}
-                      </motion.p>
-                    )}
-                    {status === "error" && (
-                      <motion.p
-                        initial={reduceMotion ? undefined : { opacity: 0, y: 8 }}
-                        animate={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.4, ease: EASE_EXPO }}
-                        className="text-sm font-medium text-red-400"
-                        role="alert"
-                      >
-                        {errorMsg || t(comments.errorGeneric)}
-                      </motion.p>
-                    )}
                   </div>
-                </form>
-              </Reveal>
+                ) : (
+                  <form onSubmit={onSubmit} noValidate className="flex flex-col gap-4">
+                    <div className="absolute left-[-9999px] top-auto h-px w-px overflow-hidden" aria-hidden="true">
+                      <label>
+                        Website
+                        <input
+                          type="text"
+                          tabIndex={-1}
+                          autoComplete="off"
+                          value={website}
+                          onChange={(e) => setWebsite(e.target.value)}
+                        />
+                      </label>
+                    </div>
 
-            {items.length === 0 ? (
-              <Reveal>
-                <div className="glass rounded-2xl p-12 text-center">
-                  <p className="text-serif-accent text-2xl text-accent">“</p>
-                  <p className="mt-2 text-lg text-gray-400">{t(comments.empty)}</p>
-                </div>
-              </Reveal>
-            ) : (
-              <div className="grid gap-6 md:grid-cols-2">
-                {items.map((c, i) => (
-                  <CommentCard key={c.id} c={c} index={i} justNowLabel={t(comments.justNow)} />
-                ))}
+                    <div>
+                      <h3 className="text-display text-xl uppercase text-white">
+                        {t(comments.formTitle)}
+                      </h3>
+                    </div>
+
+                    <label className="block">
+                      <span className={labelBase}>
+                        {t(comments.nameLabel)} <span className="text-accent">*</span>
+                      </span>
+                      <input
+                        type="text"
+                        name="name"
+                        required
+                        minLength={2}
+                        maxLength={60}
+                        autoComplete="name"
+                        value={name}
+                        onChange={(e) => setName(e.target.value)}
+                        placeholder={t(comments.namePlaceholder)}
+                        className={inputBase}
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className={labelBase}>{t(comments.emailLabel)}</span>
+                      <input
+                        type="email"
+                        name="email"
+                        maxLength={120}
+                        autoComplete="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder={t(comments.emailPlaceholder)}
+                        className={inputBase}
+                      />
+                    </label>
+
+                    <label className="block">
+                      <span className={labelBase}>
+                        {t(comments.messageLabel)} <span className="text-accent">*</span>
+                      </span>
+                      <textarea
+                        name="message"
+                        required
+                        rows={4}
+                        maxLength={maxChars}
+                        value={message}
+                        onChange={(e) => setMessage(e.target.value)}
+                        placeholder={t(comments.messagePlaceholder)}
+                        className={`${inputBase} resize-y`}
+                      />
+                      <span className="mt-1 block text-right font-data text-[11px] text-gray-500">
+                        {message.length}/{maxChars}
+                      </span>
+                    </label>
+
+                    <div>
+                      <p id="c-rating-label" className={labelBase}>
+                        {t(comments.ratingLabel)}
+                      </p>
+                      <div
+                        role="group"
+                        aria-labelledby="c-rating-label"
+                        className="flex items-center gap-1"
+                        onMouseLeave={() => setHoverRating(null)}
+                      >
+                        {Array.from({ length: 5 }, (_, i) => i + 1).map((v) => {
+                          const active = (hoverRating ?? rating ?? 0) >= v;
+                          return (
+                            <button
+                              key={v}
+                              type="button"
+                              aria-label={`${v}/5`}
+                              aria-pressed={rating === v}
+                              onMouseEnter={() => setHoverRating(v)}
+                              onClick={() => setRating(rating === v ? null : v)}
+                              className="touch-active -m-1 p-1.5 transition-colors duration-200"
+                            >
+                              <Star filled={active} size={18} />
+                            </button>
+                          );
+                        })}
+                      </div>
+                    </div>
+
+                    {errorMsg && (
+                      <p role="alert" className="text-sm text-[#f85149]">
+                        {errorMsg}
+                      </p>
+                    )}
+
+                    <button
+                      type="submit"
+                      disabled={status === "sending"}
+                      className="mt-1 inline-flex min-h-12 items-center justify-center rounded-full bg-accent px-7 text-sm font-medium uppercase tracking-widest text-black transition-colors hover:bg-accent-soft disabled:cursor-not-allowed disabled:opacity-60"
+                    >
+                      {status === "sending" ? t(comments.sending) : t(comments.submit)}
+                    </button>
+                  </form>
+                )}
               </div>
-            )}
 
-            <Reveal className="mt-20 flex justify-center">
-              <Link
-                href="/"
-                className="group relative inline-flex items-center gap-3 rounded-full border border-white/15 bg-white/5 px-8 py-3.5 text-sm font-bold uppercase tracking-widest text-white transition-colors duration-300 hover:border-accent hover:text-accent"
-              >
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.5"
-                  className="transition-transform duration-300 group-hover:-translate-x-1"
-                  aria-hidden="true"
-                >
-                  <path d="M19 12H5M11 18l-6-6 6-6" />
-                </svg>
-                {t(comments.backHome)}
-              </Link>
-            </Reveal>
+              <div>
+                <div className="flex items-baseline justify-between gap-4 border-b border-white/10 pb-3">
+                  <h3 className="text-xs uppercase tracking-[0.2em] text-gray-400">
+                    {t(comments.count)}
+                  </h3>
+                  <span className="font-data text-xs text-khaki">
+                    {String(initial.length).padStart(2, "0")}
+                  </span>
+                </div>
+
+                {initial.length === 0 ? (
+                  <p className="py-8 text-sm text-gray-400">{t(comments.empty)}</p>
+                ) : (
+                  <ol className="divide-y divide-white/10">
+                    {initial.map((c) => (
+                      <li
+                        key={c.id}
+                        className="grid gap-1 py-5 sm:grid-cols-[7.5rem_1fr] sm:gap-5"
+                      >
+                        <time
+                          dateTime={c.created_at}
+                          className="font-data text-[11px] leading-6 text-khaki"
+                        >
+                          {formatDate(c.created_at, lang)}
+                        </time>
+                        <div className="min-w-0">
+                          <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+                            <p className="text-display text-base uppercase tracking-wide text-white">
+                              {c.name}
+                            </p>
+                            {typeof c.rating === "number" && <Stars value={c.rating} />}
+                          </div>
+                          <p className="mt-1.5 whitespace-pre-wrap break-words text-[15px] leading-relaxed text-ecru">
+                            {c.message}
+                          </p>
+                        </div>
+                      </li>
+                    ))}
+                  </ol>
+                )}
+              </div>
+            </div>
+
+            <Link
+              href="/"
+              className="mt-16 inline-flex items-center gap-2 text-xs uppercase tracking-widest text-gray-400 transition-colors hover:text-accent max-md:min-h-11"
+            >
+              <span aria-hidden="true">←</span> {t(comments.backHome)}
+            </Link>
           </div>
         </section>
       </main>
     </SmoothScroll>
   );
 }
-

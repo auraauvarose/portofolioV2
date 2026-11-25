@@ -320,40 +320,40 @@ export const footer = {
 } as const;
 
 export const comments = {
-  kicker: { en: "Guestbook", id: "Buku Tamu" },  index: "08",
+  kicker: { en: "Guestbook", id: "Buku Tamu" },
   heading: { en: "Visitor Notes", id: "Catatan Pengunjung" },
   description: {
-    en: "Leave your name and a note. Everything is stored in Supabase.",
-    id: "Tinggalkan nama dan pesan. Semuanya disimpan di Supabase.",
+    en: "Leave your name and a note. Every entry is held for review, so it shows up here a little later.",
+    id: "Tinggalkan nama dan pesan. Setiap catatan aku tinjau dulu, jadi munculnya agak telat.",
   },
-  formTitle: { en: "Leave a Comment", id: "Tinggalkan Komentar" },
+  formTitle: { en: "Add an entry", id: "Tulis Catatan" },
   nameLabel: { en: "Name", id: "Nama" },
-  namePlaceholder: { en: "Your name", id: "Namamu" },
-  emailLabel: { en: "Email (optional)", id: "Email (opsional)" },
+  namePlaceholder: { en: "Your name", id: "Nama kamu" },
+  emailLabel: { en: "Email (optional, not shown)", id: "Email (opsional, tidak ditampilkan)" },
   emailPlaceholder: { en: "you@example.com", id: "kamu@contoh.com" },
   messageLabel: { en: "Message", id: "Pesan" },
   messagePlaceholder: {
-    en: "Write something nice…",
-    id: "Tulis sesuatu yang baik…",
+    en: "A hello, a critique, or a bug you found.",
+    id: "Sapaan, kritik, atau bug yang kamu temukan.",
   },
   ratingLabel: { en: "Rating (optional)", id: "Rating (opsional)" },
-  submit: { en: "Send Comment", id: "Kirim Komentar" },
+  submit: { en: "Send", id: "Kirim" },
   sending: { en: "Sending…", id: "Mengirim…" },
   success: {
-    en: "Thanks! Your comment was sent and will appear after review.",
-    id: "Terima kasih! Komentarmu terkirim dan akan tampil setelah ditinjau.",
+    en: "Sent. I review it first, then it appears here.",
+    id: "Terkirim. Aku tinjau dulu, lalu muncul di sini.",
   },
+  again: { en: "Write another", id: "Tulis lagi" },
   errorGeneric: {
     en: "Something went wrong. Please try again.",
     id: "Terjadi kesalahan. Silakan coba lagi.",
   },
   empty: {
-    en: "No comments yet — be the first to write one.",
-    id: "Belum ada komentar — jadilah yang pertama menulis.",
+    en: "Nothing yet. The first line is still empty.",
+    id: "Belum ada catatan. Baris pertama masih kosong.",
   },
-  count: { en: "comments", id: "komentar" },
+  count: { en: "Comments", id: "Komentar" },
   backHome: { en: "Back to Home", id: "Kembali ke Beranda" },
-  justNow: { en: "just now", id: "baru saja" },
 } as const;
 
 export const commentsPage = {
