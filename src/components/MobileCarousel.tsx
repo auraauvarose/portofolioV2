@@ -11,6 +11,10 @@ type Props = {
   revealClassName?: string;
   /** Di HP, sembunyikan tombol panah; navigasi hanya lewat geser jempol. */
   swipeOnly?: boolean;
+  /** Di desktop, panah samping dirender sebagai panel kaca liquid glass
+   * (transparan, membias latar) alih-alih lingkaran putih solid. Opt-in
+   * supaya Gallery/Projects yang memakai carousel ini tidak ikut berubah. */
+  glassNav?: boolean;
   children: React.ReactNode;
 };
 
@@ -20,12 +24,24 @@ const ARROW =
 const ARROW_SIDE =
   "carousel-arrow absolute top-1/2 hidden h-14 w-14 -translate-y-1/2 cursor-pointer place-items-center rounded-full bg-white text-2xl font-bold text-black shadow-[0_10px_34px_-6px_rgba(0,0,0,0.85)] ring-1 ring-black/10 transition-[transform,background-color,color] duration-300 hover:scale-110 hover:bg-accent md:grid";
 
+/* Panel kaca mengambang ala Apple: transparan, membias latar kontur, dengan
+   rim spekular dari .liquid-glass. Tetap <button> + aria-label — hanya
+   tampilannya yang kaca. Hover menaikkan sedikit tanpa mengubah warna dasar
+   supaya kesan kacanya tidak hilang.
+
+   `.glass-nav` dipakai untuk menaikkan spesifisitas di atas aturan tema terang
+   `:root:not(.dark) button.carousel-arrow` yang mengunci background-color
+   solid — tanpa itu, kaca hanya terlihat di tema gelap. */
+const ARROW_GLASS =
+  "carousel-arrow glass-nav liquid-glass absolute top-1/2 hidden h-14 w-14 -translate-y-1/2 cursor-pointer place-items-center rounded-full text-2xl font-bold text-white transition-[transform,opacity] duration-300 hover:scale-105 hover:text-accent active:scale-95 md:grid";
+
 export default function MobileCarousel({
   total,
   idx,
   onSlide,
   revealClassName = "h-full",
   swipeOnly = false,
+  glassNav = false,
   children,
 }: Props) {
   const prev = useRef(idx);
@@ -50,7 +66,13 @@ export default function MobileCarousel({
   return (
     <div>
       <div className="mb-4 flex items-center justify-between md:justify-center md:gap-6">
-        <span className="text-xs uppercase tracking-widest text-gray-500">
+        <span
+          className={`text-xs uppercase tracking-widest text-gray-500 ${
+            // Di desktop dengan navigasi kaca, posisi slide sudah ditunjukkan
+            // oleh kapsul pill di bawah — angka "01 / 04" hanya menambah noise.
+            glassNav ? "md:hidden" : ""
+          }`}
+        >
           {String(idx + 1).padStart(2, "0")} /{" "}
           {String(total).padStart(2, "0")}
         </span>
@@ -131,7 +153,7 @@ export default function MobileCarousel({
             type="button"
             aria-label="Sebelumnya"
             onClick={() => go(idx - 1)}
-            className={`${ARROW_SIDE} -left-7`}
+            className={`${glassNav ? ARROW_GLASS : ARROW_SIDE} -left-7`}
           >
             ‹
           </button>
@@ -139,7 +161,7 @@ export default function MobileCarousel({
             type="button"
             aria-label="Berikutnya"
             onClick={() => go(idx + 1)}
-            className={`${ARROW_SIDE} -right-7`}
+            className={`${glassNav ? ARROW_GLASS : ARROW_SIDE} -right-7`}
           >
             ›
           </button>
@@ -159,20 +181,44 @@ export default function MobileCarousel({
             />
           </div>
 
-          <div className="mt-4 flex items-center justify-center gap-4 max-md:hidden">
-            {Array.from({ length: total }, (_, i) => (
-              <button
-                key={i}
-                type="button"
-                aria-label={`Ke slide ${i + 1}`}
-                aria-current={i === idx ? "true" : undefined}
-                onClick={() => onSlide(i)}
-                className={`relative h-2 w-2 rounded-full transition-all after:absolute after:-inset-x-[8px] after:-inset-y-[18px] after:content-[''] ${
-                  i === idx ? "w-6 bg-accent" : "bg-white/25 hover:bg-white/50"
-                }`}
+          {glassNav ? (
+            // Kapsul pill kaca ala Apple: satu wadah memanjang, pil terang
+            // meluncur mengikuti slide. Tanpa titik-titik yang bisa diklik.
+            <div
+              className="glass-pill-track mx-auto mt-5 max-md:hidden"
+              role="tablist"
+              aria-label="Posisi slide"
+              style={
+                {
+                  "--pill-count": total,
+                  "--pill-idx": idx,
+                  width: `${total * 22 + 8}px`,
+                } as React.CSSProperties
+              }
+            >
+              <span
+                className="glass-pill-thumb"
+                role="tab"
+                aria-selected={true}
+                aria-label={`Slide ${idx + 1} dari ${total}`}
               />
-            ))}
-          </div>
+            </div>
+          ) : (
+            <div className="mt-4 flex items-center justify-center gap-4 max-md:hidden">
+              {Array.from({ length: total }, (_, i) => (
+                <button
+                  key={i}
+                  type="button"
+                  aria-label={`Ke slide ${i + 1}`}
+                  aria-current={i === idx ? "true" : undefined}
+                  onClick={() => onSlide(i)}
+                  className={`relative h-2 w-2 rounded-full transition-all after:absolute after:-inset-x-[8px] after:-inset-y-[18px] after:content-[''] ${
+                    i === idx ? "w-6 bg-accent" : "bg-white/25 hover:bg-white/50"
+                  }`}
+                />
+              ))}
+            </div>
+          )}
         </>
       )}
     </div>

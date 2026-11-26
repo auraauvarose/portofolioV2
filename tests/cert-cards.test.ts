@@ -67,8 +67,10 @@ describe("Sertifikasi — kartu teks + pratinjau gambar saat hover", () => {
       "label tombol pratinjau belum ada",
     );
     assert.ok(
-      CERT.includes("rounded-full bg-black/70"),
-      "tombol pratinjau belum bergaya kapsul gelap",
+      /liquid-glass-chip[^"\n]*rounded-full|rounded-full[^"\n]*liquid-glass-chip/.test(
+        CERT,
+      ),
+      "tombol pratinjau belum bergaya kapsul kaca (liquid-glass-chip + rounded-full)",
     );
   });
 

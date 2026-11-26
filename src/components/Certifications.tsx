@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { createPortal } from "react-dom";
 import Reveal from "@/components/Reveal";
@@ -13,6 +13,8 @@ import { certifications } from "@/lib/config";
 import type { Certification } from "@/types";
 
 const CATEGORY_ORDER = ["internship", "professional", "technical"];
+/** Ambang tahan sebelum gelembung peek muncul (iOS context menu ≈ 350–500ms). */
+const PEEK_HOLD_MS = 380;
 
 export default function Certifications({
   items,
@@ -26,6 +28,12 @@ export default function Certifications({
   const [slide, setSlide] = useState(0);
   const [deskPage, setDeskPage] = useState(0);
   const [unlocked, setUnlocked] = useState(false);
+  // "Peek" ala iOS: tahan kursor ~380ms → kartu mengambang sebagai gelembung
+  // besar yang ikut kursor (dan bisa digeser di HP), lepas = hilang.
+  const [peek, setPeek] = useState<{ cert: Certification; x: number; y: number } | null>(null);
+  const holdRef = useRef<{ pointerId: number; timer: number; x: number; y: number } | null>(null);
+  const peekRef = useRef(false);
+  const stopPeekRef = useRef<(() => void) | null>(null);
   const modalRef = useFocusTrap<HTMLDivElement>(selected !== null);
 
   // Izin disimpan di cookie perangkat ini. Dicek saat halaman dibuka dan saat
@@ -76,6 +84,58 @@ export default function Certifications({
     };
   }, [selected]);
 
+  useEffect(() => () => stopPeekRef.current?.(), []);
+
+  const startPeek = (cert: Certification, e: React.PointerEvent<HTMLElement>) => {
+    if (!cert.image_url) return;
+    if (e.pointerType === "mouse" && e.button !== 0) return;
+    // Tombol/tautan di dalam kartu tetap jalan normal.
+    if ((e.target as HTMLElement).closest("a, button")) return;
+    stopPeekRef.current?.();
+
+    const pointerId = e.pointerId;
+    const x0 = e.clientX;
+    const y0 = e.clientY;
+    const timer = window.setTimeout(() => {
+      peekRef.current = true;
+      setPeek({ cert, x: x0, y: y0 });
+    }, PEEK_HOLD_MS);
+    holdRef.current = { pointerId, timer, x: x0, y: y0 };
+
+    const stop = () => {
+      window.clearTimeout(timer);
+      holdRef.current = null;
+      stopPeekRef.current = null;
+      setPeek(null);
+      window.removeEventListener("pointermove", onMove);
+      window.removeEventListener("pointerup", onUp);
+      window.removeEventListener("pointercancel", onUp);
+    };
+    const onMove = (ev: PointerEvent) => {
+      const h = holdRef.current;
+      if (!h || ev.pointerId !== h.pointerId) return;
+      if (!peekRef.current) {
+        // Geser sebelum ambang tahan = niatnya scroll/swipe, bukan peek.
+        if (Math.hypot(ev.clientX - h.x, ev.clientY - h.y) > 10) stop();
+        return;
+      }
+      setPeek((p) => (p ? { ...p, x: ev.clientX, y: ev.clientY } : p));
+    };
+    const onUp = (ev: PointerEvent) => {
+      if (holdRef.current && ev.pointerId !== holdRef.current.pointerId) return;
+      stop();
+      // Klik yang menyusul setelah peek diabaikan; kalau tidak ada klik,
+      // flag dibersihkan sendiri.
+      window.setTimeout(() => {
+        peekRef.current = false;
+      }, 350);
+    };
+    stopPeekRef.current = stop;
+    window.addEventListener("pointermove", onMove);
+    window.addEventListener("pointerup", onUp);
+    window.addEventListener("pointercancel", onUp);
+  };
+
   const filtered =
     active === "all" ? items : items.filter((c) => c.category === active);
 
@@ -94,7 +154,18 @@ export default function Certifications({
         role={cert.image_url ? "button" : undefined}
         tabIndex={cert.image_url ? 0 : undefined}
         aria-haspopup={cert.image_url ? "dialog" : undefined}
-        onClick={() => activateCert(cert)}
+        onPointerDown={(e) => startPeek(cert, e)}
+        onContextMenu={(e) => {
+          // Tahan-lama di HP jangan memunculkan menu konteks/salin gambar.
+          if (cert.image_url) e.preventDefault();
+        }}
+        onClick={() => {
+          if (peekRef.current) {
+            peekRef.current = false;
+            return;
+          }
+          activateCert(cert);
+        }}
         onKeyDown={(e) => {
           if (!cert.image_url || e.target !== e.currentTarget) return;
           if (e.key === "Enter" || e.key === " ") {
@@ -102,39 +173,52 @@ export default function Certifications({
             activateCert(cert);
           }
         }}
-        className={`group relative flex h-full min-h-[15rem] flex-col overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.6)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:min-h-72 ${cert.image_url ? "cursor-pointer" : ""}`}
+        className={`group liquid-glass relative flex h-full min-h-[16rem] select-none flex-col overflow-hidden rounded-2xl transition-[border-color] duration-300 outline-none [-webkit-touch-callout:none] hover:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink md:min-h-[17rem] ${cert.image_url ? "cursor-pointer" : ""}`}
       >
         <div
-          className={`tilt-layer flex flex-1 flex-col p-5 md:p-6 ${cert.image_url && mobileDetails !== cert.id ? "max-md:invisible" : ""}`}
+          className={`tilt-layer flex flex-1 flex-col p-5 md:p-7 ${cert.image_url && mobileDetails !== cert.id ? "max-md:invisible" : ""}`}
           style={{ "--tz": "52px" } as React.CSSProperties}
         >
-          <div className="flex items-start justify-between gap-3">
-            <span className="text-xs font-medium uppercase tracking-widest text-accent">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="inline-flex items-center gap-2 text-xs font-medium uppercase tracking-widest text-accent">
+              <span aria-hidden className="h-1 w-1 rounded-full bg-accent" />
               {t(certifications.categories[cert.category] ?? {
                 en: cert.category,
                 id: cert.category,
               })}
             </span>
             {cert.date && (
-              <span className="shrink-0 text-xs text-gray-500">{cert.date}</span>
+              <span className="shrink-0 font-mono text-xs tracking-wide text-khaki">
+                {cert.date}
+              </span>
             )}
           </div>
-          <h3 className="mt-4 text-lg font-semibold leading-snug text-white md:text-xl">
+          <h3 className="mt-3 text-lg font-semibold leading-snug text-white md:text-2xl">
             {lang_title(cert, t)}
           </h3>
           {cert.description_en && (
-            <p className="mt-3 line-clamp-4 text-sm leading-relaxed text-gray-400">
+            <p className="mt-2 line-clamp-4 text-sm leading-relaxed text-gray-400">
               {t({
                 en: cert.description_en,
                 id: cert.description_id ?? cert.description_en,
               })}
             </p>
           )}
-          {cert.issuer && (
-            <p className="mt-auto border-t border-white/10 pt-3 text-xs uppercase tracking-widest text-gray-500">
-              {t({ en: "By:", id: "Oleh:" })} {cert.issuer}
-            </p>
-          )}
+          <div className="mt-auto border-t border-white/10 flex items-center justify-between gap-3 pt-3">
+            <span className="truncate text-xs uppercase tracking-widest text-gray-500">
+              {cert.issuer
+                ? `${t({ en: "By", id: "Oleh" })} ${cert.issuer}`
+                : t({ en: "Credential", id: "Kredensial" })}
+            </span>
+            {cert.image_url && (
+              <span className="inline-flex shrink-0 items-center gap-1.5 text-xs font-medium uppercase tracking-widest text-accent">
+                {unlocked
+                  ? t({ en: "Open scan", id: "Buka scan" })
+                  : t({ en: "Locked", id: "Terkunci" })}
+                <span aria-hidden>↗</span>
+              </span>
+            )}
+          </div>
           {cert.image_url && mobileDetails === cert.id && (
             <button
               type="button"
@@ -153,6 +237,7 @@ export default function Certifications({
         {cert.image_url && (
           <div
             className={`tilt-layer absolute inset-0 z-10 flex items-center justify-center bg-black/70 opacity-0 transition-opacity duration-300 md:group-hover:opacity-100 md:group-focus-visible:opacity-100 motion-reduce:transition-none max-md:bg-transparent ${mobileDetails === cert.id ? "max-md:pointer-events-none max-md:opacity-0" : "max-md:opacity-100"}`}
+            style={peek?.cert.id === cert.id ? { opacity: 0 } : undefined}
           >
             { }
             <img
@@ -164,7 +249,7 @@ export default function Certifications({
             />
             {!unlocked && <LockOverlay />}
             {unlocked && (
-              <span className="relative z-20 inline-flex min-h-11 items-center gap-2 rounded-full bg-black/70 px-5 text-xs font-medium uppercase tracking-widest text-white backdrop-blur-sm max-md:hidden">
+              <span className="liquid-glass-chip relative z-20 inline-flex min-h-11 items-center gap-2 rounded-full px-5 text-xs font-medium uppercase tracking-widest text-white max-md:hidden">
                 {t({ en: "View certificate", id: "Lihat sertifikat" })}
                 <span aria-hidden className="h-2 w-2 rounded-full bg-accent" />
               </span>
@@ -188,30 +273,33 @@ export default function Certifications({
           {t(certifications.description)}
         </Reveal>
 
-        <Reveal className="mb-10 flex flex-wrap gap-3">
-          <button
-            onClick={() => setActive("all")}
-            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
-              active === "all"
-                ? "bg-accent text-black"
-                : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
-            }`}
-          >
-            {t({ en: "All", id: "Semua" })}
-          </button>
-          {CATEGORY_ORDER.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
-                active === cat
-                  ? "bg-accent text-black"
-                  : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
-              }`}
-            >
-              {t(certifications.categories[cat])}
-            </button>
-          ))}
+        <Reveal className="mb-10">
+          <div className="glass-segmented liquid-glass grid max-w-full grid-cols-2 items-center gap-1 rounded-3xl p-1 sm:inline-flex sm:w-auto sm:flex-wrap sm:rounded-full">
+            {[
+              { key: "all", label: t({ en: "All", id: "Semua" }) },
+              ...CATEGORY_ORDER.map((cat) => ({
+                key: cat,
+                label: t(certifications.categories[cat]),
+              })),
+            ].map((item) => {
+              const on = active === item.key;
+              return (
+                <button
+                  key={item.key}
+                  type="button"
+                  onClick={() => setActive(item.key)}
+                  aria-pressed={on}
+                  className={`glass-segment relative z-10 cursor-pointer rounded-2xl px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 sm:rounded-full ${
+                    on
+                      ? "text-white"
+                      : "text-gray-300 hover:text-white"
+                  }`}
+                >
+                  {item.label}
+                </button>
+              );
+            })}
+          </div>
         </Reveal>
 
         {filtered.length === 0 ? (
@@ -235,6 +323,7 @@ export default function Certifications({
                       idx={idx}
                       onSlide={setDeskPage}
                       revealClassName="h-auto"
+                      glassNav
                     >
                       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
                         {pages[idx].map((cert, i) => (
@@ -272,6 +361,61 @@ export default function Certifications({
         )}
       </div>
 
+      {peek &&
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-[105] select-none">
+            <div
+              className="absolute w-[26rem] max-w-[86vw]"
+              style={{
+                // Mengambang di atas kursor/jari supaya kartunya tetap kelihatan,
+                // dijepit agar tidak keluar layar (setengah lebar + tinggi 108%
+                // ikut dihitung karena transform -50%/-108%).
+                left: clampPeekX(peek.x),
+                top: Math.max(peek.y, 264),
+                transform: "translate(-50%,-108%)",
+              }}
+            >
+              <div className="peek-bubble overflow-hidden rounded-[1.5rem] border border-white/20 bg-[#0d0e13]/95 shadow-[0_24px_70px_-24px_rgba(0,0,0,0.85)] backdrop-blur-xl">
+                <div className="relative aspect-[3/2] w-full bg-black/40">
+                  {peek.cert.image_url && (
+                    <img
+                      src={peek.cert.image_url}
+                      alt=""
+                      aria-hidden="true"
+                      draggable={false}
+                      className={`h-full w-full scale-105 object-cover ${unlocked ? "" : "blur-lg brightness-[0.5]"}`}
+                    />
+                  )}
+                  {!unlocked && (
+                    <div
+                      className="absolute inset-0 flex flex-col items-center justify-center gap-2 bg-[#0d0e13]/65"
+                      style={{ color: "#f4f4f5" }}
+                    >
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.6"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        aria-hidden="true"
+                        className="h-7 w-7 text-accent"
+                      >
+                        <rect x="3" y="11" width="18" height="11" rx="2" />
+                        <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+                      </svg>
+                      <span className="text-xs uppercase tracking-widest">
+                        {t({ en: "Request permission", id: "Minta izin" })}
+                      </span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body,
+        )}
+
       {selected &&
         createPortal(
           <div
@@ -286,12 +430,12 @@ export default function Certifications({
             type="button"
             onClick={() => setSelected(null)}
             aria-label="Close"
-            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
           >
             ✕
           </button>
           <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+            className="max-h-[90vh] w-full max-w-2xl overflow-hidden rounded-2xl liquid-glass liquid-glass--strong"
             onClick={(e) => e.stopPropagation()}
           >
             {selected.image_url && (
@@ -313,6 +457,12 @@ export default function Certifications({
         )}
     </section>
   );
+}
+
+/** Jaga gelembung peek tetap di dalam layar setelah translate(-50%). */
+function clampPeekX(x: number) {
+  const half = Math.min(208, window.innerWidth * 0.43);
+  return Math.min(Math.max(x, half), window.innerWidth - half);
 }
 
 function lang_title(

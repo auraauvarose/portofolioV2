@@ -264,7 +264,7 @@ export default function Gallery({
             aria-label={filtered[lightbox].title_en || filtered[lightbox].title_id || "Photo"}
           >
             <button
-              className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+              className="absolute right-4 top-4 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
               onClick={closeLightbox}
               aria-label="Close"
             >
@@ -273,7 +273,7 @@ export default function Gallery({
 
             {isLandscape && (
               <button
-                className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent md:hidden"
+                className="absolute right-4 top-16 z-10 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent md:hidden"
                 onClick={(e) => {
                   e.stopPropagation();
                   rotateToPortrait();
@@ -299,7 +299,7 @@ export default function Gallery({
             {filtered.length > 1 && (
               <>
                 <button
-                  className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:left-6"
+                  className="absolute left-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:left-6"
                   onClick={(e) => {
                     e.stopPropagation();
                     setLightbox((cur) =>
@@ -315,7 +315,7 @@ export default function Gallery({
                   </svg>
                 </button>
                 <button
-                  className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6"
+                  className="absolute right-3 top-1/2 z-10 flex h-12 w-12 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:right-6"
                   onClick={(e) => {
                     e.stopPropagation();
                     setLightbox((cur) =>
@@ -349,7 +349,7 @@ export default function Gallery({
                 className="flex items-center gap-3 text-xs text-[#ffffff]/70"
                 onClick={(e) => e.stopPropagation()}
               >
-                <span className="rounded-full border border-[#ffffff]/20 bg-black/50 px-3 py-1 backdrop-blur-sm">
+                <span className="liquid-glass-chip rounded-full px-3 py-1">
                   {lightbox + 1} / {filtered.length}
                 </span>
                 {filtered.length > 1 && (
@@ -360,7 +360,7 @@ export default function Gallery({
               </div>
 
               <button
-                className="flex items-center gap-2 rounded-full border border-[#ffffff]/20 bg-black/50 px-5 py-2 text-sm text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent max-md:min-h-11 md:hidden"
+                className="liquid-glass-chip flex items-center gap-2 rounded-full px-5 py-2 text-sm text-[#ffffff] transition-colors hover:border-accent hover:text-accent max-md:min-h-11 md:hidden"
                 onClick={(e) => {
                   e.stopPropagation();
                   rotateToLandscape();

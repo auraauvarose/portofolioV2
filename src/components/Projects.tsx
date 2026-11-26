@@ -95,7 +95,7 @@ export default function Projects({
               </div>
             )}
             <div className="absolute left-3 top-3 flex items-center gap-2 md:left-4 md:top-4">
-              <span className="rounded-full bg-black/60 px-2.5 py-1 text-xs uppercase tracking-widest text-[#ffffff] backdrop-blur md:px-3">
+              <span className="liquid-glass-chip rounded-full px-2.5 py-1 text-xs uppercase tracking-widest text-[#ffffff] md:px-3">
                 {project.year ?? project.category}
               </span>
             </div>
@@ -271,12 +271,12 @@ export default function Projects({
             type="button"
             onClick={() => setSelected(null)}
             aria-label="Close"
-            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
           >
             ✕
           </button>
           <div
-            className="max-h-[90vh] w-full max-w-2xl overflow-hidden overflow-y-auto rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+            className="max-h-[90vh] w-full max-w-2xl overflow-hidden overflow-y-auto rounded-2xl liquid-glass liquid-glass--strong"
             onClick={(e) => e.stopPropagation()}
           >
             {selected.image_url ? (
@@ -298,7 +298,7 @@ export default function Projects({
             )}
             <div className="px-5 py-5 md:px-6 md:py-6">
               <div className="mb-3 flex items-center justify-between">
-                <span className="rounded-full bg-black/60 px-3 py-1 text-xs uppercase tracking-widest text-[#ffffff] backdrop-blur">
+                <span className="liquid-glass-chip rounded-full px-3 py-1 text-xs uppercase tracking-widest text-[#ffffff]">
                   {selected.year ?? selected.category}
                 </span>
                 {selected.featured && (

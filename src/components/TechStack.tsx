@@ -567,7 +567,7 @@ export default function TechStack() {
                 <section
                   key={cat.title.en}
                   aria-labelledby={`ts-static-cat-${ci}`}
-                  className="rounded-3xl border border-black/10 bg-panel p-6 max-md:p-4 dark:border-white/10"
+                  className="liquid-glass rounded-3xl p-6 max-md:p-4"
                 >
                   <h3
                     id={`ts-static-cat-${ci}`}

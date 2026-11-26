@@ -85,11 +85,23 @@ export default function Hero() {
     });
   };
 
-  const resetTitleTilt = (element: HTMLDivElement) => {
+  const resetTitleTilt = (element: HTMLElement) => {
     element.style.setProperty("--title-rotate-x", "0deg");
     element.style.setProperty("--title-rotate-y", "0deg");
     element.style.setProperty("--title-depth", "0px");
     element.style.setProperty("--title-shift-x", "0px");
+  };
+
+  /* Disc (lensa) hanya muncul saat pointer benar-benar menyentuh huruf. Pemicunya
+     span baris (inline-block, pas mengikuti teks) — BUKAN kotak wrapper judul,
+     karena kotak itu juga meliputi celah kosong besar di tengah antara kolom
+     kiri dan kanan, sehingga pointer di tengah halaman akan dianggap hover. */
+  const onLineEnter = () => setActive(true);
+
+  const onLineLeave = (e: React.PointerEvent<HTMLSpanElement>) => {
+    setActive(false);
+    const title = e.currentTarget.closest<HTMLElement>(".hero-title-3d");
+    if (title) resetTitleTilt(title);
   };
 
   const onTitlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -193,11 +205,6 @@ export default function Hero() {
           onPointerDown={onTitlePointerDown}
           onPointerUp={onTitlePointerUp}
           onPointerCancel={onTitlePointerUp}
-          onPointerEnter={() => setActive(true)}
-          onPointerLeave={(e) => {
-            setActive(false);
-            resetTitleTilt(e.currentTarget);
-          }}
         >
           <p className="mb-2 text-sm font-bold uppercase tracking-[0.3em] text-[#EB5939] sm:text-base md:mb-8 md:text-xl">
             {eyebrow}
@@ -230,14 +237,22 @@ export default function Hero() {
               </span>
               <div className="hidden grid-cols-2 gap-0 md:grid md:gap-[24vw] dark:md:gap-[36vw]">
                 <div className="text-right">
-                  <span>{title1L}</span>
+                  <span className="hero-title-3d__line" onPointerEnter={onLineEnter} onPointerLeave={onLineLeave}>
+                    {title1L}
+                  </span>
                   <br />
-                  <span>{title2L}</span>
+                  <span className="hero-title-3d__line" onPointerEnter={onLineEnter} onPointerLeave={onLineLeave}>
+                    {title2L}
+                  </span>
                 </div>
                 <div className="text-left">
-                  <span>{title1R}</span>
+                  <span className="hero-title-3d__line" onPointerEnter={onLineEnter} onPointerLeave={onLineLeave}>
+                    {title1R}
+                  </span>
                   <br />
-                  <span>{title2R}</span>
+                  <span className="hero-title-3d__line" onPointerEnter={onLineEnter} onPointerLeave={onLineLeave}>
+                    {title2R}
+                  </span>
                 </div>
               </div>
             </h1>

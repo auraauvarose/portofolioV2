@@ -203,12 +203,12 @@ export default function Nav() {
             type="button"
             onClick={() => setProfileOpen(false)}
             aria-label="Close"
-            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full border border-[#ffffff]/20 bg-black/50 text-[#ffffff] backdrop-blur-sm transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
+            className="absolute right-4 top-4 z-20 flex h-11 w-11 cursor-pointer items-center justify-center rounded-full liquid-glass-chip text-[#ffffff] transition-colors hover:border-accent hover:text-accent sm:right-6 sm:top-6"
           >
             ✕
           </button>
           <div
-            className="max-h-[85vh] w-full max-w-xl overflow-hidden rounded-2xl border border-white/10 bg-panel shadow-[0_30px_80px_-20px_rgba(0,0,0,0.8)]"
+            className="max-h-[85vh] w-full max-w-xl overflow-hidden rounded-2xl liquid-glass liquid-glass--strong"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="grid aspect-square w-full place-items-center overflow-hidden bg-black/30">

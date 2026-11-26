@@ -18,6 +18,7 @@ import Footer from "@/components/Footer";
 import Marquee from "@/components/Marquee";
 import Sidebars from "@/components/Sidebars";
 import CustomCursor from "@/components/CustomCursor";
+import GlassGlow from "@/components/GlassGlow";
 import SpiderWalker from "@/components/SpiderWalker";
 import ScrollProgress from "@/components/ScrollProgress";
 import Magnetic from "@/components/Magnetic";
@@ -192,6 +193,7 @@ export default function HomeClient({
 
       <Sidebars />
       <CustomCursor />
+      <GlassGlow />
       <SpiderWalker />
       <ScrollProgress />
       <div className="tv-static pointer-events-none fixed inset-0 z-[90]" />

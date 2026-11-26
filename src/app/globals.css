@@ -333,6 +333,31 @@ html {
   border-color: var(--color-accent);
   color: var(--color-accent);
 }
+/* Panah versi kaca. Aturan tema terang di atas mengunci `background-color`
+   solid untuk semua `.carousel-arrow`; pemilih di sini sengaja lebih spesifik
+   (`:root:not(.dark) button.carousel-arrow.glass-nav`) supaya kaca menang di
+   tema terang juga. Hanya `background` yang dikembalikan — warna ikon tetap
+   mengikuti aturan hover di atas. */
+:root:not(.dark) button.carousel-arrow.glass-nav {
+  background:
+    radial-gradient(
+      120% 90% at 12% -25%,
+      rgba(255, 255, 255, 0.95),
+      transparent 60%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0.48) 46%,
+      rgba(255, 255, 255, 0.68)
+    );
+  border-color: rgba(13, 14, 19, 0.1);
+  color: #1c1c1e;
+}
+:root:not(.dark) button.carousel-arrow.glass-nav:hover {
+  border-color: var(--color-accent);
+  color: var(--color-accent);
+}
 
 :root:not(.dark) .text-outline {
   -webkit-text-stroke: 1px rgba(0, 0, 0, 0.35);
@@ -345,9 +370,24 @@ html {
   -webkit-text-stroke: 0;
   color: #000000;
 }
-:root:not(.dark) .glass {
-  background: rgba(255, 255, 255, 0.7);
-  border-color: rgba(0, 0, 0, 0.08);
+:root:not(.dark) .liquid-glass {
+  background:
+    radial-gradient(
+      120% 90% at 12% -25%,
+      rgba(255, 255, 255, 0.95),
+      transparent 60%
+    ),
+    linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.78),
+      rgba(255, 255, 255, 0.48) 46%,
+      rgba(255, 255, 255, 0.68)
+    );
+  border-color: rgba(13, 14, 19, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.9),
+    inset 0 -1px 0 rgba(13, 14, 19, 0.05),
+    0 12px 40px -18px rgba(13, 14, 19, 0.28);
 }
 :root:not(.dark) .grain::before,
 :root:not(.dark) .tv-static::before {
@@ -455,11 +495,96 @@ body {
     -webkit-text-stroke: 1px var(--color-accent);
     color: transparent;
   }
-  .glass {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    backdrop-filter: blur(12px);
+  /* Liquid glass: kaca basah. Tiga lapis gradient (kilau atas, pantulan
+     bawah, selubung tipis) + blur jenuh + garis spekular di tepi atas.
+     Dipakai hanya untuk elemen yang mengapung di atas konten, supaya latar
+     di belakangnya benar-benar terlihat membias.
+
+     `position: relative` + `isolation: isolate` dipakai agar ::before/::after
+     (rim pembias & kilau ikut-kursor) ditumpuk di bawah konten (z-index: -1)
+     tanpa lewat ke latar halaman. `overflow` SENGAJA tidak diset di sini —
+     pemakai yang butuh scroll (modal) memakai `overflow-y-auto`, dan
+     menimpanya dari sini akan bergantung pada urutan cascade dalam layer
+     utilities yang sama. Rim dibatasi lewat border-radius + clip-path pada
+     pseudo-element-nya sendiri. */
+  /* Segmented control kaca (ala iOS): satu panel .liquid-glass berisi beberapa
+     tombol. Item aktif mendapat "thumb" — pil terang yang meluncur mulus
+     antar pilihan.
+
+     Thumb dirender sebagai ::before DI DALAM tombol aktif, bukan sebagai
+     elemen terpisah yang diposisikan dengan persen — karena lebar tiap label
+     berbeda (ID vs EN), persen akan meleset. Dengan ::before, thumb selalu
+     pas dengan lebar label apa pun; efek "meluncur" datang dari transisi
+     opacity/scale + transisi warna teks, bukan dari translate. */
+  .glass-segmented {
+    gap: 4px;
   }
+  .glass-segment {
+    position: relative;
+    isolation: isolate;
+    transition:
+      color 0.3s ease,
+      transform 0.2s ease;
+  }
+  .glass-segment::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    border-radius: inherit;
+    /* Thumb: pil terang dengan kilau spekular tipis, memakai warna aksen
+       supaya status aktif tetap terbaca tanpa mengandalkan warna saja
+       (teks item aktif juga berubah jadi putih pekat). */
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.42),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        var(--color-accent),
+        var(--color-accent-soft)
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.4),
+      0 6px 18px -8px rgba(235, 89, 57, 0.8);
+    opacity: 0;
+    transform: scale(0.86);
+    transition:
+      opacity 0.28s ease,
+      transform 0.28s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+  .glass-segment[aria-pressed="true"]::before {
+    opacity: 1;
+    transform: scale(1);
+  }
+  :root:not(.dark) .glass-segment::before {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.55),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        var(--color-accent),
+        var(--color-accent-soft)
+      );
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 6px 18px -8px rgba(176, 58, 13, 0.55);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-segment::before,
+    .glass-segment {
+      transition: none;
+    }
+  }
+  /* Kelas liquid glass (.liquid-glass*, .glass-pill-*) dipindahkan ke
+     @layer components di bawah — di layer utilities ia menang atas utility
+     Tailwind (.absolute, .hidden, .md:grid) dan merusak posisi panah.
+     carousel. */
   .marquee-paused {
     animation-play-state: paused !important;
   }
@@ -1593,9 +1718,102 @@ summary {
 @media (hover: none), (pointer: coarse) {
   [class*="backdrop-blur"],
   .carousel-arrow,
-  .glass {
+  .liquid-glass,
+  .liquid-glass-chip,
+  .liquid-glass--strong {
     -webkit-backdrop-filter: none !important;
     backdrop-filter: none !important;
+  }
+
+  /* Tanpa backdrop-filter, kaca harus tetap terbaca sebagai kaca: lapisan
+     gradient ditebalkan sedikit supaya teks di atasnya kontras, dan kilau
+     ikut-kursor tidak pernah dirender (tidak ada kursor). */
+  .liquid-glass {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.22),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(13, 14, 19, 0.55),
+        rgba(13, 14, 19, 0.4) 46%,
+        rgba(13, 14, 19, 0.5)
+      );
+  }
+  .liquid-glass::after {
+    display: none;
+  }
+  .liquid-glass--strong {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.14),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(19, 21, 28, 0.96),
+        rgba(13, 14, 19, 0.94) 46%,
+        rgba(25, 28, 37, 0.96)
+      );
+  }
+  .liquid-glass-chip {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.18),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(13, 14, 19, 0.7),
+        rgba(13, 14, 19, 0.55) 50%,
+        rgba(13, 14, 19, 0.65)
+      );
+  }
+  :root:not(.dark) .liquid-glass {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.98),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.94),
+        rgba(255, 255, 255, 0.84) 46%,
+        rgba(255, 255, 255, 0.9)
+      );
+  }
+  :root:not(.dark) .liquid-glass--strong {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 1),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.98),
+        rgba(255, 255, 255, 0.92) 46%,
+        rgba(255, 255, 255, 0.96)
+      );
+  }
+  :root:not(.dark) .liquid-glass-chip {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 1),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.94),
+        rgba(255, 255, 255, 0.82) 50%,
+        rgba(255, 255, 255, 0.88)
+      );
   }
 
   .hero-blur {
@@ -1698,6 +1916,352 @@ summary {
 .admin-list > *:nth-child(6) { animation-delay: 0.24s; }
 
 @layer components {
+
+  /* ---- Liquid glass (dipindah dari @layer utilities) ---- */
+  .liquid-glass {
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.26),
+        transparent 58%
+      ),
+      radial-gradient(
+        80% 70% at 95% 115%,
+        rgba(255, 255, 255, 0.1),
+        transparent 62%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.1),
+        rgba(255, 255, 255, 0.015) 46%,
+        rgba(255, 255, 255, 0.055)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    -webkit-backdrop-filter: blur(22px) saturate(180%);
+    backdrop-filter: blur(22px) saturate(180%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.3),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+      0 12px 40px -14px rgba(0, 0, 0, 0.55);
+  }
+  /* Rim pembias: garis spekular tipis yang menyala di tepi atas dan memudar
+     ke samping, meniru cahaya yang menekuk di tepi kaca. */
+  .liquid-glass::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.55) 0%,
+      rgba(255, 255, 255, 0.12) 28%,
+      rgba(255, 255, 255, 0) 55%,
+      rgba(255, 255, 255, 0.08) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  /* Kilau lembut yang mengikuti kursor. Hanya aktif di perangkat yang punya
+     hover presisi; posisinya diset lewat --glass-x/--glass-y oleh JS kecil di
+     layout. Di mobile tidak pernah dirender. */
+  .liquid-glass::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    /* `inset: 0` (bukan negatif) supaya kilau tidak pernah keluar dari kotak
+       elemen — `overflow: hidden` tidak dipakai di .liquid-glass karena
+       elemen yang sama mungkin adalah wadah scroll. */
+    border-radius: inherit;
+    background: radial-gradient(
+      240px circle at var(--glass-x, 50%) var(--glass-y, -20%),
+      rgba(255, 255, 255, 0.18),
+      transparent 60%
+    );
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+  @media (hover: hover) and (pointer: fine) {
+    .liquid-glass:hover::after {
+      opacity: 1;
+    }
+  }
+  /* Varian tebal untuk dialog/modal yang mengapung di atas overlay hitam:
+     lebih gelap supaya teks di atasnya tetap kontras. */
+  .liquid-glass--strong {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.18),
+        transparent 58%
+      ),
+      radial-gradient(
+        80% 70% at 95% 115%,
+        rgba(255, 255, 255, 0.07),
+        transparent 62%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(19, 21, 28, 0.82),
+        rgba(13, 14, 19, 0.72) 46%,
+        rgba(25, 28, 37, 0.8)
+      );
+    border-color: rgba(255, 255, 255, 0.2);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 -1px 0 rgba(255, 255, 255, 0.05),
+      0 30px 80px -20px rgba(0, 0, 0, 0.8);
+  }
+  /* Varian kecil untuk chip/badge/tombol overlay di atas gambar. Blur lebih
+     ringan karena areanya kecil; tetap tanpa backdrop-filter di mobile. */
+  .liquid-glass-chip {
+    position: relative;
+    isolation: isolate;
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.3),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.14),
+        rgba(255, 255, 255, 0.04) 50%,
+        rgba(255, 255, 255, 0.1)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    -webkit-backdrop-filter: blur(14px) saturate(160%);
+    backdrop-filter: blur(14px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.35),
+      0 8px 24px -12px rgba(0, 0, 0, 0.6);
+  }
+  .liquid-glass-chip::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.6) 0%,
+      rgba(255, 255, 255, 0.1) 45%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  :root:not(.dark) .liquid-glass--strong {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.98),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.9),
+        rgba(255, 255, 255, 0.72) 46%,
+        rgba(255, 255, 255, 0.84)
+      );
+    border-color: rgba(13, 14, 19, 0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      inset 0 -1px 0 rgba(13, 14, 19, 0.06),
+      0 30px 80px -24px rgba(13, 14, 19, 0.35);
+  }
+  :root:not(.dark) .liquid-glass-chip {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.96),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.82),
+        rgba(255, 255, 255, 0.58) 50%,
+        rgba(255, 255, 255, 0.72)
+      );
+    border-color: rgba(13, 14, 19, 0.12);
+  }
+  :root:not(.dark) .liquid-glass-chip::before {
+    background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.95) 0%,
+      rgba(255, 255, 255, 0.2) 45%,
+      rgba(255, 255, 255, 0) 100%
+    );
+  }
+  :root:not(.dark) .liquid-glass::before {
+    background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.9) 0%,
+      rgba(255, 255, 255, 0.25) 28%,
+      rgba(255, 255, 255, 0) 55%,
+      rgba(255, 255, 255, 0.15) 100%
+    );
+  }
+  /* Kapsul indikator ala Apple untuk carousel: satu wadah kaca memanjang,
+     dengan pil terang di dalamnya yang meluncur mengikuti slide aktif.
+     `--pill-count` diset inline oleh MobileCarousel; thumb lebarnya
+     100/count% dan digeser `idx * 100%`. Tanpa tombol titik-titik. */
+  .glass-pill-track {
+    position: relative;
+    isolation: isolate;
+    display: flex;
+    align-items: center;
+    width: max-content;
+    padding: 4px;
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.22),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.12),
+        rgba(255, 255, 255, 0.03) 50%,
+        rgba(255, 255, 255, 0.08)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 9999px;
+    -webkit-backdrop-filter: blur(18px) saturate(170%);
+    backdrop-filter: blur(18px) saturate(170%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.32),
+      0 8px 24px -12px rgba(0, 0, 0, 0.55);
+  }
+  .glass-pill-track::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    border-radius: inherit;
+    padding: 1px;
+    background: linear-gradient(
+      155deg,
+      rgba(255, 255, 255, 0.5) 0%,
+      rgba(255, 255, 255, 0.1) 40%,
+      rgba(255, 255, 255, 0) 100%
+    );
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    mask-composite: exclude;
+  }
+  .glass-pill-thumb {
+    height: 6px;
+    width: calc(
+      (100% - var(--pill-count, 1) * 6px + 6px) / var(--pill-count, 1)
+    );
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.6),
+        transparent 58%
+      ),
+      linear-gradient(150deg, #ffffff, rgba(255, 255, 255, 0.72));
+    border-radius: 9999px;
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 2px 10px -2px rgba(0, 0, 0, 0.6);
+    transition: transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+    transform: translateX(calc(var(--pill-idx, 0) * (100% + 6px)));
+  }
+  :root:not(.dark) .glass-pill-track {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.98),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.86),
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.74)
+      );
+    border-color: rgba(13, 14, 19, 0.12);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.95),
+      0 8px 24px -14px rgba(13, 14, 19, 0.3);
+  }
+  :root:not(.dark) .glass-pill-thumb {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.9),
+        transparent 58%
+      ),
+      linear-gradient(150deg, var(--color-accent), var(--color-accent-soft));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 2px 10px -2px rgba(176, 58, 13, 0.6);
+  }
+  @media (hover: none), (pointer: coarse) {
+    .glass-pill-track {
+      -webkit-backdrop-filter: none !important;
+      backdrop-filter: none !important;
+      background:
+        radial-gradient(
+          120% 90% at 12% -25%,
+          rgba(255, 255, 255, 0.16),
+          transparent 58%
+        ),
+        linear-gradient(
+          150deg,
+          rgba(13, 14, 19, 0.6),
+          rgba(13, 14, 19, 0.45) 50%,
+          rgba(13, 14, 19, 0.55)
+        );
+    }
+    :root:not(.dark) .glass-pill-track {
+      background:
+        radial-gradient(
+          120% 90% at 12% -25%,
+          rgba(255, 255, 255, 1),
+          transparent 60%
+        ),
+        linear-gradient(
+          150deg,
+          rgba(255, 255, 255, 0.96),
+          rgba(255, 255, 255, 0.86) 50%,
+          rgba(255, 255, 255, 0.92)
+        );
+    }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .glass-pill-thumb {
+      transition: none;
+    }
+
 
   .a-data {
     font-family: var(--font-data);
@@ -2136,12 +2700,72 @@ summary {
 
   /* Penggaris progres carousel: sepuluh titik 8px tidak mungkin punya area
      sentuh 44px di lebar 360px, jadi di HP titiknya diganti satu batang yang
-     panjangnya mewakili posisi — tidak perlu ditekan, jadi tidak perlu 44px. */
+     panjangnya mewakili posisi — tidak perlu ditekan, jadi tidak perlu 44px.
+
+     Bentuknya kapsul kaca dengan pil terang di dalamnya (bukan garis
+     polos), senada dengan indikator desktop .glass-pill-track. */
   .m-rail {
-    height: 3px;
+    position: relative;
+    isolation: isolate;
+    height: 6px;
+    padding: 1px;
     overflow: hidden;
     border-radius: 999px;
-    background-color: rgb(255 255 255 / 0.14);
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.18),
+        transparent 58%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.14),
+        rgba(255, 255, 255, 0.04) 50%,
+        rgba(255, 255, 255, 0.09)
+      );
+    border: 1px solid rgba(255, 255, 255, 0.16);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.28);
+  }
+  .m-rail > span {
+    height: 100%;
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.6),
+        transparent 58%
+      ),
+      linear-gradient(150deg, #ffffff, rgba(255, 255, 255, 0.72));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.9),
+      0 2px 10px -2px rgba(0, 0, 0, 0.6);
+  }
+  :root:not(.dark) .m-rail {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.98),
+        transparent 60%
+      ),
+      linear-gradient(
+        150deg,
+        rgba(255, 255, 255, 0.86),
+        rgba(255, 255, 255, 0.6) 50%,
+        rgba(255, 255, 255, 0.74)
+      );
+    border-color: rgba(13, 14, 19, 0.12);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.95);
+  }
+  :root:not(.dark) .m-rail > span {
+    background:
+      radial-gradient(
+        120% 90% at 12% -25%,
+        rgba(255, 255, 255, 0.9),
+        transparent 58%
+      ),
+      linear-gradient(150deg, var(--color-accent), var(--color-accent-soft));
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.5),
+      0 2px 10px -2px rgba(176, 58, 13, 0.6);
   }
 }
 
@@ -2449,5 +3073,27 @@ summary {
   .admin-fade-up {
     animation: none !important;
     transition: none !important;
+  }
+}
+}
+
+/* Gelembung "peek" — tahan kursor di kartu sertifikat, muncul pratinjau besar
+   yang ikut kursor (pola tekan-lama iOS context menu). */
+@keyframes peek-in {
+  from {
+    opacity: 0;
+    transform: scale(0.82);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+.peek-bubble {
+  animation: peek-in 0.22s cubic-bezier(0.2, 0.9, 0.2, 1) both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .peek-bubble {
+    animation: none;
   }
 }

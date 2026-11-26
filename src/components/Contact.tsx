@@ -99,7 +99,7 @@ export default function Contact() {
 
         <div className="mt-14 grid gap-12 lg:grid-cols-[1.05fr_0.95fr] lg:gap-16">
           <Reveal variant="left">
-            <div className="border border-white/10 bg-white/[0.015] p-6 sm:p-8">
+            <div className="liquid-glass rounded-3xl p-6 sm:p-8">
               <ContactForm />
             </div>
           </Reveal>
