@@ -72,7 +72,7 @@ export default function Projects({
               setSelected(project);
             }
           }}
-          className="group h-full cursor-pointer rounded-2xl border border-white/10 bg-panel shadow-[0_18px_50px_-24px_rgba(0,0,0,0.55)] transition-[border-color,box-shadow] duration-300 outline-none hover:border-accent/40 hover:shadow-[0_30px_70px_-28px_rgba(235,89,57,0.35)] focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
+          className="group liquid-glass h-full cursor-pointer rounded-2xl transition-[border-color] duration-300 outline-none hover:border-accent/40 focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-2 focus-visible:ring-offset-ink"
         >
           <div
             className="tilt-layer relative aspect-[16/10] overflow-hidden rounded-t-2xl bg-black/40"
@@ -177,35 +177,29 @@ export default function Projects({
 
   const body = (
     <>
-      <Reveal className="mb-10 flex flex-wrap items-center gap-3">
-          <button
-            onClick={() => setActive("all")}
-            className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
-              active === "all"
-                ? "bg-accent text-black"
-                : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
-            }`}
-          >
-            {t(work.allLabel)}
-          </button>
-          {categories.map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setActive(cat)}
-              className={`rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
-                active === cat
-                  ? "bg-accent text-black"
-                  : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
-              }`}
-            >
-              {cat}
-            </button>
-          ))}
+      <Reveal className="mb-10">
+          <div className="glass-segmented liquid-glass inline-flex max-w-full flex-wrap items-center rounded-full p-1">
+            {["all", ...categories].map((cat) => {
+              const on = active === cat;
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setActive(cat)}
+                  aria-pressed={on}
+                  className={`glass-segment cursor-pointer rounded-full px-5 py-2 text-sm uppercase tracking-widest transition-colors max-md:min-h-11 ${
+                    on ? "text-white" : "text-gray-300 hover:text-white"
+                  }`}
+                >
+                  {cat === "all" ? t(work.allLabel) : cat}
+                </button>
+              );
+            })}
+          </div>
         </Reveal>
 
         {filtered.length === 0 ? (
           <Reveal>
-            <p className="rounded-2xl border border-white/10 bg-panel p-10 text-center text-gray-500">
+            <p className="liquid-glass rounded-2xl p-10 text-center text-gray-500">
               {t({
                 en: "No projects yet — check back soon.",
                 id: "Belum ada proyek — nantikan segera.",

@@ -130,11 +130,11 @@ export default function Gallery({
       <Tilt3D className="h-full" max={10} scale={1.035} lift={18} glare>
         <button
           onClick={() => setLightbox(i)}
-          className="group relative block aspect-[4/3] w-full cursor-pointer overflow-hidden rounded-2xl border border-white/10 bg-black/40 transition-[border-color,box-shadow] duration-300 hover:border-accent/50 hover:shadow-[0_28px_60px_-26px_rgba(235,89,57,0.4)] focus-visible:border-accent focus-visible:outline-none"
+          className="group relative block aspect-[4/3] w-full cursor-pointer rounded-2xl liquid-glass p-1.5 transition-[border-color] duration-300 hover:border-accent/50 focus-visible:border-accent focus-visible:outline-none"
           aria-label={title || `Photo ${i + 1}`}
         >
           <div
-            className="tilt-layer relative h-full w-full"
+            className="tilt-layer relative h-full w-full overflow-hidden rounded-xl"
             style={{ "--tz": "40px" } as React.CSSProperties}
           >
             { }
@@ -168,34 +168,36 @@ export default function Gallery({
       </Reveal>
 
         {categories.length > 1 && (
-          <Reveal className="mb-8 flex flex-wrap items-center gap-2">
-            {["all", ...categories].map((cat) => {
-              const isActive = active === cat;
-              const label =
-                cat === "all"
-                  ? t(gallery.allLabel)
-                  : t(gallery.categoryLabels[cat]) || cat;
-              return (
-                <button
-                  key={cat}
-                  onClick={() => setActive(cat)}
-                  aria-pressed={isActive}
-                  className={`rounded-full px-4 py-2 text-xs uppercase tracking-widest transition-colors duration-300 max-md:min-h-11 ${
-                    isActive
-                      ? "bg-accent text-black"
-                      : "border border-white/15 text-gray-300 hover:border-accent hover:text-accent"
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+          <Reveal className="mb-8">
+            <div className="glass-segmented liquid-glass inline-flex max-w-full flex-wrap items-center rounded-full p-1">
+              {["all", ...categories].map((cat) => {
+                const isActive = active === cat;
+                const label =
+                  cat === "all"
+                    ? t(gallery.allLabel)
+                    : t(gallery.categoryLabels[cat]) || cat;
+                return (
+                  <button
+                    key={cat}
+                    onClick={() => setActive(cat)}
+                    aria-pressed={isActive}
+                    className={`glass-segment cursor-pointer rounded-full px-4 py-2 text-xs uppercase tracking-widest transition-colors duration-300 max-md:min-h-11 ${
+                      isActive
+                        ? "text-white"
+                        : "text-gray-300 hover:text-white"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
           </Reveal>
         )}
 
         {filtered.length === 0 ? (
           <Reveal>
-            <p className="rounded-2xl border border-white/10 bg-panel p-10 text-center text-gray-500">
+            <p className="liquid-glass rounded-2xl p-10 text-center text-gray-500">
               {active === "all"
                 ? t({
                     en: "No photos yet — check back soon.",
@@ -333,17 +335,19 @@ export default function Gallery({
 
             <div className="flex flex-col items-center gap-4">
               { }
-              <img
-                src={filtered[lightbox].image_url}
-                alt={
-                  filtered[lightbox].alt_text ||
-                  filtered[lightbox].title_en ||
-                  "Photo"
-                }
-                className="max-h-[85vh] max-w-full rounded-xl object-contain"
-                decoding="async"
-                onClick={(e) => e.stopPropagation()}
-              />
+              <div className="liquid-glass liquid-glass--strong rounded-2xl p-2">
+                <img
+                  src={filtered[lightbox].image_url}
+                  alt={
+                    filtered[lightbox].alt_text ||
+                    filtered[lightbox].title_en ||
+                    "Photo"
+                  }
+                  className="max-h-[80vh] max-w-full rounded-xl object-contain"
+                  decoding="async"
+                  onClick={(e) => e.stopPropagation()}
+                />
+              </div>
 
               <div
                 className="flex items-center gap-3 text-xs text-[#ffffff]/70"

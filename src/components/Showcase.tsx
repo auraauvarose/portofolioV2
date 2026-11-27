@@ -55,22 +55,19 @@ export default function Showcase({
                 aria-hidden
                 className="hidden w-px flex-1 bg-white/10 md:block"
               />
-              <div className="inline-flex items-stretch">
-                {(["work", "gallery"] as const).map((tab, i) => (
+              <div className="glass-segmented liquid-glass inline-flex items-stretch rounded-full p-1">
+                {(["work", "gallery"] as const).map((tab) => (
                   <button
                     key={tab}
                     onClick={() => setActive(tab)}
-                    className={`-skew-x-6 border border-white/15 px-6 py-3 text-sm uppercase tracking-widest transition-colors md:px-10 md:py-4 md:text-base ${
-                      i > 0 ? "-ml-px" : ""
-                    } ${
+                    aria-pressed={active === tab}
+                    className={`glass-segment cursor-pointer rounded-full px-6 py-3 text-sm uppercase tracking-widest transition-colors md:px-10 md:py-4 md:text-base ${
                       active === tab
-                        ? "bg-accent text-black"
-                        : "text-gray-300 hover:bg-accent/10 hover:text-accent"
+                        ? "text-white"
+                        : "text-gray-300 hover:text-white"
                     }`}
                   >
-                    <span className="block skew-x-6">
-                      {tab === "work" ? t(showcase.workTab) : t(showcase.galleryTab)}
-                    </span>
+                    {tab === "work" ? t(showcase.workTab) : t(showcase.galleryTab)}
                   </button>
                 ))}
               </div>
